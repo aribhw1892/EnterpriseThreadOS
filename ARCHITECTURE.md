@@ -1,6 +1,6 @@
 # EnterpriseThreadOS Architecture
 
-EnterpriseThreadOS is intended to become an AI-native Enterprise Digital Thread Operating System. The current repository is the local-first platform foundation for that product: a .NET modular monolith backend, a Next.js frontend shell, local infrastructure services, persistence, health checks, and partial tenant identity/access foundation.
+EnterpriseThreadOS is intended to become an AI-native Enterprise Digital Thread Operating System. The current repository is the local-first platform foundation for that product: a .NET modular monolith backend, a Next.js frontend shell, local infrastructure services, persistence, health checks, tenant identity/access, and the audit/security event foundation.
 
 For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For implementation order, use `.docs/.prd/engineering-execution-issues.md`.
 
@@ -14,6 +14,7 @@ flowchart TB
     backend --> platform["EnterpriseThreadPlatform Composition"]
     platform --> health["Health Module"]
     platform --> identity["Identity And Tenant Access Module"]
+    platform --> governance["Governance And Audit Module"]
     platform --> persistence["EnterpriseThreadDbContext"]
     platform --> extensions["Extension Point Catalog"]
 
@@ -28,11 +29,12 @@ flowchart TB
 
 ## Implemented Components
 
-- `ETOS.Backend/Program.cs` creates the ASP.NET Core app, maps OpenAPI in development, enables CORS/auth, and maps health plus identity/access endpoints.
-- `ETOS.Backend/Platform/EnterpriseThreadPlatform.cs` centralizes platform service registration: options, EF Core, Identity, authentication, authorization, CORS, health checks, tenant context, identity access services, and extension point catalog.
-- `ETOS.Backend/Infrastructure/Persistence/EnterpriseThreadDbContext.cs` is the operational EF Core context using ASP.NET Identity and tenant identity/access models.
+- `ETOS.Backend/Program.cs` creates the ASP.NET Core app, maps OpenAPI in development, enables CORS/auth, and maps health, identity/access, and governance endpoints.
+- `ETOS.Backend/Platform/EnterpriseThreadPlatform.cs` centralizes platform service registration: options, EF Core, Identity, authentication, authorization, CORS, health checks, tenant context, identity access services, audit services, and extension point catalog.
+- `ETOS.Backend/Infrastructure/Persistence/EnterpriseThreadDbContext.cs` is the operational EF Core context using ASP.NET Identity, tenant identity/access models, audit records, and security events.
 - `ETOS.Backend/Health/` exposes app, infrastructure, and aggregate platform health.
 - `ETOS.Backend/Identity/` contains tenant, user, role, permission, membership, access grant, access request, local header auth, tenant context resolution, denial audit records, services, DTOs, and minimal API endpoint mapping.
+- `ETOS.Backend/Governance/` contains audit/security models, recorder services, tenant-filtered explorer services, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/Tenancy/` contains tenant-scope conventions used by persisted tenant-owned records.
 - `ETOS.Backend/Platform/Extensions/` exposes deferred extension points for planned platform capabilities without pretending they are active.
 - `ETOS.Frontend/` is a Next.js 16 shell that renders local platform health from the backend.
@@ -48,7 +50,8 @@ Implemented or partially implemented:
 - Health endpoints for app and infrastructure status.
 - Next.js frontend health shell.
 - Extension point catalog for deferred capabilities.
-- Tenant identity/access baseline is partially present in source code.
+- Tenant identity/access baseline.
+- Audit records, security events, retention placeholders, and tenant-filtered governance explorer endpoints.
 
 Planned by PRD and backlog, but not generally implemented unless future source code says otherwise:
 
@@ -67,7 +70,7 @@ Planned by PRD and backlog, but not generally implemented unless future source c
 2. Platform composition binds options, configures EF Core/PostgreSQL, Identity, local header auth, CORS, health services, tenant context, and module services.
 3. Endpoint extension methods map routes.
 4. Tenant-protected identity endpoints resolve tenant context from the authenticated user and `X-ETOS-Tenant-Id`.
-5. Unauthorized or cross-tenant access fails closed and writes a minimal access-denial audit record.
+5. Unauthorized or cross-tenant access fails closed and writes an access-denial record plus first-class audit/security records.
 6. Services use DTOs and EF Core persistence through `EnterpriseThreadDbContext`.
 
 ## Data Ownership
@@ -75,7 +78,7 @@ Planned by PRD and backlog, but not generally implemented unless future source c
 Current SQL ownership:
 
 - ASP.NET Identity users and roles.
-- Tenants, memberships, tenant roles, permissions, role-permission assignments, access grants, access requests, and access-denial audit records.
+- Tenants, memberships, tenant roles, permissions, role-permission assignments, access grants, access requests, access-denial audit records, audit records, and security events.
 - Early tenant-scoped persistence conventions.
 
 Current local infrastructure availability:

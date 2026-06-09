@@ -10,7 +10,8 @@ Issue 1 establishes architecture-honest placeholders for future platform capabil
 - Local Docker Compose infrastructure for PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ.
 - Safe health endpoints for application and infrastructure status.
 - Tenant-scoped persistence convention.
-- Partial tenant identity and access baseline with local header authentication, tenant context resolution, and access-denial audit records.
+- Tenant identity and access baseline with local header authentication, tenant context resolution, and access-denial records.
+- Audit/security event foundation with retention placeholders and tenant-filtered governance explorer endpoints.
 
 ## Deferred Extension Points
 

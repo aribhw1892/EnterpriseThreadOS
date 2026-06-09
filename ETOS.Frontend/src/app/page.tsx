@@ -1,12 +1,15 @@
 import {
   AccessGrant,
+  AuditRecord,
   ApiResult,
   IdentityUser,
+  SecurityEvent,
   Tenant,
   TenantMembership,
   TenantRole,
   adminUserId,
   apiBaseUrl,
+  getGovernanceLists,
   getIdentityLists,
   getPlatformHealth,
   selectedTenantId,
@@ -147,10 +150,49 @@ function GrantCard(grant: AccessGrant) {
   );
 }
 
+function AuditRecordCard(record: AuditRecord) {
+  return (
+    <article key={record.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{record.action}</h3>
+          <p className="mt-1 text-sm text-slate-400">{record.safeSummary}</p>
+        </div>
+        <StatusBadge status={record.result} />
+      </div>
+      <div className="mt-3 grid gap-1 text-xs text-slate-500">
+        <p>Reason: {record.reason ?? "none"}</p>
+        <p>Retention: {record.retentionCategory}</p>
+        <p>{new Date(record.createdAt).toLocaleString()}</p>
+      </div>
+    </article>
+  );
+}
+
+function SecurityEventCard(event: SecurityEvent) {
+  return (
+    <article key={event.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{event.eventType}</h3>
+          <p className="mt-1 text-sm text-slate-400">{event.safeSummary}</p>
+        </div>
+        <StatusBadge status={event.severity} />
+      </div>
+      <div className="mt-3 grid gap-1 text-xs text-slate-500">
+        <p>Action: {event.sourceAction}</p>
+        <p>Reason: {event.reason ?? "none"}</p>
+        <p>{new Date(event.createdAt).toLocaleString()}</p>
+      </div>
+    </article>
+  );
+}
+
 export default async function Home() {
-  const [health, identity] = await Promise.all([
+  const [health, identity, governance] = await Promise.all([
     getPlatformHealth(),
     getIdentityLists(),
+    getGovernanceLists(),
   ]);
   const frontendEnvironment = process.env.NODE_ENV;
 
@@ -241,6 +283,23 @@ export default async function Home() {
             result={identity.grants}
             emptyMessage="No grants are available for the selected tenant."
             renderItem={GrantCard}
+          />
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-2">
+          <ListSection
+            title="Audit records"
+            description="Tenant-scoped actions, denials, and governance-relevant runtime summaries."
+            result={governance.auditRecords}
+            emptyMessage="No audit records are available for the selected tenant."
+            renderItem={AuditRecordCard}
+          />
+          <ListSection
+            title="Security events"
+            description="Security-relevant denials and policy violation placeholders ready for later review tasks."
+            result={governance.securityEvents}
+            emptyMessage="No security events are available for the selected tenant."
+            renderItem={SecurityEventCard}
           />
         </section>
 

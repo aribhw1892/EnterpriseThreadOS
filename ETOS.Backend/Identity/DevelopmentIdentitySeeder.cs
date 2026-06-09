@@ -1,3 +1,4 @@
+using ETOS.Backend.Governance;
 using ETOS.Backend.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ public interface IDevelopmentIdentitySeeder
 public sealed class DevelopmentIdentitySeeder(
     EnterpriseThreadDbContext dbContext,
     UserManager<EtosUser> userManager,
+    IAuditRecorder auditRecorder,
     IOptions<SeedIdentityOptions> options,
     ILogger<DevelopmentIdentitySeeder> logger) : IDevelopmentIdentitySeeder
 {
@@ -35,11 +37,42 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, wildcardPermission.Id, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await EnsureBootstrapAuditAsync(tenant.Id, admin.Id, tenant.Identifier, cancellationToken);
 
         logger.LogInformation(
             "Seeded development identity admin {AdminEmail} for tenant {TenantIdentifier}.",
             seedOptions.AdminEmail,
             seedOptions.TenantIdentifier);
+    }
+
+    private async Task EnsureBootstrapAuditAsync(
+        Guid tenantId,
+        Guid userId,
+        string tenantIdentifier,
+        CancellationToken cancellationToken)
+    {
+        var bootstrapAction = "development.seed.completed";
+        var exists = await dbContext.AuditRecords.AnyAsync(
+            record => record.TenantId == tenantId && record.Action == bootstrapAction,
+            cancellationToken);
+
+        if (exists)
+        {
+            return;
+        }
+
+        await auditRecorder.RecordAsync(
+            new AuditRecordWriteRequest(
+                tenantId,
+                userId,
+                bootstrapAction,
+                AuditResult.Success,
+                null,
+                $"Development identity seed verified for tenant '{tenantIdentifier}'.",
+                SourceObjectType: nameof(Tenant),
+                SourceObjectId: tenantId.ToString(),
+                RetentionCategory: AuditRetentionCategory.Operational),
+            cancellationToken);
     }
 
     private async Task<EtosUser> EnsureAdminUserAsync(SeedIdentityOptions seedOptions, CancellationToken cancellationToken)

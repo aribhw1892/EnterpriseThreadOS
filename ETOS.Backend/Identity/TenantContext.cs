@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using ETOS.Backend.Governance;
 using ETOS.Backend.Infrastructure.Persistence;
 using Finbuckle.MultiTenant.Abstractions;
 using Finbuckle.MultiTenant.AspNetCore.Extensions;
@@ -191,7 +192,9 @@ public sealed class AccessPermissionService(EnterpriseThreadDbContext dbContext)
     private static string Normalize(string value) => value.Trim().ToUpperInvariant();
 }
 
-public sealed class AccessDenialRecorder(EnterpriseThreadDbContext dbContext) : IAccessDenialRecorder
+public sealed class AccessDenialRecorder(
+    EnterpriseThreadDbContext dbContext,
+    IAuditRecorder auditRecorder) : IAccessDenialRecorder
 {
     public async Task RecordAsync(Guid? tenantId, Guid? userId, string action, string reason, string safeSummary, CancellationToken cancellationToken)
     {
@@ -207,5 +210,46 @@ public sealed class AccessDenialRecorder(EnterpriseThreadDbContext dbContext) : 
         });
 
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        var auditRecord = await auditRecorder.RecordAsync(
+            new AuditRecordWriteRequest(
+                tenantId,
+                userId,
+                action,
+                AuditResult.Denied,
+                reason,
+                safeSummary,
+                PolicyName: "tenant-access",
+                RetentionCategory: AuditRetentionCategory.Security,
+                IsArchiveEligible: true),
+            cancellationToken);
+
+        var securityClassification = ClassifySecurityEvent(reason);
+        await auditRecorder.RecordSecurityEventAsync(
+            new SecurityEventWriteRequest(
+                tenantId,
+                userId,
+                securityClassification.EventType,
+                securityClassification.Severity,
+                action,
+                reason,
+                safeSummary,
+                auditRecord.Id,
+                ReviewTaskReady: true,
+                ReviewTaskHint: "Review tenant access or permission denial."),
+            cancellationToken);
+    }
+
+    private static (SecurityEventType EventType, SecurityEventSeverity Severity) ClassifySecurityEvent(string reason)
+    {
+        return reason switch
+        {
+            "tenant_access_denied" => (SecurityEventType.CrossTenantAttempt, SecurityEventSeverity.High),
+            "permission_denied" => (SecurityEventType.SensitiveAccessAttempt, SecurityEventSeverity.Medium),
+            "access_request_user_mismatch" => (SecurityEventType.SensitiveAccessAttempt, SecurityEventSeverity.Medium),
+            "missing_tenant" => (SecurityEventType.SuspiciousPolicyViolation, SecurityEventSeverity.Low),
+            "missing_user" => (SecurityEventType.SuspiciousPolicyViolation, SecurityEventSeverity.Low),
+            _ => (SecurityEventType.SuspiciousPolicyViolation, SecurityEventSeverity.Medium)
+        };
     }
 }

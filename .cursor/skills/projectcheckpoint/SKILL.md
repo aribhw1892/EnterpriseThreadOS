@@ -34,7 +34,7 @@ If `.context/engineering-execution-checkpoints.md` does not exist, create it wit
 ## Workflow
 
 1. Read the PRD and vertical-slice issue docs.
-2. Read `.context/engineering-execution-checkpoints.md` and identify the newest checkpoint entry.
+2. Read `.context/.checkpoints/engineering-execution-checkpoints.md` and identify the newest checkpoint entry.
 3. Inspect the repo implementation relevant to the PRD:
    - `ETOS.Backend`: ASP.NET Core modular monolith, module boundaries, APIs, persistence, migrations, tests, and contracts.
    - `ETOS.Frontend`: Next.js/React shell, routes, UI wiring, API calls, environment display, and test coverage.

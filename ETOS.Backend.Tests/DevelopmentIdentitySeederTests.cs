@@ -1,5 +1,7 @@
+using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +21,7 @@ public sealed class DevelopmentIdentitySeederTests
         var seeder = new DevelopmentIdentitySeeder(
             dbContext,
             userManager,
+            new AuditRecorder(dbContext, new HttpContextAccessor()),
             Options.Create(seedOptions),
             NullLogger<DevelopmentIdentitySeeder>.Instance);
 
@@ -40,6 +43,30 @@ public sealed class DevelopmentIdentitySeederTests
     }
 
     [Fact]
+    public async Task SeedCreatesBootstrapAuditRecord()
+    {
+        var seedOptions = new SeedIdentityOptions { Enabled = true };
+        await using var dbContext = CreateDbContext();
+        var userManager = CreateUserManager(dbContext);
+        var seeder = new DevelopmentIdentitySeeder(
+            dbContext,
+            userManager,
+            new AuditRecorder(dbContext, new HttpContextAccessor()),
+            Options.Create(seedOptions),
+            NullLogger<DevelopmentIdentitySeeder>.Instance);
+
+        await seeder.SeedAsync(CancellationToken.None);
+
+        var auditRecord = await dbContext.AuditRecords.SingleAsync(
+            record => record.Action == "development.seed.completed");
+
+        Assert.Equal(seedOptions.TenantId, auditRecord.TenantId);
+        Assert.Equal(seedOptions.AdminUserId, auditRecord.UserId);
+        Assert.Equal(AuditResult.Success, auditRecord.Result);
+        Assert.Equal(AuditRetentionCategory.Operational, auditRecord.RetentionCategory);
+    }
+
+    [Fact]
     public async Task SeedIsIdempotent()
     {
         var seedOptions = new SeedIdentityOptions { Enabled = true };
@@ -48,6 +75,7 @@ public sealed class DevelopmentIdentitySeederTests
         var seeder = new DevelopmentIdentitySeeder(
             dbContext,
             userManager,
+            new AuditRecorder(dbContext, new HttpContextAccessor()),
             Options.Create(seedOptions),
             NullLogger<DevelopmentIdentitySeeder>.Instance);
 
@@ -57,6 +85,7 @@ public sealed class DevelopmentIdentitySeederTests
         Assert.Equal(1, await dbContext.Users.CountAsync(user => user.Email == "admin@etos.com"));
         Assert.Equal(1, await dbContext.Tenants.CountAsync(tenant => tenant.Identifier == "local"));
         Assert.Equal(1, await dbContext.TenantMemberships.CountAsync());
+        Assert.Equal(1, await dbContext.AuditRecords.CountAsync(record => record.Action == "development.seed.completed"));
     }
 
     private static EnterpriseThreadDbContext CreateDbContext()

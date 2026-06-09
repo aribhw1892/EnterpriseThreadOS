@@ -74,6 +74,8 @@ Useful endpoints:
 - `GET http://localhost:5000/api/platform/extensions`
 - `GET http://localhost:5000/api/admin/identity/tenants`
 - `GET http://localhost:5000/api/admin/identity/users`
+- `GET http://localhost:5000/api/admin/governance/audit-records`
+- `GET http://localhost:5000/api/admin/governance/security-events`
 
 Tenant-protected identity endpoints use local header authentication in the current implementation. Use these headers for local API testing when an endpoint requires authorization:
 
@@ -113,7 +115,7 @@ Pop-Location
 
 Open `http://localhost:3000`.
 
-The current frontend shell renders backend environment, infrastructure health, and minimal identity admin lists from the backend.
+The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, and tenant-filtered audit/security event lists from the backend.
 
 ## Verification
 

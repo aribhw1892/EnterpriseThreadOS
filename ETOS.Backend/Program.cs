@@ -1,4 +1,5 @@
 using ETOS.Backend.Health;
+using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Platform;
 using Finbuckle.MultiTenant.AspNetCore.Extensions;
@@ -24,6 +25,7 @@ app.UseAuthorization();
 app.MapGet("/", () => Results.Redirect("/health/app"));
 app.MapEnterpriseThreadHealthEndpoints();
 app.MapEnterpriseThreadIdentityEndpoints();
+app.MapEnterpriseThreadGovernanceEndpoints();
 
 app.Run();
 

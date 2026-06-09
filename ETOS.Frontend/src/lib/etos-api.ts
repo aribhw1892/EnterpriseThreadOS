@@ -61,6 +61,42 @@ export type AccessGrant = {
   createdAt: string;
 };
 
+export type AuditRecord = {
+  id: string;
+  tenantId?: string | null;
+  userId?: string | null;
+  action: string;
+  result: string;
+  reason?: string | null;
+  sourceObjectType?: string | null;
+  sourceObjectId?: string | null;
+  policyName?: string | null;
+  policyVersion?: string | null;
+  correlationId?: string | null;
+  safeSummary: string;
+  retentionCategory: string;
+  retainUntil?: string | null;
+  isArchiveEligible: boolean;
+  archivedAt?: string | null;
+  createdAt: string;
+};
+
+export type SecurityEvent = {
+  id: string;
+  tenantId?: string | null;
+  userId?: string | null;
+  eventType: string;
+  severity: string;
+  sourceAction: string;
+  reason?: string | null;
+  safeSummary: string;
+  relatedAuditRecordId?: string | null;
+  reviewTaskReady: boolean;
+  reviewTaskHint?: string | null;
+  reviewTaskCreatedAt?: string | null;
+  createdAt: string;
+};
+
 export type ApiResult<T> = {
   data: T | null;
   error: string | null;
@@ -119,6 +155,28 @@ export async function getIdentityLists() {
     grants,
     activeTenantId,
     activeUserId,
+  };
+}
+
+export async function getGovernanceLists() {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+
+  const [auditRecords, securityEvents] = tenantHeaders
+    ? await Promise.all([
+        fetchApi<AuditRecord[]>("/api/admin/governance/audit-records?limit=10", tenantHeaders),
+        fetchApi<SecurityEvent[]>("/api/admin/governance/security-events?limit=10", tenantHeaders),
+      ])
+    : [
+        missingContext<AuditRecord[]>(),
+        missingContext<SecurityEvent[]>(),
+      ];
+
+  return {
+    auditRecords,
+    securityEvents,
   };
 }
 

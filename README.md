@@ -1,6 +1,6 @@
 # EnterpriseThreadOS
 
-EnterpriseThreadOS is being built as a developer-first, AI-native digital thread platform for manufacturing and engineering data. The current repository contains the local platform foundation: ASP.NET Core backend, Next.js frontend shell, Docker Compose infrastructure, EF Core persistence, health checks, extension-point guardrails, and the tenant identity/access baseline.
+EnterpriseThreadOS is being built as a developer-first, AI-native digital thread platform for manufacturing and engineering data. The current repository contains the local platform foundation: ASP.NET Core backend, Next.js frontend shell, Docker Compose infrastructure, EF Core persistence, health checks, extension-point guardrails, tenant identity/access, and the audit/security event foundation.
 
 For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For ordered implementation scope, use `.docs/.prd/engineering-execution-issues.md`.
 
@@ -80,6 +80,8 @@ Open `http://localhost:3000` to view the local platform health and identity admi
 - `GET http://localhost:5000/api/admin/identity/roles`
 - `GET http://localhost:5000/api/admin/identity/memberships`
 - `GET http://localhost:5000/api/admin/identity/grants`
+- `GET http://localhost:5000/api/admin/governance/audit-records`
+- `GET http://localhost:5000/api/admin/governance/security-events`
 
 Some identity/admin endpoints require local header authentication:
 
@@ -134,13 +136,13 @@ Implemented or partially implemented:
 - Local infrastructure compose file.
 - EF Core PostgreSQL baseline and migrations.
 - App and infrastructure health endpoints.
-- Frontend environment, backend health display, and minimal identity admin lists.
+- Frontend environment, backend health display, minimal identity admin lists, and audit/security event explorer lists.
 - Extension-point documentation and endpoint for deferred platform capabilities.
-- ASP.NET Identity users/roles, Finbuckle-backed tenant resolution, tenant roles, memberships, permissions, access grants, access requests, tenant context, and minimal denial audit records.
+- ASP.NET Identity users/roles, Finbuckle-backed tenant resolution, tenant roles, memberships, permissions, access grants, access requests, tenant context, and denial audit records.
+- First-class audit records, security events, retention placeholders, tenant-filtered governance explorer endpoints, and safe denial classification.
 
 Planned by the PRD but not generally implemented yet:
 
-- Full audit/security event foundation.
 - Artifact registry, classification policies, graph memory, imports, governed query/context assembly, AI Trace, chat-to-artifact generation, recommendations, review tasks, decisions, learning, tools, agents, workflows, and enterprise action framework.
 - Production secrets, CI/CD, Kubernetes, Keycloak, Temporal, live enterprise connectors, or source-system write-back.
 

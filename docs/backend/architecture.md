@@ -11,6 +11,7 @@
 - `Infrastructure/Persistence/`: `EnterpriseThreadDbContext`, migrations, and design-time factory.
 - `Tenancy/`: tenant-scoped record conventions.
 - `Identity/`: current tenant identity and access baseline.
+- `Governance/`: audit records, security events, retention placeholders, and explorer endpoints.
 - `Platform/Extensions/`: architecture-honest extension point catalog for deferred capabilities.
 
 ## Startup Flow
@@ -57,6 +58,17 @@ Current local auth headers:
 
 Tenant-protected endpoints should resolve `TenantContext` through `ITenantContextResolver` rather than trusting arbitrary tenant ids from request bodies.
 
+### Governance And Audit
+
+The governance module currently includes:
+
+- immutable audit records for successful actions, denials, and security-relevant runtime summaries.
+- security events for cross-tenant attempts, sensitive access attempts, suspicious policy violations, export denials, and override usage placeholders.
+- retention/archive metadata placeholders on audit records.
+- admin explorer endpoints under `/api/admin/governance`.
+
+Audit and security event records are tenant-filtered for explorer reads. Records with missing tenant context can still be stored for local diagnostics, but tenant-scoped API responses must not leak them across tenant boundaries.
+
 ### Tenancy
 
 Persisted tenant-owned records should implement the existing tenant-scoping convention. Cross-tenant access should fail closed and create a safe denial audit record when the flow is security-relevant.
@@ -74,6 +86,7 @@ Do not turn extension metadata into fake implementations. Future providers need 
 - ASP.NET Identity tables renamed for platform clarity.
 - tenant identity/access tables.
 - access-denial audit records.
+- audit records and security events with retention placeholders.
 
 Use EF Core migrations for schema changes:
 

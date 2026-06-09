@@ -1,4 +1,5 @@
 using ETOS.Backend.Health;
+using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Configuration;
 using ETOS.Backend.Infrastructure.Persistence;
@@ -89,6 +90,8 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<ITenantContextResolver, TenantContextResolver>();
         services.AddScoped<IAccessPermissionService, AccessPermissionService>();
         services.AddScoped<IAccessDenialRecorder, AccessDenialRecorder>();
+        services.AddScoped<IAuditRecorder, AuditRecorder>();
+        services.AddScoped<IAuditExplorerService, AuditExplorerService>();
         services.AddScoped<IDevelopmentIdentitySeeder, DevelopmentIdentitySeeder>();
 
         return services;

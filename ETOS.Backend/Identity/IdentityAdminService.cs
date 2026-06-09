@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using ETOS.Backend.Governance;
 using ETOS.Backend.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +47,7 @@ public sealed class IdentityAdminService(
     ITenantContextResolver tenantContextResolver,
     IAccessPermissionService permissionService,
     IAccessDenialRecorder denialRecorder,
+    IAuditRecorder auditRecorder,
     IHttpContextAccessor httpContextAccessor) : IIdentityAdminService
 {
     public async Task<IReadOnlyCollection<TenantResponse>> ListTenantsAsync(CancellationToken cancellationToken)
@@ -130,6 +132,19 @@ public sealed class IdentityAdminService(
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        await auditRecorder.RecordAsync(
+            new AuditRecordWriteRequest(
+                tenant.Id,
+                currentUserId,
+                "identity.tenants.create",
+                AuditResult.Success,
+                null,
+                $"Tenant '{tenant.Identifier}' was created.",
+                SourceObjectType: nameof(Tenant),
+                SourceObjectId: tenant.Id.ToString(),
+                RetentionCategory: AuditRetentionCategory.Operational),
+            cancellationToken);
 
         return ToTenantResponse(tenant);
     }
@@ -242,6 +257,19 @@ public sealed class IdentityAdminService(
 
         dbContext.TenantRoles.Add(role);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        await auditRecorder.RecordAsync(
+            new AuditRecordWriteRequest(
+                context.TenantId,
+                context.UserId,
+                "identity.roles.create",
+                AuditResult.Success,
+                null,
+                $"Tenant role '{role.Name}' was created.",
+                SourceObjectType: nameof(TenantRole),
+                SourceObjectId: role.Id.ToString(),
+                RetentionCategory: AuditRetentionCategory.Operational),
+            cancellationToken);
 
         return ToRoleResponse(role);
     }
@@ -395,6 +423,20 @@ public sealed class IdentityAdminService(
         dbContext.AccessGrants.Add(grant);
         await dbContext.SaveChangesAsync(cancellationToken);
 
+        await auditRecorder.RecordAsync(
+            new AuditRecordWriteRequest(
+                context.TenantId,
+                context.UserId,
+                "identity.grants.create",
+                AuditResult.Success,
+                null,
+                $"Access grant '{grant.PermissionKey}' was created for a tenant user.",
+                SourceObjectType: nameof(AccessGrant),
+                SourceObjectId: grant.Id.ToString(),
+                RetentionCategory: AuditRetentionCategory.Security,
+                IsArchiveEligible: true),
+            cancellationToken);
+
         return await GrantsQuery(context.TenantId)
             .SingleAsync(candidate => candidate.Id == grant.Id, cancellationToken);
     }
@@ -438,6 +480,20 @@ public sealed class IdentityAdminService(
 
         dbContext.AccessRequests.Add(accessRequest);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        await auditRecorder.RecordAsync(
+            new AuditRecordWriteRequest(
+                context.TenantId,
+                context.UserId,
+                "identity.access_requests.create",
+                AuditResult.Success,
+                null,
+                "Access request was created for tenant review.",
+                SourceObjectType: nameof(AccessRequest),
+                SourceObjectId: accessRequest.Id.ToString(),
+                RetentionCategory: AuditRetentionCategory.Security,
+                IsArchiveEligible: true),
+            cancellationToken);
 
         return await AccessRequestsQuery(context.TenantId)
             .SingleAsync(candidate => candidate.Id == accessRequest.Id, cancellationToken);

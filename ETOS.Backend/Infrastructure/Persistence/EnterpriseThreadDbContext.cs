@@ -1,4 +1,5 @@
 using ETOS.Backend.Identity;
+using ETOS.Backend.Governance;
 using ETOS.Backend.Tenancy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -26,6 +27,10 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<AccessRequest> AccessRequests => Set<AccessRequest>();
 
     public DbSet<AccessDenialRecord> AccessDenialRecords => Set<AccessDenialRecord>();
+
+    public DbSet<AuditRecord> AuditRecords => Set<AuditRecord>();
+
+    public DbSet<SecurityEvent> SecurityEvents => Set<SecurityEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -173,6 +178,46 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.Property(record => record.SafeSummary).HasMaxLength(1000).IsRequired();
             entity.Property(record => record.CreatedAt).IsRequired();
             entity.HasIndex(record => new { record.TenantId, record.UserId, record.CreatedAt });
+        });
+
+        modelBuilder.Entity<AuditRecord>(entity =>
+        {
+            entity.ToTable("audit_records");
+            entity.HasKey(record => record.Id);
+            entity.Property(record => record.Action).HasMaxLength(200).IsRequired();
+            entity.Property(record => record.Result).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(record => record.Reason).HasMaxLength(500);
+            entity.Property(record => record.SourceObjectType).HasMaxLength(120);
+            entity.Property(record => record.SourceObjectId).HasMaxLength(200);
+            entity.Property(record => record.PolicyName).HasMaxLength(160);
+            entity.Property(record => record.PolicyVersion).HasMaxLength(80);
+            entity.Property(record => record.CorrelationId).HasMaxLength(120);
+            entity.Property(record => record.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(record => record.RetentionCategory).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(record => record.CreatedAt).IsRequired();
+            entity.HasIndex(record => new { record.TenantId, record.CreatedAt });
+            entity.HasIndex(record => new { record.TenantId, record.Result, record.CreatedAt });
+            entity.HasIndex(record => new { record.TenantId, record.Action, record.CreatedAt });
+        });
+
+        modelBuilder.Entity<SecurityEvent>(entity =>
+        {
+            entity.ToTable("security_events");
+            entity.HasKey(securityEvent => securityEvent.Id);
+            entity.Property(securityEvent => securityEvent.EventType).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(securityEvent => securityEvent.Severity).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(securityEvent => securityEvent.SourceAction).HasMaxLength(200).IsRequired();
+            entity.Property(securityEvent => securityEvent.Reason).HasMaxLength(500);
+            entity.Property(securityEvent => securityEvent.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(securityEvent => securityEvent.ReviewTaskHint).HasMaxLength(500);
+            entity.Property(securityEvent => securityEvent.CreatedAt).IsRequired();
+            entity.HasIndex(securityEvent => new { securityEvent.TenantId, securityEvent.CreatedAt });
+            entity.HasIndex(securityEvent => new { securityEvent.TenantId, securityEvent.EventType, securityEvent.CreatedAt });
+            entity.HasIndex(securityEvent => new { securityEvent.TenantId, securityEvent.Severity, securityEvent.CreatedAt });
+            entity.HasOne(securityEvent => securityEvent.RelatedAuditRecord)
+                .WithMany(record => record.SecurityEvents)
+                .HasForeignKey(securityEvent => securityEvent.RelatedAuditRecordId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 
