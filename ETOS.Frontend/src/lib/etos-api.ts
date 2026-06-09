@@ -97,6 +97,60 @@ export type SecurityEvent = {
   createdAt: string;
 };
 
+export type ArtifactVersion = {
+  id: string;
+  tenantId: string;
+  artifactId: string;
+  versionLabel: string;
+  summary?: string | null;
+  readinessState: string;
+  compatibilityStatus: string;
+  compatibilitySummary?: string | null;
+  policyRiskStatus: string;
+  createdByUserId: string;
+  createdAt: string;
+  publishedByUserId?: string | null;
+  publishedAt?: string | null;
+  publishSummary?: string | null;
+};
+
+export type Artifact = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  ownerUserId: string;
+  lifecycleState: string;
+  latestVersion?: ArtifactVersion | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ArtifactRelationship = {
+  id: string;
+  tenantId: string;
+  sourceArtifactId: string;
+  targetArtifactId: string;
+  targetArtifactName: string;
+  relationshipType: string;
+  description?: string | null;
+  createdAt: string;
+};
+
+export type ArtifactDependency = {
+  id: string;
+  tenantId: string;
+  dependentVersionId: string;
+  requiredArtifactId: string;
+  requiredArtifactName: string;
+  requiredVersionId: string;
+  requiredVersionLabel: string;
+  requiredReadinessState: string;
+  dependencyKind: string;
+  createdAt: string;
+};
+
 export type ApiResult<T> = {
   data: T | null;
   error: string | null;
@@ -180,6 +234,50 @@ export async function getGovernanceLists() {
   };
 }
 
+export async function getArtifactRegistryLists() {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+
+  const artifacts = tenantHeaders
+    ? await fetchApi<Artifact[]>("/api/admin/artifacts", tenantHeaders)
+    : missingContext<Artifact[]>();
+  const firstArtifact = artifacts.data?.[0];
+  const firstVersion = firstArtifact?.latestVersion;
+
+  const [versions, relationships, dependencies] =
+    tenantHeaders && firstArtifact
+      ? await Promise.all([
+          fetchApi<ArtifactVersion[]>(
+            `/api/admin/artifacts/${firstArtifact.id}/versions`,
+            tenantHeaders,
+          ),
+          fetchApi<ArtifactRelationship[]>(
+            `/api/admin/artifacts/${firstArtifact.id}/relationships`,
+            tenantHeaders,
+          ),
+          firstVersion
+            ? fetchApi<ArtifactDependency[]>(
+                `/api/admin/artifacts/${firstArtifact.id}/versions/${firstVersion.id}/dependencies`,
+                tenantHeaders,
+              )
+            : emptyResult<ArtifactDependency[]>(),
+        ])
+      : [
+          emptyResult<ArtifactVersion[]>(),
+          emptyResult<ArtifactRelationship[]>(),
+          emptyResult<ArtifactDependency[]>(),
+        ];
+
+  return {
+    artifacts,
+    versions,
+    relationships,
+    dependencies,
+  };
+}
+
 async function fetchApi<T>(
   path: string,
   context?: { userId?: string; tenantId?: string },
@@ -224,5 +322,12 @@ function missingContext<T>(): ApiResult<T> {
   return {
     data: null,
     error: "Set NEXT_PUBLIC_ETOS_ADMIN_USER_ID and NEXT_PUBLIC_ETOS_TENANT_ID, or create a tenant admin first.",
+  };
+}
+
+function emptyResult<T extends unknown[]>(): ApiResult<T> {
+  return {
+    data: [] as unknown as T,
+    error: null,
   };
 }

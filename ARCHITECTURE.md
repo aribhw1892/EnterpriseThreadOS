@@ -1,6 +1,6 @@
 # EnterpriseThreadOS Architecture
 
-EnterpriseThreadOS is intended to become an AI-native Enterprise Digital Thread Operating System. The current repository is the local-first platform foundation for that product: a .NET modular monolith backend, a Next.js frontend shell, local infrastructure services, persistence, health checks, tenant identity/access, and the audit/security event foundation.
+EnterpriseThreadOS is intended to become an AI-native Enterprise Digital Thread Operating System. The current repository is the local-first platform foundation for that product: a .NET modular monolith backend, a Next.js frontend shell, local infrastructure services, persistence, health checks, tenant identity/access, audit/security events, and the BaseArtifact registry foundation.
 
 For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For implementation order, use `.docs/.prd/engineering-execution-issues.md`.
 
@@ -15,6 +15,7 @@ flowchart TB
     platform --> health["Health Module"]
     platform --> identity["Identity And Tenant Access Module"]
     platform --> governance["Governance And Audit Module"]
+    platform --> artifacts["Artifact Registry Module"]
     platform --> persistence["EnterpriseThreadDbContext"]
     platform --> extensions["Extension Point Catalog"]
 
@@ -29,12 +30,13 @@ flowchart TB
 
 ## Implemented Components
 
-- `ETOS.Backend/Program.cs` creates the ASP.NET Core app, maps OpenAPI in development, enables CORS/auth, and maps health, identity/access, and governance endpoints.
-- `ETOS.Backend/Platform/EnterpriseThreadPlatform.cs` centralizes platform service registration: options, EF Core, Identity, authentication, authorization, CORS, health checks, tenant context, identity access services, audit services, and extension point catalog.
-- `ETOS.Backend/Infrastructure/Persistence/EnterpriseThreadDbContext.cs` is the operational EF Core context using ASP.NET Identity, tenant identity/access models, audit records, and security events.
+- `ETOS.Backend/Program.cs` creates the ASP.NET Core app, maps OpenAPI in development, enables CORS/auth, and maps health, identity/access, governance, and artifact endpoints.
+- `ETOS.Backend/Platform/EnterpriseThreadPlatform.cs` centralizes platform service registration: options, EF Core, Identity, authentication, authorization, CORS, health checks, tenant context, identity access services, audit services, artifact registry services, and extension point catalog.
+- `ETOS.Backend/Infrastructure/Persistence/EnterpriseThreadDbContext.cs` is the operational EF Core context using ASP.NET Identity, tenant identity/access models, audit records, security events, and artifact registry records.
 - `ETOS.Backend/Health/` exposes app, infrastructure, and aggregate platform health.
 - `ETOS.Backend/Identity/` contains tenant, user, role, permission, membership, access grant, access request, local header auth, tenant context resolution, denial audit records, services, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/Governance/` contains audit/security models, recorder services, tenant-filtered explorer services, DTOs, and minimal API endpoint mapping.
+- `ETOS.Backend/Artifacts/` contains tenant-scoped artifacts, immutable versions, generic relationships, dependency edges, readiness/publish services, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/Tenancy/` contains tenant-scope conventions used by persisted tenant-owned records.
 - `ETOS.Backend/Platform/Extensions/` exposes deferred extension points for planned platform capabilities without pretending they are active.
 - `ETOS.Frontend/` is a Next.js 16 shell that renders local platform health from the backend.
@@ -52,10 +54,10 @@ Implemented or partially implemented:
 - Extension point catalog for deferred capabilities.
 - Tenant identity/access baseline.
 - Audit records, security events, retention placeholders, and tenant-filtered governance explorer endpoints.
+- BaseArtifact registry foundation with immutable versions, generic relationships, dependency edges, readiness-aware publish checks, and a minimal artifact explorer.
 
 Planned by PRD and backlog, but not generally implemented unless future source code says otherwise:
 
-- BaseArtifact registry and dependency graph.
 - Classification and policy enforcement beyond identity/access placeholders.
 - Graph memory abstraction and Memgraph business graph operations.
 - Canonical ontology, semantic layer, model packages, imports, staging graph, trusted graph promotion, identity resolution, and trust scoring.
@@ -78,7 +80,7 @@ Planned by PRD and backlog, but not generally implemented unless future source c
 Current SQL ownership:
 
 - ASP.NET Identity users and roles.
-- Tenants, memberships, tenant roles, permissions, role-permission assignments, access grants, access requests, access-denial audit records, audit records, and security events.
+- Tenants, memberships, tenant roles, permissions, role-permission assignments, access grants, access requests, access-denial audit records, audit records, security events, artifacts, artifact versions, artifact relationships, and artifact dependency edges.
 - Early tenant-scoped persistence conventions.
 
 Current local infrastructure availability:

@@ -1,5 +1,9 @@
 import {
   AccessGrant,
+  Artifact,
+  ArtifactDependency,
+  ArtifactRelationship,
+  ArtifactVersion,
   AuditRecord,
   ApiResult,
   IdentityUser,
@@ -9,6 +13,7 @@ import {
   TenantRole,
   adminUserId,
   apiBaseUrl,
+  getArtifactRegistryLists,
   getGovernanceLists,
   getIdentityLists,
   getPlatformHealth,
@@ -188,11 +193,83 @@ function SecurityEventCard(event: SecurityEvent) {
   );
 }
 
+function ArtifactCard(artifact: Artifact) {
+  return (
+    <article key={artifact.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{artifact.name}</h3>
+          <p className="mt-1 text-sm text-slate-400">{artifact.artifactType}</p>
+        </div>
+        <StatusBadge status={artifact.latestVersion?.readinessState ?? artifact.lifecycleState} />
+      </div>
+      <div className="mt-3 grid gap-1 text-xs text-slate-500">
+        <p>{artifact.description ?? "No description."}</p>
+        <p>Latest: {artifact.latestVersion?.versionLabel ?? "no versions"}</p>
+        <p className="break-all font-mono">{artifact.id}</p>
+      </div>
+    </article>
+  );
+}
+
+function ArtifactVersionCard(version: ArtifactVersion) {
+  return (
+    <article key={version.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{version.versionLabel}</h3>
+          <p className="mt-1 text-sm text-slate-400">{version.summary ?? "No summary."}</p>
+        </div>
+        <StatusBadge status={version.readinessState} />
+      </div>
+      <div className="mt-3 grid gap-1 text-xs text-slate-500">
+        <p>Compatibility: {version.compatibilityStatus}</p>
+        <p>Policy risk: {version.policyRiskStatus}</p>
+        <p>{new Date(version.createdAt).toLocaleString()}</p>
+      </div>
+    </article>
+  );
+}
+
+function ArtifactRelationshipCard(relationship: ArtifactRelationship) {
+  return (
+    <article key={relationship.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{relationship.targetArtifactName}</h3>
+          <p className="mt-1 text-sm text-slate-400">
+            {relationship.description ?? "Generic artifact relationship."}
+          </p>
+        </div>
+        <StatusBadge status={relationship.relationshipType} />
+      </div>
+    </article>
+  );
+}
+
+function ArtifactDependencyCard(dependency: ArtifactDependency) {
+  return (
+    <article key={dependency.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{dependency.requiredArtifactName}</h3>
+          <p className="mt-1 text-sm text-slate-400">
+            Requires version {dependency.requiredVersionLabel}
+          </p>
+        </div>
+        <StatusBadge status={dependency.requiredReadinessState} />
+      </div>
+      <p className="mt-3 text-xs text-slate-500">Kind: {dependency.dependencyKind}</p>
+    </article>
+  );
+}
+
 export default async function Home() {
-  const [health, identity, governance] = await Promise.all([
+  const [health, identity, governance, artifactRegistry] = await Promise.all([
     getPlatformHealth(),
     getIdentityLists(),
     getGovernanceLists(),
+    getArtifactRegistryLists(),
   ]);
   const frontendEnvironment = process.env.NODE_ENV;
 
@@ -206,11 +283,11 @@ export default async function Home() {
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
               <h1 className="text-4xl font-semibold tracking-tight">
-                Tenant identity and access
+                EnterpriseThreadOS admin foundation
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
-                This shell lists the Slice 2 identity baseline: tenants, users,
-                tenant roles, memberships, and grants resolved through the backend API.
+                This shell lists the tenant identity, governance audit, and artifact
+                registry foundations resolved through the backend API.
               </p>
             </div>
             <StatusBadge status={health?.status ?? "unavailable"} />
@@ -283,6 +360,37 @@ export default async function Home() {
             result={identity.grants}
             emptyMessage="No grants are available for the selected tenant."
             renderItem={GrantCard}
+          />
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-2">
+          <ListSection
+            title="Artifacts"
+            description="Governed BaseArtifact records in the selected tenant."
+            result={artifactRegistry.artifacts}
+            emptyMessage="No artifacts are available for the selected tenant."
+            renderItem={ArtifactCard}
+          />
+          <ListSection
+            title="Artifact versions"
+            description="Immutable version history for the first artifact in the explorer list."
+            result={artifactRegistry.versions}
+            emptyMessage="No versions are available for the first artifact."
+            renderItem={ArtifactVersionCard}
+          />
+          <ListSection
+            title="Artifact relationships"
+            description="Generic relationships from the first artifact in the explorer list."
+            result={artifactRegistry.relationships}
+            emptyMessage="No relationships are available for the first artifact."
+            renderItem={ArtifactRelationshipCard}
+          />
+          <ListSection
+            title="Artifact dependencies"
+            description="Dependency edges for the latest version of the first artifact."
+            result={artifactRegistry.dependencies}
+            emptyMessage="No dependencies are available for the first artifact version."
+            renderItem={ArtifactDependencyCard}
           />
         </section>
 

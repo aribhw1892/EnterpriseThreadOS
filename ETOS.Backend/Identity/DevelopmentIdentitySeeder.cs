@@ -1,3 +1,4 @@
+using ETOS.Backend.Artifacts;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -30,11 +31,19 @@ public sealed class DevelopmentIdentitySeeder(
         var tenant = await EnsureTenantAsync(seedOptions, cancellationToken);
         var adminPermission = await EnsurePermissionAsync(IdentityPermissions.IdentityAdmin, "Manage tenant identity and access.", cancellationToken);
         var wildcardPermission = await EnsurePermissionAsync(IdentityPermissions.Wildcard, "Tenant administrator wildcard permission.", cancellationToken);
+        var artifactReadPermission = await EnsurePermissionAsync(ArtifactPermissions.Read, "Read tenant artifact registry records.", cancellationToken);
+        var artifactCreatePermission = await EnsurePermissionAsync(ArtifactPermissions.Create, "Create tenant artifact registry records.", cancellationToken);
+        var artifactPublishPermission = await EnsurePermissionAsync(ArtifactPermissions.Publish, "Publish tenant artifact versions.", cancellationToken);
+        var artifactAdminPermission = await EnsurePermissionAsync(ArtifactPermissions.Admin, "Administer tenant artifact registry records.", cancellationToken);
         var adminRole = await EnsureTenantRoleAsync(tenant.Id, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, admin.Id, adminRole.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, adminPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, wildcardPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, artifactReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, artifactCreatePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, artifactPublishPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, artifactAdminPermission.Id, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await EnsureBootstrapAuditAsync(tenant.Id, admin.Id, tenant.Identifier, cancellationToken);

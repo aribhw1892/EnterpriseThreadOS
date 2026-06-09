@@ -1,3 +1,4 @@
+using ETOS.Backend.Artifacts;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Tenancy;
@@ -31,6 +32,14 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<AuditRecord> AuditRecords => Set<AuditRecord>();
 
     public DbSet<SecurityEvent> SecurityEvents => Set<SecurityEvent>();
+
+    public DbSet<Artifact> Artifacts => Set<Artifact>();
+
+    public DbSet<ArtifactVersion> ArtifactVersions => Set<ArtifactVersion>();
+
+    public DbSet<ArtifactRelationship> ArtifactRelationships => Set<ArtifactRelationship>();
+
+    public DbSet<ArtifactDependency> ArtifactDependencies => Set<ArtifactDependency>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -218,6 +227,99 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
                 .WithMany(record => record.SecurityEvents)
                 .HasForeignKey(securityEvent => securityEvent.RelatedAuditRecordId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<Artifact>(entity =>
+        {
+            entity.ToTable("artifacts");
+            entity.HasKey(artifact => artifact.Id);
+            entity.Property(artifact => artifact.TenantId).IsRequired();
+            entity.Property(artifact => artifact.ArtifactType).HasMaxLength(120).IsRequired();
+            entity.Property(artifact => artifact.NormalizedArtifactType).HasMaxLength(120).IsRequired();
+            entity.Property(artifact => artifact.Name).HasMaxLength(200).IsRequired();
+            entity.Property(artifact => artifact.Description).HasMaxLength(1000);
+            entity.Property(artifact => artifact.LifecycleState).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(artifact => artifact.CreatedAt).IsRequired();
+            entity.Property(artifact => artifact.UpdatedAt).IsRequired();
+            entity.HasIndex(artifact => new { artifact.TenantId, artifact.NormalizedArtifactType });
+            entity.HasOne(artifact => artifact.OwnerUser)
+                .WithMany()
+                .HasForeignKey(artifact => artifact.OwnerUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ArtifactVersion>(entity =>
+        {
+            entity.ToTable("artifact_versions");
+            entity.HasKey(version => version.Id);
+            entity.Property(version => version.TenantId).IsRequired();
+            entity.Property(version => version.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.Summary).HasMaxLength(1000);
+            entity.Property(version => version.PayloadJson).HasMaxLength(8000);
+            entity.Property(version => version.ReadinessState).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(version => version.CompatibilityStatus).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(version => version.CompatibilitySummary).HasMaxLength(1000);
+            entity.Property(version => version.PolicyRiskStatus).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(version => version.CreatedAt).IsRequired();
+            entity.Property(version => version.PublishSummary).HasMaxLength(1000);
+            entity.HasIndex(version => new { version.ArtifactId, version.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(version => new { version.ArtifactId, version.CreatedAt });
+            entity.HasOne(version => version.Artifact)
+                .WithMany(artifact => artifact.Versions)
+                .HasForeignKey(version => version.ArtifactId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(version => version.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(version => version.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(version => version.PublishedByUser)
+                .WithMany()
+                .HasForeignKey(version => version.PublishedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ArtifactRelationship>(entity =>
+        {
+            entity.ToTable("artifact_relationships");
+            entity.HasKey(relationship => relationship.Id);
+            entity.Property(relationship => relationship.TenantId).IsRequired();
+            entity.Property(relationship => relationship.RelationshipType).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(relationship => relationship.Description).HasMaxLength(1000);
+            entity.Property(relationship => relationship.CreatedAt).IsRequired();
+            entity.HasIndex(relationship => new { relationship.TenantId, relationship.SourceArtifactId, relationship.TargetArtifactId, relationship.RelationshipType }).IsUnique();
+            entity.HasOne(relationship => relationship.SourceArtifact)
+                .WithMany(artifact => artifact.SourceRelationships)
+                .HasForeignKey(relationship => relationship.SourceArtifactId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(relationship => relationship.TargetArtifact)
+                .WithMany(artifact => artifact.TargetRelationships)
+                .HasForeignKey(relationship => relationship.TargetArtifactId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ArtifactDependency>(entity =>
+        {
+            entity.ToTable("artifact_dependencies");
+            entity.HasKey(dependency => dependency.Id);
+            entity.Property(dependency => dependency.TenantId).IsRequired();
+            entity.Property(dependency => dependency.DependencyKind).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(dependency => dependency.CreatedAt).IsRequired();
+            entity.HasIndex(dependency => dependency.DependentVersionId);
+            entity.HasIndex(dependency => dependency.RequiredArtifactId);
+            entity.HasIndex(dependency => new { dependency.TenantId, dependency.DependentVersionId, dependency.RequiredVersionId, dependency.DependencyKind }).IsUnique();
+            entity.HasOne(dependency => dependency.DependentVersion)
+                .WithMany(version => version.Dependencies)
+                .HasForeignKey(dependency => dependency.DependentVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(dependency => dependency.RequiredVersion)
+                .WithMany(version => version.RequiredBy)
+                .HasForeignKey(dependency => dependency.RequiredVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(dependency => dependency.RequiredArtifact)
+                .WithMany()
+                .HasForeignKey(dependency => dependency.RequiredArtifactId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 

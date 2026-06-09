@@ -1,3 +1,4 @@
+using ETOS.Backend.Artifacts;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
@@ -26,6 +27,7 @@ app.MapGet("/", () => Results.Redirect("/health/app"));
 app.MapEnterpriseThreadHealthEndpoints();
 app.MapEnterpriseThreadIdentityEndpoints();
 app.MapEnterpriseThreadGovernanceEndpoints();
+app.MapEnterpriseThreadArtifactEndpoints();
 
 app.Run();
 

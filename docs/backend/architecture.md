@@ -12,6 +12,7 @@
 - `Tenancy/`: tenant-scoped record conventions.
 - `Identity/`: current tenant identity and access baseline.
 - `Governance/`: audit records, security events, retention placeholders, and explorer endpoints.
+- `Artifacts/`: BaseArtifact registry, immutable versions, generic relationships, dependency edges, readiness checks, and publish endpoints.
 - `Platform/Extensions/`: architecture-honest extension point catalog for deferred capabilities.
 
 ## Startup Flow
@@ -69,6 +70,19 @@ The governance module currently includes:
 
 Audit and security event records are tenant-filtered for explorer reads. Records with missing tenant context can still be stored for local diagnostics, but tenant-scoped API responses must not leak them across tenant boundaries.
 
+### Artifact Registry
+
+The artifact module currently includes:
+
+- tenant-scoped artifact headers with owner metadata.
+- immutable artifact versions with readiness, compatibility, and policy-risk placeholders.
+- generic artifact relationships between artifact headers.
+- dependency edges between specific artifact versions.
+- readiness recalculation and publish checks under `/api/admin/artifacts`.
+- safe audit records for artifact creation, version creation, publish success, publish blocks, and access denials.
+
+Issue 4 stores dependency edges in PostgreSQL. Memgraph projection, full policy evaluation, compatibility report execution, approval workflows, and typed artifact subtype payloads are deferred to their owning slices.
+
 ### Tenancy
 
 Persisted tenant-owned records should implement the existing tenant-scoping convention. Cross-tenant access should fail closed and create a safe denial audit record when the flow is security-relevant.
@@ -87,6 +101,7 @@ Do not turn extension metadata into fake implementations. Future providers need 
 - tenant identity/access tables.
 - access-denial audit records.
 - audit records and security events with retention placeholders.
+- artifact registry tables for artifacts, artifact versions, relationships, and dependency edges.
 
 Use EF Core migrations for schema changes:
 
@@ -143,6 +158,6 @@ Expected test coverage for future backend changes:
 
 ## Planned Backend Areas
 
-The PRD and issue backlog define later modules for artifacts, classification/policy, graph memory, ontology, ingestion, identity resolution, data quality, documents, governed query/context, AI Trace, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration.
+The PRD and issue backlog define later modules for classification/policy, graph memory, ontology, ingestion, identity resolution, data quality, documents, governed query/context, AI Trace, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration.
 
 Do not document or code these as implemented until the source code exists.
