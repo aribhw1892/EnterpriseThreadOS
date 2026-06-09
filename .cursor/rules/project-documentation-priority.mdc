@@ -1,0 +1,12 @@
+---
+description: Prefer project documentation in PRD, issues, then supporting context order when gathering requirements.
+alwaysApply: true
+---
+
+# Project Documentation Priority
+
+- When project documentation is relevant or required, consult it before making assumptions.
+- Use this order for requirements and intent: `.docs/.prd/engineering-execution-prd.md` first, `.docs/.prd/engineering-execution-issues.md` second, then the rest of `.docs/` and `context/` as needed.
+- Treat the PRD as the source of product intent, the issues document as the source of scoped implementation tasks, and supporting docs/context as operational or historical detail.
+- If documents conflict, prefer the higher-priority source and call out the conflict before proceeding when it affects the requested work.
+- Do not read every document by default; read the highest-priority relevant documents needed for the current task.

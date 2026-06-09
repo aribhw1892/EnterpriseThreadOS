@@ -138,6 +138,31 @@ flowchart TB
 | Observability / Audit | Audit records, AI Trace, ToolRun, AgentRun, WorkflowRun, governed export logs | Centralized observability stack, retention/archive automation                       |
 
 
+### Open-Source Development Accelerators
+
+The platform should prefer proven open-source libraries for commodity infrastructure and application plumbing so custom code stays focused on EnterpriseThreadOS domain behavior: digital-thread modeling, governance, traceability, artifact lifecycle, tenant safety, and agent/workflow policy. Libraries listed here are implementation accelerators, not scope expansion. They should be wrapped behind module interfaces where future deployment profiles, enterprise substitutions, or commercial services are likely.
+
+| Concern | Recommended OSS Library / Framework | Where to Use | Notes |
+| ------- | ----------------------------------- | ------------ | ----- |
+| Multi-tenancy | Finbuckle.MultiTenant | Identity and Access Module, Tenancy Module, request pipeline, tenant-aware options | Use for tenant resolution and tenant context. Keep custom storage-routing contracts for shared versus isolated deployment profiles. |
+| Identity | ASP.NET Core Identity | MVP user, role, membership, password, and auth baseline | Keep Keycloak as future enterprise federation. Consider OpenIddict only if first-party OAuth2/OIDC token server behavior is needed before Keycloak. |
+| Authorization / ABAC | ASP.NET Core authorization policies and custom handlers | Policy enforcement, classification filtering, artifact publishing, trace/export permissions | Start with built-in policy handlers. Evaluate OpenFGA or Casbin.NET only if relationship-based authorization becomes too complex for local policies. |
+| SQL persistence | EF Core, Npgsql.EntityFrameworkCore.PostgreSQL | Operational store for tenants, artifacts, policy, audit, runtime summaries, decisions, dashboards | EF Core remains the default abstraction for PostgreSQL and future SQL Server. Add Dapper only for hot-path read projections where EF Core becomes inefficient. |
+| DTO/domain validation | FluentValidation | API commands, import mappings, schema publishing, policy versions, tool schemas, agent/workflow publishing | Prefer explicit validators over scattered controller checks. Validation errors should remain tenant-safe and audit-friendly. |
+| DTO mapping | Mapperly or Mapster | REST DTOs, artifact versions, import previews, explorer read models | Prefer Mapperly when compile-time generated mappings are valuable; use only where mapping reduces repetitive code. |
+| OpenAPI and client generation | Microsoft.AspNetCore.OpenApi, Scalar.AspNetCore, NSwag | Backend API docs and optional generated frontend clients | Keep explicit DTO contracts. Use generated clients only if they reduce frontend drift without hiding governed API boundaries. |
+| Messaging and async processing | MassTransit with RabbitMQ | Audit/event fan-out, import processing, tool runs, workflow-adjacent async jobs | Use when durable retries, consumers, and outbox patterns are needed. Avoid bypassing Dapr Workflow for governed workflow orchestration. |
+| Background jobs | Dapr Workflow, Hangfire or Quartz.NET | MVP workflows, scheduled placeholders, maintenance tasks | Dapr Workflow is the MVP workflow runtime. Hangfire or Quartz.NET may be used for simple scheduled/background jobs that are not governed business workflows. |
+| Graph backend access | Custom graph abstraction with Neo4j.Driver for Bolt-compatible Memgraph access | Graph Memory Module, Memgraph implementation, Neo4j placeholder | Keep raw graph queries internal. Use the abstraction for tenant filtering, trust state, snapshots, diffs, and backend portability. |
+| Vector retrieval | Qdrant.Client (.NET) or qdrant-client (Python) | Document Memory Module, Retrieval and Context Module, agent runtime retrieval hooks | Tenant, classification, and trust filters must be applied before vector context becomes LLM-visible. |
+| Object storage | Minio .NET SDK behind an object-storage abstraction | Import files, document versions, trace export packages | Keep S3/Azure Blob compatibility behind the abstraction. |
+| Observability | OpenTelemetry, Serilog.AspNetCore, AspNetCore.Diagnostics.HealthChecks | API gateway, module services, infrastructure health, runtime traces | Use structured logs and trace correlation with tenant-safe identifiers. Do not log restricted payloads or long-lived secrets. |
+| Testing | xUnit, Testcontainers for .NET, Respawn, FluentAssertions, NSubstitute or Moq | Domain, API, persistence, graph, infra, and governance tests | Prefer Testcontainers for PostgreSQL, Memgraph, Redis, RabbitMQ, MinIO, and Qdrant behavior that cannot be proven with in-memory fakes. |
+| Frontend data and forms | TanStack Query, React Hook Form, Zod, TanStack Table | Admin CRUD, explorers, mapping UI, policy screens, dashboards | Zod schemas should align with backend DTOs; generated or shared contracts may be introduced later if duplication becomes risky. |
+| Frontend visualization | React Flow, shadcn/ui, Tailwind CSS, Lucide React | Graph explorer, workflow builder, governance flow, dashboard/report shell | Use configuration-driven UI components and accessible primitives; avoid bespoke visualization frameworks until product needs exceed React Flow. |
+| Python agent runtime | FastAPI, Pydantic, LangGraph, httpx, tenacity, qdrant-client | Agent runtime, model/tool adapters, retrieval adapters | LangChain may be used selectively for integrations, but governed context assembly and tool authorization must remain platform-owned. |
+
+
 ### End-to-End MVP Customer Flow
 
 ```mermaid

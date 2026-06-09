@@ -6,6 +6,27 @@ This backlog breaks the PRD into independently grabbable vertical slices. Each i
 
 Label for all issues: `needs-triage`
 
+## Open-Source Library Guidance by Issue Area
+
+Use open-source libraries to accelerate commodity implementation work while keeping EnterpriseThreadOS-specific behavior in explicit module services, contracts, and domain models. These recommendations should guide implementation but do not expand scope; future enterprise replacements should remain behind interfaces where noted.
+
+| Issue Area | Recommended Libraries | Use For |
+| ---------- | --------------------- | ------- |
+| Issue 1: Platform Foundation | EF Core, Npgsql.EntityFrameworkCore.PostgreSQL, Microsoft.AspNetCore.OpenApi, Scalar.AspNetCore or NSwag, OpenTelemetry, Serilog.AspNetCore, AspNetCore.Diagnostics.HealthChecks, xUnit, Testcontainers for .NET, FluentAssertions | PostgreSQL persistence, API documentation, health checks, structured logging, integration tests, and reproducible local infrastructure verification. |
+| Issue 2: Tenant Identity and Access | Finbuckle.MultiTenant, ASP.NET Core Identity, ASP.NET Core authorization policies, OpenIddict if first-party OIDC is needed | Tenant resolution, tenant context, users, roles, memberships, login/token flow, and permission enforcement. Keep Keycloak as a future enterprise IdP placeholder. |
+| Issue 3: Audit and Runtime Retention | EF Core, Serilog.AspNetCore, OpenTelemetry, MassTransit when async event fan-out is introduced | Immutable audit records, tenant-safe structured logs, trace correlation, security events, and later durable audit/event processing. |
+| Issue 4: Artifact Registry | EF Core, FluentValidation, Mapperly or Mapster, ASP.NET Core authorization policies | Artifact lifecycle persistence, immutable version validation, publish command validation, DTO mapping, dependency/readiness enforcement. |
+| Issue 5: Classification and Policy | FluentValidation, ASP.NET Core authorization handlers, OpenFGA or Casbin.NET only if policy relationships outgrow local handlers | Classification scheme validation, ABAC-style filtering, temporary grants, publish compatibility checks, and denied-context decisions. |
+| Issue 6: Graph Memory | Neo4j.Driver over Bolt-compatible Memgraph, custom graph abstraction, Testcontainers for .NET | Memgraph implementation, traversal contracts, graph health checks, tenant-scoped graph tests, and Neo4j placeholder portability. |
+| Issues 7-12: Model, Import, Identity Resolution, Data Quality, Documents | FluentValidation, CsvHelper, ExcelDataReader or ClosedXML, Minio .NET SDK, Qdrant.Client, Testcontainers for .NET | Ontology/schema validation, CSV/Excel import, raw file evidence storage, document metadata, vector indexing hooks, and import/graph integration tests. |
+| Issues 13-15: Governed Query, Retrieval, Trace, Chat | Qdrant.Client, Semantic Kernel or direct LLM provider SDKs behind an abstraction, Pydantic/FastAPI contracts for Python runtime, OpenTelemetry | Graph-first/document-second retrieval, LLM-safe context packages, provider abstraction, AI trace correlation, and governed chat execution. |
+| Issues 16-17: Explorers, Dashboards, Reports | TanStack Query, TanStack Table, React Hook Form, Zod, React Flow, shadcn/ui, Tailwind CSS, Lucide React | Admin and explorer data loading, filtered tables, form validation, graph/governance visualization, and consistent UI primitives. |
+| Issues 18-21: Recommendations, Tasks, Decisions, Governance Analytics | EF Core, FluentValidation, TanStack Table, Recharts or Tremor if charting is needed | Evidence rules, review/decision workflows, KPI calculations, governed dashboard views, and trend visualization. |
+| Issue 22: Tool, Skill, and Connector Registry | FluentValidation, JSON Schema libraries such as JsonSchema.Net or NJsonSchema, MassTransit, tenant-aware secret provider abstraction | Tool schema compatibility, input/output validation, tool run records, async execution, dry-run metadata, and scoped credential boundaries. |
+| Issues 23-25: Agents, Workflows, Multi-Agent Teams | FastAPI, Pydantic, LangGraph, httpx, tenacity, Dapr Workflow, MassTransit where event-driven execution is useful | Agent runtime contracts, retries, model/tool adapters, governed workflow orchestration, safe mode events, delegation traces, and team run records. |
+| Issue 26: End-to-End MVP Demo | Playwright, Testcontainers for .NET, seeded fixtures, NSwag-generated clients if useful | Scripted happy path, denied/restricted-context path, browser-verifiable flow, and stable integration smoke tests. |
+| Issues 27-28: ADRs and Future Contracts | ADR templates, Mermaid, OpenAPI/JSON Schema contracts | Architecture decision capture, disabled write-action contracts, connector boundaries, deployment placeholders, and reviewable diagrams. |
+
 ## Issue 1: Bootstrap Local Platform Foundation
 
 Type: AFK

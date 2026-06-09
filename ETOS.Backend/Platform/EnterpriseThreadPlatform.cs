@@ -1,8 +1,12 @@
 using ETOS.Backend.Health;
+using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Configuration;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Platform.Extensions;
 using ETOS.Backend.Tenancy;
+using Finbuckle.MultiTenant.AspNetCore.Extensions;
+using Finbuckle.MultiTenant.Extensions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -31,11 +35,41 @@ public static class EnterpriseThreadPlatform
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddOptions<SeedIdentityOptions>()
+            .Bind(configuration.GetSection(SeedIdentityOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.AddDbContext<EnterpriseThreadDbContext>((serviceProvider, options) =>
         {
             var storeOptions = serviceProvider.GetRequiredService<IOptions<OperationalStoreOptions>>().Value;
             options.UseNpgsql(storeOptions.ConnectionString);
         });
+
+        services.AddIdentityCore<EtosUser>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 10;
+            })
+            .AddRoles<EtosIdentityRole>()
+            .AddEntityFrameworkStores<EnterpriseThreadDbContext>();
+
+        services.AddAuthentication(LocalHeaderAuthenticationHandler.SchemeName)
+            .AddScheme<AuthenticationSchemeOptions, LocalHeaderAuthenticationHandler>(
+                LocalHeaderAuthenticationHandler.SchemeName,
+                _ => { });
+
+        services.AddAuthorization();
+
+        services.AddHttpContextAccessor();
+        services.AddMultiTenant<EtosTenantInfo>()
+            .WithHeaderStrategy(TenantHeaderNames.TenantId)
+            .WithStore<EtosTenantStore>(ServiceLifetime.Scoped);
 
         services.AddCors(options =>
         {
@@ -51,6 +85,11 @@ public static class EnterpriseThreadPlatform
         services.AddHttpClient<IInfrastructureHealthService, InfrastructureHealthService>();
         services.AddSingleton<ITenantScopeValidator, TenantScopeValidator>();
         services.AddSingleton<IExtensionPointCatalog, StaticExtensionPointCatalog>();
+        services.AddScoped<IIdentityAdminService, IdentityAdminService>();
+        services.AddScoped<ITenantContextResolver, TenantContextResolver>();
+        services.AddScoped<IAccessPermissionService, AccessPermissionService>();
+        services.AddScoped<IAccessDenialRecorder, AccessDenialRecorder>();
+        services.AddScoped<IDevelopmentIdentitySeeder, DevelopmentIdentitySeeder>();
 
         return services;
     }

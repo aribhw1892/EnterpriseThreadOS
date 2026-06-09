@@ -9,7 +9,8 @@ Issue 1 establishes architecture-honest placeholders for future platform capabil
 - PostgreSQL operational store through EF Core.
 - Local Docker Compose infrastructure for PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ.
 - Safe health endpoints for application and infrastructure status.
-- Minimal tenant-scoped persistence convention.
+- Tenant-scoped persistence convention.
+- Partial tenant identity and access baseline with local header authentication, tenant context resolution, and access-denial audit records.
 
 ## Deferred Extension Points
 
@@ -32,3 +33,12 @@ The backend exposes the extension catalog at `/api/platform/extensions`. This en
 - Do not expose raw graph, queue, object storage, or database access through public APIs.
 - Do not implement future providers until the owning issue defines behavior, tests, and operational requirements.
 - Prefer compiled contracts or documentation over mock integrations that could be mistaken for real support.
+
+## Related Docs
+
+- `../../ARCHITECTURE.md`
+- `../local-development.md`
+- `../backend/architecture.md`
+- `../frontend/architecture.md`
+- `./adr/README.md`
+- `../ai-agent-workflow.md`
