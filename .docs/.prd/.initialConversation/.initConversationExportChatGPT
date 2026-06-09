@@ -1,0 +1,172 @@
+// ChatGPT conversation chunk exporter.
+// Run this in the browser DevTools Console on an open ChatGPT conversation.
+// It collects rendered messages while scrolling and prepares one manual
+// download link per 100 messages.
+
+(async () => {
+  const CHUNK_SIZE = 100;
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  function findScrollContainer() {
+    const candidates = [...document.querySelectorAll('main, div')].filter((el) => {
+      const style = getComputedStyle(el);
+
+      return (
+        el.scrollHeight > el.clientHeight + 500 &&
+        ['auto', 'scroll'].includes(style.overflowY)
+      );
+    });
+
+    return candidates.sort((a, b) => b.scrollHeight - a.scrollHeight)[0] || document.scrollingElement;
+  }
+
+  function createExportPanel() {
+    let panel = document.getElementById('chat-export-panel');
+
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'chat-export-panel';
+      panel.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 999999;
+        width: 320px;
+        max-height: 70vh;
+        overflow: auto;
+        background: #111;
+        color: #fff;
+        padding: 12px;
+        border-radius: 8px;
+        font: 13px sans-serif;
+        box-shadow: 0 8px 30px rgba(0,0,0,.35);
+      `;
+      panel.innerHTML = '<strong>Chat export chunks</strong><div id="chat-export-links"></div>';
+      document.body.appendChild(panel);
+    }
+
+    return panel.querySelector('#chat-export-links');
+  }
+
+  const scroller = findScrollContainer();
+  const links = createExportPanel();
+
+  const seen = new Set();
+  let currentChunk = [];
+  let chunkNumber = 1;
+  let totalMessages = 0;
+
+  function exportChunk(force = false) {
+    if (currentChunk.length === 0) {
+      return;
+    }
+
+    if (!force && currentChunk.length < CHUNK_SIZE) {
+      return;
+    }
+
+    const start = totalMessages - currentChunk.length + 1;
+    const end = totalMessages;
+
+    const markdown = currentChunk
+      .map((message, index) => `## ${start + index}. ${message.role}\n\n${message.text}`)
+      .join('\n\n---\n\n');
+
+    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `chatgpt-conversation-part-${String(chunkNumber).padStart(3, '0')}-${start}-${end}.md`;
+    link.textContent = `Download part ${chunkNumber}: messages ${start}-${end}`;
+    link.style.cssText = `
+      display: block;
+      margin-top: 10px;
+      color: #7ee787;
+      text-decoration: underline;
+      cursor: pointer;
+    `;
+
+    links.appendChild(link);
+
+    console.log(`Prepared part ${chunkNumber}: messages ${start}-${end}`);
+
+    currentChunk = [];
+    chunkNumber++;
+  }
+
+  function collect() {
+    const nodes = document.querySelectorAll('[data-message-author-role]');
+
+    for (const node of nodes) {
+      const role = node.getAttribute('data-message-author-role') || 'unknown';
+      const text = node.innerText.trim();
+
+      if (!text) {
+        continue;
+      }
+
+      const messageId = node.getAttribute('data-message-id') || '';
+      const key = `${messageId}:${role}:${text.slice(0, 500)}`;
+
+      if (seen.has(key)) {
+        continue;
+      }
+
+      seen.add(key);
+      totalMessages++;
+      currentChunk.push({ role, text });
+
+      exportChunk(false);
+    }
+
+    console.log(`Collected ${totalMessages} messages...`);
+  }
+
+  // Move to the top first so older messages can render before collection starts.
+  for (let index = 0; index < 600; index++) {
+    const before = scroller.scrollTop;
+    scroller.scrollTop = Math.max(0, scroller.scrollTop - scroller.clientHeight * 0.8);
+    await sleep(500);
+
+    if (scroller.scrollTop === 0 || scroller.scrollTop === before) {
+      break;
+    }
+  }
+
+  await sleep(1500);
+
+  // Walk down and export every 100 messages.
+  scroller.scrollTop = 0;
+  await sleep(1500);
+
+  let stableCount = 0;
+
+  for (let index = 0; index < 3000; index++) {
+    const beforeTotal = totalMessages;
+
+    collect();
+
+    scroller.scrollTop += scroller.clientHeight * 0.6;
+    await sleep(600);
+
+    if (totalMessages === beforeTotal) {
+      stableCount++;
+    } else {
+      stableCount = 0;
+    }
+
+    const nearBottom =
+      scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 50;
+
+    if (nearBottom && stableCount > 8) {
+      break;
+    }
+  }
+
+  collect();
+  exportChunk(true);
+
+  console.log(`Done. Prepared ${chunkNumber - 1} files for ${totalMessages} messages.`);
+  console.log('Click each download link in the black export panel at the top-right.');
+})();
