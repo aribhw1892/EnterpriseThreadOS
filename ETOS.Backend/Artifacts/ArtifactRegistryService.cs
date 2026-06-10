@@ -1,3 +1,4 @@
+using ETOS.Backend.Classification;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
@@ -46,7 +47,8 @@ public sealed class ArtifactRegistryService(
     ITenantContextResolver tenantContextResolver,
     IAccessPermissionService permissionService,
     IAccessDenialRecorder denialRecorder,
-    IAuditRecorder auditRecorder) : IArtifactRegistryService
+    IAuditRecorder auditRecorder,
+    IClassificationPolicyService classificationPolicyService) : IArtifactRegistryService
 {
     private static readonly CreateArtifactRequestValidator CreateArtifactValidator = new();
     private static readonly CreateArtifactVersionRequestValidator CreateVersionValidator = new();
@@ -371,6 +373,7 @@ public sealed class ArtifactRegistryService(
         var context = await RequireArtifactPermissionAsync("artifacts.publish", ArtifactPermissions.Publish, cancellationToken);
         var artifact = await RequireArtifactAsync(artifactId, context, "artifacts.publish", cancellationToken);
         var version = await RequireVersionAsync(artifactId, versionId, context, "artifacts.publish", cancellationToken);
+        await classificationPolicyService.EvaluateArtifactPolicyRiskAsync(context.TenantId, version.Id, cancellationToken);
 
         if (artifact.OwnerUserId != context.UserId
             && !await permissionService.HasPermissionAsync(context.TenantId, context.UserId, ArtifactPermissions.Admin, cancellationToken))

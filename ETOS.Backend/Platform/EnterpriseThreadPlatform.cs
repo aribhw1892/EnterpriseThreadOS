@@ -1,4 +1,5 @@
 using ETOS.Backend.Artifacts;
+using ETOS.Backend.Classification;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
@@ -93,6 +94,7 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IAccessDenialRecorder, AccessDenialRecorder>();
         services.AddScoped<IAuditRecorder, AuditRecorder>();
         services.AddScoped<IAuditExplorerService, AuditExplorerService>();
+        services.AddScoped<IClassificationPolicyService, ClassificationPolicyService>();
         services.AddScoped<IArtifactRegistryService, ArtifactRegistryService>();
         services.AddScoped<IDevelopmentIdentitySeeder, DevelopmentIdentitySeeder>();
 

@@ -1,4 +1,5 @@
 using ETOS.Backend.Artifacts;
+using ETOS.Backend.Classification;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -35,6 +36,11 @@ public sealed class DevelopmentIdentitySeeder(
         var artifactCreatePermission = await EnsurePermissionAsync(ArtifactPermissions.Create, "Create tenant artifact registry records.", cancellationToken);
         var artifactPublishPermission = await EnsurePermissionAsync(ArtifactPermissions.Publish, "Publish tenant artifact versions.", cancellationToken);
         var artifactAdminPermission = await EnsurePermissionAsync(ArtifactPermissions.Admin, "Administer tenant artifact registry records.", cancellationToken);
+        var classificationReadPermission = await EnsurePermissionAsync(ClassificationPermissions.Read, "Read tenant classification and policy records.", cancellationToken);
+        var classificationManagePermission = await EnsurePermissionAsync(ClassificationPermissions.Manage, "Manage tenant classification and policy drafts.", cancellationToken);
+        var classificationPublishPermission = await EnsurePermissionAsync(ClassificationPermissions.Publish, "Publish tenant classification and policy versions.", cancellationToken);
+        var policyEvaluatePermission = await EnsurePermissionAsync(ClassificationPermissions.Evaluate, "Evaluate tenant policy against governed context.", cancellationToken);
+        var policyAdminPermission = await EnsurePermissionAsync(ClassificationPermissions.Admin, "Administer tenant policy enforcement.", cancellationToken);
         var adminRole = await EnsureTenantRoleAsync(tenant.Id, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, admin.Id, adminRole.Id, cancellationToken);
@@ -44,6 +50,11 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, artifactCreatePermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, artifactPublishPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, artifactAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, classificationReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, classificationManagePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, classificationPublishPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, policyEvaluatePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, policyAdminPermission.Id, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await EnsureBootstrapAuditAsync(tenant.Id, admin.Id, tenant.Identifier, cancellationToken);

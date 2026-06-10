@@ -6,7 +6,11 @@ import {
   ArtifactVersion,
   AuditRecord,
   ApiResult,
+  ClassificationScheme,
   IdentityUser,
+  PolicyImpact,
+  PolicyVersion,
+  RestrictedContextRule,
   SecurityEvent,
   Tenant,
   TenantMembership,
@@ -14,6 +18,7 @@ import {
   adminUserId,
   apiBaseUrl,
   getArtifactRegistryLists,
+  getClassificationPolicyLists,
   getGovernanceLists,
   getIdentityLists,
   getPlatformHealth,
@@ -264,12 +269,110 @@ function ArtifactDependencyCard(dependency: ArtifactDependency) {
   );
 }
 
+function ClassificationSchemeCard(scheme: ClassificationScheme) {
+  return (
+    <article key={scheme.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{scheme.name}</h3>
+          <p className="mt-1 font-mono text-xs text-cyan-200">{scheme.key}</p>
+        </div>
+        <StatusBadge status={scheme.latestVersion?.state ?? "draftless"} />
+      </div>
+      <div className="mt-3 grid gap-1 text-xs text-slate-500">
+        <p>{scheme.description ?? "No description."}</p>
+        <p>Latest: {scheme.latestVersion?.versionLabel ?? "no versions"}</p>
+      </div>
+    </article>
+  );
+}
+
+function PolicyVersionCard(policy: PolicyVersion) {
+  return (
+    <article key={policy.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{policy.name}</h3>
+          <p className="mt-1 font-mono text-xs text-cyan-200">
+            {policy.policyKey} / {policy.versionLabel}
+          </p>
+        </div>
+        <StatusBadge status={policy.state} />
+      </div>
+      <div className="mt-3 grid gap-1 text-xs text-slate-500">
+        <p>{policy.summary ?? "No summary."}</p>
+        <p>Scheme version: {policy.classificationSchemeVersionLabel}</p>
+        <p>Restricted rules: {policy.restrictedRuleCount}</p>
+      </div>
+    </article>
+  );
+}
+
+function RestrictedContextRuleCard(rule: RestrictedContextRule) {
+  return (
+    <article key={rule.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{rule.classificationKey}</h3>
+          <p className="mt-1 text-sm text-slate-400">{rule.safeSummary}</p>
+        </div>
+        <StatusBadge status={rule.effect} />
+      </div>
+      <div className="mt-3 grid gap-1 text-xs text-slate-500">
+        <p>Policy: {rule.policyKey}</p>
+        <p>Attribute: {rule.attributeKey ?? "any"}</p>
+        <p>Permission: {rule.requiredPermissionKey ?? "none"}</p>
+        <p>Grant required: {rule.requiresGrant ? "yes" : "no"}</p>
+      </div>
+    </article>
+  );
+}
+
+function PolicyImpactCard({ impact }: { impact: ApiResult<PolicyImpact> }) {
+  if (impact.error) {
+    return <ErrorState error={impact.error} />;
+  }
+
+  if (!impact.data) {
+    return <EmptyState message="No published policy is available for impact analysis." />;
+  }
+
+  return (
+    <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
+      <div className="mb-5">
+        <h2 className="text-2xl font-semibold">Policy impact</h2>
+        <p className="mt-1 text-sm text-slate-400">
+          First published policy matched to artifact versions for publish-risk review.
+        </p>
+      </div>
+      <article className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-semibold">{impact.data.policyKey}</h3>
+            <p className="mt-1 text-sm text-slate-400">Version {impact.data.versionLabel}</p>
+          </div>
+          <StatusBadge status={`${impact.data.affectedArtifactCount} affected`} />
+        </div>
+        <div className="mt-3 grid gap-2 text-xs text-slate-500">
+          <p>Restricted rules: {impact.data.restrictedRuleCount}</p>
+          {impact.data.affectedArtifacts.slice(0, 5).map((artifact) => (
+            <p key={artifact.artifactId}>
+              {artifact.artifactName}: {artifact.policyRiskStatus}
+            </p>
+          ))}
+        </div>
+      </article>
+    </section>
+  );
+}
+
 export default async function Home() {
-  const [health, identity, governance, artifactRegistry] = await Promise.all([
+  const [health, identity, governance, artifactRegistry, classificationPolicy] = await Promise.all([
     getPlatformHealth(),
     getIdentityLists(),
     getGovernanceLists(),
     getArtifactRegistryLists(),
+    getClassificationPolicyLists(),
   ]);
   const frontendEnvironment = process.env.NODE_ENV;
 
@@ -287,7 +390,8 @@ export default async function Home() {
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
                 This shell lists the tenant identity, governance audit, and artifact
-                registry foundations resolved through the backend API.
+                registry foundations resolved through the backend API, including
+                classification and policy enforcement records.
               </p>
             </div>
             <StatusBadge status={health?.status ?? "unavailable"} />
@@ -392,6 +496,31 @@ export default async function Home() {
             emptyMessage="No dependencies are available for the first artifact version."
             renderItem={ArtifactDependencyCard}
           />
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-2">
+          <ListSection
+            title="Classification schemes"
+            description="Versioned classification schemes available in the selected tenant."
+            result={classificationPolicy.schemes}
+            emptyMessage="No classification schemes are available for the selected tenant."
+            renderItem={ClassificationSchemeCard}
+          />
+          <ListSection
+            title="Policy versions"
+            description="Tenant policy versions that govern restricted context access."
+            result={classificationPolicy.policies}
+            emptyMessage="No policy versions are available for the selected tenant."
+            renderItem={PolicyVersionCard}
+          />
+          <ListSection
+            title="Restricted context rules"
+            description="Rules that split allowed context from denied summaries and sensitive references."
+            result={classificationPolicy.rules}
+            emptyMessage="No restricted context rules are available for the selected tenant."
+            renderItem={RestrictedContextRuleCard}
+          />
+          <PolicyImpactCard impact={classificationPolicy.impact} />
         </section>
 
         <section className="grid gap-4 lg:grid-cols-2">

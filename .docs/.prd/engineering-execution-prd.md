@@ -75,7 +75,7 @@ flowchart TB
 
     subgraph storage["Memory and Storage Layer"]
         postgres["PostgreSQL Operational Store"]
-        memgraph["Memgraph Digital Thread Graph"]
+        neo4j["Neo4j Digital Thread Graph"]
         qdrant["Qdrant Vector Memory"]
         minio["MinIO Object Storage"]
         redis["Redis Cache"]
@@ -105,7 +105,7 @@ flowchart TB
     agentrt --> llm
     monolith --> dapr
     monolith --> postgres
-    monolith --> memgraph
+    monolith --> neo4j
     monolith --> qdrant
     monolith --> minio
     monolith --> redis
@@ -127,15 +127,17 @@ flowchart TB
 | API / Modular Backend | ASP.NET Core .NET 10, EF Core, REST APIs, modular monolith                    | Split services only if module boundaries and scale require it                       |
 | Identity              | ASP.NET Identity, tenant-aware authorization, RBAC + ABAC                     | Keycloak or enterprise IdP federation                                               |
 | Operational Store     | PostgreSQL, EF Core migrations                                                | SQL Server support through EF Core abstraction                                      |
-| Graph Memory          | Memgraph via graph abstraction contracts                                      | Neo4j and other graph backends                                                      |
+| Graph Memory          | Neo4j via graph abstraction contracts                                         | Memgraph and other graph backends                                                   |
 | Vector Memory         | Qdrant                                                                        | Additional vector stores if customer deployment requires them                       |
 | Object Storage        | MinIO                                                                         | S3, Azure Blob, or enterprise object storage                                        |
 | Cache / Messaging     | Redis, RabbitMQ                                                               | Managed cache/message services                                                      |
 | Agent Runtime         | Python FastAPI, LangGraph, LLM provider abstraction                           | Additional agent runtimes and private/local model execution                         |
 | Workflow Runtime      | Dapr Workflow                                                                 | Temporal                                                                            |
-| Local Infrastructure  | Docker Compose for PostgreSQL, Memgraph, Qdrant, MinIO, Redis, RabbitMQ       | Kubernetes                                                                          |
+| Local Infrastructure  | Docker Compose for PostgreSQL, Neo4j, Qdrant, MinIO, Redis, RabbitMQ          | Kubernetes, optional Memgraph evaluation profile                                    |
 | Connectors            | CSV, Excel, document import, mock ERP/PDM, disabled write connector contracts | Live ERP, PDM, PLM, MES, QMS, CRM, CAD automation                                   |
 | Observability / Audit | Audit records, AI Trace, ToolRun, AgentRun, WorkflowRun, governed export logs | Centralized observability stack, retention/archive automation                       |
+
+Decision: Neo4j is the primary MVP graph memory backend because EnterpriseThreadOS must support large, durable enterprise digital-thread graphs without requiring the full graph dataset to fit in RAM. Memgraph remains a possible optional backend behind the graph abstraction for memory-first analytics or future evaluation, but it is not the default system-of-record graph backend.
 
 
 ### Open-Source Development Accelerators
@@ -153,11 +155,11 @@ The platform should prefer proven open-source libraries for commodity infrastruc
 | OpenAPI and client generation | Microsoft.AspNetCore.OpenApi, Scalar.AspNetCore, NSwag | Backend API docs and optional generated frontend clients | Keep explicit DTO contracts. Use generated clients only if they reduce frontend drift without hiding governed API boundaries. |
 | Messaging and async processing | MassTransit with RabbitMQ | Audit/event fan-out, import processing, tool runs, workflow-adjacent async jobs | Use when durable retries, consumers, and outbox patterns are needed. Avoid bypassing Dapr Workflow for governed workflow orchestration. |
 | Background jobs | Dapr Workflow, Hangfire or Quartz.NET | MVP workflows, scheduled placeholders, maintenance tasks | Dapr Workflow is the MVP workflow runtime. Hangfire or Quartz.NET may be used for simple scheduled/background jobs that are not governed business workflows. |
-| Graph backend access | Custom graph abstraction with Neo4j.Driver for Bolt-compatible Memgraph access | Graph Memory Module, Memgraph implementation, Neo4j placeholder | Keep raw graph queries internal. Use the abstraction for tenant filtering, trust state, snapshots, diffs, and backend portability. |
+| Graph backend access | Custom graph abstraction with Neo4j.Driver for Neo4j primary access | Graph Memory Module, Neo4j implementation, optional Memgraph adapter placeholder | Keep raw graph queries internal. Use the abstraction for tenant filtering, trust state, snapshots, diffs, and backend portability. Preserve Cypher/Bolt portability where practical without constraining Neo4j-specific operational needs. |
 | Vector retrieval | Qdrant.Client (.NET) or qdrant-client (Python) | Document Memory Module, Retrieval and Context Module, agent runtime retrieval hooks | Tenant, classification, and trust filters must be applied before vector context becomes LLM-visible. |
 | Object storage | Minio .NET SDK behind an object-storage abstraction | Import files, document versions, trace export packages | Keep S3/Azure Blob compatibility behind the abstraction. |
 | Observability | OpenTelemetry, Serilog.AspNetCore, AspNetCore.Diagnostics.HealthChecks | API gateway, module services, infrastructure health, runtime traces | Use structured logs and trace correlation with tenant-safe identifiers. Do not log restricted payloads or long-lived secrets. |
-| Testing | xUnit, Testcontainers for .NET, Respawn, FluentAssertions, NSubstitute or Moq | Domain, API, persistence, graph, infra, and governance tests | Prefer Testcontainers for PostgreSQL, Memgraph, Redis, RabbitMQ, MinIO, and Qdrant behavior that cannot be proven with in-memory fakes. |
+| Testing | xUnit, Testcontainers for .NET, Respawn, FluentAssertions, NSubstitute or Moq | Domain, API, persistence, graph, infra, and governance tests | Prefer Testcontainers for PostgreSQL, Neo4j, Redis, RabbitMQ, MinIO, and Qdrant behavior that cannot be proven with in-memory fakes. Add optional Memgraph contract tests only if that backend is enabled. |
 | Frontend data and forms | TanStack Query, React Hook Form, Zod, TanStack Table | Admin CRUD, explorers, mapping UI, policy screens, dashboards | Zod schemas should align with backend DTOs; generated or shared contracts may be introduced later if duplication becomes risky. |
 | Frontend visualization | React Flow, shadcn/ui, Tailwind CSS, Lucide React | Graph explorer, workflow builder, governance flow, dashboard/report shell | Use configuration-driven UI components and accessible primitives; avoid bespoke visualization frameworks until product needs exceed React Flow. |
 | Python agent runtime | FastAPI, Pydantic, LangGraph, httpx, tenacity, qdrant-client | Agent runtime, model/tool adapters, retrieval adapters | LangChain may be used selectively for integrations, but governed context assembly and tool authorization must remain platform-owned. |
@@ -173,7 +175,7 @@ sequenceDiagram
     participant API as ASP.NET Core Gateway
     participant Gov as Governance / Policy
     participant Import as Import + Mapping Module
-    participant Graph as Memgraph Graph Memory
+    participant Graph as Neo4j Graph Memory
     participant Docs as MinIO + Qdrant
     participant AI as Agent Runtime / LLM
     participant Decision as Recommendation / Task / Decision Modules
@@ -374,7 +376,7 @@ flowchart LR
 112. As an admin, I want team confidence rules platform-defined in MVP, so that team output trust remains explainable.
 113. As a governance user, I want consensus definitions for scenarios that require explicit agreement, so that coordinator-only synthesis is not used where consensus is required.
 114. As a developer, I want Dapr Workflow used for MVP workflow runtime and Temporal kept as future placeholder, so that orchestration starts simple while preserving future scale.
-115. As a developer, I want Memgraph supported as a first-class graph memory backend and Neo4j kept as a placeholder option, so that graph storage remains pluggable.
+115. As a developer, I want Neo4j supported as the primary graph memory backend and Memgraph kept as an optional adapter option, so that graph storage can scale for large enterprise digital threads while remaining pluggable.
 116. As a developer, I want PostgreSQL as the default operational SQL database, so that tenants, artifacts, classifications, audit, and runtime records have reliable relational persistence.
 117. As a developer, I want EF Core migrations from day one, so that operational schema changes are controlled.
 118. As a developer, I want Docker Compose for infrastructure services only in early milestones, so that local development remains IDE-friendly while dependencies are reproducible.
@@ -389,7 +391,7 @@ flowchart LR
 - Backend: ASP.NET Core .NET 10 modular monolith with explicit module boundaries, dependency injection, EF Core, PostgreSQL by default, and future SQL Server support through EF Core abstraction.
 - Agent runtime: Python FastAPI and LangGraph-style orchestration for agent internals, integrated through governed contracts rather than direct database access.
 - Workflow runtime: Dapr Workflow for MVP; Temporal remains a future placeholder.
-- Graph memory: Memgraph as the first-class MVP graph backend; Neo4j remains a pluggable placeholder.
+- Graph memory: Neo4j as the first-class MVP graph backend; Memgraph remains an optional pluggable backend for memory-first analytics or future evaluation.
 - Vector memory: Qdrant for embedding-backed document/vector retrieval.
 - Object storage: MinIO for import files, original documents, extraction artifacts, and trace export packages.
 - Cache and messaging: Redis and RabbitMQ for local infrastructure where needed by runtime, background jobs, cache invalidation, and async workflows.
@@ -465,7 +467,7 @@ Execution objects such as ToolRun, SkillRun, AgentRun, WorkflowRun, AgentTeamRun
 - Artifact Registry Module: BaseArtifact lifecycle, artifact versions, artifact relationships, dependency graph, publish workflow, compatibility checks, readiness states.
 - Audit and Security Module: audit records, security events, denied access records, export events, trace/export permissions, retention placeholders.
 - Classification and Policy Module: classification schemes, permission rules, ABAC-style filtering, policy versioning, temporary access, restricted context handling.
-- Graph Memory Module: graph abstraction, graph health, Memgraph implementation, Neo4j placeholder, graph bootstrap conventions, graph snapshots, graph diff.
+- Graph Memory Module: graph abstraction, graph health, Neo4j implementation, optional Memgraph adapter placeholder, graph bootstrap conventions, graph snapshots, graph diff.
 - Ontology and Semantic Layer Module: canonical model, tenant attribute schemas, ontology versions, semantic metadata, AI descriptions, examples, synonyms, model package publishing.
 - Ingestion and Mapping Module: raw import batches, staging graph, import mappings, lifecycle mapping, attribute mapping, import validation, import file evidence.
 - Identity Resolution Module: identity rules, identity candidates, identity decisions, approved/provisional/conflicted links, trust effects, learning evidence.
@@ -500,10 +502,10 @@ Deliverables:
 - Identity, tenancy, classification schemes, audit records, access grant placeholders, execution retention placeholders.
 - Artifact registry foundation with BaseArtifact, version metadata, status, ownership, tenant scoping, and generic artifact relationships.
 - PostgreSQL local infrastructure and EF Core migrations.
-- Memgraph local infrastructure and bootstrap scripts for BaseNode/BaseRelationship conventions.
+- Neo4j local infrastructure and bootstrap scripts for BaseNode/BaseRelationship constraints, indexes, and conventions.
 - Qdrant, MinIO, Redis, and RabbitMQ local infrastructure services.
 - Graph abstraction package with graph memory, graph query, graph schema, graph snapshot, and graph health contracts.
-- Memgraph graph memory implementation and Neo4j placeholder.
+- Neo4j graph memory implementation and optional Memgraph adapter placeholder.
 - Minimal admin UI for tenants, users/roles, artifacts, classifications, and audit visibility.
 - Foundation CRUD APIs with automated tests.
 
@@ -511,7 +513,7 @@ Acceptance criteria:
 
 - A developer can run local infrastructure services through Docker Compose.
 - The backend can create tenants, users/roles, classification schemes, artifacts, artifact versions, and audit records.
-- The graph memory abstraction can connect to Memgraph and pass health checks.
+- The graph memory abstraction can connect to Neo4j and pass health checks.
 - Raw graph database access is platform-internal only.
 - Tenant isolation is represented in all persisted foundation records.
 - Tests cover domain invariants and API behavior for foundation objects.
@@ -648,7 +650,7 @@ Future deliverables:
 ## Data and Storage Decisions
 
 - PostgreSQL stores operational data: tenants, users, roles, artifacts, artifact versions, classifications, policies, audit records, access grants, runtime summaries, task/decision operational fields, deployment profiles, and governance analytics.
-- Memgraph stores graph memory: enterprise objects, object versions, relationships, BOM lines, identity links, document links, data quality links, artifact relationship projections, dependency graph projections, and context navigation links.
+- Neo4j stores graph memory: enterprise objects, object versions, relationships, BOM lines, identity links, document links, data quality links, artifact relationship projections, dependency graph projections, and context navigation links.
 - Documents and import files should be represented by governed metadata and evidence links. Physical storage implementation can be local/object-storage abstraction in MVP with cloud storage as future extension.
 - Staging graph and trusted graph are separate logical spaces in MVP.
 - Rejected staged data keeps summaries, validation results, identity decisions, and audit records rather than full payload retention.
@@ -698,7 +700,7 @@ Test modules from Milestone 1 onward:
 
 - Foundation domain tests for tenants, artifacts, versions, artifact relationships, classifications, audit records, and deployment profiles.
 - API tests for foundation CRUD behavior, tenant isolation, validation failures, and permission boundaries.
-- Graph abstraction tests using a test Memgraph container or local test fixture.
+- Graph abstraction tests using a test Neo4j container or local test fixture, with optional Memgraph contract tests only when the optional backend is enabled.
 - Import/mapping tests for staged import, mapping validation, lifecycle normalization, and trusted graph promotion.
 - Identity resolution tests for candidate generation, approval, conflict handling, and relationship-based linking.
 - Data quality tests for rule-detected issues, trust score effects, and issue artifact links.

@@ -1,4 +1,5 @@
 using ETOS.Backend.Artifacts;
+using ETOS.Backend.Classification;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
@@ -28,6 +29,7 @@ app.MapEnterpriseThreadHealthEndpoints();
 app.MapEnterpriseThreadIdentityEndpoints();
 app.MapEnterpriseThreadGovernanceEndpoints();
 app.MapEnterpriseThreadArtifactEndpoints();
+app.MapEnterpriseThreadClassificationEndpoints();
 
 app.Run();
 

@@ -151,6 +151,83 @@ export type ArtifactDependency = {
   createdAt: string;
 };
 
+export type ClassificationSchemeVersion = {
+  id: string;
+  tenantId: string;
+  schemeId: string;
+  schemeKey: string;
+  versionLabel: string;
+  summary?: string | null;
+  levelsJson?: string | null;
+  state: string;
+  createdByUserId: string;
+  createdAt: string;
+  publishedByUserId?: string | null;
+  publishedAt?: string | null;
+};
+
+export type ClassificationScheme = {
+  id: string;
+  tenantId: string;
+  key: string;
+  name: string;
+  description?: string | null;
+  latestVersion?: ClassificationSchemeVersion | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PolicyVersion = {
+  id: string;
+  tenantId: string;
+  policyKey: string;
+  name: string;
+  versionLabel: string;
+  summary?: string | null;
+  classificationSchemeVersionId: string;
+  classificationSchemeVersionLabel: string;
+  state: string;
+  restrictedRuleCount: number;
+  createdByUserId: string;
+  createdAt: string;
+  publishedByUserId?: string | null;
+  publishedAt?: string | null;
+};
+
+export type RestrictedContextRule = {
+  id: string;
+  tenantId: string;
+  policyVersionId: string;
+  policyKey: string;
+  classificationKey: string;
+  attributeKey?: string | null;
+  documentType?: string | null;
+  requiredPermissionKey?: string | null;
+  allowedRoleName?: string | null;
+  requiresGrant: boolean;
+  effect: string;
+  safeSummary: string;
+  createdAt: string;
+};
+
+export type PolicyAffectedArtifact = {
+  artifactId: string;
+  artifactName: string;
+  artifactType: string;
+  latestVersionId?: string | null;
+  latestVersionLabel?: string | null;
+  policyRiskStatus: string;
+};
+
+export type PolicyImpact = {
+  policyVersionId: string;
+  policyKey: string;
+  versionLabel: string;
+  restrictedRuleCount: number;
+  affectedArtifactCount: number;
+  affectedArtifacts: PolicyAffectedArtifact[];
+};
+
 export type ApiResult<T> = {
   data: T | null;
   error: string | null;
@@ -278,6 +355,40 @@ export async function getArtifactRegistryLists() {
   };
 }
 
+export async function getClassificationPolicyLists() {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+
+  const [schemes, policies, rules] = tenantHeaders
+    ? await Promise.all([
+        fetchApi<ClassificationScheme[]>("/api/admin/classification/schemes", tenantHeaders),
+        fetchApi<PolicyVersion[]>("/api/admin/classification/policies", tenantHeaders),
+        fetchApi<RestrictedContextRule[]>("/api/admin/classification/rules", tenantHeaders),
+      ])
+    : [
+        missingContext<ClassificationScheme[]>(),
+        missingContext<PolicyVersion[]>(),
+        missingContext<RestrictedContextRule[]>(),
+      ];
+  const firstPublishedPolicy = policies.data?.find((policy) => policy.state === "Published");
+  const impact =
+    tenantHeaders && firstPublishedPolicy
+      ? await fetchApi<PolicyImpact>(
+          `/api/admin/classification/policies/${firstPublishedPolicy.id}/impact`,
+          tenantHeaders,
+        )
+      : emptyObject<PolicyImpact>();
+
+  return {
+    schemes,
+    policies,
+    rules,
+    impact,
+  };
+}
+
 async function fetchApi<T>(
   path: string,
   context?: { userId?: string; tenantId?: string },
@@ -328,6 +439,13 @@ function missingContext<T>(): ApiResult<T> {
 function emptyResult<T extends unknown[]>(): ApiResult<T> {
   return {
     data: [] as unknown as T,
+    error: null,
+  };
+}
+
+function emptyObject<T>(): ApiResult<T> {
+  return {
+    data: null,
     error: null,
   };
 }

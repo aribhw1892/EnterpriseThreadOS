@@ -1,4 +1,5 @@
 using ETOS.Backend.Artifacts;
+using ETOS.Backend.Classification;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Tenancy;
@@ -40,6 +41,16 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<ArtifactRelationship> ArtifactRelationships => Set<ArtifactRelationship>();
 
     public DbSet<ArtifactDependency> ArtifactDependencies => Set<ArtifactDependency>();
+
+    public DbSet<ClassificationScheme> ClassificationSchemes => Set<ClassificationScheme>();
+
+    public DbSet<ClassificationSchemeVersion> ClassificationSchemeVersions => Set<ClassificationSchemeVersion>();
+
+    public DbSet<PolicyVersion> PolicyVersions => Set<PolicyVersion>();
+
+    public DbSet<RestrictedContextRule> RestrictedContextRules => Set<RestrictedContextRule>();
+
+    public DbSet<PolicyEvaluationRecord> PolicyEvaluationRecords => Set<PolicyEvaluationRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -320,6 +331,98 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
                 .WithMany()
                 .HasForeignKey(dependency => dependency.RequiredArtifactId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ClassificationScheme>(entity =>
+        {
+            entity.ToTable("classification_schemes");
+            entity.HasKey(scheme => scheme.Id);
+            entity.Property(scheme => scheme.TenantId).IsRequired();
+            entity.Property(scheme => scheme.Key).HasMaxLength(120).IsRequired();
+            entity.Property(scheme => scheme.NormalizedKey).HasMaxLength(120).IsRequired();
+            entity.Property(scheme => scheme.Name).HasMaxLength(200).IsRequired();
+            entity.Property(scheme => scheme.Description).HasMaxLength(1000);
+            entity.Property(scheme => scheme.CreatedAt).IsRequired();
+            entity.Property(scheme => scheme.UpdatedAt).IsRequired();
+            entity.HasIndex(scheme => new { scheme.TenantId, scheme.NormalizedKey }).IsUnique();
+        });
+
+        modelBuilder.Entity<ClassificationSchemeVersion>(entity =>
+        {
+            entity.ToTable("classification_scheme_versions");
+            entity.HasKey(version => version.Id);
+            entity.Property(version => version.TenantId).IsRequired();
+            entity.Property(version => version.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.Summary).HasMaxLength(1000);
+            entity.Property(version => version.LevelsJson).HasMaxLength(8000);
+            entity.Property(version => version.State).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(version => version.CreatedAt).IsRequired();
+            entity.HasIndex(version => new { version.SchemeId, version.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(version => new { version.TenantId, version.State, version.PublishedAt });
+            entity.HasOne(version => version.Scheme)
+                .WithMany(scheme => scheme.Versions)
+                .HasForeignKey(version => version.SchemeId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PolicyVersion>(entity =>
+        {
+            entity.ToTable("policy_versions");
+            entity.HasKey(policy => policy.Id);
+            entity.Property(policy => policy.TenantId).IsRequired();
+            entity.Property(policy => policy.PolicyKey).HasMaxLength(120).IsRequired();
+            entity.Property(policy => policy.NormalizedPolicyKey).HasMaxLength(120).IsRequired();
+            entity.Property(policy => policy.Name).HasMaxLength(200).IsRequired();
+            entity.Property(policy => policy.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(policy => policy.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(policy => policy.Summary).HasMaxLength(1000);
+            entity.Property(policy => policy.State).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(policy => policy.CreatedAt).IsRequired();
+            entity.HasIndex(policy => new { policy.TenantId, policy.NormalizedPolicyKey, policy.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(policy => new { policy.TenantId, policy.NormalizedPolicyKey, policy.State, policy.PublishedAt });
+            entity.HasOne(policy => policy.ClassificationSchemeVersion)
+                .WithMany()
+                .HasForeignKey(policy => policy.ClassificationSchemeVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RestrictedContextRule>(entity =>
+        {
+            entity.ToTable("restricted_context_rules");
+            entity.HasKey(rule => rule.Id);
+            entity.Property(rule => rule.TenantId).IsRequired();
+            entity.Property(rule => rule.ClassificationKey).HasMaxLength(120).IsRequired();
+            entity.Property(rule => rule.NormalizedClassificationKey).HasMaxLength(120).IsRequired();
+            entity.Property(rule => rule.AttributeKey).HasMaxLength(160);
+            entity.Property(rule => rule.NormalizedAttributeKey).HasMaxLength(160);
+            entity.Property(rule => rule.DocumentType).HasMaxLength(120);
+            entity.Property(rule => rule.NormalizedDocumentType).HasMaxLength(120);
+            entity.Property(rule => rule.RequiredPermissionKey).HasMaxLength(160);
+            entity.Property(rule => rule.NormalizedRequiredPermissionKey).HasMaxLength(160);
+            entity.Property(rule => rule.AllowedRoleName).HasMaxLength(120);
+            entity.Property(rule => rule.NormalizedAllowedRoleName).HasMaxLength(120);
+            entity.Property(rule => rule.Effect).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(rule => rule.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(rule => rule.CreatedAt).IsRequired();
+            entity.HasIndex(rule => new { rule.TenantId, rule.PolicyVersionId });
+            entity.HasIndex(rule => new { rule.TenantId, rule.NormalizedClassificationKey, rule.NormalizedAttributeKey });
+            entity.HasOne(rule => rule.PolicyVersion)
+                .WithMany(policy => policy.RestrictedRules)
+                .HasForeignKey(rule => rule.PolicyVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PolicyEvaluationRecord>(entity =>
+        {
+            entity.ToTable("policy_evaluation_records");
+            entity.HasKey(record => record.Id);
+            entity.Property(record => record.TenantId).IsRequired();
+            entity.Property(record => record.Action).HasMaxLength(200).IsRequired();
+            entity.Property(record => record.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(record => record.CreatedAt).IsRequired();
+            entity.HasIndex(record => new { record.TenantId, record.Action, record.CreatedAt });
+            entity.HasIndex(record => new { record.TenantId, record.PolicyVersionId, record.CreatedAt });
         });
     }
 

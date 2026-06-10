@@ -17,7 +17,7 @@ Use open-source libraries to accelerate commodity implementation work while keep
 | Issue 3: Audit and Runtime Retention | EF Core, Serilog.AspNetCore, OpenTelemetry, MassTransit when async event fan-out is introduced | Immutable audit records, tenant-safe structured logs, trace correlation, security events, and later durable audit/event processing. |
 | Issue 4: Artifact Registry | EF Core, FluentValidation, Mapperly or Mapster, ASP.NET Core authorization policies | Artifact lifecycle persistence, immutable version validation, publish command validation, DTO mapping, dependency/readiness enforcement. |
 | Issue 5: Classification and Policy | FluentValidation, ASP.NET Core authorization handlers, OpenFGA or Casbin.NET only if policy relationships outgrow local handlers | Classification scheme validation, ABAC-style filtering, temporary grants, publish compatibility checks, and denied-context decisions. |
-| Issue 6: Graph Memory | Neo4j.Driver over Bolt-compatible Memgraph, custom graph abstraction, Testcontainers for .NET | Memgraph implementation, traversal contracts, graph health checks, tenant-scoped graph tests, and Neo4j placeholder portability. |
+| Issue 6: Graph Memory | Neo4j.Driver for Neo4j primary access, custom graph abstraction, Testcontainers for .NET | Neo4j implementation, traversal contracts, graph health checks, tenant-scoped graph tests, and optional Memgraph adapter portability. |
 | Issues 7-12: Model, Import, Identity Resolution, Data Quality, Documents | FluentValidation, CsvHelper, ExcelDataReader or ClosedXML, Minio .NET SDK, Qdrant.Client, Testcontainers for .NET | Ontology/schema validation, CSV/Excel import, raw file evidence storage, document metadata, vector indexing hooks, and import/graph integration tests. |
 | Issues 13-15: Governed Query, Retrieval, Trace, Chat | Qdrant.Client, Semantic Kernel or direct LLM provider SDKs behind an abstraction, Pydantic/FastAPI contracts for Python runtime, OpenTelemetry | Graph-first/document-second retrieval, LLM-safe context packages, provider abstraction, AI trace correlation, and governed chat execution. |
 | Issues 16-17: Explorers, Dashboards, Reports | TanStack Query, TanStack Table, React Hook Form, Zod, React Flow, shadcn/ui, Tailwind CSS, Lucide React | Admin and explorer data loading, filtered tables, form validation, graph/governance visualization, and consistent UI primitives. |
@@ -35,15 +35,15 @@ User stories covered: 32, 33, 34, 116, 117, 118, 119, 120
 
 ## What to build
 
-Create the developer-first solution foundation for the modular monolith, frontend shell, local infrastructure, and automated test baseline. The slice should prove that the platform can run locally with PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ available through Docker Compose, while the application remains IDE-friendly.
+Create the developer-first solution foundation for the modular monolith, frontend shell, local infrastructure, and automated test baseline. The slice should prove that the platform can run locally with PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ available through Docker Compose, while the application remains IDE-friendly.
 
 ## Acceptance criteria
 
 - A developer can start local infrastructure services through Docker Compose.
 - The backend solution has explicit module boundaries, dependency injection conventions, EF Core migrations, and a test project from day one.
 - The frontend shell can call a backend health endpoint and display the active environment.
-- Infrastructure health checks cover PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ.
-- Future Kubernetes, SQL Server, Neo4j, Keycloak, Temporal, and CI/CD extension points exist as contracts or documentation placeholders, not fake implementations.
+- Infrastructure health checks cover PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ.
+- Future Kubernetes, SQL Server, Memgraph optional adapter support, Keycloak, Temporal, and CI/CD extension points exist as contracts or documentation placeholders, not fake implementations.
 - Tests verify backend health, infrastructure configuration binding, and basic tenant-scoped persistence conventions.
 
 ## Blocked by
@@ -142,7 +142,7 @@ Implement versioned classification schemes, policy versions, restricted attribut
 
 Issue 4.
 
-## Issue 6: Graph Memory Abstraction and Memgraph Backend
+## Issue 6: Graph Memory Abstraction and Neo4j Backend
 
 Type: AFK
 Blocked by: Issue 5
@@ -150,15 +150,15 @@ User stories covered: 9, 10, 11, 16, 26, 35, 38, 115
 
 ## What to build
 
-Implement the graph memory abstraction, BaseNode/BaseRelationship conventions, graph health checks, platform-internal graph query contracts, Memgraph implementation, and Neo4j placeholder contract. Raw graph access must stay internal; public access flows through governed services.
+Implement the graph memory abstraction, BaseNode/BaseRelationship conventions, graph health checks, platform-internal graph query contracts, Neo4j implementation, and optional Memgraph adapter placeholder. Raw graph access must stay internal; public access flows through governed services.
 
 ## Acceptance criteria
 
 - Graph contracts support nodes, relationships, attributes, tenant scope, source references, trust state, snapshots, diffs, and health checks.
-- Memgraph backend can create, query, update, and traverse tenant-scoped graph records through the abstraction.
+- Neo4j backend can create, query, update, and traverse tenant-scoped graph records through the abstraction.
 - Raw graph query execution is not exposed through public or admin APIs.
-- Neo4j support exists only as a disabled placeholder contract.
-- Graph bootstrap scripts create baseline constraints and conventions for BaseNode/BaseRelationship.
+- Memgraph support exists only as an optional disabled placeholder or later adapter unless explicitly enabled.
+- Graph bootstrap scripts create baseline Neo4j constraints, indexes, and conventions for BaseNode/BaseRelationship.
 - Tests cover graph health, tenant filtering, relationship metadata, traversal constraints, and raw access restrictions.
 
 ## Blocked by
