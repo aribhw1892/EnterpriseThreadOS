@@ -13,6 +13,9 @@
 - `Identity/`: current tenant identity and access baseline.
 - `Governance/`: audit records, security events, retention placeholders, and explorer endpoints.
 - `Artifacts/`: BaseArtifact registry, immutable versions, generic relationships, dependency edges, readiness checks, and publish endpoints.
+- `Classification/`: versioned classification schemes, policy versions, restricted context rules, policy evaluation, and artifact policy-risk integration.
+- `GraphMemory/`: internal graph memory contracts, Neo4j implementation, graph health/bootstrap, and disabled Memgraph placeholder.
+- `Ontology/`: versioned ontology, semantic layer, lifecycle vocabulary, tenant attribute schema, BOM metadata, and model package publishing.
 - `Platform/Extensions/`: architecture-honest extension point catalog for deferred capabilities.
 
 ## Startup Flow
@@ -83,6 +86,40 @@ The artifact module currently includes:
 
 Issue 4 stores dependency edges in PostgreSQL. Neo4j graph projection, full policy evaluation, compatibility report execution, approval workflows, and typed artifact subtype payloads are deferred to their owning slices.
 
+### Classification And Policy
+
+The classification module currently includes:
+
+- tenant-scoped classification schemes and immutable scheme versions.
+- policy versions with restricted context rules.
+- evaluation responses that split allowed context, denied safe summaries, and sensitive denied references.
+- policy impact and artifact publish risk checks.
+- admin endpoints under `/api/admin/classification`.
+
+Restricted data must be filtered before downstream query, dashboard, export, agent, or LLM context assembly. Do not rely on post-generation redaction.
+
+### Graph Memory
+
+The graph memory module currently includes:
+
+- internal `IGraphMemoryService` contracts for BaseNode/BaseRelationship create/read/update/traverse operations.
+- Neo4j driver, bootstrap, and health services.
+- snapshot/diff contract placeholders for later slices.
+- optional Memgraph adapter placeholder that is disabled by default.
+
+Raw graph query execution must not be exposed through public or admin endpoints.
+
+### Ontology And Model Packages
+
+The ontology module currently includes:
+
+- `OntologyVersion`, `SemanticLayerVersion`, `LifecycleVocabularyVersion`, `AttributeSchemaVersion`, and `ModelPackageVersion` records.
+- object type, semantic relationship, BOM relationship, lifecycle state/transition, and attribute definitions.
+- draft/publish/retire behavior and dependency validation for model packages.
+- admin endpoints under `/api/admin/ontology`.
+
+Issue 7 stores schema governance records in PostgreSQL. It does not import source records, populate staging graph data, or promote trusted graph state; those are later slices.
+
 ### Tenancy
 
 Persisted tenant-owned records should implement the existing tenant-scoping convention. Cross-tenant access should fail closed and create a safe denial audit record when the flow is security-relevant.
@@ -102,6 +139,8 @@ Do not turn extension metadata into fake implementations. Future providers need 
 - access-denial audit records.
 - audit records and security events with retention placeholders.
 - artifact registry tables for artifacts, artifact versions, relationships, and dependency edges.
+- classification and policy tables for schemes, policies, restricted rules, and evaluations.
+- ontology/model package tables for canonical object/schema/version governance.
 
 Use EF Core migrations for schema changes:
 
@@ -154,10 +193,11 @@ Expected test coverage for future backend changes:
 - tenant isolation and fail-closed behavior.
 - persistence invariants and EF model conventions.
 - governance/audit side effects when security boundaries are crossed.
+- EF Core query translation behavior against PostgreSQL-shaped queries; order/filter on entity fields before projecting DTOs.
 - module contracts, not private helper implementation details.
 
 ## Planned Backend Areas
 
-The PRD and issue backlog define later modules for classification/policy, graph memory, ontology, ingestion, identity resolution, data quality, documents, governed query/context, AI Trace, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration.
+The PRD and issue backlog define later modules for ingestion, identity resolution, data quality, documents, governed query/context, AI Trace, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration.
 
 Do not document or code these as implemented until the source code exists.

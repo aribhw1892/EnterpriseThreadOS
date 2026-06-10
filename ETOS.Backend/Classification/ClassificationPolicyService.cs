@@ -214,7 +214,6 @@ public sealed class ClassificationPolicyService(
     {
         var context = await RequireClassificationPermissionAsync("classification.policy_versions.list", ClassificationPermissions.Read, cancellationToken);
         return await PolicyVersionsQuery(context.TenantId)
-            .OrderByDescending(policy => policy.CreatedAt)
             .ToListAsync(cancellationToken);
     }
 
@@ -281,10 +280,7 @@ public sealed class ClassificationPolicyService(
             query = query.Where(rule => rule.PolicyVersionId == policyVersionId.Value);
         }
 
-        return await query
-            .OrderBy(rule => rule.ClassificationKey)
-            .ThenBy(rule => rule.AttributeKey)
-            .ToListAsync(cancellationToken);
+        return await query.ToListAsync(cancellationToken);
     }
 
     public async Task<RestrictedContextRuleResponse> AddRestrictedRuleAsync(
@@ -783,6 +779,7 @@ public sealed class ClassificationPolicyService(
                 policy => policy.ClassificationSchemeVersionId,
                 schemeVersion => schemeVersion.Id,
                 (policy, schemeVersion) => new { policy, schemeVersion })
+            .OrderByDescending(pair => pair.policy.CreatedAt)
             .GroupJoin(
                 dbContext.RestrictedContextRules,
                 pair => pair.policy.Id,
@@ -813,20 +810,23 @@ public sealed class ClassificationPolicyService(
                 dbContext.PolicyVersions,
                 rule => rule.PolicyVersionId,
                 policy => policy.Id,
-                (rule, policy) => new RestrictedContextRuleResponse(
-                    rule.Id,
-                    rule.TenantId,
-                    rule.PolicyVersionId,
-                    policy.PolicyKey,
-                    rule.ClassificationKey,
-                    rule.AttributeKey,
-                    rule.DocumentType,
-                    rule.RequiredPermissionKey,
-                    rule.AllowedRoleName,
-                    rule.RequiresGrant,
-                    rule.Effect,
-                    rule.SafeSummary,
-                    rule.CreatedAt));
+                (rule, policy) => new { rule, policy })
+            .OrderBy(pair => pair.rule.ClassificationKey)
+            .ThenBy(pair => pair.rule.AttributeKey)
+            .Select(pair => new RestrictedContextRuleResponse(
+                    pair.rule.Id,
+                    pair.rule.TenantId,
+                    pair.rule.PolicyVersionId,
+                    pair.policy.PolicyKey,
+                    pair.rule.ClassificationKey,
+                    pair.rule.AttributeKey,
+                    pair.rule.DocumentType,
+                    pair.rule.RequiredPermissionKey,
+                    pair.rule.AllowedRoleName,
+                    pair.rule.RequiresGrant,
+                    pair.rule.Effect,
+                    pair.rule.SafeSummary,
+                    pair.rule.CreatedAt));
     }
 
     private static ClassificationSchemeResponse ToSchemeResponse(

@@ -6,6 +6,7 @@ using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Configuration;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.Ontology;
 using ETOS.Backend.Platform.Extensions;
 using ETOS.Backend.Tenancy;
 using Finbuckle.MultiTenant.AspNetCore.Extensions;
@@ -99,6 +100,7 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IAuditExplorerService, AuditExplorerService>();
         services.AddScoped<IClassificationPolicyService, ClassificationPolicyService>();
         services.AddScoped<IArtifactRegistryService, ArtifactRegistryService>();
+        services.AddScoped<IOntologyService, OntologyService>();
         services.AddScoped<IDevelopmentIdentitySeeder, DevelopmentIdentitySeeder>();
 
         return services;

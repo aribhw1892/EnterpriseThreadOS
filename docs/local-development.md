@@ -83,6 +83,12 @@ Useful endpoints:
 - `GET http://localhost:5000/api/admin/identity/users`
 - `GET http://localhost:5000/api/admin/governance/audit-records`
 - `GET http://localhost:5000/api/admin/governance/security-events`
+- `GET http://localhost:5000/api/admin/artifacts`
+- `GET http://localhost:5000/api/admin/classification/schemes`
+- `GET http://localhost:5000/api/admin/classification/policies`
+- `GET http://localhost:5000/api/admin/ontology/versions`
+- `GET http://localhost:5000/api/admin/ontology/model-packages`
+- `GET http://localhost:5000/api/admin/ontology/model-packages/active`
 
 Tenant-protected identity endpoints use local header authentication in the current implementation. Use these headers for local API testing when an endpoint requires authorization:
 
@@ -122,7 +128,9 @@ Pop-Location
 
 Open `http://localhost:3000`.
 
-The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, and tenant-filtered audit/security event lists from the backend.
+Open `http://localhost:3000/model-artifacts` to inspect and seed canonical ontology/model package versions. The `Create seed model package` action creates draft ontology, semantic layer, lifecycle vocabulary, attribute schema, and model package versions, publishes them, and makes the latest model package active. Repeated clicks create new versions and retire previous published versions for the same keys.
+
+The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, tenant-filtered audit/security event lists, artifact registry lists, classification/policy lists, and model artifact admin screens from the backend.
 
 ## Verification
 

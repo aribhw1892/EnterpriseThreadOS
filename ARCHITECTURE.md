@@ -1,6 +1,6 @@
 # EnterpriseThreadOS Architecture
 
-EnterpriseThreadOS is intended to become an AI-native Enterprise Digital Thread Operating System. The current repository is the local-first platform foundation for that product: a .NET modular monolith backend, a Next.js frontend shell, local infrastructure services, persistence, health checks, tenant identity/access, audit/security events, and the BaseArtifact registry foundation.
+EnterpriseThreadOS is intended to become an AI-native Enterprise Digital Thread Operating System. The current repository is the local-first platform foundation for that product: a .NET modular monolith backend, a Next.js frontend shell, local infrastructure services, persistence, health checks, tenant identity/access, audit/security events, the BaseArtifact registry foundation, graph memory, and canonical model governance.
 
 For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For implementation order, use `.docs/.prd/engineering-execution-issues.md`.
 
@@ -16,6 +16,9 @@ flowchart TB
     platform --> identity["Identity And Tenant Access Module"]
     platform --> governance["Governance And Audit Module"]
     platform --> artifacts["Artifact Registry Module"]
+    platform --> classification["Classification And Policy Module"]
+    platform --> graphmemory["Graph Memory Module"]
+    platform --> ontology["Ontology And Model Package Module"]
     platform --> persistence["EnterpriseThreadDbContext"]
     platform --> extensions["Extension Point Catalog"]
 
@@ -37,6 +40,9 @@ flowchart TB
 - `ETOS.Backend/Identity/` contains tenant, user, role, permission, membership, access grant, access request, local header auth, tenant context resolution, denial audit records, services, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/Governance/` contains audit/security models, recorder services, tenant-filtered explorer services, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/Artifacts/` contains tenant-scoped artifacts, immutable versions, generic relationships, dependency edges, readiness/publish services, DTOs, and minimal API endpoint mapping.
+- `ETOS.Backend/Classification/` contains versioned classification schemes, policy versions, restricted context rules, policy evaluation, policy impact, artifact publish risk integration, DTOs, and minimal API endpoint mapping.
+- `ETOS.Backend/GraphMemory/` contains the internal graph memory abstraction, Neo4j driver implementation, graph health/bootstrap services, and optional disabled Memgraph adapter placeholder.
+- `ETOS.Backend/Ontology/` contains versioned ontology, semantic layer, lifecycle vocabulary, attribute schema, model package records, publish validation, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/Tenancy/` contains tenant-scope conventions used by persisted tenant-owned records.
 - `ETOS.Backend/Platform/Extensions/` exposes deferred extension points for planned platform capabilities without pretending they are active.
 - `ETOS.Frontend/` is a Next.js 16 shell that renders local platform health from the backend.
@@ -55,15 +61,18 @@ Implemented or partially implemented:
 - Tenant identity/access baseline.
 - Audit records, security events, retention placeholders, and tenant-filtered governance explorer endpoints.
 - BaseArtifact registry foundation with immutable versions, generic relationships, dependency edges, readiness-aware publish checks, and a minimal artifact explorer.
+- Graph memory abstraction and Neo4j backend foundation for tenant-scoped BaseNode/BaseRelationship records.
+- Classification and policy enforcement foundation with pre-context filtering contracts and artifact publish risk checks.
+- Canonical ontology and tenant schema foundation with model packages, lifecycle vocabularies, attribute schemas, BOM metadata, and a minimal model-artifacts UI.
 
 Planned by PRD and backlog, but not generally implemented unless future source code says otherwise:
 
-- Classification and policy enforcement beyond identity/access placeholders.
-- Graph memory abstraction and Neo4j business graph operations.
-- Canonical ontology, semantic layer, model packages, imports, staging graph, trusted graph promotion, identity resolution, and trust scoring.
+- Graph business flows beyond the foundation: canonical model-backed graph records, staging graph population, trusted graph promotion, snapshots, diffs, and governed traversals.
+- Imports, staging graph, trusted graph promotion, identity resolution, and trust scoring.
 - Document memory, Qdrant indexing, governed query intents, context assembly, and AI Trace.
 - Governed chat, dashboard/report generation, recommendations, review tasks, decisions, outcomes, and learning.
 - Tool registry, agent runtime, workflow runtime, multi-agent collaboration, and enterprise action framework.
+- Neo4j Agent Memory or any other persistent agent-memory provider. These remain deferred behind EnterpriseThreadOS-owned contracts and must not replace the platform graph memory abstraction.
 - Live enterprise connectors, source-system write actions, external collaboration portal, Keycloak, Temporal, Kubernetes, and production multi-tenant deployment hardening.
 
 ## Backend Request Flow
@@ -80,7 +89,7 @@ Planned by PRD and backlog, but not generally implemented unless future source c
 Current SQL ownership:
 
 - ASP.NET Identity users and roles.
-- Tenants, memberships, tenant roles, permissions, role-permission assignments, access grants, access requests, access-denial audit records, audit records, security events, artifacts, artifact versions, artifact relationships, and artifact dependency edges.
+- Tenants, memberships, tenant roles, permissions, role-permission assignments, access grants, access requests, access-denial audit records, audit records, security events, artifacts, artifact versions, artifact relationships, artifact dependency edges, classification/policy records, ontology versions, semantic layer versions, lifecycle vocabularies, attribute schemas, and model package versions.
 - Early tenant-scoped persistence conventions.
 
 Current local infrastructure availability:
@@ -92,8 +101,10 @@ Future PRD ownership model:
 
 - SQL stores operational, governance, artifact, audit, runtime summary, and tenant state.
 - Graph memory stores connected enterprise objects, versions, relationships, BOM structures, identity links, document links, quality links, and dependency projections.
+- The Neo4j Digital Thread Graph also serves as the platform's context graph for governed agent retrieval.
 - Object storage holds import files, documents, extraction artifacts, and trace export packages.
 - Vector memory supports document retrieval after tenant/policy filtering.
+- Persistent agent memory, if added later, stores governed conversation, fact/preference, and reasoning memory behind an internal provider contract. It cannot directly promote learned facts into trusted graph state.
 
 ## Guardrails
 
@@ -101,6 +112,7 @@ Future PRD ownership model:
 - Platform-owned overlays may be created only when the owning issue defines behavior and tests.
 - Restricted data must be filtered before LLM context assembly.
 - Public APIs must not expose raw graph or database query access.
+- Agents must use approved backend tool/context APIs. Future Agent Memory integrations stay behind platform contracts and cannot bypass tenant, policy, trace, audit, or review boundaries.
 - Future extension points should stay honest: contracts and documentation are acceptable; mock implementations that look production-ready are not.
 
 ## Related Docs

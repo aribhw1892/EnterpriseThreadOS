@@ -1,5 +1,137 @@
 # EnterpriseThreadOS Engineering Execution Checkpoints
 
+## 2026-06-10 - Slice 7 Canonical Ontology Ready
+
+Source docs reviewed:
+
+- `.docs/.prd/engineering-execution-prd.md`
+- `.docs/.prd/engineering-execution-issues.md`
+- `.cursor/plans/slice-7-ontology_83914dfb.plan.md`
+
+Previous checkpoint reviewed:
+
+- `2026-06-10 - Slice 6 Graph Memory Ready`
+
+Working framing:
+
+- Slice 7 implements Issue 7 as the canonical ontology and tenant schema foundation. It lets tenant admins create, inspect, preview, and publish ontology/model package versions without implementing imports or graph promotion ahead of Issue 8.
+- Ontology and schema governance records are stored in PostgreSQL. Neo4j remains the graph memory backend from Slice 6, but Slice 7 only defines reference-ready model metadata and semantic mappings.
+- The local frontend now has a dedicated `/model-artifacts` page for model package inspection and seed publishing.
+
+Design decisions:
+
+- Added a dedicated `ETOS.Backend/Ontology` module rather than overloading Artifact or Classification. The module owns ontology, semantic layer, lifecycle vocabulary, attribute schema, BOM metadata, and model package records.
+- Kept published versions immutable by API shape and service checks. New published versions retire earlier published versions for the same tenant/key.
+- Model package publishing validates same-tenant dependencies and requires published ontology, semantic layer, lifecycle vocabulary, and attribute schema versions.
+- Kept Issue 7 architecture-honest: no CSV/Excel import flow, staging graph population, trusted graph promotion, dashboard/agent behavior, or raw graph query endpoint was added.
+- Captured the repeated EF Core projection-ordering bug in `.cursor/rules/ef-core-query-projection-ordering.mdc`: order/filter on entity fields before projecting response DTOs.
+
+Implemented or partially implemented:
+
+- `ETOS.Backend/Ontology` contains models, DTO contracts, service validation, permissions, publish/retire behavior, and minimal API endpoint mapping under `/api/admin/ontology`.
+- `EnterpriseThreadDbContext` maps ontology versions, object type definitions, semantic relationship definitions, BOM relationship definitions, semantic layer versions, lifecycle vocabulary versions, lifecycle state/transition definitions, attribute schema versions, attribute definitions, and model package versions.
+- EF migration `Slice7CanonicalOntology` adds the Slice 7 PostgreSQL schema.
+- `ETOS.Frontend/src/app/model-artifacts/page.tsx` renders active published model package, ontology versions, semantic layers, lifecycle vocabularies, attribute schemas, and model packages.
+- The model artifacts UI includes a `Create seed model package` server action that creates draft model artifacts, publishes dependencies, publishes the model package, and makes the latest package active. Repeated clicks create new versions and retire previous published versions.
+- The main frontend page links to `/model-artifacts`.
+- Backend tests now include `OntologyTests` for dependency publishing, restricted attribute validation, BOM metadata, cross-tenant denial/audit, and published-version immutability.
+- Classification list queries were fixed to avoid EF Core/Npgsql translation failures when ordering projected response records.
+
+Changes since previous checkpoint:
+
+- Issue 7 moved from not implemented to implemented as the canonical ontology and tenant schema foundation.
+- Frontend gained a model-artifacts admin page and navigation from the main shell.
+- Backend test count increased from 31 tests to 35 tests.
+- Documentation now describes canonical model governance as implemented and moves imports/staging graph/trust promotion to later slices.
+
+Not implemented yet:
+
+- Issue 8 import batches, raw file evidence storage, import mapping versions, mapping suggestion preview, lifecycle mapping, and staging graph creation are not implemented.
+- Trusted graph promotion, identity resolution, trust scoring, data quality, document memory, governed query/context assembly, AI Trace, chat, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration remain future slices.
+- Full GraphSnapshot and GraphDiff engines are not implemented; only Slice 6 contracts/placeholders exist.
+- Model package artifact registry linking remains metadata-only; no separate BaseArtifact is created for model packages yet.
+- `ETOS.Langraph` does not exist yet.
+
+Verification run:
+
+- `dotnet test EnterpriseThreadOS.sln`: passed, 35 tests.
+- `dotnet test EnterpriseThreadOS.sln -p:UseAppHost=false`: passed, 35 tests while a local backend process had output files locked.
+- `npm run typecheck` from `ETOS.Frontend`: passed.
+- `npm run lint` from `ETOS.Frontend`: passed.
+- Browser verification at `http://localhost:3000/model-artifacts`: page loaded with `200`, active published model package rendered, no `500 Internal Server Error` text appeared, and the seed action returned `POST /model-artifacts 200`.
+
+Recommended next implementation slice:
+
+1. Begin Issue 8: Import Mapping and Staging Graph Flow.
+2. Use the published model package IDs and schema metadata from Slice 7 as references for import mapping validation.
+3. Create staging graph records through `IGraphMemoryService`; do not write raw Cypher or promote trusted graph state until the owning acceptance criteria are implemented.
+
+## 2026-06-10 - Slice 6 Graph Memory Ready
+
+Source docs reviewed:
+
+- `.docs/.prd/engineering-execution-prd.md`
+- `.docs/.prd/engineering-execution-issues.md`
+
+Previous checkpoint reviewed:
+
+- `2026-06-10 - Slice 3 Audit And Security Events`
+
+Working framing:
+
+- Slices 4, 5, and 6 are now implemented after the last durable checkpoint. The platform has moved from audit/governance foundations into artifact registry, classification/policy enforcement, and graph memory.
+- Neo4j is the primary MVP graph backend behind internal graph-memory contracts. Memgraph is retained only as an optional disabled adapter/profile and is not the default local graph service.
+- Raw graph access remains internal-only. Future import, ontology, governed query, and explorer slices should consume `IGraphMemoryService` rather than exposing Cypher or direct graph database access.
+
+Design decisions:
+
+- Confirmed the Neo4j-primary graph decision from the PRD and Issue 6: Neo4j is the default local and MVP graph backend because persistent enterprise digital-thread graphs should not depend on a memory-first graph store.
+- Kept graph snapshots and diffs as Slice 6 contracts only. Full snapshot/diff behavior remains owned by Issue 11.
+- Implemented graph relationships with a stable `BASE_RELATIONSHIP` Neo4j relationship type and a `relationshipType` property, avoiding user-controlled raw relationship labels while preserving semantic relationship metadata.
+- Moved Memgraph to an optional Compose profile and disabled backend placeholder. Selecting Memgraph requires explicit configuration and remains a future adapter evaluation path.
+- Fixed Neo4j Docker startup by avoiding unsupported `NEO4J_USER` / `NEO4J_PASSWORD` container environment variables; only `NEO4J_AUTH` is passed, while the healthcheck uses Compose-expanded credentials.
+
+Implemented or partially implemented:
+
+- Issue 4 artifact registry is implemented: `ETOS.Backend/Artifacts` contains BaseArtifact records, immutable artifact versions, generic artifact relationships, dependency edges, readiness/publish services, DTOs, endpoints, and audit side effects.
+- Issue 5 classification and policy enforcement is implemented: `ETOS.Backend/Classification` contains versioned classification schemes, policy versions, restricted-context rules, policy evaluation, policy impact behavior, endpoints, and artifact publish risk integration.
+- Issue 6 graph memory is implemented: `ETOS.Backend/GraphMemory` contains graph contracts, BaseNode/BaseRelationship models, tenant-scoped create/read/update/traverse contracts, Neo4j driver/bootstrap/health/memory services, snapshot/diff placeholders, and a disabled Memgraph placeholder.
+- Local infrastructure now defaults to PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ. Memgraph is available only through the `memgraph-optional` profile with a non-default Bolt port.
+- Infrastructure health now reports graph health through `IGraphHealthService`; Neo4j bootstrap creates baseline constraints and indexes for BaseNode/BaseRelationship conventions.
+- `ETOS.Frontend` now renders identity, governance, artifact, classification/policy, and infrastructure health sections with Neo4j naming.
+- Backend tests now include artifact registry, classification policy, and graph memory integration tests. Graph tests use `Testcontainers.Neo4j` for real Bolt behavior.
+
+Changes since previous checkpoint:
+
+- Issue 4 moved from not implemented to implemented as the Base Artifact Registry and Dependency Graph foundation.
+- Issue 5 moved from not implemented to implemented as the Classification and Policy Enforcement foundation.
+- Issue 6 moved from not implemented to implemented as the Graph Memory Abstraction and Neo4j Backend foundation.
+- The local graph backend changed from Memgraph-oriented health/config/docs to Neo4j-primary local infrastructure and backend graph service registration.
+- Test coverage increased from 15 backend tests at the Slice 3 checkpoint to 31 backend tests.
+- Documentation and agent guidance were updated to describe Neo4j as the active MVP graph backend and Memgraph as optional/deferred.
+
+Not implemented yet:
+
+- Issue 7 canonical ontology, semantic layer, model packages, lifecycle vocabulary, tenant attribute schemas, object/version modeling, and BOM metadata are not implemented.
+- Import mapping, staging graph creation, trusted graph promotion, identity resolution, data quality, documents, governed query/context assembly, AI Trace, chat, explorers, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration remain future slices.
+- Full GraphSnapshot and GraphDiff engines are not implemented; only Slice 6 contracts/placeholders exist.
+- Policy-filtered graph retrieval is not wired yet; Issue 13 should combine classification/policy decisions with graph/document retrieval.
+- `ETOS.Langraph` does not exist yet.
+
+Verification run:
+
+- `dotnet test EnterpriseThreadOS.sln`: passed, 31 tests.
+- `npm run typecheck` from `ETOS.Frontend`: passed.
+- `npm run lint` from `ETOS.Frontend`: passed.
+- `docker compose --env-file .env -f infra/local/docker-compose.yml ps`: PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ healthy.
+- `docker compose -f infra/local/docker-compose.yml config --quiet`: passed.
+
+Recommended next implementation slice:
+
+1. Begin Issue 7: Canonical Ontology and Tenant Attribute Schemas.
+2. Add versioned OntologyVersion, SemanticLayerVersion, ModelPackageVersion, lifecycle vocabulary, and tenant attribute schema artifacts using the existing artifact/version/publish governance patterns.
+3. Define how published schemas reference graph BaseNode/BaseRelationship conventions without hard-coding future import or governed-query behavior ahead of Issues 8 and 13.
+
 ## 2026-06-10 - Slice 3 Audit And Security Events
 
 Source docs reviewed:

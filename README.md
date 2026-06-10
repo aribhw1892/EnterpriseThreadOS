@@ -1,6 +1,6 @@
 # EnterpriseThreadOS
 
-EnterpriseThreadOS is being built as a developer-first, AI-native digital thread platform for manufacturing and engineering data. The current repository contains the local platform foundation: ASP.NET Core backend, Next.js frontend shell, Docker Compose infrastructure, EF Core persistence, health checks, extension-point guardrails, tenant identity/access, audit/security events, and the BaseArtifact registry foundation.
+EnterpriseThreadOS is being built as a developer-first, AI-native digital thread platform for manufacturing and engineering data. The current repository contains the local platform foundation: ASP.NET Core backend, Next.js frontend shell, Docker Compose infrastructure, EF Core persistence, health checks, extension-point guardrails, tenant identity/access, audit/security events, the BaseArtifact registry foundation, classification/policy enforcement, graph memory, and canonical model governance.
 
 For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For ordered implementation scope, use `.docs/.prd/engineering-execution-issues.md`.
 
@@ -67,7 +67,7 @@ npm run dev
 Pop-Location
 ```
 
-Open `http://localhost:3000` to view the local platform health, identity, governance, and artifact registry admin shell.
+Open `http://localhost:3000` to view the local platform health, identity, governance, artifact registry, classification/policy, and infrastructure admin shell. Open `http://localhost:3000/model-artifacts` to manage canonical ontology/model package versions.
 
 ## Useful Endpoints
 
@@ -88,6 +88,15 @@ Open `http://localhost:3000` to view the local platform health, identity, govern
 - `POST http://localhost:5000/api/admin/artifacts/{artifactId}/versions`
 - `GET http://localhost:5000/api/admin/artifacts/{artifactId}/versions/{versionId}/readiness`
 - `POST http://localhost:5000/api/admin/artifacts/{artifactId}/versions/{versionId}/publish`
+- `GET http://localhost:5000/api/admin/classification/schemes`
+- `GET http://localhost:5000/api/admin/classification/policies`
+- `GET http://localhost:5000/api/admin/classification/rules`
+- `GET http://localhost:5000/api/admin/ontology/versions`
+- `GET http://localhost:5000/api/admin/ontology/semantic-layers`
+- `GET http://localhost:5000/api/admin/ontology/lifecycle-vocabularies`
+- `GET http://localhost:5000/api/admin/ontology/attribute-schemas`
+- `GET http://localhost:5000/api/admin/ontology/model-packages`
+- `GET http://localhost:5000/api/admin/ontology/model-packages/active`
 
 Some identity/admin endpoints require local header authentication:
 
@@ -142,15 +151,18 @@ Implemented or partially implemented:
 - Local infrastructure compose file.
 - EF Core PostgreSQL baseline and migrations.
 - App and infrastructure health endpoints.
-- Frontend environment, backend health display, minimal identity admin lists, audit/security event explorer lists, and artifact registry explorer lists.
+- Frontend environment, backend health display, minimal identity admin lists, audit/security event explorer lists, artifact registry explorer lists, classification/policy lists, and model artifact admin page.
 - Extension-point documentation and endpoint for deferred platform capabilities.
 - ASP.NET Identity users/roles, Finbuckle-backed tenant resolution, tenant roles, memberships, permissions, access grants, access requests, tenant context, and denial audit records.
 - First-class audit records, security events, retention placeholders, tenant-filtered governance explorer endpoints, and safe denial classification.
 - BaseArtifact registry foundation with tenant-scoped artifacts, immutable versions, generic relationships, dependency edges, readiness-aware publish checks, and artifact audit side effects.
+- Classification and policy enforcement with versioned schemes/policies, restricted context rules, safe denied summaries, policy impact, and artifact publish risk integration.
+- Graph memory abstraction with Neo4j backend, tenant-scoped BaseNode/BaseRelationship operations, health/bootstrap, and optional disabled Memgraph placeholder.
+- Canonical ontology/model package foundation with versioned ontology, semantic layer, lifecycle vocabulary, tenant attribute schema, BOM metadata, publish validation, and `/model-artifacts` UI.
 
 Planned by the PRD but not generally implemented yet:
 
-- Graph memory, imports, governed query/context assembly, AI Trace, chat-to-artifact generation, recommendations, review tasks, decisions, learning, tools, agents, workflows, and enterprise action framework.
+- Imports, staging graph promotion, governed query/context assembly, AI Trace, chat-to-artifact generation, recommendations, review tasks, decisions, learning, tools, agents, workflows, and enterprise action framework.
 - Production secrets, CI/CD, Kubernetes, Keycloak, Temporal, live enterprise connectors, or source-system write-back.
 
 See `ARCHITECTURE.md` and `docs/local-development.md` for details.

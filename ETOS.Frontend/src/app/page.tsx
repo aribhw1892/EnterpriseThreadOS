@@ -24,6 +24,7 @@ import {
   getPlatformHealth,
   selectedTenantId,
 } from "@/lib/etos-api";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
@@ -394,7 +395,15 @@ export default async function Home() {
                 classification and policy enforcement records.
               </p>
             </div>
-            <StatusBadge status={health?.status ?? "unavailable"} />
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/model-artifacts"
+                className="rounded-full bg-cyan-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
+              >
+                Model artifacts
+              </Link>
+              <StatusBadge status={health?.status ?? "unavailable"} />
+            </div>
           </div>
         </section>
 

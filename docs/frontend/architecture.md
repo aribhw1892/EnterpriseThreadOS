@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-`ETOS.Frontend` is the current Next.js frontend shell for EnterpriseThreadOS. It proves the frontend can reach the ASP.NET Core backend and display safe local platform health.
+`ETOS.Frontend` is the current Next.js frontend shell for EnterpriseThreadOS. It proves the frontend can reach the ASP.NET Core backend and display safe local platform health, tenant admin lists, governance records, artifact registry data, classification/policy records, and model artifact administration.
 
 ## Stack
 
@@ -14,9 +14,11 @@ Read `ETOS.Frontend/AGENTS.md` before frontend edits. This project uses a newer 
 
 ## Project Shape
 
-- `src/app/page.tsx`: current server-rendered health shell.
+- `src/app/page.tsx`: current server-rendered admin foundation shell.
+- `src/app/model-artifacts/page.tsx`: server-rendered canonical model artifact admin page with seed publish action.
 - `src/app/layout.tsx`: app layout and metadata.
 - `src/app/globals.css`: global Tailwind CSS entry.
+- `src/lib/etos-api.ts`: typed backend fetch helpers and local admin header configuration.
 - `package.json`: local scripts and dependency versions.
 - `next.config.ts`: Next.js config.
 - `tsconfig.json`: TypeScript config.
@@ -50,6 +52,10 @@ Pop-Location
 
 ```text
 GET /api/health
+GET /api/admin/identity/*
+GET /api/admin/governance/*
+GET /api/admin/artifacts*
+GET /api/admin/classification/*
 ```
 
 from the configured backend base URL and renders:
@@ -58,6 +64,23 @@ from the configured backend base URL and renders:
 - backend environment.
 - backend API base URL.
 - infrastructure health for PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ.
+- tenant identity/access lists.
+- audit/security event lists.
+- artifact registry lists.
+- classification/policy lists and policy impact.
+
+`src/app/model-artifacts/page.tsx` fetches:
+
+```text
+GET /api/admin/ontology/versions
+GET /api/admin/ontology/semantic-layers
+GET /api/admin/ontology/lifecycle-vocabularies
+GET /api/admin/ontology/attribute-schemas
+GET /api/admin/ontology/model-packages
+GET /api/admin/ontology/model-packages/active
+```
+
+It also exposes a server action for `Create seed model package`, which calls the ontology admin APIs to create draft model artifacts, publish them, and activate the latest model package.
 
 The fetch uses `cache: "no-store"` and `dynamic = "force-dynamic"` so local health reflects current backend state.
 
@@ -68,6 +91,7 @@ The fetch uses `cache: "no-store"` and `dynamic = "force-dynamic"` so local heal
 - Keep backend calls centralized when screens grow beyond the current single page.
 - Use accessible semantic HTML before introducing component abstractions.
 - Keep error states explicit and safe. Do not expose backend secrets or raw infrastructure details.
+- Do not spread backend DTOs with a `key` field into JSX components. Pass React `key` directly or call a card renderer with the object argument to avoid React special-prop warnings.
 
 ## Scripts
 

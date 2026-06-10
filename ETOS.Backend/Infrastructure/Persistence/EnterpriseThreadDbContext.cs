@@ -2,6 +2,7 @@ using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Governance;
+using ETOS.Backend.Ontology;
 using ETOS.Backend.Tenancy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -51,6 +52,28 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<RestrictedContextRule> RestrictedContextRules => Set<RestrictedContextRule>();
 
     public DbSet<PolicyEvaluationRecord> PolicyEvaluationRecords => Set<PolicyEvaluationRecord>();
+
+    public DbSet<OntologyVersion> OntologyVersions => Set<OntologyVersion>();
+
+    public DbSet<OntologyObjectTypeDefinition> OntologyObjectTypeDefinitions => Set<OntologyObjectTypeDefinition>();
+
+    public DbSet<SemanticRelationshipDefinition> SemanticRelationshipDefinitions => Set<SemanticRelationshipDefinition>();
+
+    public DbSet<BomRelationshipDefinition> BomRelationshipDefinitions => Set<BomRelationshipDefinition>();
+
+    public DbSet<SemanticLayerVersion> SemanticLayerVersions => Set<SemanticLayerVersion>();
+
+    public DbSet<LifecycleVocabularyVersion> LifecycleVocabularyVersions => Set<LifecycleVocabularyVersion>();
+
+    public DbSet<LifecycleStateDefinition> LifecycleStateDefinitions => Set<LifecycleStateDefinition>();
+
+    public DbSet<LifecycleTransitionDefinition> LifecycleTransitionDefinitions => Set<LifecycleTransitionDefinition>();
+
+    public DbSet<AttributeSchemaVersion> AttributeSchemaVersions => Set<AttributeSchemaVersion>();
+
+    public DbSet<AttributeDefinition> AttributeDefinitions => Set<AttributeDefinition>();
+
+    public DbSet<ModelPackageVersion> ModelPackageVersions => Set<ModelPackageVersion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -423,6 +446,241 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.Property(record => record.CreatedAt).IsRequired();
             entity.HasIndex(record => new { record.TenantId, record.Action, record.CreatedAt });
             entity.HasIndex(record => new { record.TenantId, record.PolicyVersionId, record.CreatedAt });
+        });
+
+        ConfigureOntologyTables(modelBuilder);
+    }
+
+    private static void ConfigureOntologyTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<OntologyVersion>(entity =>
+        {
+            entity.ToTable("ontology_versions");
+            entity.HasKey(version => version.Id);
+            entity.Property(version => version.TenantId).IsRequired();
+            entity.Property(version => version.Key).HasMaxLength(120).IsRequired();
+            entity.Property(version => version.NormalizedKey).HasMaxLength(120).IsRequired();
+            entity.Property(version => version.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.Summary).HasMaxLength(1000);
+            entity.Property(version => version.State).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(version => version.CreatedAt).IsRequired();
+            entity.HasIndex(version => new { version.TenantId, version.NormalizedKey, version.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(version => new { version.TenantId, version.NormalizedKey, version.State, version.PublishedAt });
+        });
+
+        modelBuilder.Entity<OntologyObjectTypeDefinition>(entity =>
+        {
+            entity.ToTable("ontology_object_type_definitions");
+            entity.HasKey(definition => definition.Id);
+            entity.Property(definition => definition.TenantId).IsRequired();
+            entity.Property(definition => definition.Key).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedKey).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.DisplayName).HasMaxLength(200).IsRequired();
+            entity.Property(definition => definition.Description).HasMaxLength(1000);
+            entity.Property(definition => definition.VersionIdentityFieldsJson).HasMaxLength(4000);
+            entity.Property(definition => definition.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(definition => definition.CreatedAt).IsRequired();
+            entity.HasIndex(definition => new { definition.TenantId, definition.OntologyVersionId, definition.NormalizedKey }).IsUnique();
+            entity.HasOne(definition => definition.OntologyVersion)
+                .WithMany(version => version.ObjectTypes)
+                .HasForeignKey(definition => definition.OntologyVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<SemanticRelationshipDefinition>(entity =>
+        {
+            entity.ToTable("semantic_relationship_definitions");
+            entity.HasKey(definition => definition.Id);
+            entity.Property(definition => definition.TenantId).IsRequired();
+            entity.Property(definition => definition.RelationshipType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedRelationshipType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.FromObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedFromObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.ToObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedToObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.Description).HasMaxLength(1000);
+            entity.Property(definition => definition.CreatedAt).IsRequired();
+            entity.HasIndex(definition => new { definition.TenantId, definition.OntologyVersionId, definition.NormalizedRelationshipType, definition.NormalizedFromObjectType, definition.NormalizedToObjectType }).IsUnique();
+            entity.HasOne(definition => definition.OntologyVersion)
+                .WithMany(version => version.RelationshipTypes)
+                .HasForeignKey(definition => definition.OntologyVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<BomRelationshipDefinition>(entity =>
+        {
+            entity.ToTable("bom_relationship_definitions");
+            entity.HasKey(definition => definition.Id);
+            entity.Property(definition => definition.TenantId).IsRequired();
+            entity.Property(definition => definition.RelationshipType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedRelationshipType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.ParentObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedParentObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.ChildObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedChildObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.QuantityAttributeKey).HasMaxLength(160);
+            entity.Property(definition => definition.UnitAttributeKey).HasMaxLength(160);
+            entity.Property(definition => definition.FindNumberAttributeKey).HasMaxLength(160);
+            entity.Property(definition => definition.ReferenceDesignatorAttributeKey).HasMaxLength(160);
+            entity.Property(definition => definition.LifecycleConstraintJson).HasMaxLength(4000);
+            entity.Property(definition => definition.AuditReferenceAttributeKey).HasMaxLength(160);
+            entity.Property(definition => definition.CreatedAt).IsRequired();
+            entity.HasIndex(definition => new { definition.TenantId, definition.OntologyVersionId, definition.NormalizedRelationshipType, definition.NormalizedParentObjectType, definition.NormalizedChildObjectType }).IsUnique();
+            entity.HasOne(definition => definition.OntologyVersion)
+                .WithMany(version => version.BomRelationships)
+                .HasForeignKey(definition => definition.OntologyVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<SemanticLayerVersion>(entity =>
+        {
+            entity.ToTable("semantic_layer_versions");
+            entity.HasKey(version => version.Id);
+            entity.Property(version => version.TenantId).IsRequired();
+            entity.Property(version => version.Key).HasMaxLength(120).IsRequired();
+            entity.Property(version => version.NormalizedKey).HasMaxLength(120).IsRequired();
+            entity.Property(version => version.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.Summary).HasMaxLength(1000);
+            entity.Property(version => version.GraphNodeTypeMappingsJson).HasMaxLength(8000);
+            entity.Property(version => version.GraphRelationshipTypeMappingsJson).HasMaxLength(8000);
+            entity.Property(version => version.State).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(version => version.CreatedAt).IsRequired();
+            entity.HasIndex(version => new { version.TenantId, version.NormalizedKey, version.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(version => new { version.TenantId, version.NormalizedKey, version.State, version.PublishedAt });
+            entity.HasOne(version => version.OntologyVersion)
+                .WithMany()
+                .HasForeignKey(version => version.OntologyVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<LifecycleVocabularyVersion>(entity =>
+        {
+            entity.ToTable("lifecycle_vocabulary_versions");
+            entity.HasKey(version => version.Id);
+            entity.Property(version => version.TenantId).IsRequired();
+            entity.Property(version => version.Key).HasMaxLength(120).IsRequired();
+            entity.Property(version => version.NormalizedKey).HasMaxLength(120).IsRequired();
+            entity.Property(version => version.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.Summary).HasMaxLength(1000);
+            entity.Property(version => version.State).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(version => version.CreatedAt).IsRequired();
+            entity.HasIndex(version => new { version.TenantId, version.NormalizedKey, version.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(version => new { version.TenantId, version.NormalizedKey, version.State, version.PublishedAt });
+        });
+
+        modelBuilder.Entity<LifecycleStateDefinition>(entity =>
+        {
+            entity.ToTable("lifecycle_state_definitions");
+            entity.HasKey(definition => definition.Id);
+            entity.Property(definition => definition.TenantId).IsRequired();
+            entity.Property(definition => definition.Key).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedKey).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.DisplayName).HasMaxLength(200).IsRequired();
+            entity.Property(definition => definition.NormalizedCategory).HasMaxLength(120);
+            entity.Property(definition => definition.CreatedAt).IsRequired();
+            entity.HasIndex(definition => new { definition.TenantId, definition.LifecycleVocabularyVersionId, definition.NormalizedKey }).IsUnique();
+            entity.HasOne(definition => definition.LifecycleVocabularyVersion)
+                .WithMany(version => version.States)
+                .HasForeignKey(definition => definition.LifecycleVocabularyVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<LifecycleTransitionDefinition>(entity =>
+        {
+            entity.ToTable("lifecycle_transition_definitions");
+            entity.HasKey(definition => definition.Id);
+            entity.Property(definition => definition.TenantId).IsRequired();
+            entity.Property(definition => definition.FromStateKey).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedFromStateKey).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.ToStateKey).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedToStateKey).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.SafeSummary).HasMaxLength(1000);
+            entity.Property(definition => definition.CreatedAt).IsRequired();
+            entity.HasIndex(definition => new { definition.TenantId, definition.LifecycleVocabularyVersionId, definition.NormalizedFromStateKey, definition.NormalizedToStateKey }).IsUnique();
+            entity.HasOne(definition => definition.LifecycleVocabularyVersion)
+                .WithMany(version => version.Transitions)
+                .HasForeignKey(definition => definition.LifecycleVocabularyVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AttributeSchemaVersion>(entity =>
+        {
+            entity.ToTable("attribute_schema_versions");
+            entity.HasKey(version => version.Id);
+            entity.Property(version => version.TenantId).IsRequired();
+            entity.Property(version => version.Key).HasMaxLength(120).IsRequired();
+            entity.Property(version => version.NormalizedKey).HasMaxLength(120).IsRequired();
+            entity.Property(version => version.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.Summary).HasMaxLength(1000);
+            entity.Property(version => version.State).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(version => version.CreatedAt).IsRequired();
+            entity.HasIndex(version => new { version.TenantId, version.NormalizedKey, version.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(version => new { version.TenantId, version.NormalizedKey, version.State, version.PublishedAt });
+            entity.HasOne(version => version.OntologyVersion)
+                .WithMany()
+                .HasForeignKey(version => version.OntologyVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AttributeDefinition>(entity =>
+        {
+            entity.ToTable("attribute_definitions");
+            entity.HasKey(definition => definition.Id);
+            entity.Property(definition => definition.TenantId).IsRequired();
+            entity.Property(definition => definition.AttributeKey).HasMaxLength(160).IsRequired();
+            entity.Property(definition => definition.NormalizedAttributeKey).HasMaxLength(160).IsRequired();
+            entity.Property(definition => definition.AppliesToObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedAppliesToObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.ValueType).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(definition => definition.ValidationRulesJson).HasMaxLength(4000);
+            entity.Property(definition => definition.Visibility).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(definition => definition.RequiredPermissionKey).HasMaxLength(160);
+            entity.Property(definition => definition.ClassificationKey).HasMaxLength(120);
+            entity.Property(definition => definition.DisplayName).HasMaxLength(200);
+            entity.Property(definition => definition.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(definition => definition.CreatedAt).IsRequired();
+            entity.HasIndex(definition => new { definition.TenantId, definition.AttributeSchemaVersionId, definition.NormalizedAppliesToObjectType, definition.NormalizedAttributeKey }).IsUnique();
+            entity.HasOne(definition => definition.AttributeSchemaVersion)
+                .WithMany(version => version.Attributes)
+                .HasForeignKey(definition => definition.AttributeSchemaVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ModelPackageVersion>(entity =>
+        {
+            entity.ToTable("model_package_versions");
+            entity.HasKey(version => version.Id);
+            entity.Property(version => version.TenantId).IsRequired();
+            entity.Property(version => version.Key).HasMaxLength(120).IsRequired();
+            entity.Property(version => version.NormalizedKey).HasMaxLength(120).IsRequired();
+            entity.Property(version => version.Name).HasMaxLength(200).IsRequired();
+            entity.Property(version => version.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.Summary).HasMaxLength(1000);
+            entity.Property(version => version.State).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(version => version.CreatedAt).IsRequired();
+            entity.HasIndex(version => new { version.TenantId, version.NormalizedKey, version.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(version => new { version.TenantId, version.NormalizedKey, version.State, version.PublishedAt });
+            entity.HasOne(version => version.OntologyVersion)
+                .WithMany()
+                .HasForeignKey(version => version.OntologyVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(version => version.SemanticLayerVersion)
+                .WithMany()
+                .HasForeignKey(version => version.SemanticLayerVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(version => version.LifecycleVocabularyVersion)
+                .WithMany()
+                .HasForeignKey(version => version.LifecycleVocabularyVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(version => version.AttributeSchemaVersion)
+                .WithMany()
+                .HasForeignKey(version => version.AttributeSchemaVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 

@@ -19,11 +19,11 @@ Use open-source libraries to accelerate commodity implementation work while keep
 | Issue 5: Classification and Policy | FluentValidation, ASP.NET Core authorization handlers, OpenFGA or Casbin.NET only if policy relationships outgrow local handlers | Classification scheme validation, ABAC-style filtering, temporary grants, publish compatibility checks, and denied-context decisions. |
 | Issue 6: Graph Memory | Neo4j.Driver for Neo4j primary access, custom graph abstraction, Testcontainers for .NET | Neo4j implementation, traversal contracts, graph health checks, tenant-scoped graph tests, and optional Memgraph adapter portability. |
 | Issues 7-12: Model, Import, Identity Resolution, Data Quality, Documents | FluentValidation, CsvHelper, ExcelDataReader or ClosedXML, Minio .NET SDK, Qdrant.Client, Testcontainers for .NET | Ontology/schema validation, CSV/Excel import, raw file evidence storage, document metadata, vector indexing hooks, and import/graph integration tests. |
-| Issues 13-15: Governed Query, Retrieval, Trace, Chat | Qdrant.Client, Semantic Kernel or direct LLM provider SDKs behind an abstraction, Pydantic/FastAPI contracts for Python runtime, OpenTelemetry | Graph-first/document-second retrieval, LLM-safe context packages, provider abstraction, AI trace correlation, and governed chat execution. |
+| Issues 13-15: Governed Query, Retrieval, Trace, Chat | Qdrant.Client, Semantic Kernel or direct LLM provider SDKs behind an abstraction, Pydantic/FastAPI contracts for Python runtime, OpenTelemetry | Graph-first/document-second retrieval, LLM-safe context packages, provider abstraction, AI trace correlation, and governed chat execution. Neo4j Agent Memory is deferred; only add platform-owned placeholders if needed. |
 | Issues 16-17: Explorers, Dashboards, Reports | TanStack Query, TanStack Table, React Hook Form, Zod, React Flow, shadcn/ui, Tailwind CSS, Lucide React | Admin and explorer data loading, filtered tables, form validation, graph/governance visualization, and consistent UI primitives. |
 | Issues 18-21: Recommendations, Tasks, Decisions, Governance Analytics | EF Core, FluentValidation, TanStack Table, Recharts or Tremor if charting is needed | Evidence rules, review/decision workflows, KPI calculations, governed dashboard views, and trend visualization. |
 | Issue 22: Tool, Skill, and Connector Registry | FluentValidation, JSON Schema libraries such as JsonSchema.Net or NJsonSchema, MassTransit, tenant-aware secret provider abstraction | Tool schema compatibility, input/output validation, tool run records, async execution, dry-run metadata, and scoped credential boundaries. |
-| Issues 23-25: Agents, Workflows, Multi-Agent Teams | FastAPI, Pydantic, LangGraph, httpx, tenacity, Dapr Workflow, MassTransit where event-driven execution is useful | Agent runtime contracts, retries, model/tool adapters, governed workflow orchestration, safe mode events, delegation traces, and team run records. |
+| Issues 23-25: Agents, Workflows, Multi-Agent Teams | FastAPI, Pydantic, LangGraph, httpx, tenacity, Dapr Workflow, MassTransit where event-driven execution is useful | Agent runtime contracts, retries, model/tool adapters, governed workflow orchestration, safe mode events, delegation traces, and team run records. Neo4j Agent Memory may be evaluated later behind an internal agent-memory provider contract, not used as a replacement for the platform graph. |
 | Issue 26: End-to-End MVP Demo | Playwright, Testcontainers for .NET, seeded fixtures, NSwag-generated clients if useful | Scripted happy path, denied/restricted-context path, browser-verifiable flow, and stable integration smoke tests. |
 | Issues 27-28: ADRs and Future Contracts | ADR templates, Mermaid, OpenAPI/JSON Schema contracts | Architecture decision capture, disabled write-action contracts, connector boundaries, deployment placeholders, and reviewable diagrams. |
 
@@ -171,6 +171,8 @@ Type: AFK
 Blocked by: Issue 6
 User stories covered: 2, 6, 7, 8, 10, 11, 12, 13
 
+Implementation status: Implemented in the current source as Slice 7. See `ETOS.Backend/Ontology/`, EF migration `Slice7CanonicalOntology`, `ETOS.Backend.Tests/OntologyTests.cs`, and `ETOS.Frontend/src/app/model-artifacts/page.tsx`.
+
 ## What to build
 
 Implement OntologyVersion, SemanticLayerVersion, ModelPackageVersion, tenant-specific attribute schemas, lifecycle vocabulary, object/version modeling, and BOM relationship metadata. The slice should let a tenant admin publish the initial canonical model and safe tenant extensions.
@@ -311,7 +313,7 @@ User stories covered: 35, 36, 37, 38, 39, 40, 46, 52
 
 ## What to build
 
-Implement QueryIntentVersion, RetrievalStrategyVersion, fixed platform query intents, governed query service, graph-first document-second retrieval, RetrievalRun, ContextPackage, ContextAccessDecision, and LLM-safe context assembly.
+Implement QueryIntentVersion, RetrievalStrategyVersion, fixed platform query intents, governed query service, graph-first document-second retrieval, RetrievalRun, ContextPackage, ContextAccessDecision, and LLM-safe context assembly. RetrievalStrategyVersion may include approved graph traversal templates, semantic/vector fallback behavior, and context assembly rules. Keep persistent agent-memory provider integration out of this slice except for explicit placeholder contracts if needed by later agents.
 
 ## Acceptance criteria
 
@@ -320,6 +322,7 @@ Implement QueryIntentVersion, RetrievalStrategyVersion, fixed platform query int
 - Context assembly records retrieved, filtered, denied, and LLM-visible context separately.
 - Restricted information is excluded before prompts are assembled.
 - Tenant-defined query intents and retrieval strategies exist only as future placeholders.
+- Neo4j Agent Memory, if referenced, remains a deferred provider behind platform contracts and cannot bypass governed context assembly.
 - Tests cover query intent execution, GraphRAG ordering, denied context handling, trust filtering, and LLM-safe context packages.
 
 ## Blocked by
@@ -539,7 +542,7 @@ User stories covered: 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97
 
 ## What to build
 
-Implement AgentTypeDefinition, AgentVersion, prompt-based agent creation, advanced configuration, seeded agent types, prompt/model/tool/retrieval composition, model fallback policy, global and per-agent skills, capability/risk profiles, safe mode, preview mode, publish governance, and AgentRun records.
+Implement AgentTypeDefinition, AgentVersion, prompt-based agent creation, advanced configuration, seeded agent types, prompt/model/tool/retrieval composition, model fallback policy, global and per-agent skills, capability/risk profiles, safe mode, preview mode, publish governance, and AgentRun records. Agents consume context through approved QueryIntentVersion and RetrievalStrategyVersion APIs rather than direct Neo4j, NAMS, or raw storage access. Define any persistent agent-memory capability through EnterpriseThreadOS-owned contracts first; Neo4j Agent Memory is an optional future provider, not a direct product dependency.
 
 ## Acceptance criteria
 
@@ -548,6 +551,7 @@ Implement AgentTypeDefinition, AgentVersion, prompt-based agent creation, advanc
 - Agent versions pin prompt templates, model definitions, retrieval strategies, tools, output schemas, fallback rules, safe mode, preview mode, and compatibility tests.
 - Capability and risk derive from actual tools, data access, retrieval strategies, output schemas, and creation permissions.
 - Agent execution creates traceable AgentRun and ToolRun records linked to AI Trace and audit records.
+- Any future persistent memory provider records conversation, fact/preference, or reasoning memory only after policy filtering and through approved agent-runtime contracts.
 - Tests cover draft permissions, publish governance, capability/risk derivation, fallback behavior, prompt pinning, and runtime trace creation.
 
 ## Blocked by
@@ -594,6 +598,7 @@ Implement AgentTeamVersion, coordinator agents, CollaborationPatternDefinition, 
 - Delegation is allowed only through explicit delegation rules.
 - Every delegation creates its own AgentRun linked to the parent AgentTeamRun or AgentRun.
 - Team runs show member outputs, coordinator synthesis, confidence, consensus status, failures, and trace links.
+- Shared team memory, if introduced later, must be permission-filtered and provider-agnostic behind the agent-memory contract.
 - Tests cover delegation authorization, team confidence rules, consensus requirements, coordinator versioning, and run trace topology.
 
 ## Blocked by

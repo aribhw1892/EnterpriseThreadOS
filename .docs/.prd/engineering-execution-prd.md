@@ -131,13 +131,15 @@ flowchart TB
 | Vector Memory         | Qdrant                                                                        | Additional vector stores if customer deployment requires them                       |
 | Object Storage        | MinIO                                                                         | S3, Azure Blob, or enterprise object storage                                        |
 | Cache / Messaging     | Redis, RabbitMQ                                                               | Managed cache/message services                                                      |
-| Agent Runtime         | Python FastAPI, LangGraph, LLM provider abstraction                           | Additional agent runtimes and private/local model execution                         |
+| Agent Runtime         | Python FastAPI, LangGraph, LLM provider abstraction                           | Additional agent runtimes, private/local model execution, and optional agent-memory providers behind platform contracts |
 | Workflow Runtime      | Dapr Workflow                                                                 | Temporal                                                                            |
 | Local Infrastructure  | Docker Compose for PostgreSQL, Neo4j, Qdrant, MinIO, Redis, RabbitMQ          | Kubernetes, optional Memgraph evaluation profile                                    |
 | Connectors            | CSV, Excel, document import, mock ERP/PDM, disabled write connector contracts | Live ERP, PDM, PLM, MES, QMS, CRM, CAD automation                                   |
 | Observability / Audit | Audit records, AI Trace, ToolRun, AgentRun, WorkflowRun, governed export logs | Centralized observability stack, retention/archive automation                       |
 
 Decision: Neo4j is the primary MVP graph memory backend because EnterpriseThreadOS must support large, durable enterprise digital-thread graphs without requiring the full graph dataset to fit in RAM. Memgraph remains a possible optional backend behind the graph abstraction for memory-first analytics or future evaluation, but it is not the default system-of-record graph backend.
+
+Decision: Neo4j Agent Memory is a future agent-runtime enhancement, not a replacement for the EnterpriseThreadOS graph memory abstraction. During MVP, keep placeholders behind platform-owned agent memory contracts. If later adopted, use it for conversation, extracted fact/preference, and reasoning/tool memory for governed agents, while trusted enterprise graph state continues to flow through the platform graph, policy, audit, and review boundaries.
 
 
 ### Open-Source Development Accelerators
@@ -162,7 +164,7 @@ The platform should prefer proven open-source libraries for commodity infrastruc
 | Testing | xUnit, Testcontainers for .NET, Respawn, FluentAssertions, NSubstitute or Moq | Domain, API, persistence, graph, infra, and governance tests | Prefer Testcontainers for PostgreSQL, Neo4j, Redis, RabbitMQ, MinIO, and Qdrant behavior that cannot be proven with in-memory fakes. Add optional Memgraph contract tests only if that backend is enabled. |
 | Frontend data and forms | TanStack Query, React Hook Form, Zod, TanStack Table | Admin CRUD, explorers, mapping UI, policy screens, dashboards | Zod schemas should align with backend DTOs; generated or shared contracts may be introduced later if duplication becomes risky. |
 | Frontend visualization | React Flow, shadcn/ui, Tailwind CSS, Lucide React | Graph explorer, workflow builder, governance flow, dashboard/report shell | Use configuration-driven UI components and accessible primitives; avoid bespoke visualization frameworks until product needs exceed React Flow. |
-| Python agent runtime | FastAPI, Pydantic, LangGraph, httpx, tenacity, qdrant-client | Agent runtime, model/tool adapters, retrieval adapters | LangChain may be used selectively for integrations, but governed context assembly and tool authorization must remain platform-owned. |
+| Python agent runtime | FastAPI, Pydantic, LangGraph, httpx, tenacity, qdrant-client | Agent runtime, model/tool adapters, retrieval adapters | LangChain may be used selectively for integrations, but governed context assembly and tool authorization must remain platform-owned. Neo4j Agent Memory may be evaluated later behind internal agent-memory contracts, not exposed directly to product APIs. |
 
 
 ### End-to-End MVP Customer Flow
@@ -651,6 +653,7 @@ Future deliverables:
 
 - PostgreSQL stores operational data: tenants, users, roles, artifacts, artifact versions, classifications, policies, audit records, access grants, runtime summaries, task/decision operational fields, deployment profiles, and governance analytics.
 - Neo4j stores graph memory: enterprise objects, object versions, relationships, BOM lines, identity links, document links, data quality links, artifact relationship projections, dependency graph projections, and context navigation links.
+- Neo4j Agent Memory, if adopted after MVP, stores agent conversation, fact/preference, and reasoning memory behind an internal agent-memory contract. It must not become the source of truth for trusted enterprise graph state or bypass review, policy, trace, and audit records.
 - Documents and import files should be represented by governed metadata and evidence links. Physical storage implementation can be local/object-storage abstraction in MVP with cloud storage as future extension.
 - Staging graph and trusted graph are separate logical spaces in MVP.
 - Rejected staged data keeps summaries, validation results, identity decisions, and audit records rather than full payload retention.
@@ -666,6 +669,7 @@ Future deliverables:
 - Build connector interfaces for read-only source import, document ingestion, future live integrations, and disabled write-capable actions.
 - Build tool interfaces around explicit input/output schemas, permission requirements, capability/risk metadata, dry-run support, and trace output.
 - Integrate the Python agent runtime through approved backend tool/context APIs rather than direct database access.
+- Keep any future Neo4j Agent Memory integration behind approved agent-runtime APIs and platform-owned contracts; agents may propose learned evidence or recommendations, but cannot directly promote memories into trusted graph state.
 
 ## Security, Governance, and Compliance Requirements
 

@@ -228,6 +228,103 @@ export type PolicyImpact = {
   affectedArtifacts: PolicyAffectedArtifact[];
 };
 
+export type OntologyVersion = {
+  id: string;
+  tenantId: string;
+  key: string;
+  versionLabel: string;
+  summary?: string | null;
+  state: string;
+  objectTypeCount: number;
+  relationshipTypeCount: number;
+  bomRelationshipCount: number;
+  createdByUserId: string;
+  createdAt: string;
+  publishedByUserId?: string | null;
+  publishedAt?: string | null;
+};
+
+export type SemanticLayerVersion = {
+  id: string;
+  tenantId: string;
+  key: string;
+  versionLabel: string;
+  summary?: string | null;
+  ontologyVersionId: string;
+  ontologyVersionLabel?: string | null;
+  graphNodeTypeMappingsJson?: string | null;
+  graphRelationshipTypeMappingsJson?: string | null;
+  state: string;
+  createdByUserId: string;
+  createdAt: string;
+  publishedByUserId?: string | null;
+  publishedAt?: string | null;
+};
+
+export type LifecycleVocabularyVersion = {
+  id: string;
+  tenantId: string;
+  key: string;
+  versionLabel: string;
+  summary?: string | null;
+  state: string;
+  stateCount: number;
+  transitionCount: number;
+  createdByUserId: string;
+  createdAt: string;
+  publishedByUserId?: string | null;
+  publishedAt?: string | null;
+};
+
+export type AttributeSchemaVersion = {
+  id: string;
+  tenantId: string;
+  key: string;
+  versionLabel: string;
+  summary?: string | null;
+  ontologyVersionId: string;
+  ontologyVersionLabel?: string | null;
+  state: string;
+  attributeCount: number;
+  createdByUserId: string;
+  createdAt: string;
+  publishedByUserId?: string | null;
+  publishedAt?: string | null;
+};
+
+export type ModelPackageVersion = {
+  id: string;
+  tenantId: string;
+  key: string;
+  name: string;
+  versionLabel: string;
+  summary?: string | null;
+  ontologyVersionId: string;
+  ontologyVersionLabel?: string | null;
+  semanticLayerVersionId: string;
+  semanticLayerVersionLabel?: string | null;
+  lifecycleVocabularyVersionId: string;
+  lifecycleVocabularyVersionLabel?: string | null;
+  attributeSchemaVersionId: string;
+  attributeSchemaVersionLabel?: string | null;
+  artifactId?: string | null;
+  artifactVersionId?: string | null;
+  state: string;
+  createdByUserId: string;
+  createdAt: string;
+  publishedByUserId?: string | null;
+  publishedAt?: string | null;
+};
+
+export type ModelPackagePreview = {
+  isValid: boolean;
+  blockingReasons: string[];
+  ontologyVersionId: string;
+  semanticLayerVersionId: string;
+  lifecycleVocabularyVersionId: string;
+  attributeSchemaVersionId: string;
+};
+
 export type ApiResult<T> = {
   data: T | null;
   error: string | null;
@@ -389,9 +486,261 @@ export async function getClassificationPolicyLists() {
   };
 }
 
+export async function getOntologyLists() {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+
+  const [ontologyVersions, semanticLayers, lifecycleVocabularies, attributeSchemas, modelPackages, activeModelPackage] =
+    tenantHeaders
+      ? await Promise.all([
+          fetchApi<OntologyVersion[]>("/api/admin/ontology/versions", tenantHeaders),
+          fetchApi<SemanticLayerVersion[]>("/api/admin/ontology/semantic-layers", tenantHeaders),
+          fetchApi<LifecycleVocabularyVersion[]>("/api/admin/ontology/lifecycle-vocabularies", tenantHeaders),
+          fetchApi<AttributeSchemaVersion[]>("/api/admin/ontology/attribute-schemas", tenantHeaders),
+          fetchApi<ModelPackageVersion[]>("/api/admin/ontology/model-packages", tenantHeaders),
+          fetchApi<ModelPackageVersion>("/api/admin/ontology/model-packages/active", tenantHeaders),
+        ])
+      : [
+          missingContext<OntologyVersion[]>(),
+          missingContext<SemanticLayerVersion[]>(),
+          missingContext<LifecycleVocabularyVersion[]>(),
+          missingContext<AttributeSchemaVersion[]>(),
+          missingContext<ModelPackageVersion[]>(),
+          missingContext<ModelPackageVersion>(),
+        ];
+
+  return {
+    ontologyVersions,
+    semanticLayers,
+    lifecycleVocabularies,
+    attributeSchemas,
+    modelPackages,
+    activeModelPackage,
+  };
+}
+
+export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackageVersion>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<ModelPackageVersion>();
+  }
+
+  const versionLabel = `seed-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`;
+  const ontology = await postApi<OntologyVersion>(
+    "/api/admin/ontology/versions",
+    {
+      key: "canonical-manufacturing",
+      versionLabel,
+      summary: "Initial canonical manufacturing ontology.",
+      objectTypes: [
+        {
+          key: "part",
+          displayName: "Part",
+          description: "A source-owned engineering or manufacturing part.",
+          versionIdentityFieldsJson: `["partNumber","revision"]`,
+          safeSummary: "Part identity and lifecycle metadata.",
+        },
+        {
+          key: "document",
+          displayName: "Document",
+          description: "A governed document or drawing reference.",
+          versionIdentityFieldsJson: `["documentNumber","revision"]`,
+          safeSummary: "Document identity metadata.",
+        },
+        {
+          key: "change",
+          displayName: "Change",
+          description: "An engineering or manufacturing change package.",
+          versionIdentityFieldsJson: `["changeNumber"]`,
+          safeSummary: "Change control metadata.",
+        },
+      ],
+      relationshipTypes: [
+        {
+          relationshipType: "references",
+          fromObjectType: "part",
+          toObjectType: "document",
+          description: "Part references document evidence.",
+          isVersionRelationship: true,
+        },
+      ],
+      bomRelationships: [
+        {
+          relationshipType: "contains",
+          parentObjectType: "part",
+          childObjectType: "part",
+          quantityAttributeKey: "quantity",
+          unitAttributeKey: "unitOfMeasure",
+          findNumberAttributeKey: "findNumber",
+          referenceDesignatorAttributeKey: "referenceDesignator",
+          lifecycleConstraintJson: `{"allowedParentStates":["released","in-review"]}`,
+          requiresApproval: true,
+          auditReferenceAttributeKey: "approvalRecordId",
+        },
+      ],
+    },
+    tenantHeaders,
+  );
+  if (!ontology.data) {
+    return { data: null, error: ontology.error };
+  }
+
+  await postApi<OntologyVersion>(
+    `/api/admin/ontology/versions/${ontology.data.id}/publish`,
+    { summary: "Publish initial canonical ontology." },
+    tenantHeaders,
+  );
+
+  const semanticLayer = await postApi<SemanticLayerVersion>(
+    "/api/admin/ontology/semantic-layers",
+    {
+      key: "canonical-manufacturing-semantic",
+      versionLabel,
+      summary: "Graph memory naming for canonical manufacturing objects.",
+      ontologyVersionId: ontology.data.id,
+      graphNodeTypeMappingsJson: `{"part":"Part","document":"Document","change":"Change"}`,
+      graphRelationshipTypeMappingsJson: `{"contains":"contains","references":"references"}`,
+    },
+    tenantHeaders,
+  );
+  if (!semanticLayer.data) {
+    return { data: null, error: semanticLayer.error };
+  }
+  await postApi<SemanticLayerVersion>(
+    `/api/admin/ontology/semantic-layers/${semanticLayer.data.id}/publish`,
+    { summary: "Publish initial semantic layer." },
+    tenantHeaders,
+  );
+
+  const lifecycle = await postApi<LifecycleVocabularyVersion>(
+    "/api/admin/ontology/lifecycle-vocabularies",
+    {
+      key: "canonical-lifecycle",
+      versionLabel,
+      summary: "Initial lifecycle normalization vocabulary.",
+      states: [
+        { key: "draft", displayName: "Draft", category: "working", sortOrder: 10, isTerminal: false },
+        { key: "in-review", displayName: "In Review", category: "review", sortOrder: 20, isTerminal: false },
+        { key: "released", displayName: "Released", category: "released", sortOrder: 30, isTerminal: false },
+        { key: "obsolete", displayName: "Obsolete", category: "terminal", sortOrder: 40, isTerminal: true },
+      ],
+      transitions: [
+        { fromStateKey: "draft", toStateKey: "in-review", requiresApproval: false, safeSummary: "Draft submitted for review." },
+        { fromStateKey: "in-review", toStateKey: "released", requiresApproval: true, safeSummary: "Review approved for release." },
+        { fromStateKey: "released", toStateKey: "obsolete", requiresApproval: true, safeSummary: "Released item obsoleted." },
+      ],
+    },
+    tenantHeaders,
+  );
+  if (!lifecycle.data) {
+    return { data: null, error: lifecycle.error };
+  }
+  await postApi<LifecycleVocabularyVersion>(
+    `/api/admin/ontology/lifecycle-vocabularies/${lifecycle.data.id}/publish`,
+    { summary: "Publish initial lifecycle vocabulary." },
+    tenantHeaders,
+  );
+
+  const attributeSchema = await postApi<AttributeSchemaVersion>(
+    "/api/admin/ontology/attribute-schemas",
+    {
+      key: "canonical-attributes",
+      versionLabel,
+      summary: "Initial tenant-safe canonical attributes.",
+      ontologyVersionId: ontology.data.id,
+      attributes: [
+        {
+          attributeKey: "partNumber",
+          appliesToObjectType: "part",
+          valueType: "Text",
+          isRequired: true,
+          validationRulesJson: `{"maxLength":80}`,
+          visibility: "Internal",
+          requiredPermissionKey: null,
+          isSearchable: true,
+          isAiFacing: true,
+          classificationKey: "internal",
+          displayName: "Part Number",
+          safeSummary: "Part number identifier.",
+        },
+        {
+          attributeKey: "cost",
+          appliesToObjectType: "part",
+          valueType: "Number",
+          isRequired: false,
+          validationRulesJson: `{"minimum":0}`,
+          visibility: "Restricted",
+          requiredPermissionKey: "restricted.cost.read",
+          isSearchable: false,
+          isAiFacing: false,
+          classificationKey: "secret",
+          displayName: "Cost",
+          safeSummary: "Restricted part cost value.",
+        },
+      ],
+    },
+    tenantHeaders,
+  );
+  if (!attributeSchema.data) {
+    return { data: null, error: attributeSchema.error };
+  }
+  await postApi<AttributeSchemaVersion>(
+    `/api/admin/ontology/attribute-schemas/${attributeSchema.data.id}/publish`,
+    { summary: "Publish initial attribute schema." },
+    tenantHeaders,
+  );
+
+  const preview = await postApi<ModelPackagePreview>(
+    "/api/admin/ontology/model-packages/preview",
+    {
+      ontologyVersionId: ontology.data.id,
+      semanticLayerVersionId: semanticLayer.data.id,
+      lifecycleVocabularyVersionId: lifecycle.data.id,
+      attributeSchemaVersionId: attributeSchema.data.id,
+    },
+    tenantHeaders,
+  );
+  if (!preview.data?.isValid) {
+    return {
+      data: null,
+      error: preview.data?.blockingReasons.join("; ") ?? preview.error ?? "Model package preview failed.",
+    };
+  }
+
+  const modelPackage = await postApi<ModelPackageVersion>(
+    "/api/admin/ontology/model-packages",
+    {
+      key: "canonical-manufacturing-package",
+      name: "Canonical Manufacturing Model Package",
+      versionLabel,
+      summary: "Published model package tying ontology, semantic layer, lifecycle, and attributes together.",
+      ontologyVersionId: ontology.data.id,
+      semanticLayerVersionId: semanticLayer.data.id,
+      lifecycleVocabularyVersionId: lifecycle.data.id,
+      attributeSchemaVersionId: attributeSchema.data.id,
+    },
+    tenantHeaders,
+  );
+  if (!modelPackage.data) {
+    return { data: null, error: modelPackage.error };
+  }
+
+  return await postApi<ModelPackageVersion>(
+    `/api/admin/ontology/model-packages/${modelPackage.data.id}/publish`,
+    { summary: "Publish initial model package." },
+    tenantHeaders,
+  );
+}
+
 async function fetchApi<T>(
   path: string,
   context?: { userId?: string; tenantId?: string },
+  init?: RequestInit,
 ): Promise<ApiResult<T>> {
   try {
     const headers = new Headers();
@@ -404,16 +753,22 @@ async function fetchApi<T>(
       headers.set("X-ETOS-Tenant-Id", context.tenantId);
     }
 
+    if (init?.headers) {
+      new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+    }
+
     const response = await fetch(`${apiBaseUrl}${path}`, {
       cache: "no-store",
+      ...init,
       headers,
       next: { revalidate: 0 },
     });
 
     if (!response.ok) {
+      const problem = await readProblem(response);
       return {
         data: null,
-        error: `${response.status} ${response.statusText}`,
+        error: problem ?? `${response.status} ${response.statusText}`,
       };
     }
 
@@ -426,6 +781,34 @@ async function fetchApi<T>(
       data: null,
       error: error instanceof Error ? error.message : "Request failed",
     };
+  }
+}
+
+async function postApi<T>(
+  path: string,
+  body: unknown,
+  context?: { userId?: string; tenantId?: string },
+): Promise<ApiResult<T>> {
+  return await fetchApi<T>(path, context, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+async function readProblem(response: Response): Promise<string | null> {
+  try {
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.includes("application/json")) {
+      return null;
+    }
+
+    const payload = (await response.json()) as { error?: string; detail?: string; title?: string };
+    return payload.error ?? payload.detail ?? payload.title ?? null;
+  } catch {
+    return null;
   }
 }
 
