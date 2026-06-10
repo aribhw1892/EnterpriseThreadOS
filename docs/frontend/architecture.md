@@ -57,7 +57,7 @@ from the configured backend base URL and renders:
 - frontend environment.
 - backend environment.
 - backend API base URL.
-- infrastructure health for PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ.
+- infrastructure health for PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ.
 
 The fetch uses `cache: "no-store"` and `dynamic = "force-dynamic"` so local health reflects current backend state.
 

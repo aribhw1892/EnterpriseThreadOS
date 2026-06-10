@@ -21,7 +21,7 @@ The repository currently contains:
 - `ETOS.Backend/`: ASP.NET Core .NET 10 modular monolith host.
 - `ETOS.Backend.Tests/`: xUnit backend tests.
 - `ETOS.Frontend/`: Next.js 16, React 19, TypeScript, Tailwind 4 frontend shell.
-- `infra/local/docker-compose.yml`: local PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ.
+- `infra/local/docker-compose.yml`: local PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ, with Memgraph available only through an optional evaluation profile.
 - `.docs/.prd/`: product intent and ordered implementation backlog.
 
 Issue 1 platform foundation is present. Issue 2 tenant identity and access work is partially present in the current codebase. Later PRD capabilities such as artifact registry, graph memory services, imports, governed context assembly, AI trace, recommendations, workflows, and agents are roadmap items unless source code proves otherwise.
@@ -34,7 +34,7 @@ In particular:
 
 - Do not expose raw database, graph, object storage, queue, or vector store access through public APIs.
 - Do not enable enterprise source-system write actions during MVP work.
-- Do not imply Keycloak, SQL Server, Neo4j, Temporal, Kubernetes, live ERP/PDM/PLM connectors, or CAD automation are active unless they are actually implemented and tested.
+- Do not imply Keycloak, SQL Server, Memgraph, Temporal, Kubernetes, live ERP/PDM/PLM connectors, or CAD automation are active unless they are actually implemented and tested.
 - Keep tenant isolation, auditability, and LLM-safe context filtering as non-negotiable boundaries.
 
 ## Backend Conventions

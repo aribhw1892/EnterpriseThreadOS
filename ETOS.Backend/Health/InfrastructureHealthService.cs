@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net.Sockets;
+using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Infrastructure.Configuration;
 using ETOS.Backend.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace ETOS.Backend.Health;
 public sealed class InfrastructureHealthService(
     IServiceScopeFactory scopeFactory,
     HttpClient httpClient,
+    IGraphHealthService graphHealthService,
     IOptions<InfrastructureHealthOptions> options) : IInfrastructureHealthService
 {
     public async Task<IReadOnlyCollection<ComponentHealthResponse>> CheckAsync(CancellationToken cancellationToken)
@@ -21,7 +23,7 @@ public sealed class InfrastructureHealthService(
         var checks = new[]
         {
             CheckPostgreSqlAsync(settings.PostgreSql.Name, timeoutSource.Token),
-            CheckTcpAsync(settings.Memgraph, timeoutSource.Token),
+            CheckGraphHealthAsync(timeoutSource.Token),
             CheckHttpOrTcpAsync(settings.Qdrant, timeoutSource.Token),
             CheckHttpOrTcpAsync(settings.Minio, timeoutSource.Token),
             CheckTcpAsync(settings.Redis, timeoutSource.Token),
@@ -29,6 +31,17 @@ public sealed class InfrastructureHealthService(
         };
 
         return await Task.WhenAll(checks);
+    }
+
+    private async Task<ComponentHealthResponse> CheckGraphHealthAsync(CancellationToken cancellationToken)
+    {
+        var graphHealth = await graphHealthService.CheckAsync(cancellationToken);
+
+        return new ComponentHealthResponse(
+            graphHealth.Provider,
+            graphHealth.Status,
+            graphHealth.Description,
+            graphHealth.DurationMilliseconds);
     }
 
     private async Task<ComponentHealthResponse> CheckPostgreSqlAsync(string name, CancellationToken cancellationToken)

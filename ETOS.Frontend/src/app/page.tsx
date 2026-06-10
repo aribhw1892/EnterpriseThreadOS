@@ -545,7 +545,7 @@ export default async function Home() {
             <div>
               <h2 className="text-2xl font-semibold">Infrastructure health</h2>
               <p className="mt-1 text-sm text-slate-400">
-                PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ.
+                PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ.
               </p>
             </div>
             {health?.checkedAt ? (

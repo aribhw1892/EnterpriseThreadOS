@@ -34,11 +34,18 @@ docker compose --env-file .env -f infra/local/docker-compose.yml ps
 Local services:
 
 - PostgreSQL: operational SQL store for current backend persistence.
-- Memgraph: graph backend for future graph memory slices.
+- Neo4j: primary graph memory backend for Slice 6 and later graph-backed features.
 - Qdrant: vector store for future document/vector retrieval slices.
 - MinIO: object storage for future import/document/trace package slices.
 - Redis: cache/runtime support for later slices.
 - RabbitMQ: messaging/runtime support for later slices.
+
+Memgraph is retained as an optional evaluation profile behind the graph abstraction. To start it for adapter experiments, use a non-default Bolt port:
+
+```powershell
+$env:MEMGRAPH_BOLT_PORT = "7688"
+docker compose --env-file .env -f infra/local/docker-compose.yml --profile memgraph-optional up -d memgraph
+```
 
 Stop services:
 

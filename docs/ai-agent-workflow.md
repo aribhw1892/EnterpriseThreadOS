@@ -58,7 +58,7 @@ Examples:
 - Full audit/security event foundation: Issue 3.
 - BaseArtifact lifecycle and dependency graph: Issue 4.
 - Classification/policy and pre-context filtering: Issue 5.
-- Graph memory abstraction and Memgraph business graph operations: Issue 6.
+- Graph memory abstraction and Neo4j business graph operations: Issue 6.
 
 Do not jump ahead to later issues unless the user explicitly asks and the prerequisite boundaries are already present or intentionally scoped as documentation.
 

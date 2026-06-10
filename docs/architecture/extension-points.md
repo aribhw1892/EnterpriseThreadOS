@@ -7,7 +7,7 @@ Issue 1 establishes architecture-honest placeholders for future platform capabil
 - ASP.NET Core modular monolith host in `ETOS.Backend`.
 - Next.js frontend shell in `ETOS.Frontend`.
 - PostgreSQL operational store through EF Core.
-- Local Docker Compose infrastructure for PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ.
+- Local Docker Compose infrastructure for PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ, with Memgraph available only through an optional evaluation profile.
 - Safe health endpoints for application and infrastructure status.
 - Tenant-scoped persistence convention.
 - Tenant identity and access baseline with local header authentication, tenant context resolution, and access-denial records.
@@ -18,7 +18,8 @@ Issue 1 establishes architecture-honest placeholders for future platform capabil
 | Extension | Current Status | Future Direction |
 | --- | --- | --- |
 | SQL Server | Deferred | Add an EF Core provider option when customer deployment requires SQL Server. |
-| Neo4j | Deferred | Keep graph access behind provider contracts; Memgraph remains the MVP local graph backend. |
+| Neo4j | Active | Keep graph access behind provider contracts; Neo4j is the MVP graph memory backend. |
+| Memgraph | Optional | Keep Memgraph as a disabled optional adapter placeholder unless explicitly enabled for evaluation. |
 | Keycloak | Deferred | Add enterprise IdP federation after tenant identity and access foundations are implemented. |
 | Temporal | Deferred | Add workflow runtime integration after workflow contracts and runtime boundaries exist. |
 | Kubernetes | Deferred | Keep Issue 1 local-first with Docker Compose; add manifests or Helm charts during deployment hardening. |

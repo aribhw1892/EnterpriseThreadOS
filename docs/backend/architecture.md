@@ -36,7 +36,7 @@ Register services in `EnterpriseThreadPlatform` unless a later slice introduces 
 The health module exposes:
 
 - app liveness/readiness style status.
-- local infrastructure checks for PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ.
+- local infrastructure checks for PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ.
 - a frontend-friendly aggregate response at `/api/health`.
 
 Health responses should stay safe for local diagnostics. Do not leak secrets or full connection strings.
@@ -81,7 +81,7 @@ The artifact module currently includes:
 - readiness recalculation and publish checks under `/api/admin/artifacts`.
 - safe audit records for artifact creation, version creation, publish success, publish blocks, and access denials.
 
-Issue 4 stores dependency edges in PostgreSQL. Memgraph projection, full policy evaluation, compatibility report execution, approval workflows, and typed artifact subtype payloads are deferred to their owning slices.
+Issue 4 stores dependency edges in PostgreSQL. Neo4j graph projection, full policy evaluation, compatibility report execution, approval workflows, and typed artifact subtype payloads are deferred to their owning slices.
 
 ### Tenancy
 

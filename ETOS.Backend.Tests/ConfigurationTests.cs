@@ -14,9 +14,10 @@ public sealed class ConfigurationTests
                 ["Infrastructure:PostgreSql:Name"] = "PostgreSQL",
                 ["Infrastructure:PostgreSql:Host"] = "localhost",
                 ["Infrastructure:PostgreSql:Port"] = "5432",
-                ["Infrastructure:Memgraph:Name"] = "Memgraph",
-                ["Infrastructure:Memgraph:Host"] = "localhost",
-                ["Infrastructure:Memgraph:Port"] = "7687",
+                ["Infrastructure:Neo4j:Name"] = "Neo4j",
+                ["Infrastructure:Neo4j:Host"] = "localhost",
+                ["Infrastructure:Neo4j:Port"] = "7687",
+                ["Infrastructure:Neo4j:HealthUrl"] = "http://localhost:7474",
                 ["Infrastructure:Qdrant:Name"] = "Qdrant",
                 ["Infrastructure:Qdrant:Host"] = "localhost",
                 ["Infrastructure:Qdrant:Port"] = "6333",
@@ -36,7 +37,7 @@ public sealed class ConfigurationTests
 
         Assert.NotNull(options);
         Assert.Equal(5432, options.PostgreSql.Port);
-        Assert.Equal(7687, options.Memgraph.Port);
+        Assert.Equal(7687, options.Neo4j.Port);
         Assert.Equal(6333, options.Qdrant.Port);
         Assert.Equal(9000, options.Minio.Port);
         Assert.Equal(6379, options.Redis.Port);

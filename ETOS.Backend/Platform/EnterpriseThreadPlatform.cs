@@ -1,5 +1,6 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
+using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
@@ -42,6 +43,8 @@ public static class EnterpriseThreadPlatform
             .Bind(configuration.GetSection(SeedIdentityOptions.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        services.AddEnterpriseThreadGraphMemory(configuration);
 
         services.AddDbContext<EnterpriseThreadDbContext>((serviceProvider, options) =>
         {

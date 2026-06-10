@@ -12,7 +12,7 @@ For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For or
 - `ETOS.Backend/`: ASP.NET Core modular monolith host.
 - `ETOS.Backend.Tests/`: xUnit backend tests.
 - `ETOS.Frontend/`: Next.js frontend shell.
-- `infra/local/docker-compose.yml`: local PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ.
+- `infra/local/docker-compose.yml`: local PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ, with Memgraph available only through an optional evaluation profile.
 - `docs/local-development.md`: full local development workflow.
 - `docs/backend/architecture.md`: backend module conventions.
 - `docs/frontend/architecture.md`: frontend conventions.
@@ -150,7 +150,7 @@ Implemented or partially implemented:
 
 Planned by the PRD but not generally implemented yet:
 
-- Classification policies, Memgraph dependency projection, graph memory, imports, governed query/context assembly, AI Trace, chat-to-artifact generation, recommendations, review tasks, decisions, learning, tools, agents, workflows, and enterprise action framework.
+- Graph memory, imports, governed query/context assembly, AI Trace, chat-to-artifact generation, recommendations, review tasks, decisions, learning, tools, agents, workflows, and enterprise action framework.
 - Production secrets, CI/CD, Kubernetes, Keycloak, Temporal, live enterprise connectors, or source-system write-back.
 
 See `ARCHITECTURE.md` and `docs/local-development.md` for details.

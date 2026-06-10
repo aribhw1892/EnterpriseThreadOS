@@ -72,7 +72,7 @@ npm run lint
 - selected tenant and local admin user context.
 - tenants and users.
 - tenant roles, memberships, and grants when a valid tenant context is available.
-- infrastructure health for PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ.
+- infrastructure health for PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ.
 
 ## More Documentation
 

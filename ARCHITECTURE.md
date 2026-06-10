@@ -21,7 +21,7 @@ flowchart TB
 
     persistence --> postgres["PostgreSQL Operational Store"]
     health --> postgres
-    health --> memgraph["Memgraph"]
+    health --> neo4j["Neo4j"]
     health --> qdrant["Qdrant"]
     health --> minio["MinIO"]
     health --> redis["Redis"]
@@ -40,7 +40,7 @@ flowchart TB
 - `ETOS.Backend/Tenancy/` contains tenant-scope conventions used by persisted tenant-owned records.
 - `ETOS.Backend/Platform/Extensions/` exposes deferred extension points for planned platform capabilities without pretending they are active.
 - `ETOS.Frontend/` is a Next.js 16 shell that renders local platform health from the backend.
-- `infra/local/docker-compose.yml` defines local PostgreSQL, Memgraph, Qdrant, MinIO, Redis, and RabbitMQ services.
+- `infra/local/docker-compose.yml` defines local PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ services, with Memgraph available only through an optional evaluation profile.
 
 ## Implemented Vs Planned
 
@@ -59,7 +59,7 @@ Implemented or partially implemented:
 Planned by PRD and backlog, but not generally implemented unless future source code says otherwise:
 
 - Classification and policy enforcement beyond identity/access placeholders.
-- Graph memory abstraction and Memgraph business graph operations.
+- Graph memory abstraction and Neo4j business graph operations.
 - Canonical ontology, semantic layer, model packages, imports, staging graph, trusted graph promotion, identity resolution, and trust scoring.
 - Document memory, Qdrant indexing, governed query intents, context assembly, and AI Trace.
 - Governed chat, dashboard/report generation, recommendations, review tasks, decisions, outcomes, and learning.
@@ -86,7 +86,7 @@ Current SQL ownership:
 Current local infrastructure availability:
 
 - PostgreSQL is the active operational store.
-- Memgraph, Qdrant, MinIO, Redis, and RabbitMQ are available locally for health and future slices.
+- Neo4j, Qdrant, MinIO, Redis, and RabbitMQ are available locally for health and future slices. Memgraph is available only through an optional graph-adapter evaluation profile.
 
 Future PRD ownership model:
 

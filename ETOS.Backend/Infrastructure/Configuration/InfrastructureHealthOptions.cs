@@ -10,7 +10,7 @@ public sealed class InfrastructureHealthOptions
     public EndpointOptions PostgreSql { get; init; } = new();
 
     [Required]
-    public EndpointOptions Memgraph { get; init; } = new();
+    public EndpointOptions Neo4j { get; init; } = new();
 
     [Required]
     public EndpointOptions Qdrant { get; init; } = new();
