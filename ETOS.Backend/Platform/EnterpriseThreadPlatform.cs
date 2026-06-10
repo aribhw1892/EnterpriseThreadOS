@@ -4,6 +4,8 @@ using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
+using ETOS.Backend.Imports;
+using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Infrastructure.Configuration;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Ontology;
@@ -43,6 +45,10 @@ public static class EnterpriseThreadPlatform
         services.AddOptions<SeedIdentityOptions>()
             .Bind(configuration.GetSection(SeedIdentityOptions.SectionName))
             .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<ImportFileStorageOptions>()
+            .Bind(configuration.GetSection(ImportFileStorageOptions.SectionName))
             .ValidateOnStart();
 
         services.AddEnterpriseThreadGraphMemory(configuration);
@@ -101,6 +107,10 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IClassificationPolicyService, ClassificationPolicyService>();
         services.AddScoped<IArtifactRegistryService, ArtifactRegistryService>();
         services.AddScoped<IOntologyService, OntologyService>();
+        services.AddScoped<IImportFileStorage, LocalImportFileStorage>();
+        services.AddScoped<IImportFileParser, CsvImportFileParser>();
+        services.AddScoped<IImportService, ImportService>();
+        services.AddScoped<IIdentityResolutionService, IdentityResolutionService>();
         services.AddScoped<IDevelopmentIdentitySeeder, DevelopmentIdentitySeeder>();
 
         return services;

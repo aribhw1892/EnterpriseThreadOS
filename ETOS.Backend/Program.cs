@@ -3,6 +3,8 @@ using ETOS.Backend.Classification;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
+using ETOS.Backend.Imports;
+using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Platform;
 using Finbuckle.MultiTenant.AspNetCore.Extensions;
@@ -32,6 +34,8 @@ app.MapEnterpriseThreadGovernanceEndpoints();
 app.MapEnterpriseThreadArtifactEndpoints();
 app.MapEnterpriseThreadClassificationEndpoints();
 app.MapEnterpriseThreadOntologyEndpoints();
+app.MapEnterpriseThreadImportEndpoints();
+app.MapEnterpriseThreadIdentityResolutionEndpoints();
 
 app.Run();
 

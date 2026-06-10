@@ -16,6 +16,8 @@
 - `Classification/`: versioned classification schemes, policy versions, restricted context rules, policy evaluation, and artifact policy-risk integration.
 - `GraphMemory/`: internal graph memory contracts, Neo4j implementation, graph health/bootstrap, and disabled Memgraph placeholder.
 - `Ontology/`: versioned ontology, semantic layer, lifecycle vocabulary, tenant attribute schema, BOM metadata, and model package publishing.
+- `Imports/`: tenant-scoped import batches, raw file evidence metadata, CSV/Excel parsing, mapping preview/approval, validation, and staging graph creation.
+- `IdentityResolution/`: tenant-scoped identity rules, deterministic candidate links, review decisions, learning evidence, trust scores, and identity-link graph relationships.
 - `Platform/Extensions/`: architecture-honest extension point catalog for deferred capabilities.
 
 ## Startup Flow
@@ -118,7 +120,44 @@ The ontology module currently includes:
 - draft/publish/retire behavior and dependency validation for model packages.
 - admin endpoints under `/api/admin/ontology`.
 
-Issue 7 stores schema governance records in PostgreSQL. It does not import source records, populate staging graph data, or promote trusted graph state; those are later slices.
+Issue 7 stores schema governance records in PostgreSQL. It does not import source records or promote trusted graph state. Source import and untrusted staging graph creation are handled by the import module.
+
+### Import Mapping And Staging
+
+The import module currently includes:
+
+- tenant-scoped `ImportBatch` records tied to the active published model package at creation time.
+- raw file evidence metadata with storage key, checksum, content type, size, original filename, tenant, batch, and audit linkage.
+- `IImportFileStorage` as the raw payload storage boundary. The current local implementation is file-backed for developer/test workflows; production MinIO-compatible storage can be added behind the same interface.
+- CSV and Excel import parsing through `IImportFileParser`.
+- deterministic/heuristic mapping preview suggestions labeled with the provider name `deterministic-heuristic-v1`.
+- draft/approved/rejected mapping versions, with approved mappings immutable by service invariant and no update endpoint.
+- row-level validation issues for missing required values, invalid value types, invalid lifecycle values, and model/package consistency failures.
+- staging graph creation through `IGraphMemoryService` using `GraphSpace.Staging`, `TrustState.Unverified`, and `GraphSourceReference`.
+- admin endpoints under `/api/admin/imports`.
+
+Parser/library choices:
+
+- CSV is parsed by the local `CsvImportFileParser` because the current slice requires only headers, sample rows, quoted fields, and escaped quotes.
+- Excel `.xls` and `.xlsx` parsing uses `ExcelDataReader` because ETOS only needs read/import behavior, not workbook editing, styling, formula evaluation, or export generation.
+- If CSV imports need richer customer-facing diagnostics, custom delimiters, cultures, comments, or broader edge-case coverage, prefer switching the CSV path to `CsvHelper`.
+
+The import module creates only untrusted staging graph records. Identity resolution consumes those staged records through the identity-resolution module. Trusted graph promotion, snapshots, diffs, and data-quality review artifacts remain deferred to later owning issues.
+
+### Identity Resolution And Trust
+
+The identity-resolution module currently includes:
+
+- tenant-scoped `IdentityResolutionRule` records for object type, identity attribute keys, review threshold, and auto-approve threshold metadata.
+- deterministic candidate generation from staged import rows using identity field mappings, source-system differences, lifecycle compatibility, and validation issue impact.
+- `IdentityCandidateLink` records that connect two graph node/source-record references without merging records.
+- human review decisions for approve, reject, and conflicted outcomes.
+- approved candidate links represented in graph memory as `IDENTITY_LINK` relationships through `IGraphMemoryService.CreateRelationshipAsync`.
+- `IdentityLearningEvidence` records from accepted, rejected, or conflicted review outcomes.
+- `TrustScoreRecord` records with score breakdown JSON for candidate confidence, decision impact, validation penalties, and conflict penalties.
+- admin endpoints under `/api/admin/identity-resolution`.
+
+Identity resolution does not promote staged records into trusted graph space. It records candidate identity links and trust metadata that later graph promotion and recommendation slices can consume.
 
 ### Tenancy
 
@@ -141,6 +180,8 @@ Do not turn extension metadata into fake implementations. Future providers need 
 - artifact registry tables for artifacts, artifact versions, relationships, and dependency edges.
 - classification and policy tables for schemes, policies, restricted rules, and evaluations.
 - ontology/model package tables for canonical object/schema/version governance.
+- import tables for batches, file evidence, immutable mapping versions, column/lifecycle mappings, validation issues, and staging graph runs.
+- identity-resolution tables for rules, candidate links, review decisions, learning evidence, and trust score records.
 
 Use EF Core migrations for schema changes:
 
@@ -196,8 +237,12 @@ Expected test coverage for future backend changes:
 - EF Core query translation behavior against PostgreSQL-shaped queries; order/filter on entity fields before projecting DTOs.
 - module contracts, not private helper implementation details.
 
+Issue 8 import tests cover raw evidence audit linkage, mapping approval immutability, approval-required staging, validation failures, staging graph metadata, and cross-tenant denial behavior.
+
+Issue 9 identity-resolution tests cover cross-source candidate generation, idempotency, approval-created graph relationships, rejection learning evidence, conflict exclusion, trust score effects, and cross-tenant denial behavior.
+
 ## Planned Backend Areas
 
-The PRD and issue backlog define later modules for ingestion, identity resolution, data quality, documents, governed query/context, AI Trace, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration.
+The PRD and issue backlog define later modules for data quality review artifacts, trusted graph promotion/snapshots/diffs, documents, governed query/context, AI Trace, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration.
 
 Do not document or code these as implemented until the source code exists.

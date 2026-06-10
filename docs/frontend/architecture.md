@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-`ETOS.Frontend` is the current Next.js frontend shell for EnterpriseThreadOS. It proves the frontend can reach the ASP.NET Core backend and display safe local platform health, tenant admin lists, governance records, artifact registry data, classification/policy records, and model artifact administration.
+`ETOS.Frontend` is the current Next.js frontend shell for EnterpriseThreadOS. It proves the frontend can reach the ASP.NET Core backend and display safe local platform health, tenant admin lists, governance records, artifact registry data, classification/policy records, model artifact administration, import/staging administration, and identity-resolution review data.
 
 ## Stack
 
@@ -16,6 +16,7 @@ Read `ETOS.Frontend/AGENTS.md` before frontend edits. This project uses a newer 
 
 - `src/app/page.tsx`: current server-rendered admin foundation shell.
 - `src/app/model-artifacts/page.tsx`: server-rendered canonical model artifact admin page with seed publish action.
+- `src/app/imports/page.tsx`: server-rendered import admin page with demo import, mapping approval, validation, staging, identity candidate, and trust-score actions.
 - `src/app/layout.tsx`: app layout and metadata.
 - `src/app/globals.css`: global Tailwind CSS entry.
 - `src/lib/etos-api.ts`: typed backend fetch helpers and local admin header configuration.
@@ -81,6 +82,32 @@ GET /api/admin/ontology/model-packages/active
 ```
 
 It also exposes a server action for `Create seed model package`, which calls the ontology admin APIs to create draft model artifacts, publish them, and activate the latest model package.
+
+`src/app/imports/page.tsx` fetches:
+
+```text
+GET /api/admin/imports/batches
+GET /api/admin/imports/batches/{batchId}
+GET /api/admin/identity-resolution/batches/{batchId}/candidates
+GET /api/admin/identity-resolution/batches/{batchId}/trust-scores
+```
+
+It exposes small server actions for the Issue 8 import flow and Issue 9 identity-resolution demo flow:
+
+```text
+POST /api/admin/imports/batches
+POST /api/admin/imports/batches/{batchId}/files
+POST /api/admin/imports/batches/{batchId}/mapping-preview
+POST /api/admin/imports/mappings
+POST /api/admin/imports/mappings/{mappingVersionId}/approve
+POST /api/admin/imports/batches/{batchId}/validate
+POST /api/admin/imports/batches/{batchId}/stage
+POST /api/admin/identity-resolution/batches/{batchId}/candidates/generate
+POST /api/admin/identity-resolution/candidates/{candidateId}/approve
+POST /api/admin/identity-resolution/candidates/{candidateId}/mark-conflicted
+```
+
+The page renders batches, raw evidence metadata, mapping versions, validation issues, staging run summaries, identity candidates, and trust score breakdowns. The `Run identity demo` action creates two source batches, approves their mappings, validates rows, stages both batches, and generates identity candidates. Manual tools are labeled as latest-batch-only for debugging. The page intentionally keeps upload UI minimal and documents backend multipart upload support because Next.js server actions have request body limits.
 
 The fetch uses `cache: "no-store"` and `dynamic = "force-dynamic"` so local health reflects current backend state.
 

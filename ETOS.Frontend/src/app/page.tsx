@@ -402,6 +402,12 @@ export default async function Home() {
               >
                 Model artifacts
               </Link>
+              <Link
+                href="/imports"
+                className="rounded-full border border-cyan-300 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"
+              >
+                Imports
+              </Link>
               <StatusBadge status={health?.status ?? "unavailable"} />
             </div>
           </div>

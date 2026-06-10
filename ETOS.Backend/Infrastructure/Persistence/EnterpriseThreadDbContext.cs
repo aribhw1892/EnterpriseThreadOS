@@ -2,6 +2,8 @@ using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Governance;
+using ETOS.Backend.Imports;
+using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Tenancy;
 using Microsoft.AspNetCore.Identity;
@@ -74,6 +76,30 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<AttributeDefinition> AttributeDefinitions => Set<AttributeDefinition>();
 
     public DbSet<ModelPackageVersion> ModelPackageVersions => Set<ModelPackageVersion>();
+
+    public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
+
+    public DbSet<ImportFileEvidence> ImportFileEvidence => Set<ImportFileEvidence>();
+
+    public DbSet<ImportMappingVersion> ImportMappingVersions => Set<ImportMappingVersion>();
+
+    public DbSet<ImportColumnMapping> ImportColumnMappings => Set<ImportColumnMapping>();
+
+    public DbSet<ImportLifecycleMapping> ImportLifecycleMappings => Set<ImportLifecycleMapping>();
+
+    public DbSet<ImportValidationIssue> ImportValidationIssues => Set<ImportValidationIssue>();
+
+    public DbSet<ImportStagingGraphRun> ImportStagingGraphRuns => Set<ImportStagingGraphRun>();
+
+    public DbSet<IdentityResolutionRule> IdentityResolutionRules => Set<IdentityResolutionRule>();
+
+    public DbSet<IdentityCandidateLink> IdentityCandidateLinks => Set<IdentityCandidateLink>();
+
+    public DbSet<IdentityResolutionDecision> IdentityResolutionDecisions => Set<IdentityResolutionDecision>();
+
+    public DbSet<IdentityLearningEvidence> IdentityLearningEvidence => Set<IdentityLearningEvidence>();
+
+    public DbSet<TrustScoreRecord> TrustScoreRecords => Set<TrustScoreRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -449,6 +475,264 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
         });
 
         ConfigureOntologyTables(modelBuilder);
+        ConfigureImportTables(modelBuilder);
+        ConfigureIdentityResolutionTables(modelBuilder);
+    }
+
+    private static void ConfigureIdentityResolutionTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<IdentityResolutionRule>(entity =>
+        {
+            entity.ToTable("identity_resolution_rules");
+            entity.HasKey(rule => rule.Id);
+            entity.Property(rule => rule.TenantId).IsRequired();
+            entity.Property(rule => rule.Name).HasMaxLength(120).IsRequired();
+            entity.Property(rule => rule.NormalizedName).HasMaxLength(120).IsRequired();
+            entity.Property(rule => rule.ObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(rule => rule.NormalizedObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(rule => rule.IdentityAttributeKeysJson).HasMaxLength(2000).IsRequired();
+            entity.Property(rule => rule.AutoApproveThreshold).HasPrecision(5, 3).IsRequired();
+            entity.Property(rule => rule.ReviewThreshold).HasPrecision(5, 3).IsRequired();
+            entity.Property(rule => rule.CreatedAt).IsRequired();
+            entity.HasIndex(rule => new { rule.TenantId, rule.NormalizedName }).IsUnique();
+            entity.HasIndex(rule => new { rule.TenantId, rule.NormalizedObjectType, rule.IsActive });
+        });
+
+        modelBuilder.Entity<IdentityCandidateLink>(entity =>
+        {
+            entity.ToTable("identity_candidate_links");
+            entity.HasKey(candidate => candidate.Id);
+            entity.Property(candidate => candidate.TenantId).IsRequired();
+            entity.Property(candidate => candidate.SourceSystem).HasMaxLength(120).IsRequired();
+            entity.Property(candidate => candidate.TargetSystem).HasMaxLength(120).IsRequired();
+            entity.Property(candidate => candidate.SourceRecordId).HasMaxLength(400).IsRequired();
+            entity.Property(candidate => candidate.TargetRecordId).HasMaxLength(400).IsRequired();
+            entity.Property(candidate => candidate.ObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(candidate => candidate.NormalizedObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(candidate => candidate.IdentityKey).HasMaxLength(800).IsRequired();
+            entity.Property(candidate => candidate.ConfidenceScore).HasPrecision(5, 3).IsRequired();
+            entity.Property(candidate => candidate.State).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(candidate => candidate.TrustState).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(candidate => candidate.EvidenceSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(candidate => candidate.CreatedAt).IsRequired();
+            entity.HasIndex(candidate => new { candidate.TenantId, candidate.ImportBatchId, candidate.State });
+            entity.HasIndex(candidate => new { candidate.TenantId, candidate.SourceGraphNodeId, candidate.TargetGraphNodeId, candidate.IdentityKey }).IsUnique();
+            entity.HasOne(candidate => candidate.ImportBatch)
+                .WithMany()
+                .HasForeignKey(candidate => candidate.ImportBatchId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(candidate => candidate.ImportMappingVersion)
+                .WithMany()
+                .HasForeignKey(candidate => candidate.ImportMappingVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(candidate => candidate.ImportStagingGraphRun)
+                .WithMany()
+                .HasForeignKey(candidate => candidate.ImportStagingGraphRunId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(candidate => candidate.IdentityResolutionRule)
+                .WithMany(rule => rule.Candidates)
+                .HasForeignKey(candidate => candidate.IdentityResolutionRuleId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<IdentityResolutionDecision>(entity =>
+        {
+            entity.ToTable("identity_resolution_decisions");
+            entity.HasKey(decision => decision.Id);
+            entity.Property(decision => decision.TenantId).IsRequired();
+            entity.Property(decision => decision.DecisionType).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(decision => decision.ResultingTrustState).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(decision => decision.Rationale).HasMaxLength(1000);
+            entity.Property(decision => decision.CreatedAt).IsRequired();
+            entity.HasIndex(decision => new { decision.TenantId, decision.IdentityCandidateLinkId, decision.CreatedAt });
+            entity.HasOne(decision => decision.IdentityCandidateLink)
+                .WithMany(candidate => candidate.Decisions)
+                .HasForeignKey(decision => decision.IdentityCandidateLinkId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<IdentityLearningEvidence>(entity =>
+        {
+            entity.ToTable("identity_learning_evidence");
+            entity.HasKey(evidence => evidence.Id);
+            entity.Property(evidence => evidence.TenantId).IsRequired();
+            entity.Property(evidence => evidence.Outcome).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(evidence => evidence.IdentityKey).HasMaxLength(800).IsRequired();
+            entity.Property(evidence => evidence.EvidenceSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(evidence => evidence.CreatedAt).IsRequired();
+            entity.HasIndex(evidence => new { evidence.TenantId, evidence.Outcome, evidence.CreatedAt });
+            entity.HasOne(evidence => evidence.IdentityCandidateLink)
+                .WithMany()
+                .HasForeignKey(evidence => evidence.IdentityCandidateLinkId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(evidence => evidence.IdentityResolutionDecision)
+                .WithMany()
+                .HasForeignKey(evidence => evidence.IdentityResolutionDecisionId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<TrustScoreRecord>(entity =>
+        {
+            entity.ToTable("trust_score_records");
+            entity.HasKey(record => record.Id);
+            entity.Property(record => record.TenantId).IsRequired();
+            entity.Property(record => record.EntityType).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(record => record.Score).HasPrecision(5, 3).IsRequired();
+            entity.Property(record => record.TrustState).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(record => record.BreakdownJson).HasMaxLength(4000).IsRequired();
+            entity.Property(record => record.RecalculatedAt).IsRequired();
+            entity.HasIndex(record => new { record.TenantId, record.ImportBatchId, record.EntityType });
+            entity.HasIndex(record => new { record.TenantId, record.ImportBatchId, record.IdentityCandidateLinkId, record.EntityType }).IsUnique();
+            entity.HasOne(record => record.ImportBatch)
+                .WithMany()
+                .HasForeignKey(record => record.ImportBatchId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(record => record.IdentityCandidateLink)
+                .WithMany()
+                .HasForeignKey(record => record.IdentityCandidateLinkId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+    }
+
+    private static void ConfigureImportTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ImportBatch>(entity =>
+        {
+            entity.ToTable("import_batches");
+            entity.HasKey(batch => batch.Id);
+            entity.Property(batch => batch.TenantId).IsRequired();
+            entity.Property(batch => batch.SourceSystem).HasMaxLength(120).IsRequired();
+            entity.Property(batch => batch.NormalizedSourceSystem).HasMaxLength(120).IsRequired();
+            entity.Property(batch => batch.Description).HasMaxLength(1000);
+            entity.Property(batch => batch.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(batch => batch.ActiveModelPackageKey).HasMaxLength(120);
+            entity.Property(batch => batch.ActiveModelPackageVersionLabel).HasMaxLength(80);
+            entity.Property(batch => batch.CreatedAt).IsRequired();
+            entity.HasIndex(batch => new { batch.TenantId, batch.CreatedAt });
+            entity.HasIndex(batch => new { batch.TenantId, batch.NormalizedSourceSystem, batch.CreatedAt });
+            entity.HasOne<ModelPackageVersion>()
+                .WithMany()
+                .HasForeignKey(batch => batch.ActiveModelPackageVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ImportFileEvidence>(entity =>
+        {
+            entity.ToTable("import_file_evidence");
+            entity.HasKey(evidence => evidence.Id);
+            entity.Property(evidence => evidence.TenantId).IsRequired();
+            entity.Property(evidence => evidence.StorageKey).HasMaxLength(600).IsRequired();
+            entity.Property(evidence => evidence.Sha256Checksum).HasMaxLength(128).IsRequired();
+            entity.Property(evidence => evidence.OriginalFileName).HasMaxLength(260).IsRequired();
+            entity.Property(evidence => evidence.ContentType).HasMaxLength(120).IsRequired();
+            entity.Property(evidence => evidence.CreatedAt).IsRequired();
+            entity.HasIndex(evidence => new { evidence.TenantId, evidence.ImportBatchId, evidence.CreatedAt });
+            entity.HasIndex(evidence => new { evidence.TenantId, evidence.Sha256Checksum });
+            entity.HasOne(evidence => evidence.ImportBatch)
+                .WithMany(batch => batch.FileEvidence)
+                .HasForeignKey(evidence => evidence.ImportBatchId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ImportMappingVersion>(entity =>
+        {
+            entity.ToTable("import_mapping_versions");
+            entity.HasKey(mapping => mapping.Id);
+            entity.Property(mapping => mapping.TenantId).IsRequired();
+            entity.Property(mapping => mapping.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(mapping => mapping.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(mapping => mapping.Summary).HasMaxLength(1000);
+            entity.Property(mapping => mapping.State).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(mapping => mapping.SuggestionProvider).HasMaxLength(120).IsRequired();
+            entity.Property(mapping => mapping.CreatedAt).IsRequired();
+            entity.HasIndex(mapping => new { mapping.ImportBatchId, mapping.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(mapping => new { mapping.TenantId, mapping.State, mapping.CreatedAt });
+            entity.HasOne(mapping => mapping.ImportBatch)
+                .WithMany(batch => batch.MappingVersions)
+                .HasForeignKey(mapping => mapping.ImportBatchId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<ModelPackageVersion>()
+                .WithMany()
+                .HasForeignKey(mapping => mapping.ModelPackageVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ImportColumnMapping>(entity =>
+        {
+            entity.ToTable("import_column_mappings");
+            entity.HasKey(mapping => mapping.Id);
+            entity.Property(mapping => mapping.TenantId).IsRequired();
+            entity.Property(mapping => mapping.SourceColumn).HasMaxLength(160).IsRequired();
+            entity.Property(mapping => mapping.NormalizedSourceColumn).HasMaxLength(160).IsRequired();
+            entity.Property(mapping => mapping.CanonicalObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(mapping => mapping.NormalizedCanonicalObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(mapping => mapping.CanonicalAttributeKey).HasMaxLength(160);
+            entity.Property(mapping => mapping.NormalizedCanonicalAttributeKey).HasMaxLength(160);
+            entity.HasIndex(mapping => new { mapping.ImportMappingVersionId, mapping.NormalizedSourceColumn }).IsUnique();
+            entity.HasOne(mapping => mapping.ImportMappingVersion)
+                .WithMany(version => version.ColumnMappings)
+                .HasForeignKey(mapping => mapping.ImportMappingVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ImportLifecycleMapping>(entity =>
+        {
+            entity.ToTable("import_lifecycle_mappings");
+            entity.HasKey(mapping => mapping.Id);
+            entity.Property(mapping => mapping.TenantId).IsRequired();
+            entity.Property(mapping => mapping.SourceValue).HasMaxLength(160).IsRequired();
+            entity.Property(mapping => mapping.NormalizedSourceValue).HasMaxLength(160).IsRequired();
+            entity.Property(mapping => mapping.CanonicalLifecycleKey).HasMaxLength(120).IsRequired();
+            entity.Property(mapping => mapping.NormalizedCanonicalLifecycleKey).HasMaxLength(120).IsRequired();
+            entity.HasIndex(mapping => new { mapping.ImportMappingVersionId, mapping.NormalizedSourceValue }).IsUnique();
+            entity.HasOne(mapping => mapping.ImportMappingVersion)
+                .WithMany(version => version.LifecycleMappings)
+                .HasForeignKey(mapping => mapping.ImportMappingVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ImportValidationIssue>(entity =>
+        {
+            entity.ToTable("import_validation_issues");
+            entity.HasKey(issue => issue.Id);
+            entity.Property(issue => issue.TenantId).IsRequired();
+            entity.Property(issue => issue.Severity).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(issue => issue.SourceColumn).HasMaxLength(160);
+            entity.Property(issue => issue.CanonicalObjectType).HasMaxLength(120);
+            entity.Property(issue => issue.IssueCode).HasMaxLength(120).IsRequired();
+            entity.Property(issue => issue.Message).HasMaxLength(1000).IsRequired();
+            entity.Property(issue => issue.CreatedAt).IsRequired();
+            entity.HasIndex(issue => new { issue.TenantId, issue.ImportBatchId, issue.Severity });
+            entity.HasOne(issue => issue.ImportBatch)
+                .WithMany(batch => batch.ValidationIssues)
+                .HasForeignKey(issue => issue.ImportBatchId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(issue => issue.ImportMappingVersion)
+                .WithMany()
+                .HasForeignKey(issue => issue.ImportMappingVersionId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<ImportStagingGraphRun>(entity =>
+        {
+            entity.ToTable("import_staging_graph_runs");
+            entity.HasKey(run => run.Id);
+            entity.Property(run => run.TenantId).IsRequired();
+            entity.Property(run => run.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(run => run.GraphNodeIdsJson).HasMaxLength(8000);
+            entity.Property(run => run.GraphRelationshipIdsJson).HasMaxLength(8000);
+            entity.Property(run => run.FailureSummary).HasMaxLength(1000);
+            entity.Property(run => run.CreatedAt).IsRequired();
+            entity.HasIndex(run => new { run.TenantId, run.ImportBatchId, run.CreatedAt });
+            entity.HasOne(run => run.ImportBatch)
+                .WithMany(batch => batch.StagingRuns)
+                .HasForeignKey(run => run.ImportBatchId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(run => run.ImportMappingVersion)
+                .WithMany()
+                .HasForeignKey(run => run.ImportMappingVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
     }
 
     private static void ConfigureOntologyTables(ModelBuilder modelBuilder)

@@ -36,7 +36,7 @@ Local services:
 - PostgreSQL: operational SQL store for current backend persistence.
 - Neo4j: primary graph memory backend for Slice 6 and later graph-backed features.
 - Qdrant: vector store for future document/vector retrieval slices.
-- MinIO: object storage for future import/document/trace package slices.
+- MinIO: object storage for import/document/trace package slices. The current import slice uses a local file-backed `IImportFileStorage` implementation for developer/test runs while keeping the storage boundary ready for MinIO-compatible object storage.
 - Redis: cache/runtime support for later slices.
 - RabbitMQ: messaging/runtime support for later slices.
 
@@ -89,6 +89,22 @@ Useful endpoints:
 - `GET http://localhost:5000/api/admin/ontology/versions`
 - `GET http://localhost:5000/api/admin/ontology/model-packages`
 - `GET http://localhost:5000/api/admin/ontology/model-packages/active`
+- `GET http://localhost:5000/api/admin/imports/batches`
+- `POST http://localhost:5000/api/admin/imports/batches`
+- `POST http://localhost:5000/api/admin/imports/batches/{batchId}/files`
+- `POST http://localhost:5000/api/admin/imports/batches/{batchId}/mapping-preview`
+- `POST http://localhost:5000/api/admin/imports/mappings`
+- `POST http://localhost:5000/api/admin/imports/mappings/{mappingVersionId}/approve`
+- `POST http://localhost:5000/api/admin/imports/batches/{batchId}/validate`
+- `POST http://localhost:5000/api/admin/imports/batches/{batchId}/stage`
+- `GET http://localhost:5000/api/admin/identity-resolution/rules`
+- `POST http://localhost:5000/api/admin/identity-resolution/rules`
+- `POST http://localhost:5000/api/admin/identity-resolution/batches/{batchId}/candidates/generate`
+- `GET http://localhost:5000/api/admin/identity-resolution/batches/{batchId}/candidates`
+- `POST http://localhost:5000/api/admin/identity-resolution/candidates/{candidateId}/approve`
+- `POST http://localhost:5000/api/admin/identity-resolution/candidates/{candidateId}/reject`
+- `POST http://localhost:5000/api/admin/identity-resolution/candidates/{candidateId}/mark-conflicted`
+- `GET http://localhost:5000/api/admin/identity-resolution/batches/{batchId}/trust-scores`
 
 Tenant-protected identity endpoints use local header authentication in the current implementation. Use these headers for local API testing when an endpoint requires authorization:
 
@@ -130,7 +146,24 @@ Open `http://localhost:3000`.
 
 Open `http://localhost:3000/model-artifacts` to inspect and seed canonical ontology/model package versions. The `Create seed model package` action creates draft ontology, semantic layer, lifecycle vocabulary, attribute schema, and model package versions, publishes them, and makes the latest model package active. Repeated clicks create new versions and retire previous published versions for the same keys.
 
-The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, tenant-filtered audit/security event lists, artifact registry lists, classification/policy lists, and model artifact admin screens from the backend.
+Open `http://localhost:3000/imports` to inspect import batches and run import/identity demo flows. The recommended `Run identity demo` button creates two CSV-backed source batches, approves their generated mapping drafts, validates records, stages unverified graph nodes for both batches, and generates identity candidates with trust score breakdowns. The manual tools on the page intentionally operate on the newest batch only and are meant for step-by-step debugging. Multipart upload is supported by the backend API at `/api/admin/imports/batches/{batchId}/files`; the UI intentionally keeps upload behavior small because Next.js server actions have body-size limits.
+
+The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, tenant-filtered audit/security event lists, artifact registry lists, classification/policy lists, model artifact admin screens, and import admin screens from the backend.
+
+Expected `/imports` identity-demo result:
+
+1. At least two staged batches from different source systems, usually `demo-cad-pdm` and `demo-erp`.
+2. Populated `Identity Candidates` cards showing confidence, trust state, recommendation exclusion status, and graph relationship id when approved.
+3. Populated `Trust Scores` cards showing score and component breakdowns.
+
+## Import File Parsing
+
+The import module accepts CSV and Excel-style source exports:
+
+- CSV parsing is implemented in `ETOS.Backend/Imports/ImportFileParser.cs` because the current slice only needs headers, sample rows, quoted fields, and escaped quotes.
+- Excel `.xls` and `.xlsx` parsing uses `ExcelDataReader`, a focused reader library that avoids bringing in a heavier workbook editing/export stack.
+
+If future customer CSVs need custom delimiters, culture-specific parsing, comments, richer diagnostics, or more edge-case handling, `CsvHelper` is the expected replacement/upgrade path.
 
 ## Verification
 

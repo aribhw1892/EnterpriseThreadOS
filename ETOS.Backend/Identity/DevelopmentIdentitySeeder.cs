@@ -2,6 +2,7 @@ using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.IdentityResolution;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -41,6 +42,10 @@ public sealed class DevelopmentIdentitySeeder(
         var classificationPublishPermission = await EnsurePermissionAsync(ClassificationPermissions.Publish, "Publish tenant classification and policy versions.", cancellationToken);
         var policyEvaluatePermission = await EnsurePermissionAsync(ClassificationPermissions.Evaluate, "Evaluate tenant policy against governed context.", cancellationToken);
         var policyAdminPermission = await EnsurePermissionAsync(ClassificationPermissions.Admin, "Administer tenant policy enforcement.", cancellationToken);
+        var identityResolutionReadPermission = await EnsurePermissionAsync(IdentityResolutionPermissions.Read, "Read tenant identity resolution records.", cancellationToken);
+        var identityResolutionManagePermission = await EnsurePermissionAsync(IdentityResolutionPermissions.Manage, "Manage tenant identity resolution rules and candidate generation.", cancellationToken);
+        var identityResolutionReviewPermission = await EnsurePermissionAsync(IdentityResolutionPermissions.Review, "Review tenant identity resolution candidates.", cancellationToken);
+        var identityResolutionAdminPermission = await EnsurePermissionAsync(IdentityResolutionPermissions.Admin, "Administer tenant identity resolution.", cancellationToken);
         var adminRole = await EnsureTenantRoleAsync(tenant.Id, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, admin.Id, adminRole.Id, cancellationToken);
@@ -55,6 +60,10 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, classificationPublishPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, policyEvaluatePermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, policyAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, identityResolutionReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, identityResolutionManagePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, identityResolutionReviewPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, identityResolutionAdminPermission.Id, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await EnsureBootstrapAuditAsync(tenant.Id, admin.Id, tenant.Identifier, cancellationToken);

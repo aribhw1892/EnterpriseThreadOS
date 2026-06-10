@@ -325,6 +325,206 @@ export type ModelPackagePreview = {
   attributeSchemaVersionId: string;
 };
 
+export type ImportBatch = {
+  id: string;
+  tenantId: string;
+  sourceSystem: string;
+  description?: string | null;
+  status: string;
+  activeModelPackageVersionId: string;
+  activeModelPackageKey?: string | null;
+  activeModelPackageVersionLabel?: string | null;
+  evidenceCount: number;
+  mappingVersionCount: number;
+  validationIssueCount: number;
+  stagingRunCount: number;
+  createdByUserId: string;
+  createdAt: string;
+  validatedAt?: string | null;
+  stagedAt?: string | null;
+};
+
+export type ImportFileEvidence = {
+  id: string;
+  tenantId: string;
+  importBatchId: string;
+  storageKey: string;
+  sha256Checksum: string;
+  originalFileName: string;
+  contentType: string;
+  sizeBytes: number;
+  uploadedByUserId: string;
+  auditRecordId?: string | null;
+  createdAt: string;
+};
+
+export type ImportColumnMapping = {
+  id: string;
+  sourceColumn: string;
+  canonicalObjectType: string;
+  canonicalAttributeKey?: string | null;
+  isIdentityField: boolean;
+  isRequired: boolean;
+};
+
+export type ImportLifecycleMapping = {
+  id: string;
+  sourceValue: string;
+  canonicalLifecycleKey: string;
+};
+
+export type ImportMappingVersion = {
+  id: string;
+  tenantId: string;
+  importBatchId: string;
+  modelPackageVersionId: string;
+  versionLabel: string;
+  summary?: string | null;
+  state: string;
+  suggestionProvider: string;
+  columnMappingCount: number;
+  lifecycleMappingCount: number;
+  createdByUserId: string;
+  createdAt: string;
+  approvedByUserId?: string | null;
+  approvedAt?: string | null;
+  rejectedByUserId?: string | null;
+  rejectedAt?: string | null;
+  columnMappings: ImportColumnMapping[];
+  lifecycleMappings: ImportLifecycleMapping[];
+};
+
+export type ImportValidationIssue = {
+  id: string;
+  tenantId: string;
+  importBatchId: string;
+  importMappingVersionId?: string | null;
+  severity: string;
+  rowNumber?: number | null;
+  sourceColumn?: string | null;
+  canonicalObjectType?: string | null;
+  issueCode: string;
+  message: string;
+  createdAt: string;
+};
+
+export type ImportStagingGraphRun = {
+  id: string;
+  tenantId: string;
+  importBatchId: string;
+  importMappingVersionId: string;
+  status: string;
+  nodeCount: number;
+  relationshipCount: number;
+  graphNodeIds: string[];
+  graphRelationshipIds: string[];
+  failureSummary?: string | null;
+  createdAt: string;
+  completedAt?: string | null;
+};
+
+export type ImportBatchDetail = {
+  batch: ImportBatch;
+  evidence: ImportFileEvidence[];
+  mappingVersions: ImportMappingVersion[];
+  validationIssues: ImportValidationIssue[];
+  stagingRuns: ImportStagingGraphRun[];
+};
+
+export type IdentityResolutionDecision = {
+  id: string;
+  tenantId: string;
+  identityCandidateLinkId: string;
+  decisionType: string;
+  resultingTrustState: string;
+  rationale?: string | null;
+  decidedByUserId: string;
+  createdAt: string;
+};
+
+export type IdentityCandidateLink = {
+  id: string;
+  tenantId: string;
+  importBatchId: string;
+  importMappingVersionId: string;
+  importStagingGraphRunId?: string | null;
+  identityResolutionRuleId?: string | null;
+  sourceGraphNodeId: string;
+  targetGraphNodeId: string;
+  sourceSystem: string;
+  targetSystem: string;
+  sourceRecordId: string;
+  targetRecordId: string;
+  objectType: string;
+  identityKey: string;
+  confidenceScore: number;
+  state: string;
+  trustState: string | number;
+  excludedFromTrustedRecommendations: boolean;
+  graphRelationshipId?: string | null;
+  evidenceSummary: string;
+  createdAt: string;
+  reviewedByUserId?: string | null;
+  reviewedAt?: string | null;
+  decisions: IdentityResolutionDecision[];
+};
+
+export type IdentityCandidateGeneration = {
+  importBatchId: string;
+  createdCount: number;
+  existingCount: number;
+  candidates: IdentityCandidateLink[];
+};
+
+export type TrustScoreRecord = {
+  id: string;
+  tenantId: string;
+  importBatchId: string;
+  identityCandidateLinkId?: string | null;
+  graphNodeId?: string | null;
+  graphRelationshipId?: string | null;
+  entityType: string;
+  score: number;
+  trustState: string | number;
+  breakdown: Record<string, number>;
+  recalculatedAt: string;
+};
+
+export type ImportPreview = {
+  batchId: string;
+  evidenceId: string;
+  activeModelPackageVersionId: string;
+  activeModelPackageKey: string;
+  activeModelPackageVersionLabel: string;
+  suggestionProvider: string;
+  headers: string[];
+  sampleRows: Record<string, string | null>[];
+  columnSuggestions: {
+    sourceColumn: string;
+    canonicalObjectType: string;
+    canonicalAttributeKey?: string | null;
+    isIdentityField: boolean;
+    isRequired: boolean;
+    confidence: number;
+    rationale: string;
+  }[];
+  lifecycleSuggestions: {
+    sourceValue: string;
+    canonicalLifecycleKey: string;
+    confidence: number;
+    rationale: string;
+  }[];
+};
+
+export type ImportValidation = {
+  batchId: string;
+  mappingVersionId: string;
+  isValid: boolean;
+  errorCount: number;
+  warningCount: number;
+  issues: ImportValidationIssue[];
+};
+
 export type ApiResult<T> = {
   data: T | null;
   error: string | null;
@@ -518,6 +718,37 @@ export async function getOntologyLists() {
     attributeSchemas,
     modelPackages,
     activeModelPackage,
+  };
+}
+
+export async function getImportLists() {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+
+  const batches = tenantHeaders
+    ? await fetchApi<ImportBatch[]>("/api/admin/imports/batches", tenantHeaders)
+    : missingContext<ImportBatch[]>();
+  const firstBatch = batches.data?.[0];
+  const firstBatchDetail =
+    tenantHeaders && firstBatch
+      ? await fetchApi<ImportBatchDetail>(`/api/admin/imports/batches/${firstBatch.id}`, tenantHeaders)
+      : emptyObject<ImportBatchDetail>();
+  const firstBatchIdentityCandidates =
+    tenantHeaders && firstBatch
+      ? await fetchApi<IdentityCandidateLink[]>(`/api/admin/identity-resolution/batches/${firstBatch.id}/candidates`, tenantHeaders)
+      : emptyObject<IdentityCandidateLink[]>();
+  const firstBatchTrustScores =
+    tenantHeaders && firstBatch
+      ? await fetchApi<TrustScoreRecord[]>(`/api/admin/identity-resolution/batches/${firstBatch.id}/trust-scores`, tenantHeaders)
+      : emptyObject<TrustScoreRecord[]>();
+
+  return {
+    batches,
+    firstBatchDetail,
+    firstBatchIdentityCandidates,
+    firstBatchTrustScores,
   };
 }
 
@@ -733,6 +964,335 @@ export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackage
   return await postApi<ModelPackageVersion>(
     `/api/admin/ontology/model-packages/${modelPackage.data.id}/publish`,
     { summary: "Publish initial model package." },
+    tenantHeaders,
+  );
+}
+
+export async function createDemoImportFlow(): Promise<ApiResult<ImportMappingVersion>> {
+  return await createDemoImportForSource("demo-cad-pdm", "Demo CSV import batch for Issue 8.");
+}
+
+export async function createDemoComparisonImportFlow(): Promise<ApiResult<ImportMappingVersion>> {
+  return await createDemoImportForSource("demo-erp", "Comparison CSV import batch for identity resolution.");
+}
+
+export async function runIdentityResolutionDemoFlow(): Promise<ApiResult<IdentityCandidateGeneration>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<IdentityCandidateGeneration>();
+  }
+
+  await createPreparedDemoImportForSource("demo-cad-pdm", "Prepared CAD/PDM source batch for identity resolution.", tenantHeaders);
+  const comparison = await createPreparedDemoImportForSource(
+    "demo-erp",
+    "Prepared ERP comparison batch for identity resolution.",
+    tenantHeaders,
+  );
+  if (comparison.error || !comparison.data) {
+    return { data: null, error: comparison.error ?? "Comparison import did not complete." };
+  }
+
+  return await postApi<IdentityCandidateGeneration>(
+    `/api/admin/identity-resolution/batches/${comparison.data.batch.id}/candidates/generate`,
+    { ruleId: null },
+    tenantHeaders,
+  );
+}
+
+async function createDemoImportForSource(
+  sourceSystem: string,
+  description: string,
+): Promise<ApiResult<ImportMappingVersion>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<ImportMappingVersion>();
+  }
+
+  const batch = await postApi<ImportBatch>(
+    "/api/admin/imports/batches",
+    {
+      sourceSystem,
+      description,
+      modelPackageKey: "canonical-manufacturing-package",
+    },
+    tenantHeaders,
+  );
+  if (!batch.data) {
+    return { data: null, error: batch.error };
+  }
+
+  const csv = [
+    "partNumber,lifecycle,cost",
+    "P-100,released,12.50",
+    "P-200,in-review,21.00",
+  ].join("\n");
+  const formData = new FormData();
+  formData.set("file", new Blob([csv], { type: "text/csv" }), "demo-import.csv");
+  const upload = await fetchApi<{ evidence: ImportFileEvidence }>(
+    `/api/admin/imports/batches/${batch.data.id}/files`,
+    tenantHeaders,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+  if (!upload.data) {
+    return { data: null, error: upload.error };
+  }
+
+  const preview = await postApi<ImportPreview>(
+    `/api/admin/imports/batches/${batch.data.id}/mapping-preview`,
+    { evidenceId: upload.data.evidence.id, sampleRowLimit: 10 },
+    tenantHeaders,
+  );
+  if (!preview.data) {
+    return { data: null, error: preview.error };
+  }
+
+  return await postApi<ImportMappingVersion>(
+    "/api/admin/imports/mappings",
+    {
+      importBatchId: batch.data.id,
+      versionLabel: `demo-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`,
+      summary: "Demo deterministic mapping generated from preview suggestions.",
+      columnMappings: preview.data.columnSuggestions
+        .filter((suggestion) => suggestion.canonicalAttributeKey || suggestion.isIdentityField)
+        .map((suggestion) => ({
+          sourceColumn: suggestion.sourceColumn,
+          canonicalObjectType: suggestion.canonicalObjectType,
+          canonicalAttributeKey: suggestion.canonicalAttributeKey,
+          isIdentityField: suggestion.isIdentityField,
+          isRequired: suggestion.isRequired,
+        })),
+      lifecycleMappings: preview.data.lifecycleSuggestions.map((suggestion) => ({
+        sourceValue: suggestion.sourceValue,
+        canonicalLifecycleKey: suggestion.canonicalLifecycleKey,
+      })),
+    },
+    tenantHeaders,
+  );
+}
+
+async function createPreparedDemoImportForSource(
+  sourceSystem: string,
+  description: string,
+  tenantHeaders: { userId?: string; tenantId?: string },
+): Promise<ApiResult<{ batch: ImportBatch; mapping: ImportMappingVersion; stagingRun: ImportStagingGraphRun }>> {
+  const batch = await postApi<ImportBatch>(
+    "/api/admin/imports/batches",
+    {
+      sourceSystem,
+      description,
+      modelPackageKey: "canonical-manufacturing-package",
+    },
+    tenantHeaders,
+  );
+  if (!batch.data) {
+    return { data: null, error: batch.error };
+  }
+
+  const csv = [
+    "partNumber,lifecycle,cost",
+    "P-100,released,12.50",
+    "P-200,in-review,21.00",
+  ].join("\n");
+  const formData = new FormData();
+  formData.set("file", new Blob([csv], { type: "text/csv" }), "demo-import.csv");
+  const upload = await fetchApi<{ evidence: ImportFileEvidence }>(
+    `/api/admin/imports/batches/${batch.data.id}/files`,
+    tenantHeaders,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+  if (!upload.data) {
+    return { data: null, error: upload.error };
+  }
+
+  const preview = await postApi<ImportPreview>(
+    `/api/admin/imports/batches/${batch.data.id}/mapping-preview`,
+    { evidenceId: upload.data.evidence.id, sampleRowLimit: 10 },
+    tenantHeaders,
+  );
+  if (!preview.data) {
+    return { data: null, error: preview.error };
+  }
+
+  const mapping = await postApi<ImportMappingVersion>(
+    "/api/admin/imports/mappings",
+    {
+      importBatchId: batch.data.id,
+      versionLabel: `demo-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}-${sourceSystem}`,
+      summary: "Prepared demo mapping for identity resolution.",
+      columnMappings: preview.data.columnSuggestions
+        .filter((suggestion) => suggestion.canonicalAttributeKey || suggestion.isIdentityField)
+        .map((suggestion) => ({
+          sourceColumn: suggestion.sourceColumn,
+          canonicalObjectType: suggestion.canonicalObjectType,
+          canonicalAttributeKey: suggestion.canonicalAttributeKey,
+          isIdentityField: suggestion.isIdentityField,
+          isRequired: suggestion.isRequired,
+        })),
+      lifecycleMappings: preview.data.lifecycleSuggestions.map((suggestion) => ({
+        sourceValue: suggestion.sourceValue,
+        canonicalLifecycleKey: suggestion.canonicalLifecycleKey,
+      })),
+    },
+    tenantHeaders,
+  );
+  if (!mapping.data) {
+    return { data: null, error: mapping.error };
+  }
+
+  const approved = await postApi<ImportMappingVersion>(
+    `/api/admin/imports/mappings/${mapping.data.id}/approve`,
+    { summary: "Approved by identity demo workflow." },
+    tenantHeaders,
+  );
+  if (!approved.data) {
+    return { data: null, error: approved.error };
+  }
+
+  const validation = await postApi<ImportValidation>(`/api/admin/imports/batches/${batch.data.id}/validate`, {}, tenantHeaders);
+  if (!validation.data) {
+    return { data: null, error: validation.error };
+  }
+
+  const stagingRun = await postApi<ImportStagingGraphRun>(`/api/admin/imports/batches/${batch.data.id}/stage`, {}, tenantHeaders);
+  if (!stagingRun.data) {
+    return { data: null, error: stagingRun.error };
+  }
+
+  return { data: { batch: batch.data, mapping: approved.data, stagingRun: stagingRun.data }, error: null };
+}
+
+export async function approveLatestImportMapping(): Promise<ApiResult<ImportMappingVersion>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<ImportMappingVersion>();
+  }
+
+  const lists = await getImportLists();
+  const mapping = lists.firstBatchDetail.data?.mappingVersions.find((item) => item.state === "Draft");
+  if (!mapping) {
+    return { data: null, error: "No draft import mapping is available to approve." };
+  }
+
+  return await postApi<ImportMappingVersion>(
+    `/api/admin/imports/mappings/${mapping.id}/approve`,
+    { summary: "Approved from the imports admin UI." },
+    tenantHeaders,
+  );
+}
+
+export async function validateLatestImportBatch(): Promise<ApiResult<ImportValidation>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<ImportValidation>();
+  }
+
+  const lists = await getImportLists();
+  const batch = lists.batches.data?.[0];
+  if (!batch) {
+    return { data: null, error: "No import batch is available to validate." };
+  }
+
+  return await postApi<ImportValidation>(`/api/admin/imports/batches/${batch.id}/validate`, {}, tenantHeaders);
+}
+
+export async function stageLatestImportBatch(): Promise<ApiResult<ImportStagingGraphRun>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<ImportStagingGraphRun>();
+  }
+
+  const lists = await getImportLists();
+  const batch = lists.batches.data?.[0];
+  if (!batch) {
+    return { data: null, error: "No import batch is available to stage." };
+  }
+
+  return await postApi<ImportStagingGraphRun>(`/api/admin/imports/batches/${batch.id}/stage`, {}, tenantHeaders);
+}
+
+export async function generateLatestIdentityCandidates(): Promise<ApiResult<IdentityCandidateGeneration>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<IdentityCandidateGeneration>();
+  }
+
+  const lists = await getImportLists();
+  const batch = lists.batches.data?.[0];
+  if (!batch) {
+    return { data: null, error: "No import batch is available for identity candidate generation." };
+  }
+
+  return await postApi<IdentityCandidateGeneration>(
+    `/api/admin/identity-resolution/batches/${batch.id}/candidates/generate`,
+    { ruleId: null },
+    tenantHeaders,
+  );
+}
+
+export async function approveLatestIdentityCandidate(): Promise<ApiResult<IdentityCandidateLink>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<IdentityCandidateLink>();
+  }
+
+  const lists = await getImportLists();
+  const candidate = lists.firstBatchIdentityCandidates.data?.find((item) => item.state !== "Approved" && item.state !== "Rejected");
+  if (!candidate) {
+    return { data: null, error: "No reviewable identity candidate is available to approve." };
+  }
+
+  return await postApi<IdentityCandidateLink>(
+    `/api/admin/identity-resolution/candidates/${candidate.id}/approve`,
+    { rationale: "Approved from the imports admin UI." },
+    tenantHeaders,
+  );
+}
+
+export async function markLatestIdentityCandidateConflicted(): Promise<ApiResult<IdentityCandidateLink>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<IdentityCandidateLink>();
+  }
+
+  const lists = await getImportLists();
+  const candidate = lists.firstBatchIdentityCandidates.data?.find((item) => item.state !== "Approved" && item.state !== "Rejected");
+  if (!candidate) {
+    return { data: null, error: "No reviewable identity candidate is available to mark conflicted." };
+  }
+
+  return await postApi<IdentityCandidateLink>(
+    `/api/admin/identity-resolution/candidates/${candidate.id}/mark-conflicted`,
+    { rationale: "Marked conflicted from the imports admin UI." },
     tenantHeaders,
   );
 }
