@@ -1,6 +1,7 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
+using ETOS.Backend.Documents;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Governance;
@@ -120,6 +121,14 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<DataQualityTrustImpact> DataQualityTrustImpacts => Set<DataQualityTrustImpact>();
 
     public DbSet<MonitoringIssueTypeDefinition> MonitoringIssueTypeDefinitions => Set<MonitoringIssueTypeDefinition>();
+
+    public DbSet<DocumentArtifact> DocumentArtifacts => Set<DocumentArtifact>();
+
+    public DbSet<DocumentVersion> DocumentVersions => Set<DocumentVersion>();
+
+    public DbSet<DocumentObjectLink> DocumentObjectLinks => Set<DocumentObjectLink>();
+
+    public DbSet<DocumentVectorIndexRecord> DocumentVectorIndexRecords => Set<DocumentVectorIndexRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -499,6 +508,106 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
         ConfigureGraphMemoryTables(modelBuilder);
         ConfigureIdentityResolutionTables(modelBuilder);
         ConfigureDataQualityTables(modelBuilder);
+        ConfigureDocumentTables(modelBuilder);
+    }
+
+    private static void ConfigureDocumentTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DocumentArtifact>(entity =>
+        {
+            entity.ToTable("document_artifacts");
+            entity.HasKey(document => document.Id);
+            entity.Property(document => document.TenantId).IsRequired();
+            entity.Property(document => document.DocumentType).HasMaxLength(120).IsRequired();
+            entity.Property(document => document.NormalizedDocumentType).HasMaxLength(120).IsRequired();
+            entity.Property(document => document.ClassificationKey).HasMaxLength(120).IsRequired();
+            entity.Property(document => document.NormalizedClassificationKey).HasMaxLength(120).IsRequired();
+            entity.Property(document => document.Title).HasMaxLength(200).IsRequired();
+            entity.Property(document => document.Description).HasMaxLength(1000);
+            entity.Property(document => document.CreatedAt).IsRequired();
+            entity.Property(document => document.UpdatedAt).IsRequired();
+            entity.HasIndex(document => new { document.TenantId, document.NormalizedDocumentType, document.CreatedAt });
+            entity.HasIndex(document => new { document.TenantId, document.NormalizedClassificationKey });
+            entity.HasOne(document => document.Artifact)
+                .WithMany()
+                .HasForeignKey(document => document.ArtifactId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DocumentVersion>(entity =>
+        {
+            entity.ToTable("document_versions");
+            entity.HasKey(version => version.Id);
+            entity.Property(version => version.TenantId).IsRequired();
+            entity.Property(version => version.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(version => version.StorageKey).HasMaxLength(700).IsRequired();
+            entity.Property(version => version.Sha256Checksum).HasMaxLength(64).IsRequired();
+            entity.Property(version => version.OriginalFileName).HasMaxLength(260).IsRequired();
+            entity.Property(version => version.ContentType).HasMaxLength(160).IsRequired();
+            entity.Property(version => version.ExtractedMetadataSummaryJson).HasMaxLength(4000);
+            entity.Property(version => version.ExtractionStatus).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(version => version.ExtractionFailureSummary).HasMaxLength(1000);
+            entity.Property(version => version.CreatedAt).IsRequired();
+            entity.HasIndex(version => new { version.DocumentArtifactId, version.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(version => new { version.TenantId, version.DocumentArtifactId, version.CreatedAt });
+            entity.HasOne(version => version.DocumentArtifact)
+                .WithMany(document => document.Versions)
+                .HasForeignKey(version => version.DocumentArtifactId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DocumentObjectLink>(entity =>
+        {
+            entity.ToTable("document_object_links");
+            entity.HasKey(link => link.Id);
+            entity.Property(link => link.TenantId).IsRequired();
+            entity.Property(link => link.ConfidenceScore).HasPrecision(5, 4).IsRequired();
+            entity.Property(link => link.EvidenceSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(link => link.ExtractionStatus).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(link => link.SourceSystem).HasMaxLength(120);
+            entity.Property(link => link.SourceRecordId).HasMaxLength(200);
+            entity.Property(link => link.CreatedAt).IsRequired();
+            entity.HasIndex(link => new { link.TenantId, link.DocumentArtifactId, link.CreatedAt });
+            entity.HasIndex(link => new { link.TenantId, link.GraphNodeId });
+            entity.HasIndex(link => new { link.TenantId, link.ImportBatchId });
+            entity.HasOne(link => link.DocumentArtifact)
+                .WithMany(document => document.ObjectLinks)
+                .HasForeignKey(link => link.DocumentArtifactId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(link => link.DocumentVersion)
+                .WithMany(version => version.ObjectLinks)
+                .HasForeignKey(link => link.DocumentVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(link => link.ImportBatch)
+                .WithMany()
+                .HasForeignKey(link => link.ImportBatchId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DocumentVectorIndexRecord>(entity =>
+        {
+            entity.ToTable("document_vector_index_records");
+            entity.HasKey(record => record.Id);
+            entity.Property(record => record.TenantId).IsRequired();
+            entity.Property(record => record.ProviderName).HasMaxLength(120).IsRequired();
+            entity.Property(record => record.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(record => record.TenantFilter).HasMaxLength(120).IsRequired();
+            entity.Property(record => record.PolicyFilterSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(record => record.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(record => record.FailureSummary).HasMaxLength(1000);
+            entity.Property(record => record.CreatedAt).IsRequired();
+            entity.HasIndex(record => new { record.TenantId, record.Status, record.CreatedAt });
+            entity.HasIndex(record => new { record.TenantId, record.DocumentArtifactId, record.DocumentVersionId });
+            entity.HasOne(record => record.DocumentArtifact)
+                .WithMany()
+                .HasForeignKey(record => record.DocumentArtifactId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(record => record.DocumentVersion)
+                .WithMany(version => version.VectorIndexRecords)
+                .HasForeignKey(record => record.DocumentVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
     }
 
     private static void ConfigureGraphMemoryTables(ModelBuilder modelBuilder)

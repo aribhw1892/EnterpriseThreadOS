@@ -1,0 +1,242 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "AI Agent Workflow Guide",
+      "file_type": "document",
+      "source_file": "ai-agent-workflow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "ai_agent_workflow_guide",
+      "community": 1,
+      "norm_label": "ai agent workflow guide"
+    },
+    {
+      "label": "Local Development Guide",
+      "file_type": "document",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "local_development_guide",
+      "community": 1,
+      "norm_label": "local development guide"
+    },
+    {
+      "label": "EnterpriseThreadOS Extension Points Document",
+      "file_type": "document",
+      "source_file": "architecture/extension-points.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "architecture_extension_points_doc",
+      "community": 0,
+      "norm_label": "enterprisethreados extension points document"
+    },
+    {
+      "label": "ADR 0002: Artifact Lifecycle",
+      "file_type": "document",
+      "source_file": "architecture/adr/0002-artifact-lifecycle.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "adr_0002_artifact_lifecycle",
+      "community": 0,
+      "norm_label": "adr 0002: artifact lifecycle"
+    },
+    {
+      "label": "Architecture Decision Records README",
+      "file_type": "document",
+      "source_file": "architecture/adr/README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "adr_readme",
+      "community": 0,
+      "norm_label": "architecture decision records readme"
+    },
+    {
+      "label": "Backend Architecture Document",
+      "file_type": "document",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "backend_architecture_doc",
+      "community": 0,
+      "norm_label": "backend architecture document"
+    },
+    {
+      "label": "Frontend Architecture Document",
+      "file_type": "document",
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "frontend_architecture_doc",
+      "community": 1,
+      "norm_label": "frontend architecture document"
+    }
+  ],
+  "links": [
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/adr/0002-artifact-lifecycle.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "adr_0002_artifact_lifecycle",
+      "target": "ai_agent_workflow_guide"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/adr/README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "adr_readme",
+      "target": "ai_agent_workflow_guide"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ai-agent-workflow.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "ai_agent_workflow_guide",
+      "target": "architecture_extension_points_doc"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "frontend_architecture_doc",
+      "target": "ai_agent_workflow_guide"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "local_development_guide",
+      "target": "ai_agent_workflow_guide"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "local_development_guide",
+      "target": "backend_architecture_doc"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "local_development_guide",
+      "target": "frontend_architecture_doc"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/adr/0002-artifact-lifecycle.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "adr_0002_artifact_lifecycle",
+      "target": "architecture_extension_points_doc"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/adr/README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "adr_readme",
+      "target": "architecture_extension_points_doc"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/extension-points.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "architecture_extension_points_doc",
+      "target": "backend_architecture_doc"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/extension-points.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "architecture_extension_points_doc",
+      "target": "frontend_architecture_doc"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/adr/0002-artifact-lifecycle.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "adr_0002_artifact_lifecycle",
+      "target": "backend_architecture_doc"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backend_architecture_doc",
+      "target": "adr_readme"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "frontend_architecture_doc",
+      "target": "backend_architecture_doc"
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "4cb8ecd0957ba74591a68fda54fceb951f84d098"
+}

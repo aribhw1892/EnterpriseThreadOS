@@ -1,6 +1,7 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
+using ETOS.Backend.Documents;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
@@ -40,6 +41,7 @@ app.MapEnterpriseThreadImportEndpoints();
 app.MapEnterpriseThreadIdentityResolutionEndpoints();
 app.MapEnterpriseThreadDataQualityEndpoints();
 app.MapEnterpriseThreadGraphMemoryEndpoints();
+app.MapEnterpriseThreadDocumentEndpoints();
 
 app.Run();
 

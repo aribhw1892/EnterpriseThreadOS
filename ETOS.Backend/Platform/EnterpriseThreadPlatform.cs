@@ -1,6 +1,7 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
+using ETOS.Backend.Documents;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
@@ -50,6 +51,10 @@ public static class EnterpriseThreadPlatform
 
         services.AddOptions<ImportFileStorageOptions>()
             .Bind(configuration.GetSection(ImportFileStorageOptions.SectionName))
+            .ValidateOnStart();
+
+        services.AddOptions<DocumentFileStorageOptions>()
+            .Bind(configuration.GetSection(DocumentFileStorageOptions.SectionName))
             .ValidateOnStart();
 
         services.AddEnterpriseThreadGraphMemory(configuration);
@@ -113,6 +118,10 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IImportService, ImportService>();
         services.AddScoped<IIdentityResolutionService, IdentityResolutionService>();
         services.AddScoped<IDataQualityIssueService, DataQualityIssueService>();
+        services.AddScoped<IDocumentFileStorage, LocalDocumentFileStorage>();
+        services.AddScoped<IDocumentVectorIndexingService, DisabledDocumentVectorIndexingService>();
+        services.AddScoped<ICadParsingPlaceholder, DisabledCadParsingPlaceholder>();
+        services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<IDevelopmentIdentitySeeder, DevelopmentIdentitySeeder>();
 
         return services;

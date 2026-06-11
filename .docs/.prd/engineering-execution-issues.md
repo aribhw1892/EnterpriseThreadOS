@@ -290,6 +290,8 @@ Type: AFK
 Blocked by: Issue 11
 User stories covered: 28, 29, 30, 31, 38, 40
 
+Implementation status: Implemented in the current source as Slice 12. See `ETOS.Backend/Documents/`, EF migration `Issue12DocumentMemoryObjectLinking`, `ETOS.Backend.Tests/DocumentMemoryTests.cs`, and `ETOS.Frontend/src/app/documents/page.tsx`.
+
 ## What to build
 
 Implement DocumentArtifact and DocumentVersion, document storage metadata, extracted metadata summaries, document-object links, confidence/evidence metadata, extraction issue handling, Qdrant indexing hooks, and native CAD parsing placeholders.

@@ -681,7 +681,7 @@ public sealed class DataQualityIssueService(
         return $"{issue.IssueCode} at {row}, {column}: {issue.Message}";
     }
 
-    private static DataQualityIssueResponse ToIssueResponse(DataQualityIssue issue)
+    internal static DataQualityIssueResponse ToIssueResponse(DataQualityIssue issue)
     {
         return new DataQualityIssueResponse(
             issue.Id,

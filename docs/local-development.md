@@ -36,7 +36,7 @@ Local services:
 - PostgreSQL: operational SQL store for current backend persistence.
 - Neo4j: primary graph memory backend for Slice 6 and later graph-backed features.
 - Qdrant: vector store for future document/vector retrieval slices.
-- MinIO: object storage for import/document/trace package slices. The current import slice uses a local file-backed `IImportFileStorage` implementation for developer/test runs while keeping the storage boundary ready for MinIO-compatible object storage.
+- MinIO: object storage for import/document/trace package slices. Current import and document slices use local file-backed storage implementations for developer/test runs while keeping storage boundaries ready for MinIO-compatible object storage.
 - Redis: cache/runtime support for later slices.
 - RabbitMQ: messaging/runtime support for later slices.
 

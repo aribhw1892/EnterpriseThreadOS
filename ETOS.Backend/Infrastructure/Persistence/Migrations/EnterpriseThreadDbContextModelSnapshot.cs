@@ -817,6 +817,279 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.ToTable("monitoring_issue_type_definitions", (string)null);
                 });
 
+            modelBuilder.Entity("ETOS.Backend.Documents.DocumentArtifact", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ClassificationKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("NormalizedClassificationKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("NormalizedDocumentType")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArtifactId");
+
+                    b.HasIndex("TenantId", "NormalizedClassificationKey");
+
+                    b.HasIndex("TenantId", "NormalizedDocumentType", "CreatedAt");
+
+                    b.ToTable("document_artifacts", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Documents.DocumentObjectLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ConfidenceScore")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DocumentArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DocumentVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EvidenceSummary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ExtractionStatus")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<Guid?>("GraphNodeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ImportBatchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SourceRecordId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("SourceSystem")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentArtifactId");
+
+                    b.HasIndex("DocumentVersionId");
+
+                    b.HasIndex("ImportBatchId");
+
+                    b.HasIndex("TenantId", "GraphNodeId");
+
+                    b.HasIndex("TenantId", "ImportBatchId");
+
+                    b.HasIndex("TenantId", "DocumentArtifactId", "CreatedAt");
+
+                    b.ToTable("document_object_links", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Documents.DocumentVectorIndexRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DocumentArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DocumentVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FailureSummary")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("PolicyFilterSummary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ProviderName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SafeSummary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("TenantFilter")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentArtifactId");
+
+                    b.HasIndex("DocumentVersionId");
+
+                    b.HasIndex("TenantId", "DocumentArtifactId", "DocumentVersionId");
+
+                    b.HasIndex("TenantId", "Status", "CreatedAt");
+
+                    b.ToTable("document_vector_index_records", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Documents.DocumentVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DocumentArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ExtractedMetadataSummaryJson")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("ExtractionFailureSummary")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ExtractionStatus")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("NormalizedVersionLabel")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<string>("Sha256Checksum")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(700)
+                        .HasColumnType("character varying(700)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VersionLabel")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentArtifactId", "NormalizedVersionLabel")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "DocumentArtifactId", "CreatedAt");
+
+                    b.ToTable("document_versions", (string)null);
+                });
+
             modelBuilder.Entity("ETOS.Backend.Governance.AuditRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3388,6 +3661,73 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Navigation("DataQualityIssue");
                 });
 
+            modelBuilder.Entity("ETOS.Backend.Documents.DocumentArtifact", b =>
+                {
+                    b.HasOne("ETOS.Backend.Artifacts.Artifact", "Artifact")
+                        .WithMany()
+                        .HasForeignKey("ArtifactId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Artifact");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Documents.DocumentObjectLink", b =>
+                {
+                    b.HasOne("ETOS.Backend.Documents.DocumentArtifact", "DocumentArtifact")
+                        .WithMany("ObjectLinks")
+                        .HasForeignKey("DocumentArtifactId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ETOS.Backend.Documents.DocumentVersion", "DocumentVersion")
+                        .WithMany("ObjectLinks")
+                        .HasForeignKey("DocumentVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ETOS.Backend.Imports.ImportBatch", "ImportBatch")
+                        .WithMany()
+                        .HasForeignKey("ImportBatchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DocumentArtifact");
+
+                    b.Navigation("DocumentVersion");
+
+                    b.Navigation("ImportBatch");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Documents.DocumentVectorIndexRecord", b =>
+                {
+                    b.HasOne("ETOS.Backend.Documents.DocumentArtifact", "DocumentArtifact")
+                        .WithMany()
+                        .HasForeignKey("DocumentArtifactId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ETOS.Backend.Documents.DocumentVersion", "DocumentVersion")
+                        .WithMany("VectorIndexRecords")
+                        .HasForeignKey("DocumentVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DocumentArtifact");
+
+                    b.Navigation("DocumentVersion");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Documents.DocumentVersion", b =>
+                {
+                    b.HasOne("ETOS.Backend.Documents.DocumentArtifact", "DocumentArtifact")
+                        .WithMany("Versions")
+                        .HasForeignKey("DocumentArtifactId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DocumentArtifact");
+                });
+
             modelBuilder.Entity("ETOS.Backend.Governance.SecurityEvent", b =>
                 {
                     b.HasOne("ETOS.Backend.Governance.AuditRecord", "RelatedAuditRecord")
@@ -3941,6 +4281,20 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Navigation("SourceLinks");
 
                     b.Navigation("TrustImpacts");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Documents.DocumentArtifact", b =>
+                {
+                    b.Navigation("ObjectLinks");
+
+                    b.Navigation("Versions");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Documents.DocumentVersion", b =>
+                {
+                    b.Navigation("ObjectLinks");
+
+                    b.Navigation("VectorIndexRecords");
                 });
 
             modelBuilder.Entity("ETOS.Backend.Governance.AuditRecord", b =>

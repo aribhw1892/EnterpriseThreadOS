@@ -118,7 +118,8 @@ public enum DataQualityIssueOrigin
     ImportValidation = 0,
     Manual = 1,
     SecurityEvent = 2,
-    MonitoringPlaceholder = 3
+    MonitoringPlaceholder = 3,
+    DocumentExtraction = 4
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -130,7 +131,9 @@ public enum DataQualityAffectedEntityType
     GraphRelationship = 3,
     IdentityCandidate = 4,
     SecurityEvent = 5,
-    GenericSource = 6
+    GenericSource = 6,
+    DocumentVersion = 7,
+    DocumentObjectLink = 8
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -145,7 +148,10 @@ public enum DataQualitySourceLinkType
     SecurityEvent = 6,
     GraphNode = 7,
     GraphRelationship = 8,
-    GenericSource = 9
+    GenericSource = 9,
+    DocumentArtifact = 10,
+    DocumentVersion = 11,
+    DocumentObjectLink = 12
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

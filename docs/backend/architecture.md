@@ -19,6 +19,7 @@
 - `Imports/`: tenant-scoped import batches, raw file evidence metadata, CSV/Excel parsing, mapping preview/approval, validation, and staging graph creation.
 - `IdentityResolution/`: tenant-scoped identity rules, deterministic candidate links, review decisions, learning evidence, trust scores, and identity-link graph relationships.
 - `DataQuality/`: tenant-scoped durable data-quality issues, source links, trust-impact metadata, security-event review hooks, inert monitoring placeholders, and issue endpoints.
+- `Documents/`: tenant-scoped document artifacts, immutable versions, document-object links, extraction issue hooks, vector indexing metadata records, disabled native CAD parsing placeholder, and document endpoints.
 - `Platform/Extensions/`: architecture-honest extension point catalog for deferred capabilities.
 
 ## Startup Flow
@@ -173,6 +174,22 @@ The data-quality module currently includes:
 
 Data quality does not implement full `ReviewTaskArtifact` behavior. Assignment, blocking, escalation, completion, decisions, and task chains remain owned by later review-task and decision slices.
 
+### Document Memory
+
+The document module currently includes:
+
+- tenant-scoped `DocumentArtifact` records backed by BaseArtifact registry entries with document type, classification, owner, title, and safe description metadata.
+- immutable `DocumentVersion` records with storage key, checksum, content type, file name, size, extracted metadata summary JSON, extraction status, and audit linkage.
+- local file-backed `IDocumentFileStorage` for developer/test runs while preserving the object-storage boundary for future MinIO-compatible storage.
+- `DocumentObjectLink` records that connect document versions to graph node ids and/or import batches with confidence, evidence summary, extraction status, and source references.
+- extraction failure and uncertain-link hooks that create durable data-quality issues with document source links and review-ready metadata.
+- `DocumentVectorIndexRecord` entries that record tenant/policy filter metadata for future vector indexing.
+- disabled Qdrant/vector provider behavior by default; no live vector search or Qdrant writes are performed in this slice.
+- disabled native CAD geometry parsing placeholder. CAD metadata can be stored in document metadata, but geometry parsing remains deferred.
+- admin endpoints under `/api/admin/documents`.
+
+Document APIs expose metadata and safe summaries only. They do not expose raw document bytes, raw object storage access, raw vector search, or raw graph/database access.
+
 ### Tenancy
 
 Persisted tenant-owned records should implement the existing tenant-scoping convention. Cross-tenant access should fail closed and create a safe denial audit record when the flow is security-relevant.
@@ -197,6 +214,7 @@ Do not turn extension metadata into fake implementations. Future providers need 
 - import tables for batches, file evidence, immutable mapping versions, column/lifecycle mappings, validation issues, and staging graph runs.
 - identity-resolution tables for rules, candidate links, review decisions, learning evidence, and trust score records.
 - data-quality tables for durable issues, issue source links, trust-impact records, and monitoring issue type placeholders.
+- document tables for document artifacts, document versions, document-object links, and vector index records.
 
 Use EF Core migrations for schema changes:
 
@@ -258,8 +276,10 @@ Issue 9 identity-resolution tests cover cross-source candidate generation, idemp
 
 Issue 10 data-quality tests cover import-validation issue generation, idempotency, manual issue tenant/source validation, security-event review hooks, trust-impact metadata, and inert monitoring placeholders.
 
+Issue 12 document-memory tests cover document creation, version metadata, extraction failures, uncertain document links, vector index records, policy filtering, and the disabled CAD parsing placeholder.
+
 ## Planned Backend Areas
 
-The PRD and issue backlog define later modules for trusted graph promotion/snapshots/diffs, documents, governed query/context, AI Trace, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration.
+The PRD and issue backlog define later modules for governed query/context, AI Trace, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration.
 
 Do not document or code these as implemented until the source code exists.

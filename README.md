@@ -145,6 +145,12 @@ Bootstrap flow for local testing:
 
 ## Verification
 
+Build the solution:
+
+```powershell
+dotnet build EnterpriseThreadOS.sln
+```
+
 Backend:
 
 ```powershell

@@ -50,14 +50,14 @@
     "semantic_hash": "3830a0fc287bda5f026b66a62feb4cb4"
   },
   "ETOS.Backend.Tests/IdentityResolutionTests.cs": {
-    "mtime": 1781112435.0441456,
-    "ast_hash": "2520e9eca8465e8ae34127dddc086b19",
-    "semantic_hash": "2520e9eca8465e8ae34127dddc086b19"
+    "mtime": 1781177075.0067425,
+    "ast_hash": "2f73bb014d7d922f32b3720a576d1354",
+    "semantic_hash": ""
   },
   "ETOS.Backend.Tests/ImportTests.cs": {
-    "mtime": 1781110795.4755814,
-    "ast_hash": "4cabc5a8c169d5cb31c2a97654396a6d",
-    "semantic_hash": "4cabc5a8c169d5cb31c2a97654396a6d"
+    "mtime": 1781177178.9679036,
+    "ast_hash": "d11ae43b6e63a040112f9f790c328c47",
+    "semantic_hash": ""
   },
   "ETOS.Backend.Tests/OntologyTests.cs": {
     "mtime": 1781107790.3414297,
@@ -155,14 +155,14 @@
     "semantic_hash": "544d6ccbfa4816d528d58665a67b7cf8"
   },
   "ETOS.Backend/GraphMemory/DeferredGraphDiffService.cs": {
-    "mtime": 1781103378.8985229,
-    "ast_hash": "27e46ba914f2291aaead2804e3b94761",
-    "semantic_hash": "27e46ba914f2291aaead2804e3b94761"
+    "mtime": 1781177042.9891262,
+    "ast_hash": "6bbdaa39b3dccabbf915c95588a114b7",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GraphMemory/DeferredGraphSnapshotService.cs": {
-    "mtime": 1781103374.2168543,
-    "ast_hash": "06b67fe139eee2326ce77775d2e2041a",
-    "semantic_hash": "06b67fe139eee2326ce77775d2e2041a"
+    "mtime": 1781176791.2705972,
+    "ast_hash": "e8a2c1384705a705286ee632f66b3b69",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GraphMemory/GraphBootstrapHostedService.cs": {
     "mtime": 1781103431.2242715,
@@ -170,14 +170,14 @@
     "semantic_hash": "752c37f6f486ddf45c870701ab54dd62"
   },
   "ETOS.Backend/GraphMemory/GraphMemoryContracts.cs": {
-    "mtime": 1781103350.112067,
-    "ast_hash": "b45d5833b0a47382d8fa717a9d1a6794",
-    "semantic_hash": "b45d5833b0a47382d8fa717a9d1a6794"
+    "mtime": 1781176726.8931572,
+    "ast_hash": "c4f6764da7c320c2f78bfd39a9f82010",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GraphMemory/GraphMemoryModels.cs": {
-    "mtime": 1781103342.4917119,
-    "ast_hash": "a94cea5f5c421d3398982145c91f3458",
-    "semantic_hash": "a94cea5f5c421d3398982145c91f3458"
+    "mtime": 1781176722.671796,
+    "ast_hash": "a59bac7b854cc32ed8439203fdc2840e",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GraphMemory/GraphMemoryOptions.cs": {
     "mtime": 1781103370.611287,
@@ -185,9 +185,9 @@
     "semantic_hash": "85c5d160cc5818179b014c636c913ee9"
   },
   "ETOS.Backend/GraphMemory/GraphMemoryServiceExtensions.cs": {
-    "mtime": 1781103541.3783412,
-    "ast_hash": "137f8b74715060b10a079a6771475596",
-    "semantic_hash": "137f8b74715060b10a079a6771475596"
+    "mtime": 1781176815.7395437,
+    "ast_hash": "60aa3bc936e6cfa4f9f84fa1fe1a85af",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GraphMemory/IGraphBootstrapService.cs": {
     "mtime": 1781103358.9753728,
@@ -195,9 +195,9 @@
     "semantic_hash": "95b585c8109a1aa075d2e70d48f04f3f"
   },
   "ETOS.Backend/GraphMemory/IGraphDiffService.cs": {
-    "mtime": 1781103364.911366,
-    "ast_hash": "5743edd196dcb12b4668ab6c1870ff1b",
-    "semantic_hash": "5743edd196dcb12b4668ab6c1870ff1b"
+    "mtime": 1781176737.363504,
+    "ast_hash": "d5e20918a8ce97dadf9a380b5f995b66",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GraphMemory/IGraphHealthService.cs": {
     "mtime": 1781103356.3503942,
@@ -205,19 +205,19 @@
     "semantic_hash": "c08c35e70b129eefbd578ee0cf28cecd"
   },
   "ETOS.Backend/GraphMemory/IGraphMemoryService.cs": {
-    "mtime": 1781103353.6632867,
-    "ast_hash": "975595846c95c1a8527adedf7d93d526",
-    "semantic_hash": "975595846c95c1a8527adedf7d93d526"
+    "mtime": 1781176730.6473382,
+    "ast_hash": "ae6b77c236ed09cf4a11ecf2440a60b3",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GraphMemory/IGraphSnapshotService.cs": {
-    "mtime": 1781103361.9634154,
-    "ast_hash": "80b5b3f0b09922c827e3342e3ab43ac6",
-    "semantic_hash": "80b5b3f0b09922c827e3342e3ab43ac6"
+    "mtime": 1781176733.5412028,
+    "ast_hash": "47b55652e2df63da01734e2e5a74715d",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GraphMemory/MemgraphGraphMemoryService.cs": {
-    "mtime": 1781103508.3014011,
-    "ast_hash": "a9225007099a375ebb9381f360042387",
-    "semantic_hash": "a9225007099a375ebb9381f360042387"
+    "mtime": 1781176768.2857509,
+    "ast_hash": "d1e3bf30cb9cfd48dd39bced62ad5478",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GraphMemory/Neo4jGraphBootstrapService.cs": {
     "mtime": 1781103415.1304078,
@@ -235,9 +235,9 @@
     "semantic_hash": "77df658cf634f90f4560ce4b80f6a285"
   },
   "ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs": {
-    "mtime": 1781103812.048537,
-    "ast_hash": "2ccb415a2b5a433f888d856b39060096",
-    "semantic_hash": "2ccb415a2b5a433f888d856b39060096"
+    "mtime": 1781176761.3522089,
+    "ast_hash": "6fb891354b7491a08471d4046506f469",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Health/HealthContracts.cs": {
     "mtime": 1780763787.057803,
@@ -325,14 +325,14 @@
     "semantic_hash": "4b9324497150da86362e9abeb6687984"
   },
   "ETOS.Backend/Imports/ImportContracts.cs": {
-    "mtime": 1781110031.257594,
-    "ast_hash": "8b2d9ba18636f94b56f2868b51bfe7b6",
-    "semantic_hash": "8b2d9ba18636f94b56f2868b51bfe7b6"
+    "mtime": 1781176822.5142212,
+    "ast_hash": "31527556b747923b4088f68f40214002",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Imports/ImportEndpointExtensions.cs": {
-    "mtime": 1781110577.3830698,
-    "ast_hash": "444facf2779bc4a9fda85d1ade029082",
-    "semantic_hash": "444facf2779bc4a9fda85d1ade029082"
+    "mtime": 1781176909.2738664,
+    "ast_hash": "74db9fc82e23d2e4782e8dcc0a0a48f1",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Imports/ImportFileParser.cs": {
     "mtime": 1781111026.0698602,
@@ -345,14 +345,14 @@
     "semantic_hash": "5701239685e48c5ff406ffb6a8de02d8"
   },
   "ETOS.Backend/Imports/ImportModels.cs": {
-    "mtime": 1781110015.242803,
-    "ast_hash": "da0ea38a90112ad9ae9445e81145f8e0",
-    "semantic_hash": "da0ea38a90112ad9ae9445e81145f8e0"
+    "mtime": 1781176713.640376,
+    "ast_hash": "2291f94494340b1758bfdd8187ddd944",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Imports/ImportService.cs": {
-    "mtime": 1781110822.973716,
-    "ast_hash": "d304f620dfb1730a743d8b960b18eccd",
-    "semantic_hash": "d304f620dfb1730a743d8b960b18eccd"
+    "mtime": 1781176904.4459405,
+    "ast_hash": "9130750bb74fb1bde4e423e29f49c1ed",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Infrastructure/Configuration/FrontendOptions.cs": {
     "mtime": 1780763741.151692,
@@ -370,9 +370,9 @@
     "semantic_hash": "4ebfd3f3dca17b6433e92d90a17a894c"
   },
   "ETOS.Backend/Infrastructure/Persistence/EnterpriseThreadDbContext.cs": {
-    "mtime": 1781174596.4120893,
-    "ast_hash": "4b4900d941ff7d5d3e8ac7e2eaf617ce",
-    "semantic_hash": "4b4900d941ff7d5d3e8ac7e2eaf617ce"
+    "mtime": 1781177021.4538038,
+    "ast_hash": "f63d224f37437ba5ddb5baa6da0daee7",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Infrastructure/Persistence/EnterpriseThreadDbContextFactory.cs": {
     "mtime": 1780763767.995577,
@@ -470,9 +470,9 @@
     "semantic_hash": "9df571df408944dd308482b14bed348b"
   },
   "ETOS.Backend/Infrastructure/Persistence/Migrations/EnterpriseThreadDbContextModelSnapshot.cs": {
-    "mtime": 1781114989.6329288,
-    "ast_hash": "531e70108715d7b698cb04d7f32f1d14",
-    "semantic_hash": "531e70108715d7b698cb04d7f32f1d14"
+    "mtime": 1781177110.4299762,
+    "ast_hash": "ab645c90057d398711e97751af6f0e3e",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Ontology/OntologyContracts.cs": {
     "mtime": 1781106922.4280906,
@@ -515,9 +515,9 @@
     "semantic_hash": "fd4125b8aaa80f3f4830120d9d1d285f"
   },
   "ETOS.Backend/Program.cs": {
-    "mtime": 1781174596.412754,
-    "ast_hash": "30699dc548f39a03369443776e2e6f7e",
-    "semantic_hash": "30699dc548f39a03369443776e2e6f7e"
+    "mtime": 1781176925.1457832,
+    "ast_hash": "8bf195b60897eff6e94f2769fdfd9f3e",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Properties/launchSettings.json": {
     "mtime": 1780763550.1079583,
@@ -818,5 +818,50 @@
     "mtime": 1781104831.994099,
     "ast_hash": "298730d5396a7b3f018d9c2a15417bc0",
     "semantic_hash": "298730d5396a7b3f018d9c2a15417bc0"
+  },
+  "ETOS.Backend/GraphMemory/GraphMemoryEndpointExtensions.cs": {
+    "mtime": 1781176920.5277267,
+    "ast_hash": "f90c2a4efa229036816ca37abc9f208a",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260611112510_Issue11TrustedGraphPromotion.Designer.cs": {
+    "mtime": 1781177110.4289756,
+    "ast_hash": "f7f79c378f0622c83ce9b74021f09b54",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260611112510_Issue11TrustedGraphPromotion.cs": {
+    "mtime": 1781177110.427976,
+    "ast_hash": "ac1df6f4c2af1d12eb7ecb6a11c54af2",
+    "semantic_hash": ""
+  },
+  ".cursor/plans/slice-11_e69df934.plan.md": {
+    "mtime": 1781177198.6949482,
+    "ast_hash": "de7069aa6f5905aa0cf83b93b6d380b7",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/public/file.svg": {
+    "mtime": 1780763287.9507353,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/public/globe.svg": {
+    "mtime": 1780763287.9578085,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/public/next.svg": {
+    "mtime": 1780763287.9633749,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/public/vercel.svg": {
+    "mtime": 1780763287.9693766,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/public/window.svg": {
+    "mtime": 1780763287.9733746,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
   }
 }

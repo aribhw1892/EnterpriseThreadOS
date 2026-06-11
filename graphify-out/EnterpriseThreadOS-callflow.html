@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>EnterpriseThreadOS — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 3646 nodes, 6338 edges, 167 communities. Commit: 2720e74</p>
+<p class="subtitle">Generated from graphify knowledge graph: 3894 nodes, 6920 edges, 177 communities. Commit: 4cb8ecd</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -88,9 +88,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>269 nodes</small>")
+    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>280 nodes</small>")
     class EXTRACT_PIPELINE_5F350230 module;
-    BUILD_GRAPH_321CBB04("Graph Build<br/><small>332 nodes</small>")
+    BUILD_GRAPH_321CBB04("Graph Build<br/><small>331 nodes</small>")
     class BUILD_GRAPH_321CBB04 module;
     ANALYSIS_CLUSTERING_C79796DA("Analysis &amp; Clustering<br/><small>57 nodes</small>")
     class ANALYSIS_CLUSTERING_C79796DA module;
@@ -98,9 +98,9 @@ flowchart LR
     class OUTPUTS_DOCS_ED82387C module;
     CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>43 nodes</small>")
     class CLI_SKILLS_9964CBB8 module;
-    SERVE_API_35EC8E86("Serving API<br/><small>103 nodes</small>")
+    SERVE_API_35EC8E86("Serving API<br/><small>120 nodes</small>")
     class SERVE_API_35EC8E86 module;
-    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>456 nodes</small>")
+    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>550 nodes</small>")
     class TESTS_FIXTURES_B84B1DCC module;
     SCHEMA_VERSIONING_AND_VALIDATION_C36176F4("Schema Versioning and Validation<br/><small>119 nodes</small>")
     class SCHEMA_VERSIONING_AND_VALIDATION_C36176F4 module;
@@ -116,17 +116,16 @@ flowchart LR
     class ENTERPRISETHREADOS_ENGINEERING_PRD_006713C9 module;
     ETOS_FRONTEND_BBF23E07("ETOS Frontend<br/><small>101 nodes</small>")
     class ETOS_FRONTEND_BBF23E07 module;
-    OTHER_D0941E68("Other<br/><small>1648 nodes</small>")
+    OTHER_D0941E68("Other<br/><small>1775 nodes</small>")
     class OTHER_D0941E68 module;
-    OTHER_D0941E68 -->|implements x34| EXTRACT_PIPELINE_5F350230
-    EXTRACT_PIPELINE_5F350230 -->|imports x26| SERVE_API_35EC8E86
-    SERVE_API_35EC8E86 -->|contains x14| EXTRACT_PIPELINE_5F350230
+    OTHER_D0941E68 -->|implements x38| EXTRACT_PIPELINE_5F350230
+    EXTRACT_PIPELINE_5F350230 -->|calls x22| SERVE_API_35EC8E86
+    SERVE_API_35EC8E86 -->|contains x19| EXTRACT_PIPELINE_5F350230
     OTHER_D0941E68 -->|inherits x5| SCHEMA_VERSIONING_AND_VALIDATION_C36176F4
-    SERVE_API_35EC8E86 -->|imports x2| OTHER_D0941E68
-    TESTS_FIXTURES_B84B1DCC -->|implements| OTHER_D0941E68
-    TESTS_FIXTURES_B84B1DCC -->|implements| BUILD_GRAPH_321CBB04
-    BUILD_GRAPH_321CBB04 -->|implements| TESTS_FIXTURES_B84B1DCC
+    TESTS_FIXTURES_B84B1DCC -->|implements x3| OTHER_D0941E68
+    TESTS_FIXTURES_B84B1DCC -->|implements x2| BUILD_GRAPH_321CBB04
     OTHER_D0941E68 -->|contains| TESTS_FIXTURES_B84B1DCC
+    OTHER_D0941E68 -->|inherits| SERVE_API_35EC8E86
     EXTRACT_PIPELINE_5F350230 -->|implements| OTHER_D0941E68
     OTHER_D0941E68 -->|contains| ENTERPRISETHREADOS_AGENT_GUIDE_61C00685
     ENTERPRISETHREADOS_AGENT_GUIDE_61C00685 -->|contains| CLI_SKILLS_9964CBB8
@@ -146,19 +145,19 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Extraction Pipeline</td><td>269</td><td><code>1, 39, 12, 29, 34, 139, 48, 91</code></td></tr><tr><td>Graph Build</td><td>332</td><td><code>98, 13, 15, 132, 22, 28, 27, 135, 41, 155</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>57</td><td><code>133, 136, 137</code></td></tr><tr><td>Outputs &amp; Docs</td><td>5</td><td><code>112, 113, 114, 116, 117</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>43</td><td><code>142, 144, 146, 156, 103, 111, 127, 166</code></td></tr><tr><td>Serving API</td><td>103</td><td><code>14, 19, 24, 26</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>456</td><td><code>10, 6, 9, 11, 16, 17, 20, 21, 23, 31, 35, 37, 66, 80</code></td></tr><tr><td>Schema Versioning and Validation</td><td>119</td><td><code>0</code></td></tr><tr><td>EnterpriseThreadOS Agent Guide</td><td>109</td><td><code>100</code></td></tr><tr><td>AI Agent Workflow</td><td>101</td><td><code>101</code></td></tr><tr><td>Backend Architecture</td><td>101</td><td><code>102</code></td></tr><tr><td>EnterpriseThreadOS Implementation Issues</td><td>101</td><td><code>107</code></td></tr><tr><td>EnterpriseThreadOS Engineering PRD</td><td>101</td><td><code>108</code></td></tr><tr><td>ETOS Frontend</td><td>101</td><td><code>115</code></td></tr><tr><td>Other</td><td>1648</td><td><code>118, 120, 126, 128, 129, 2, 3, 4, 5, 7, 130, 131, 18, 30, 36, 134, 25, 8, 32, 33, 138, 38, 140, 141, 143, 145, 40, 147, 148, 149, 150, 42, 43, 44, 45, 46, 47, 49, 151, 152, 153, 50, 51, 154, 52, 62, 99, 157, 158, 159, 53, 54, 55, 56, 57, 58, 59, 60, 61, 63, 64, 65, 67, 160, 161, 162, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 81, 82, 83, 123, 84, 85, 86, 87, 88, 89, 90, 92, 93, 163, 164, 165, 94, 95, 96, 97, 104, 105, 106, 109, 110, 119, 121, 122, 124, 125</code></td></tr>
+      <tr><td>Extraction Pipeline</td><td>280</td><td><code>1, 12, 39, 29, 34, 139, 48, 91</code></td></tr><tr><td>Graph Build</td><td>331</td><td><code>98, 13, 15, 132, 22, 28, 27, 135, 41, 155</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>57</td><td><code>133, 136, 137</code></td></tr><tr><td>Outputs &amp; Docs</td><td>5</td><td><code>112, 113, 114, 116, 117</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>43</td><td><code>142, 144, 146, 156, 103, 111, 127, 166</code></td></tr><tr><td>Serving API</td><td>120</td><td><code>14, 169, 26, 19, 24</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>550</td><td><code>167, 10, 6, 9, 11, 16, 17, 20, 21, 23, 31, 35, 37, 66, 80</code></td></tr><tr><td>Schema Versioning and Validation</td><td>119</td><td><code>0</code></td></tr><tr><td>EnterpriseThreadOS Agent Guide</td><td>109</td><td><code>100</code></td></tr><tr><td>AI Agent Workflow</td><td>101</td><td><code>101</code></td></tr><tr><td>Backend Architecture</td><td>101</td><td><code>102</code></td></tr><tr><td>EnterpriseThreadOS Implementation Issues</td><td>101</td><td><code>107</code></td></tr><tr><td>EnterpriseThreadOS Engineering PRD</td><td>101</td><td><code>108</code></td></tr><tr><td>ETOS Frontend</td><td>101</td><td><code>115</code></td></tr><tr><td>Other</td><td>1775</td><td><code>118, 120, 126, 128, 129, 2, 3, 4, 5, 7, 168, 130, 131, 18, 30, 36, 170, 134, 25, 32, 33, 38, 8, 138, 140, 141, 143, 145, 40, 147, 148, 149, 150, 171, 42, 43, 44, 45, 46, 47, 49, 151, 152, 153, 172, 50, 51, 154, 52, 53, 99, 157, 158, 159, 173, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 160, 161, 162, 174, 175, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 81, 82, 83, 123, 176, 84, 85, 86, 87, 88, 89, 90, 92, 93, 163, 164, 165, 94, 95, 96, 97, 104, 105, 106, 109, 110, 119, 121, 122, 124, 125</code></td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Core Flow</h4>
-    <div class="arrow-chain">Analysis &amp; Clustering -&gt; Extraction Pipeline -&gt; Serving API -&gt; Other -&gt; Schema Versioning and Validation -&gt; Graph Build -&gt; Tests &amp; Fixtures</div>
+    <div class="arrow-chain">Analysis &amp; Clustering -&gt; Extraction Pipeline -&gt; Serving API -&gt; Graph Build -&gt; Outputs &amp; Docs -&gt; CLI &amp; Skill Installers -&gt; Tests &amp; Fixtures</div>
   </div>
 </div>
 <div class="grid">
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>3646 nodes · 6338 edges · 167 communities (139 shown, 28 thin omitted)</li>
+      <li>3894 nodes · 6920 edges · 177 communities (148 shown, 29 thin omitted)</li>
       <li>Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS</li>
       <li>Token cost: 0 input · 0 output</li>
       <li>1. `EnterpriseThreadOS Implementation Issues` - 115 edges</li>
@@ -170,12 +169,12 @@ flowchart LR
 <hr>
 <!-- ====== 2. Extraction Pipeline ====== -->
 <h2 id="extract-pipeline">2. Extraction Pipeline</h2>
-<p>Extraction Pipeline groups implementation around imports, etosbackend, importservicecs, slice, mostly in ETOS.Backend/Imports/ImportService.cs, app/imports/page.tsx, .cursor/plans/slice-2-identity_ffcbe231.plan.md. This section covers 269 nodes and 609 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Extraction Pipeline groups implementation around imports, etosbackend, importservicecs, etosfrontend, mostly in ETOS.Backend/Imports/ImportService.cs, app/imports/page.tsx, src/lib/etos-api.ts. This section covers 280 nodes and 633 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Extraction Pipeline (269 nodes, 609 edges)
+    %% Section: Extraction Pipeline (280 nodes, 633 edges)
     subgraph extract_pipeline_ETOS_Backend_Imports_ImportFile_f251b09d["ETOS.Backend/Imports/ImportFileParser.cs"]
         imports_importfileparser_iimportfileparser_5c239621("IImportFileParser<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
         imports_importfileparser_iimportfileparser_parse_6027d6bf("ParseAsync()<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
@@ -218,7 +217,7 @@ flowchart LR
     imports_importservice_importservice_e3aca74c -->|method| imports_importservice_importservice_createmappin_c96af6b3
     imports_importservice_importservice_e3aca74c -->|method| imports_importservice_importservice_stagebatchas_a2a84b18
     imports_importservice_importservice_e3aca74c -->|method| imports_importservice_importservice_validatebatc_49d7267b
-    %% Omitted for readability: 251 nodes, 0 edges
+    %% Omitted for readability: 262 nodes, 0 edges
     class imports_importfileparser_iimportfileparser_5c239621 klass;
     class imports_importfileparser_iimportfileparser_parse_6027d6bf async;
     class imports_importfileparser_csvimportfileparser_9ebfabdc klass;
@@ -506,30 +505,30 @@ flowchart LR
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>ETOS.Backend/Imports/ImportService.cs</code></td><td>126 nodes</td></tr>
-<tr><td><code>app/imports/page.tsx</code></td><td>24 nodes</td></tr>
+<tr><td><code>app/imports/page.tsx</code></td><td>30 nodes</td></tr>
+<tr><td><code>src/lib/etos-api.ts</code></td><td>19 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-2-identity_ffcbe231.plan.md</code></td><td>17 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportFileParser.cs</code></td><td>17 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportFileStorage.cs</code></td><td>15 nodes</td></tr>
-<tr><td><code>src/lib/etos-api.ts</code></td><td>14 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-8_imports_062273a3.plan.md</code></td><td>13 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportModels.cs</code></td><td>11 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x291, calls x127, method x85, contains x81. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x291, calls x138, contains x87, method x85. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 3. Graph Build ====== -->
 <h2 id="build-graph">3. Graph Build</h2>
-<p>Graph Build groups implementation around execution, engineering, issuesmd, docs, mostly in .docs/.prd/engineering-execution-issues.md, ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs, .cursor/plans/slice-6-graph-memory_8a3f2c1b.plan.md. This section covers 332 nodes and 440 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Graph Build groups implementation around execution, engineering, issuesmd, docs, mostly in .docs/.prd/engineering-execution-issues.md, ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs, .cursor/plans/slice-6-graph-memory_8a3f2c1b.plan.md. This section covers 331 nodes and 438 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Graph Build (332 nodes, 440 edges)
+    %% Section: Graph Build (331 nodes, 438 edges)
     subgraph build_graph_ETOS_Backend_GraphMemory_IGraphMemor_167ccc11["ETOS.Backend/GraphMemory/IGraphMemoryService.cs"]
         graphmemory_igraphmemoryservice_igraphmemoryserv_ccaf1ba0("IGraphMemoryService<br/><small>ETOS.Backend/GraphMemory/IGraphMemoryService.cs</small>")
         graphmemory_igraphmemoryservice_igraphmemoryserv_9c7eb93a("CreateNodeAsync()<br/><small>ETOS.Backend/GraphMemory/IGraphMemoryService.cs</small>")
@@ -573,7 +572,7 @@ flowchart LR
     graphmemory_neo4jgraphmemoryservice_neo4jgraphme_fecb3331 -->|method| graphmemory_neo4jgraphmemoryservice_neo4jgraphme_4b6df6f5
     graphmemory_neo4jgraphmemoryservice_neo4jgraphme_fecb3331 -->|method| graphmemory_neo4jgraphmemoryservice_neo4jgraphme_3df464d1
     graphmemory_neo4jgraphmemoryservice_neo4jgraphme_fecb3331 -->|method| graphmemory_neo4jgraphmemoryservice_neo4jgraphme_1850e820
-    %% Omitted for readability: 314 nodes, 0 edges
+    %% Omitted for readability: 313 nodes, 0 edges
     class graphmemory_igraphmemoryservice_igraphmemoryserv_ccaf1ba0 klass;
     class graphmemory_igraphmemoryservice_igraphmemoryserv_9c7eb93a async;
     class graphmemory_igraphmemoryservice_igraphmemoryserv_faead137 async;
@@ -1670,68 +1669,68 @@ flowchart LR
 
 <!-- ====== 7. Serving API ====== -->
 <h2 id="serve-api">7. Serving API</h2>
-<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, src/app/page.tsx, app/model-artifacts/page.tsx. This section covers 103 nodes and 172 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, src/app/page.tsx, app/documents/page.tsx. This section covers 120 nodes and 201 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Serving API (103 nodes, 172 edges)
+    %% Section: Serving API (120 nodes, 201 edges)
     subgraph serve_api_src_lib_etos_api_ts_396531a3["src/lib/etos-api.ts"]
-        lib_etos_api_getimportlists_2b6edf5b("getImportLists()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_getdocumentlists_03e84205("getDocumentLists()<br/><small>src/lib/etos-api.ts</small>")
         lib_etos_api_getartifactregistrylists_864dfb70("getArtifactRegistryLists()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_getclassificationpolicylists_d19a9d2f("getClassificationPolicyLists()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_approvelatestimportmapping_944c2c44("approveLatestImportMapping()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_validatelatestimportbatch_fa35df85("validateLatestImportBatch()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_stagelatestimportbatch_ee3bf943("stageLatestImportBatch()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_generatelatestidentitycandidates_c9ba0a80("generateLatestIdentityCandidates()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_approvelatestidentitycandidate_a095fb77("approveLatestIdentityCandidate()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_marklatestidentitycandidateconflict_b467c39d("markLatestIdentityCandidateConflicted()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_createdemodocumentflow_5de24b21("createDemoDocumentFlow()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_requestlatestdocumentvectorindex_575d07fb("requestLatestDocumentVectorIndex()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_createextractionissueforlatestdocum_a8f10835("createExtractionIssueForLatestDocument()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_createdemoimportflow_c8eab30d("createDemoImportFlow()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_createdemocomparisonimportflow_ae2fb94c("createDemoComparisonImportFlow()<br/><small>src/lib/etos-api.ts</small>")
+    end
+    subgraph serve_api_app_documents_page_tsx_8c83656d["app/documents/page.tsx"]
+        documents_page_cd6176ee("page.tsx")
+        documents_page_createdemodocument_c5eea162("createDemoDocument()<br/><small>app/documents/page.tsx</small>")
+        documents_page_requestvectorindex_f15594ac("requestVectorIndex()<br/><small>app/documents/page.tsx</small>")
+        documents_page_createextractionissue_7b0ccb65("createExtractionIssue()<br/><small>app/documents/page.tsx</small>")
+        documents_page_documentspage_926991a0("DocumentsPage()<br/><small>app/documents/page.tsx</small>")
     end
     subgraph serve_api_app_imports_page_tsx_2c2909a6["app/imports/page.tsx"]
-        imports_page_approvedraftmapping_ad57d594("approveDraftMapping()<br/><small>app/imports/page.tsx</small>")
-        imports_page_validatebatch_e2ba19d2("validateBatch()<br/><small>app/imports/page.tsx</small>")
-        imports_page_stagebatch_ec8339e6("stageBatch()<br/><small>app/imports/page.tsx</small>")
-        imports_page_generateidentitycandidates_e7d1661c("generateIdentityCandidates()<br/><small>app/imports/page.tsx</small>")
-        imports_page_approveidentitycandidate_0944bd91("approveIdentityCandidate()<br/><small>app/imports/page.tsx</small>")
-        imports_page_markidentitycandidateconflicted_f586fd84("markIdentityCandidateConflicted()<br/><small>app/imports/page.tsx</small>")
+        imports_page_createdemoimport_0e2ed45e("createDemoImport()<br/><small>app/imports/page.tsx</small>")
+        imports_page_createcomparisonimport_415c8f25("createComparisonImport()<br/><small>app/imports/page.tsx</small>")
+        imports_page_runidentitydemo_3dba09b2("runIdentityDemo()<br/><small>app/imports/page.tsx</small>")
     end
     subgraph serve_api_src_app_page_tsx_9599101b["src/app/page.tsx"]
         app_page_c77e992c("page.tsx")
         app_page_home_8cd6c4cc("Home()<br/><small>src/app/page.tsx</small>")
     end
     model_artifacts_page_317eae05("page.tsx")
-    imports_page_approvedraftmapping_ad57d594 -->|calls| lib_etos_api_approvelatestimportmapping_944c2c44
-    imports_page_validatebatch_e2ba19d2 -->|calls| lib_etos_api_validatelatestimportbatch_fa35df85
-    imports_page_stagebatch_ec8339e6 -->|calls| lib_etos_api_stagelatestimportbatch_ee3bf943
-    imports_page_generateidentitycandidates_e7d1661c -->|calls| lib_etos_api_generatelatestidentitycandidates_c9ba0a80
-    imports_page_approveidentitycandidate_0944bd91 -->|calls| lib_etos_api_approvelatestidentitycandidate_a095fb77
-    imports_page_markidentitycandidateconflicted_f586fd84 -->|calls| lib_etos_api_marklatestidentitycandidateconflict_b467c39d
+    documents_page_createdemodocument_c5eea162 -->|calls| lib_etos_api_createdemodocumentflow_5de24b21
+    documents_page_requestvectorindex_f15594ac -->|calls| lib_etos_api_requestlatestdocumentvectorindex_575d07fb
+    documents_page_createextractionissue_7b0ccb65 -->|calls| lib_etos_api_createextractionissueforlatestdocum_a8f10835
+    documents_page_documentspage_926991a0 -->|calls| lib_etos_api_getdocumentlists_03e84205
+    imports_page_createdemoimport_0e2ed45e -->|calls| lib_etos_api_createdemoimportflow_c8eab30d
+    imports_page_createcomparisonimport_415c8f25 -->|calls| lib_etos_api_createdemocomparisonimportflow_ae2fb94c
     app_page_home_8cd6c4cc -->|calls| lib_etos_api_getartifactregistrylists_864dfb70
-    app_page_home_8cd6c4cc -->|calls| lib_etos_api_getclassificationpolicylists_d19a9d2f
-    lib_etos_api_getimportlists_2b6edf5b -->|calls| lib_etos_api_approvelatestidentitycandidate_a095fb77
-    lib_etos_api_getimportlists_2b6edf5b -->|calls| lib_etos_api_approvelatestimportmapping_944c2c44
-    lib_etos_api_getimportlists_2b6edf5b -->|calls| lib_etos_api_generatelatestidentitycandidates_c9ba0a80
-    lib_etos_api_getimportlists_2b6edf5b -->|calls| lib_etos_api_marklatestidentitycandidateconflict_b467c39d
-    lib_etos_api_getimportlists_2b6edf5b -->|calls| lib_etos_api_stagelatestimportbatch_ee3bf943
-    lib_etos_api_getimportlists_2b6edf5b -->|calls| lib_etos_api_validatelatestimportbatch_fa35df85
+    lib_etos_api_getdocumentlists_03e84205 -->|calls| lib_etos_api_createextractionissueforlatestdocum_a8f10835
+    lib_etos_api_getdocumentlists_03e84205 -->|calls| lib_etos_api_requestlatestdocumentvectorindex_575d07fb
+    documents_page_cd6176ee -->|imports| lib_etos_api_createdemodocumentflow_5de24b21
+    documents_page_cd6176ee -->|imports| lib_etos_api_createextractionissueforlatestdocum_a8f10835
+    documents_page_cd6176ee -->|imports| lib_etos_api_getdocumentlists_03e84205
+    documents_page_cd6176ee -->|imports| lib_etos_api_requestlatestdocumentvectorindex_575d07fb
     app_page_c77e992c -->|imports| lib_etos_api_getartifactregistrylists_864dfb70
-    app_page_c77e992c -->|imports| lib_etos_api_getclassificationpolicylists_d19a9d2f
-    %% Omitted for readability: 85 nodes, 0 edges
-    class lib_etos_api_getimportlists_2b6edf5b function;
+    %% Omitted for readability: 102 nodes, 0 edges
+    class lib_etos_api_getdocumentlists_03e84205 function;
     class lib_etos_api_getartifactregistrylists_864dfb70 function;
-    class lib_etos_api_getclassificationpolicylists_d19a9d2f function;
-    class lib_etos_api_approvelatestimportmapping_944c2c44 function;
-    class lib_etos_api_validatelatestimportbatch_fa35df85 function;
-    class lib_etos_api_stagelatestimportbatch_ee3bf943 function;
-    class lib_etos_api_generatelatestidentitycandidates_c9ba0a80 function;
-    class lib_etos_api_approvelatestidentitycandidate_a095fb77 function;
-    class lib_etos_api_marklatestidentitycandidateconflict_b467c39d function;
-    class imports_page_approvedraftmapping_ad57d594 ui;
-    class imports_page_validatebatch_e2ba19d2 ui;
-    class imports_page_stagebatch_ec8339e6 ui;
-    class imports_page_generateidentitycandidates_e7d1661c ui;
-    class imports_page_approveidentitycandidate_0944bd91 ui;
-    class imports_page_markidentitycandidateconflicted_f586fd84 ui;
+    class lib_etos_api_createdemodocumentflow_5de24b21 function;
+    class lib_etos_api_requestlatestdocumentvectorindex_575d07fb function;
+    class lib_etos_api_createextractionissueforlatestdocum_a8f10835 function;
+    class lib_etos_api_createdemoimportflow_c8eab30d function;
+    class lib_etos_api_createdemocomparisonimportflow_ae2fb94c function;
+    class documents_page_cd6176ee ui;
+    class documents_page_createdemodocument_c5eea162 ui;
+    class documents_page_requestvectorindex_f15594ac ui;
+    class documents_page_createextractionissue_7b0ccb65 ui;
+    class documents_page_documentspage_926991a0 ui;
+    class imports_page_createdemoimport_0e2ed45e ui;
+    class imports_page_createcomparisonimport_415c8f25 ui;
+    class imports_page_runidentitydemo_3dba09b2 ui;
     class app_page_c77e992c ui;
     class app_page_home_8cd6c4cc ui;
     class model_artifacts_page_317eae05 ui;
@@ -1761,7 +1760,7 @@ flowchart LR
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>AccessGrant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>ApiResult</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>Artifact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+18 more</td>
+  <td><code>AccessGrant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>ApiResult</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>Artifact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+19 more</td>
   <td>Module file in src/app/page.tsx.</td>
 </tr>
 <tr>
@@ -1918,6 +1917,30 @@ flowchart LR
 </tr>
 <tr>
   <td>21</td>
+  <td><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-endpoint">API</span></td>
+  <td><code>page.tsx</code><br><small style="color:var(--muted)">app/documents/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">app/model-artifacts/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>Module file in src/lib/etos-api.ts.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>ComponentHealth</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>ComponentHealth node in src/lib/etos-api.ts.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>PlatformHealth</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>PlatformHealth node in src/lib/etos-api.ts.</td>
+</tr>
+<tr>
+  <td>24</td>
   <td><code>Tenant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1925,7 +1948,15 @@ flowchart LR
   <td>Tenant node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>22</td>
+  <td>25</td>
+  <td><code>IdentityUser</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>IdentityUser node in src/lib/etos-api.ts.</td>
+</tr>
+<tr>
+  <td>26</td>
   <td><code>TenantRole</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1933,7 +1964,7 @@ flowchart LR
   <td>TenantRole node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>23</td>
+  <td>27</td>
   <td><code>TenantMembership</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1941,7 +1972,7 @@ flowchart LR
   <td>TenantMembership node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>24</td>
+  <td>28</td>
   <td><code>AccessGrant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1949,7 +1980,7 @@ flowchart LR
   <td>AccessGrant node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>25</td>
+  <td>29</td>
   <td><code>AuditRecord</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1957,44 +1988,12 @@ flowchart LR
   <td>AuditRecord node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>26</td>
+  <td>30</td>
   <td><code>SecurityEvent</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td>No direct outbound edge</td>
   <td>SecurityEvent node in src/lib/etos-api.ts.</td>
-</tr>
-<tr>
-  <td>27</td>
-  <td><code>ArtifactVersion</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
-  <td>No direct outbound edge</td>
-  <td>ArtifactVersion node in src/lib/etos-api.ts.</td>
-</tr>
-<tr>
-  <td>28</td>
-  <td><code>Artifact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
-  <td>No direct outbound edge</td>
-  <td>Artifact node in src/lib/etos-api.ts.</td>
-</tr>
-<tr>
-  <td>29</td>
-  <td><code>ArtifactRelationship</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
-  <td>No direct outbound edge</td>
-  <td>ArtifactRelationship node in src/lib/etos-api.ts.</td>
-</tr>
-<tr>
-  <td>30</td>
-  <td><code>ArtifactDependency</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
-  <td>No direct outbound edge</td>
-  <td>Builds dependency relationships and graph data.</td>
 </tr>
 </table>
 
@@ -2003,27 +2002,28 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>src/lib/etos-api.ts</code></td><td>59 nodes</td></tr>
+      <tr><td><code>src/lib/etos-api.ts</code></td><td>65 nodes</td></tr>
 <tr><td><code>src/app/page.tsx</code></td><td>21 nodes</td></tr>
+<tr><td><code>app/documents/page.tsx</code></td><td>17 nodes</td></tr>
 <tr><td><code>app/model-artifacts/page.tsx</code></td><td>13 nodes</td></tr>
-<tr><td><code>app/imports/page.tsx</code></td><td>10 nodes</td></tr>
+<tr><td><code>app/imports/page.tsx</code></td><td>4 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x90, calls x52, imports x28, imports x2. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x112, calls x45, imports x41, imports x3. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 8. Tests & Fixtures ====== -->
 <h2 id="tests-fixtures">8. Tests &amp; Fixtures</h2>
-<p>Tests &amp; Fixtures groups implementation around etosbackendtests, importtestscs, etosbackend, identityresolutiontestscs, mostly in ETOS.Backend.Tests/ImportTests.cs, ETOS.Backend.Tests/IdentityResolutionTests.cs, ETOS.Backend.Tests/ClassificationPolicyTests.cs. This section covers 456 nodes and 1209 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Tests &amp; Fixtures groups implementation around etosbackendtests, documentmemorytestscs, importtestscs, etosbackend, mostly in ETOS.Backend.Tests/DocumentMemoryTests.cs, ETOS.Backend.Tests/ImportTests.cs, ETOS.Backend.Tests/IdentityResolutionTests.cs. This section covers 550 nodes and 1431 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Tests &amp; Fixtures (456 nodes, 1209 edges)
+    %% Section: Tests &amp; Fixtures (550 nodes, 1431 edges)
     subgraph tests_fixtures_ETOS_Backend_Tests_ArtifactRegist_237423f9["ETOS.Backend.Tests/ArtifactRegistryTests.cs"]
         etos_backend_tests_artifactregistrytests_artifac_08763d20("ArtifactRegistryTests<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
         etos_backend_tests_artifactregistrytests_artifac_371bb13b("AddDependencyAsync()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
@@ -2039,12 +2039,10 @@ flowchart LR
         etos_backend_tests_artifactregistrytests_artifac_75fdd0e5("PublishBlocksUntilRequiredDependenciesArePublished()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
         etos_backend_tests_artifactregistrytests_artifac_a38da541("RelationshipsRejectSelfLinksAndDependenciesReturnImpact()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
     end
-    subgraph tests_fixtures_ETOS_Backend_Tests_ImportTests_cs_a2c6a6f0["ETOS.Backend.Tests/ImportTests.cs"]
-        etos_backend_tests_importtests_importtests_419a3725("ImportTests<br/><small>ETOS.Backend.Tests/ImportTests.cs</small>")
-        etos_backend_tests_importtests_importtests_snaps_5390a1eb("SnapshotsPersistDeterministicPayloadsAndDiffsReportChanges()<br/><small>ETOS.Backend.Tests/ImportTests.cs</small>")
-    end
     etos_backend_tests_classificationpolicytests_cla_921288d1("ClassificationPolicyTests<br/><small>ETOS.Backend.Tests/ClassificationPolicyTests.cs</small>")
+    etos_backend_tests_documentmemorytests_allowallp_d0599af3("AllowAllPolicyService<br/><small>ETOS.Backend.Tests/DocumentMemoryTests.cs</small>")
     etos_backend_tests_identityresolutiontests_ident_a7bd97f7("IdentityResolutionTests<br/><small>ETOS.Backend.Tests/IdentityResolutionTests.cs</small>")
+    etos_backend_tests_importtests_importtests_419a3725("ImportTests<br/><small>ETOS.Backend.Tests/ImportTests.cs</small>")
     etos_backend_tests_ontologytests_ontologytests_0ac3b3cc("OntologyTests<br/><small>ETOS.Backend.Tests/OntologyTests.cs</small>")
     etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_371bb13b
     etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_917c710b
@@ -2070,7 +2068,7 @@ flowchart LR
     etos_backend_tests_artifactregistrytests_artifac_86d6ae87 -->|calls| etos_backend_tests_artifactregistrytests_artifac_65588976
     etos_backend_tests_artifactregistrytests_artifac_86d6ae87 -->|calls| etos_backend_tests_artifactregistrytests_artifac_9fff29a2
     etos_backend_tests_artifactregistrytests_artifac_a38da541 -->|calls| etos_backend_tests_artifactregistrytests_artifac_371bb13b
-    %% Omitted for readability: 438 nodes, 12 edges
+    %% Omitted for readability: 532 nodes, 11 edges
     class etos_backend_tests_artifactregistrytests_artifac_08763d20 test;
     class etos_backend_tests_artifactregistrytests_artifac_371bb13b test;
     class etos_backend_tests_artifactregistrytests_artifac_917c710b test;
@@ -2084,10 +2082,10 @@ flowchart LR
     class etos_backend_tests_artifactregistrytests_artifac_7507371a test;
     class etos_backend_tests_artifactregistrytests_artifac_75fdd0e5 test;
     class etos_backend_tests_artifactregistrytests_artifac_a38da541 test;
-    class etos_backend_tests_importtests_importtests_419a3725 test;
-    class etos_backend_tests_importtests_importtests_snaps_5390a1eb test;
     class etos_backend_tests_classificationpolicytests_cla_921288d1 test;
+    class etos_backend_tests_documentmemorytests_allowallp_d0599af3 test;
     class etos_backend_tests_identityresolutiontests_ident_a7bd97f7 test;
+    class etos_backend_tests_importtests_importtests_419a3725 test;
     class etos_backend_tests_ontologytests_ontologytests_0ac3b3cc test;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
@@ -2112,7 +2110,7 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
-  <td><code>ImportTests.cs</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>DocumentMemoryTests.cs</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
@@ -2120,235 +2118,235 @@ flowchart LR
 </tr>
 <tr>
   <td>2</td>
-  <td><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>AddTenantHeaders()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>ApproveMappingAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>BomMetadataStagesRelationshipsAndComparisonReportsMismatches()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+30 more</td>
+  <td><code>CadParsingPlaceholderStaysDisabled()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateDocumentWithVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+9 more</td>
   <td>Verifies imports, entry points, or version behavior.</td>
 </tr>
 <tr>
   <td>3</td>
-  <td><code>.RawFileEvidenceIsStoredWithChecksumAndAuditLink()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>CreateApplication()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateImportBatchAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreatePublishedModelContextAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+2 more</td>
-  <td>.RawFileEvidenceIsStoredWithChecksumAndAuditLink() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateTextFile()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+2 more</td>
+  <td>.DocumentCreationAndVersionUploadCreateArtifactAndMetadata() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>4</td>
-  <td><code>Task</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>Task</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Task node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>Task node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>5</td>
-  <td><code>Fact</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>Fact</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Fact node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>Fact node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>6</td>
-  <td><code>.MappingApprovalIsRequiredAndApprovedMappingsHaveNoUpdateEndpoint()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.UncertainDocumentLinksCreateReviewableDataQualityIssues()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>AddTenantHeaders()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>ApproveMappingAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateApplication()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+4 more</td>
-  <td>.MappingApprovalIsRequiredAndApprovedMappingsHaveNoUpdateEndpoint() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateDocumentWithVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+1 more</td>
+  <td>.UncertainDocumentLinksCreateReviewableDataQualityIssues() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>7</td>
-  <td><code>.ValidationPersistsRequiredFieldTypeAndLifecycleFailures()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.ExtractionFailuresCreateDocumentVersionIssues()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>ApproveMappingAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateApplication()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateImportBatchAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+4 more</td>
-  <td>.ValidationPersistsRequiredFieldTypeAndLifecycleFailures() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateTextFile()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+1 more</td>
+  <td>.ExtractionFailuresCreateDocumentVersionIssues() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>8</td>
-  <td><code>.StagingCreatesUnverifiedStagingGraphNodesWithSourceReferences()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.VectorIndexRequestsRecordDisabledProviderWithTenantAndPolicyMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>ApproveMappingAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateApplication()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateImportBatchAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+4 more</td>
-  <td>Builds dependency relationships and graph data.</td>
+  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateDocumentWithVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+1 more</td>
+  <td>.VectorIndexRequestsRecordDisabledProviderWithTenantAndPolicyMetadata() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>9</td>
-  <td><code>.CrossTenantImportAccessIsDeniedAndAudited()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.PolicyFilteringExcludesRestrictedDocuments()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>AddTenantHeaders()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateApplication()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateImportBatchAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+1 more</td>
-  <td>.CrossTenantImportAccessIsDeniedAndAudited() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>SeedTenantUserAndImport()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td>.PolicyFilteringExcludesRestrictedDocuments() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>10</td>
-  <td><code>.PromotionIsBlockedByValidationErrors()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.CadParsingPlaceholderStaysDisabled()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>AddTenantHeaders()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>ApproveMappingAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateApplication()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+5 more</td>
-  <td>.PromotionIsBlockedByValidationErrors() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>SeedTenantUserAndImport()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td>.CadParsingPlaceholderStaysDisabled() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>11</td>
-  <td><code>.PromotionCopiesStagingGraphToTrustedAndRecordsAudit()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.CreateDocumentWithVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>ApproveMappingAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateApplication()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateImportBatchAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+5 more</td>
-  <td>Builds dependency relationships and graph data.</td>
+  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>UncertainDocumentLinksCreateReviewableDataQualityIssues()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>VectorIndexRequestsRecordDisabledProviderWithTenantAndPolicyMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>CreateTextFile()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td>.CreateDocumentWithVersionAsync() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>12</td>
-  <td><code>.RejectedStagingStoresSummariesWithoutRawPayload()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>IDocumentService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>ApproveMappingAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateApplication()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateImportBatchAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+5 more</td>
-  <td>.RejectedStagingStoresSummariesWithoutRawPayload() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>IDocumentService node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>13</td>
-  <td><code>.BomMetadataStagesRelationshipsAndComparisonReportsMismatches()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>DocumentArtifactDetailResponse</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>ApproveMappingAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateApplication()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateBomComparisonAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+5 more</td>
-  <td>.BomMetadataStagesRelationshipsAndComparisonReportsMismatches() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>DocumentArtifactDetailResponse node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>14</td>
-  <td><code>.SnapshotsPersistDeterministicPayloadsAndDiffsReportChanges()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>ApproveMappingAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CaptureSnapshotAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateApplication()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+8 more</td>
-  <td>.SnapshotsPersistDeterministicPayloadsAndDiffsReportChanges() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td><code>CadParsingPlaceholderStaysDisabled()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+4 more</td>
+  <td>No direct outbound edge</td>
+  <td>.CreateDbContext() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>15</td>
-  <td><code>.CreateApplication()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>EnterpriseThreadDbContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>BomMetadataStagesRelationshipsAndComparisonReportsMismatches()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CrossTenantImportAccessIsDeniedAndAudited()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+8 more</td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>.CreateApplication() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>EnterpriseThreadDbContext node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>16</td>
-  <td><code>RecordingGraphMemoryService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.SeedTenantUserAndImport()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>CadParsingPlaceholderStaysDisabled()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+4 more</td>
   <td>No direct outbound edge</td>
-  <td>Builds dependency relationships and graph data.</td>
+  <td>.SeedTenantUserAndImport() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>17</td>
-  <td><code>WebApplicationFactory</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>WebApplicationFactory node in ETOS.Backend.Tests/ImportTests.cs.</td>
-</tr>
-<tr>
-  <td>18</td>
-  <td><code>Program</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Program node in ETOS.Backend.Tests/ImportTests.cs.</td>
-</tr>
-<tr>
-  <td>19</td>
-  <td><code>.CreatePublishedModelContextAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td><code>BomMetadataStagesRelationshipsAndComparisonReportsMismatches()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CrossTenantImportAccessIsDeniedAndAudited()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+8 more</td>
-  <td><code>CreateAttributeSchemaAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateLifecycleAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>CreateModelPackageAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br>+4 more</td>
-  <td>.CreatePublishedModelContextAsync() node in ETOS.Backend.Tests/ImportTests.cs.</td>
-</tr>
-<tr>
-  <td>20</td>
-  <td><code>HttpClient</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>HttpClient node in ETOS.Backend.Tests/ImportTests.cs.</td>
-</tr>
-<tr>
-  <td>21</td>
-  <td><code>TestContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>TestContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
   <td>Verifies imports, entry points, or version behavior.</td>
 </tr>
 <tr>
-  <td>22</td>
-  <td><code>.CreateUserAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td>18</td>
+  <td><code>.CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>CreatePublishedModelContextAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>CadParsingPlaceholderStaysDisabled()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+4 more</td>
   <td>No direct outbound edge</td>
-  <td>.CreateUserAsync() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>.CreateService() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>IClassificationPolicyService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>IClassificationPolicyService node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>DocumentService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>DocumentService node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>.CreateTextFile()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>CreateDocumentWithVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+1 more</td>
+  <td>No direct outbound edge</td>
+  <td>.CreateTextFile() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>IFormFile</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>IFormFile node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>23</td>
-  <td><code>Guid</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.Sha256()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>Guid node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>.Sha256() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>24</td>
-  <td><code>.CreateTenantAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>StaticTenantContextResolver</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>CreatePublishedModelContextAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td>No direct outbound edge</td>
-  <td>.CreateTenantAsync() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>External entry / no inbound edge</td>
+  <td><code>ResolveAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td>StaticTenantContextResolver node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>25</td>
-  <td><code>TenantResponse</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.ResolveAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>StaticTenantContextResolver</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>TenantResponse node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>.ResolveAsync() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>26</td>
-  <td><code>.CreateOntologyAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>CancellationToken</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>CreatePublishedModelContextAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>AddTenantHeaders()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td>.CreateOntologyAsync() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>CancellationToken node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>27</td>
-  <td><code>OntologyVersionResponse</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>ActiveTenantContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>OntologyVersionResponse node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>ActiveTenantContext node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>28</td>
-  <td><code>.CreateSemanticLayerAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>AllowAllPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>CreatePublishedModelContextAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>AddTenantHeaders()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td>.CreateSemanticLayerAsync() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>External entry / no inbound edge</td>
+  <td><code>HasPermissionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>HasTenantAccessAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td>AllowAllPermissionService node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>29</td>
-  <td><code>SemanticLayerVersionResponse</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>.HasTenantAccessAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>AllowAllPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>SemanticLayerVersionResponse node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>.HasTenantAccessAsync() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 <tr>
   <td>30</td>
-  <td><code>.CreateLifecycleAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
+  <td><code>Guid</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>CreatePublishedModelContextAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small><br><code>ImportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td><code>AddTenantHeaders()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/ImportTests.cs</small></td>
-  <td>.CreateLifecycleAsync() node in ETOS.Backend.Tests/ImportTests.cs.</td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Guid node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
 </tr>
 </table>
 
@@ -2357,19 +2355,19 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>ETOS.Backend.Tests/ImportTests.cs</code></td><td>81 nodes</td></tr>
+      <tr><td><code>ETOS.Backend.Tests/DocumentMemoryTests.cs</code></td><td>93 nodes</td></tr>
+<tr><td><code>ETOS.Backend.Tests/ImportTests.cs</code></td><td>81 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/IdentityResolutionTests.cs</code></td><td>67 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/ClassificationPolicyTests.cs</code></td><td>43 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/OntologyTests.cs</code></td><td>35 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/DataQualityTests.cs</code></td><td>34 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Identity/TenantContext.cs</code></td><td>33 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/ArtifactRegistryTests.cs</code></td><td>25 nodes</td></tr>
-<tr><td><code>ETOS.Backend.Tests/GraphMemoryTests.cs</code></td><td>23 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x620, calls x330, method x197, contains x33. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x761, calls x354, method x237, contains x42. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -4755,12 +4753,12 @@ flowchart LR
 
 <!-- ====== 16. Other ====== -->
 <h2 id="other">16. Other</h2>
-<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-007-601-700.md, .prd/.initialConversation/chatgpt-conversation-part-008-701-800.md, .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md. This section covers 1648 nodes and 2652 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-007-601-700.md, .prd/.initialConversation/chatgpt-conversation-part-008-701-800.md, .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md. This section covers 1775 nodes and 2955 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Other (1648 nodes, 2652 edges)
+    %% Section: Other (1775 nodes, 2955 edges)
     subgraph other_ETOS_Backend_Artifacts_ArtifactRegistrySer_bc961771["ETOS.Backend/Artifacts/ArtifactRegistryService.cs"]
         artifacts_artifactregistryservice_artifactregist_5bf4a65c("ArtifactRegistryService<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
         artifacts_artifactregistryservice_iartifactregis_cc28299e("IArtifactRegistryService<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
@@ -4778,12 +4776,10 @@ flowchart LR
         artifacts_artifactendpointextensions_artifactend_763de6d7("ExecuteAsync()<br/><small>ETOS.Backend/Artifacts/ArtifactEndpointExtensions.cs</small>")
         artifacts_artifactendpointextensions_artifactend_b32267fc("MapEnterpriseThreadArtifactEndpoints()<br/><small>ETOS.Backend/Artifacts/ArtifactEndpointExtensions.cs</small>")
     end
-    subgraph other_ETOS_Backend_Identity_IdentityAdminService_d731a28b["ETOS.Backend/Identity/IdentityAdminService.cs"]
-        identity_identityadminservice_identityadminservi_474833e0("IdentityAdminService<br/><small>ETOS.Backend/Identity/IdentityAdminService.cs</small>")
-        identity_identityadminservice_iidentityadminserv_1d5ba5a4("IIdentityAdminService<br/><small>ETOS.Backend/Identity/IdentityAdminService.cs</small>")
-    end
     classification_classificationpolicyservice_class_737a2aa3("ClassificationPolicyService<br/><small>ETOS.Backend/Classification/ClassificationPolicyService.cs</small>")
     dataquality_dataqualityservice_dataqualityissues_c3a4fac1("DataQualityIssueService<br/><small>ETOS.Backend/DataQuality/DataQualityService.cs</small>")
+    documents_documentservice_documentservice_5e7e63ca("DocumentService<br/><small>ETOS.Backend/Documents/DocumentService.cs</small>")
+    identity_identityadminservice_identityadminservi_474833e0("IdentityAdminService<br/><small>ETOS.Backend/Identity/IdentityAdminService.cs</small>")
     identityresolution_identityresolutionservice_ide_fee45c54("IdentityResolutionService<br/><small>ETOS.Backend/IdentityResolution/IdentityResolutionService.cs</small>")
     artifacts_artifactendpointextensions_artifactend_16ea151a -->|method| artifacts_artifactendpointextensions_artifactend_763de6d7
     artifacts_artifactendpointextensions_artifactend_16ea151a -->|method| artifacts_artifactendpointextensions_artifactend_b32267fc
@@ -4796,7 +4792,7 @@ flowchart LR
     artifacts_artifactregistryservice_iartifactregis_cc28299e -->|method| artifacts_artifactregistryservice_iartifactregis_c0eb927c
     artifacts_artifactregistryservice_iartifactregis_cc28299e -->|method| artifacts_artifactregistryservice_iartifactregis_55433041
     artifacts_artifactregistryservice_iartifactregis_cc28299e -->|method| artifacts_artifactregistryservice_iartifactregis_5399a720
-    %% Omitted for readability: 1630 nodes, 0 edges
+    %% Omitted for readability: 1757 nodes, 0 edges
     class artifacts_artifactregistryservice_artifactregist_5bf4a65c klass;
     class artifacts_artifactregistryservice_iartifactregis_cc28299e klass;
     class artifacts_artifactregistryservice_iartifactregis_bf63aefd async;
@@ -4810,10 +4806,10 @@ flowchart LR
     class artifacts_artifactendpointextensions_artifactend_16ea151a api;
     class artifacts_artifactendpointextensions_artifactend_763de6d7 async;
     class artifacts_artifactendpointextensions_artifactend_b32267fc api;
-    class identity_identityadminservice_identityadminservi_474833e0 klass;
-    class identity_identityadminservice_iidentityadminserv_1d5ba5a4 klass;
     class classification_classificationpolicyservice_class_737a2aa3 klass;
     class dataquality_dataqualityservice_dataqualityissues_c3a4fac1 klass;
+    class documents_documentservice_documentservice_5e7e63ca klass;
+    class identity_identityadminservice_identityadminservi_474833e0 klass;
     class identityresolution_identityresolutionservice_ide_fee45c54 klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
@@ -5095,7 +5091,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x1056, contains x871, method x341, calls x336. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x1219, contains x898, calls x396, method x390. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -5106,17 +5102,17 @@ flowchart LR
   <div class="card">
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>Nodes</td><td>3646</td></tr>
-      <tr><td>Edges</td><td>6338</td></tr>
+      <tr><td>Nodes</td><td>3894</td></tr>
+      <tr><td>Edges</td><td>6920</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
-      <tr><td>Communities</td><td>167</td></tr>
+      <tr><td>Communities</td><td>177</td></tr>
       <tr><td>Documented Sections</td><td>15</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>EXTRACTED</td><td>6338</td></tr>
+      <tr><td>EXTRACTED</td><td>6920</td></tr>
       <tr><td>INFERRED</td><td>0</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
@@ -5125,7 +5121,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>EnterpriseThreadOS — Architecture Documentation</p>
-  <p>Generated: 2026-06-11 11:28 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-06-11 18:46 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

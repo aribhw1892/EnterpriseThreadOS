@@ -569,6 +569,94 @@ export type MonitoringIssueTypeDefinition = {
   createdAt: string;
 };
 
+export type DocumentVersion = {
+  id: string;
+  tenantId: string;
+  documentArtifactId: string;
+  versionLabel: string;
+  storageKey: string;
+  sha256Checksum: string;
+  originalFileName: string;
+  contentType: string;
+  sizeBytes: number;
+  extractedMetadataSummaryJson?: string | null;
+  extractionStatus: string;
+  extractionFailureSummary?: string | null;
+  uploadedByUserId: string;
+  auditRecordId?: string | null;
+  createdAt: string;
+};
+
+export type DocumentObjectLink = {
+  id: string;
+  tenantId: string;
+  documentArtifactId: string;
+  documentVersionId: string;
+  graphNodeId?: string | null;
+  importBatchId?: string | null;
+  confidenceScore: number;
+  evidenceSummary: string;
+  extractionStatus: string;
+  sourceSystem?: string | null;
+  sourceRecordId?: string | null;
+  createdByUserId: string;
+  auditRecordId?: string | null;
+  createdAt: string;
+};
+
+export type DocumentVectorIndexRecord = {
+  id: string;
+  tenantId: string;
+  documentArtifactId: string;
+  documentVersionId: string;
+  providerName: string;
+  status: string;
+  tenantFilter: string;
+  policyFilterSummary: string;
+  safeSummary: string;
+  failureSummary?: string | null;
+  requestedByUserId: string;
+  auditRecordId?: string | null;
+  createdAt: string;
+};
+
+export type DocumentArtifact = {
+  id: string;
+  tenantId: string;
+  artifactId: string;
+  documentType: string;
+  classificationKey: string;
+  title: string;
+  description?: string | null;
+  ownerUserId: string;
+  latestVersion?: DocumentVersion | null;
+  linkCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type DocumentArtifactDetail = {
+  id: string;
+  tenantId: string;
+  artifactId: string;
+  documentType: string;
+  classificationKey: string;
+  title: string;
+  description?: string | null;
+  ownerUserId: string;
+  versions: DocumentVersion[];
+  objectLinks: DocumentObjectLink[];
+  vectorIndexRecords: DocumentVectorIndexRecord[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CadParsingStatus = {
+  isEnabled: boolean;
+  providerName: string;
+  safeSummary: string;
+};
+
 export type ImportPreview = {
   batchId: string;
   evidenceId: string;
@@ -844,6 +932,39 @@ export async function getImportLists() {
   };
 }
 
+export async function getDocumentLists() {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+
+  const documents = tenantHeaders
+    ? await fetchApi<DocumentArtifact[]>("/api/admin/documents", tenantHeaders)
+    : missingContext<DocumentArtifact[]>();
+  const firstDocument = documents.data?.[0];
+
+  const [firstDocumentDetail, cadParsing, dataQualityIssues] = tenantHeaders
+    ? await Promise.all([
+        firstDocument
+          ? fetchApi<DocumentArtifactDetail>(`/api/admin/documents/${firstDocument.id}`, tenantHeaders)
+          : emptyObject<DocumentArtifactDetail>(),
+        fetchApi<CadParsingStatus>("/api/admin/documents/cad-parsing", tenantHeaders),
+        fetchApi<DataQualityIssue[]>("/api/admin/data-quality/issues", tenantHeaders),
+      ])
+    : [
+        missingContext<DocumentArtifactDetail>(),
+        missingContext<CadParsingStatus>(),
+        missingContext<DataQualityIssue[]>(),
+      ];
+
+  return {
+    documents,
+    firstDocumentDetail,
+    cadParsing,
+    dataQualityIssues,
+  };
+}
+
 export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackageVersion>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1062,6 +1183,129 @@ export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackage
 
 export async function createDemoImportFlow(): Promise<ApiResult<ImportMappingVersion>> {
   return await createDemoImportForSource("demo-cad-pdm", "Demo CSV import batch for Issue 8.");
+}
+
+export async function createDemoDocumentFlow(): Promise<ApiResult<DocumentArtifactDetail>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<DocumentArtifactDetail>();
+  }
+
+  const document = await postApi<DocumentArtifactDetail>(
+    "/api/admin/documents",
+    {
+      documentType: "engineering-spec",
+      classificationKey: "internal",
+      title: `Pump Assembly Specification ${new Date().toISOString().slice(0, 19)}`,
+      description: "Demo document memory artifact for Slice 12.",
+      ownerUserId: adminUserId,
+    },
+    tenantHeaders,
+  );
+  if (!document.data) {
+    return { data: null, error: document.error };
+  }
+
+  const metadata = JSON.stringify({
+    source: "demo",
+    summary: "Internal engineering specification metadata.",
+    cadGeometryParsing: "disabled-placeholder",
+  });
+  const formData = new FormData();
+  formData.set("file", new Blob(["Pump assembly torque spec and inspection note."], { type: "text/plain" }), "pump-spec.txt");
+  formData.set("versionLabel", `v-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`);
+  formData.set("extractedMetadataSummaryJson", metadata);
+  formData.set("extractionStatus", "MetadataImported");
+  formData.set("extractionFailureSummary", "");
+  const version = await fetchApi<DocumentVersion>(
+    `/api/admin/documents/${document.data.id}/versions`,
+    tenantHeaders,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+  if (!version.data) {
+    return { data: null, error: version.error };
+  }
+
+  const imports = await getImportLists();
+  const latestBatch = imports.batches.data?.[0];
+  if (latestBatch) {
+    await postApi<DocumentObjectLink>(
+      `/api/admin/documents/${document.data.id}/links`,
+      {
+        documentVersionId: version.data.id,
+        graphNodeId: null,
+        importBatchId: latestBatch.id,
+        confidenceScore: 0.68,
+        evidenceSummary: "Demo document linked to latest import batch for reviewable evidence.",
+        extractionStatus: "Uncertain",
+        sourceSystem: latestBatch.sourceSystem,
+        sourceRecordId: latestBatch.id,
+      },
+      tenantHeaders,
+    );
+  }
+
+  return await fetchApi<DocumentArtifactDetail>(`/api/admin/documents/${document.data.id}`, tenantHeaders);
+}
+
+export async function requestLatestDocumentVectorIndex(): Promise<ApiResult<DocumentVectorIndexRecord>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<DocumentVectorIndexRecord>();
+  }
+
+  const lists = await getDocumentLists();
+  const document = lists.firstDocumentDetail.data;
+  const version = document?.versions[0];
+  if (!document || !version) {
+    return { data: null, error: "No document version is available for vector indexing." };
+  }
+
+  return await postApi<DocumentVectorIndexRecord>(
+    `/api/admin/documents/${document.id}/versions/${version.id}/vector-index`,
+    {
+      policyKey: null,
+      safeSummary: "Demo vector indexing request recorded from the documents page.",
+    },
+    tenantHeaders,
+  );
+}
+
+export async function createExtractionIssueForLatestDocument(): Promise<ApiResult<DataQualityIssue>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<DataQualityIssue>();
+  }
+
+  const lists = await getDocumentLists();
+  const document = lists.firstDocumentDetail.data;
+  const version = document?.versions[0];
+  if (!document || !version) {
+    return { data: null, error: "No document version is available for extraction issue creation." };
+  }
+
+  return await postApi<DataQualityIssue>(
+    `/api/admin/documents/${document.id}/versions/${version.id}/extraction-issue`,
+    {
+      title: "Manual document extraction review",
+      issueCode: "document_extraction_review",
+      evidenceSummary: "Manual extraction issue created from the documents page.",
+      rationale: "Demo review hook for Slice 12.",
+    },
+    tenantHeaders,
+  );
 }
 
 export async function createDemoComparisonImportFlow(): Promise<ApiResult<ImportMappingVersion>> {

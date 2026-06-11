@@ -1,0 +1,117 @@
+{
+  "communities": {
+    "0": [
+      "adr_0002_artifact_lifecycle",
+      "adr_readme",
+      "architecture_extension_points_doc",
+      "backend_architecture_doc"
+    ],
+    "1": [
+      "ai_agent_workflow_guide",
+      "frontend_architecture_doc",
+      "local_development_guide"
+    ]
+  },
+  "cohesion": {
+    "0": 0.8333333333333334,
+    "1": 1.0
+  },
+  "gods": [
+    {
+      "id": "ai_agent_workflow_guide",
+      "label": "AI Agent Workflow Guide",
+      "degree": 5
+    },
+    {
+      "id": "architecture_extension_points_doc",
+      "label": "EnterpriseThreadOS Extension Points Document",
+      "degree": 5
+    },
+    {
+      "id": "backend_architecture_doc",
+      "label": "Backend Architecture Document",
+      "degree": 5
+    },
+    {
+      "id": "frontend_architecture_doc",
+      "label": "Frontend Architecture Document",
+      "degree": 4
+    },
+    {
+      "id": "local_development_guide",
+      "label": "Local Development Guide",
+      "degree": 3
+    },
+    {
+      "id": "adr_0002_artifact_lifecycle",
+      "label": "ADR 0002: Artifact Lifecycle",
+      "degree": 3
+    },
+    {
+      "id": "adr_readme",
+      "label": "Architecture Decision Records README",
+      "degree": 3
+    }
+  ],
+  "surprises": [
+    {
+      "source": "ADR 0002: Artifact Lifecycle",
+      "target": "AI Agent Workflow Guide",
+      "source_files": [
+        "architecture/adr/0002-artifact-lifecycle.md",
+        "ai-agent-workflow.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "Architecture Decision Records README",
+      "target": "AI Agent Workflow Guide",
+      "source_files": [
+        "architecture/adr/README.md",
+        "ai-agent-workflow.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "AI Agent Workflow Guide",
+      "target": "EnterpriseThreadOS Extension Points Document",
+      "source_files": [
+        "ai-agent-workflow.md",
+        "architecture/extension-points.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "Local Development Guide",
+      "target": "Backend Architecture Document",
+      "source_files": [
+        "local-development.md",
+        "backend/architecture.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "EnterpriseThreadOS Extension Points Document",
+      "target": "Frontend Architecture Document",
+      "source_files": [
+        "architecture/extension-points.md",
+        "frontend/architecture.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; bridges separate communities"
+    }
+  ],
+  "tokens": {
+    "input": 10363,
+    "output": 1423
+  }
+}

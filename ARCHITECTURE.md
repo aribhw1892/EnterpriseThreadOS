@@ -1,6 +1,6 @@
 # EnterpriseThreadOS Architecture
 
-EnterpriseThreadOS is intended to become an AI-native Enterprise Digital Thread Operating System. The current repository is the local-first platform foundation for that product: a .NET modular monolith backend, a Next.js frontend shell, local infrastructure services, persistence, health checks, tenant identity/access, audit/security events, the BaseArtifact registry foundation, graph memory, canonical model governance, import/mapping/staging, identity-resolution review and trust scoring, and data-quality issue review hooks.
+EnterpriseThreadOS is intended to become an AI-native Enterprise Digital Thread Operating System. The current repository is the local-first platform foundation for that product: a .NET modular monolith backend, a Next.js frontend shell, local infrastructure services, persistence, health checks, tenant identity/access, audit/security events, the BaseArtifact registry foundation, graph memory, canonical model governance, import/mapping/staging, identity-resolution review and trust scoring, data-quality issue review hooks, and document memory/object linking.
 
 For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For implementation order, use `.docs/.prd/engineering-execution-issues.md`.
 
@@ -22,6 +22,7 @@ flowchart TB
     platform --> imports["Import Mapping And Staging Module"]
     platform --> identityresolution["Identity Resolution And Trust Module"]
     platform --> dataquality["Data Quality Issues Module"]
+    platform --> documents["Document Memory Module"]
     platform --> persistence["EnterpriseThreadDbContext"]
     platform --> extensions["Extension Point Catalog"]
 
@@ -49,6 +50,7 @@ flowchart TB
 - `ETOS.Backend/Imports/` contains import batches, raw file evidence metadata, CSV/Excel parsing, deterministic mapping preview/approval, validation, staging graph creation, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/IdentityResolution/` contains identity resolution rules, deterministic candidate generation from staged import identity fields, human review decisions, identity-link graph relationship creation, learning evidence, trust score records, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/DataQuality/` contains durable data-quality issues, source links, trust-impact metadata, security-event review hooks, inert monitoring placeholders, DTOs, and minimal API endpoint mapping.
+- `ETOS.Backend/Documents/` contains document artifacts, immutable document versions, document-object links, extraction issue hooks, vector indexing metadata records, disabled CAD parsing placeholder contracts, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/Tenancy/` contains tenant-scope conventions used by persisted tenant-owned records.
 - `ETOS.Backend/Platform/Extensions/` exposes deferred extension points for planned platform capabilities without pretending they are active.
 - `ETOS.Frontend/` is a Next.js 16 shell that renders local platform health from the backend.
@@ -73,12 +75,13 @@ Implemented or partially implemented:
 - Import mapping and staging graph foundation with raw evidence metadata, CSV/Excel import parsing, deterministic mapping suggestions, approved immutable mapping versions, row validation, and staging/unverified graph writes.
 - Identity resolution and trust-scoring foundation with deterministic cross-source candidate links, approval/rejection/conflict review decisions, graph `IDENTITY_LINK` relationships instead of destructive merges, learning evidence, trust score breakdowns, and a minimal imports-page review UI.
 - Data quality issue foundation with durable issue records generated from import validation, manual issue creation, security-event review hooks, severity-to-trust-impact metadata, review-priority metadata, inert monitoring placeholders, and a minimal imports-page UI.
+- Document memory foundation with document artifact metadata, immutable version storage metadata, document-to-graph/import links, extraction issue hooks, Qdrant-ready vector indexing records, disabled native CAD geometry parsing placeholder, and a minimal documents-page UI.
 
 Planned by PRD and backlog, but not generally implemented unless future source code says otherwise:
 
 - Graph business flows beyond the current import staging and identity-review foundations: trusted graph promotion, snapshots, diffs, and governed traversals.
 - Full review task workflows for data quality issues, including assignment, blocking, escalation, completion, and decision creation.
-- Document memory, Qdrant indexing, governed query intents, context assembly, and AI Trace.
+- Live Qdrant indexing/provider execution, governed query intents, context assembly, and AI Trace.
 - Governed chat, dashboard/report generation, recommendations, review tasks, decisions, outcomes, and learning.
 - Tool registry, agent runtime, workflow runtime, multi-agent collaboration, and enterprise action framework.
 - Neo4j Agent Memory or any other persistent agent-memory provider. These remain deferred behind EnterpriseThreadOS-owned contracts and must not replace the platform graph memory abstraction.
@@ -98,7 +101,7 @@ Planned by PRD and backlog, but not generally implemented unless future source c
 Current SQL ownership:
 
 - ASP.NET Identity users and roles.
-- Tenants, memberships, tenant roles, permissions, role-permission assignments, access grants, access requests, access-denial audit records, audit records, security events, artifacts, artifact versions, artifact relationships, artifact dependency edges, classification/policy records, ontology versions, semantic layer versions, lifecycle vocabularies, attribute schemas, model package versions, import batches, file evidence metadata, mapping versions, validation issues, staging run summaries, identity resolution rules, identity candidate links, review decisions, learning evidence, trust score records, data-quality issues, issue source links, trust-impact records, and monitoring issue type placeholders.
+- Tenants, memberships, tenant roles, permissions, role-permission assignments, access grants, access requests, access-denial audit records, audit records, security events, artifacts, artifact versions, artifact relationships, artifact dependency edges, classification/policy records, ontology versions, semantic layer versions, lifecycle vocabularies, attribute schemas, model package versions, import batches, file evidence metadata, mapping versions, validation issues, staging run summaries, identity resolution rules, identity candidate links, review decisions, learning evidence, trust score records, data-quality issues, issue source links, trust-impact records, monitoring issue type placeholders, document artifacts, document versions, document-object links, and document vector index records.
 - Early tenant-scoped persistence conventions.
 
 Current local infrastructure availability:
@@ -111,8 +114,8 @@ Future PRD ownership model:
 - SQL stores operational, governance, artifact, audit, runtime summary, and tenant state.
 - Graph memory stores connected enterprise objects, versions, relationships, BOM structures, identity links, document links, quality links, and dependency projections.
 - The Neo4j Digital Thread Graph also serves as the platform's context graph for governed agent retrieval.
-- Object storage holds import files, documents, extraction artifacts, and trace export packages. Current import file storage is behind `IImportFileStorage`; the local implementation stores raw evidence on disk while preserving the object-storage boundary.
-- Vector memory supports document retrieval after tenant/policy filtering.
+- Object storage holds import files, documents, extraction artifacts, and trace export packages. Current import and document file storage use local file-backed abstractions while preserving the object-storage boundary.
+- Vector memory supports document retrieval after tenant/policy filtering. Current document vector indexing records provider/filter metadata only; live Qdrant execution is deferred.
 - Persistent agent memory, if added later, stores governed conversation, fact/preference, and reasoning memory behind an internal provider contract. It cannot directly promote learned facts into trusted graph state.
 
 ## Guardrails
