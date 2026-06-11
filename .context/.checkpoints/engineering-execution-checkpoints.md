@@ -1,5 +1,67 @@
 # EnterpriseThreadOS Engineering Execution Checkpoints
 
+## 2026-06-11 - Slice 10 Data Quality Ready
+
+Source docs reviewed:
+
+- `.docs/.prd/engineering-execution-prd.md`
+- `.docs/.prd/engineering-execution-issues.md`
+- `.cursor/plans/slice_10_quality_558f624b.plan.md`
+
+Previous checkpoint reviewed:
+
+- `2026-06-10 - Slice 7 Canonical Ontology Ready`
+
+Working framing:
+
+- Slice 10 implements Issue 10 as the data-quality issue and review-hook foundation. It promotes import validation signals into durable tenant-scoped data-quality records, supports manual/security-event issue creation, and exposes severity/trust-impact metadata without implementing full review tasks.
+- Data-quality issues are operational/governance records in PostgreSQL. Full `ReviewTaskArtifact`, trusted graph promotion, graph snapshots/diffs, recommendations, and decisions remain later slices.
+- Monitoring-agent support is represented as disabled placeholders only. No live source scanning or agent execution was added.
+
+Design decisions:
+
+- Added a dedicated `ETOS.Backend/DataQuality` module rather than overloading import validation rows. `ImportValidationIssue` stays batch-local evidence; `DataQualityIssue` is the durable governance record.
+- Used unique source keys for generated issues so import-validation and security-event issue creation is idempotent.
+- Kept review hooks as metadata (`ReviewTaskReady`, hints, hook timestamps, priority), not full task workflows.
+- Modeled trust impact separately from issue headers through `DataQualityTrustImpact`, with deterministic severity penalties and recommendation-exclusion metadata.
+
+Implemented or partially implemented:
+
+- `ETOS.Backend/DataQuality` contains models, DTO contracts, service logic, permissions, endpoint mapping under `/api/admin/data-quality`, and disabled monitoring placeholders.
+- `EnterpriseThreadDbContext` maps data-quality issues, issue source links, trust-impact records, and monitoring issue type definitions.
+- EF migration `Slice10DataQualityIssues` adds the Slice 10 PostgreSQL schema.
+- `DevelopmentIdentitySeeder` seeds `data_quality.read`, `data_quality.manage`, `data_quality.review_hook`, and `data_quality.admin`.
+- `ETOS.Frontend/src/lib/etos-api.ts` includes typed data-quality DTOs and helper actions.
+- `ETOS.Frontend/src/app/imports/page.tsx` renders data-quality issues, trust-impact metadata, source links, review-hook readiness, and monitoring placeholders.
+- Backend tests now include `DataQualityTests` for import-generated issues, idempotency, source/tenant validation, security-event review hooks, trust impact, and inert monitoring placeholders.
+
+Changes since previous checkpoint:
+
+- Issue 10 moved from not implemented to implemented as the data-quality issue foundation.
+- Import validation results can now become durable quality issues with source evidence links.
+- Security events can now produce review-ready data-quality issues without creating review tasks.
+- Backend test count increased to 50 tests.
+
+Not implemented yet:
+
+- Issue 11 trusted graph promotion, rejected staging summaries, snapshots, diffs, and BOM comparison are not implemented.
+- Document memory, governed query/context assembly, AI Trace, chat, explorers beyond current admin pages, recommendations, full review tasks, decisions, tools, agents, workflows, and multi-agent collaboration remain future slices.
+- Data-quality graph projection and full review-task lifecycle remain deferred to owning slices.
+- `ETOS.Langraph` does not exist yet.
+
+Verification run:
+
+- `dotnet build EnterpriseThreadOS.sln --no-restore -p:UseAppHost=false`: passed.
+- `dotnet test EnterpriseThreadOS.sln --no-build -p:UseAppHost=false`: passed, 50 tests.
+- `npm run typecheck` from `ETOS.Frontend`: passed.
+- `npm run lint` from `ETOS.Frontend`: passed.
+
+Recommended next implementation slice:
+
+1. Begin Issue 11: Trusted Graph Promotion, Snapshots, Diffs, and BOM Comparison.
+2. Consume Slice 8 staging runs, Slice 9 identity/trust metadata, and Slice 10 data-quality issues as promotion gates.
+3. Keep rejected staged payload retention summary-only and avoid trusted graph writes until approval gates pass.
+
 ## 2026-06-10 - Slice 7 Canonical Ontology Ready
 
 Source docs reviewed:

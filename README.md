@@ -1,6 +1,6 @@
 # EnterpriseThreadOS
 
-EnterpriseThreadOS is being built as a developer-first, AI-native digital thread platform for manufacturing and engineering data. The current repository contains the local platform foundation: ASP.NET Core backend, Next.js frontend shell, Docker Compose infrastructure, EF Core persistence, health checks, extension-point guardrails, tenant identity/access, audit/security events, the BaseArtifact registry foundation, classification/policy enforcement, graph memory, canonical model governance, import/mapping/staging, and the first identity-resolution review and trust-scoring slice.
+EnterpriseThreadOS is being built as a developer-first, AI-native digital thread platform for manufacturing and engineering data. The current repository contains the local platform foundation: ASP.NET Core backend, Next.js frontend shell, Docker Compose infrastructure, EF Core persistence, health checks, extension-point guardrails, tenant identity/access, audit/security events, the BaseArtifact registry foundation, classification/policy enforcement, graph memory, canonical model governance, import/mapping/staging, identity-resolution review and trust scoring, and data-quality issue review hooks.
 
 For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For ordered implementation scope, use `.docs/.prd/engineering-execution-issues.md`.
 
@@ -67,7 +67,7 @@ npm run dev
 Pop-Location
 ```
 
-Open `http://localhost:3000` to view the local platform health, identity, governance, artifact registry, classification/policy, and infrastructure admin shell. Open `http://localhost:3000/model-artifacts` to manage canonical ontology/model package versions. Open `http://localhost:3000/imports` and click `Run identity demo` to create two source imports, approve mappings, validate rows, stage unverified graph records, generate identity candidates, and view trust score breakdowns.
+Open `http://localhost:3000` to view the local platform health, identity, governance, artifact registry, classification/policy, and infrastructure admin shell. Open `http://localhost:3000/model-artifacts` to manage canonical ontology/model package versions. Open `http://localhost:3000/imports` and click `Run identity demo` to create two source imports, approve mappings, validate rows, stage unverified graph records, generate identity candidates, view trust score breakdowns, and generate durable data-quality issues from validation results.
 
 ## Useful Endpoints
 
@@ -114,6 +114,12 @@ Open `http://localhost:3000` to view the local platform health, identity, govern
 - `POST http://localhost:5000/api/admin/identity-resolution/candidates/{candidateId}/reject`
 - `POST http://localhost:5000/api/admin/identity-resolution/candidates/{candidateId}/mark-conflicted`
 - `GET http://localhost:5000/api/admin/identity-resolution/batches/{batchId}/trust-scores`
+- `GET http://localhost:5000/api/admin/data-quality/issues`
+- `GET http://localhost:5000/api/admin/data-quality/issues/{issueId}`
+- `POST http://localhost:5000/api/admin/data-quality/issues`
+- `POST http://localhost:5000/api/admin/data-quality/imports/batches/{batchId}/issues/generate`
+- `POST http://localhost:5000/api/admin/data-quality/security-events/{securityEventId}/issues/create`
+- `GET http://localhost:5000/api/admin/data-quality/monitoring-placeholders`
 
 Some identity/admin endpoints require local header authentication:
 
@@ -178,10 +184,11 @@ Implemented or partially implemented:
 - Canonical ontology/model package foundation with versioned ontology, semantic layer, lifecycle vocabulary, tenant attribute schema, BOM metadata, publish validation, and `/model-artifacts` UI.
 - Import mapping and staging graph foundation with tenant-scoped import batches, raw file evidence metadata, CSV/Excel parsing, deterministic mapping previews, immutable mapping approval, row validation, unverified staging graph creation, and `/imports` UI.
 - Identity resolution review and trust-scoring foundation with deterministic cross-source candidate generation, approval/rejection/conflict decisions, graph `IDENTITY_LINK` relationships, learning evidence, trust score breakdowns, and `/imports` UI.
+- Data quality issue foundation with durable issues generated from import validation, manual issue creation, security-event review hooks, severity/trust-impact metadata, inert monitoring placeholders, and `/imports` UI.
 
 Planned by the PRD but not generally implemented yet:
 
-- Trusted graph promotion, governed query/context assembly, AI Trace, chat-to-artifact generation, recommendations, review tasks, decisions, broader learning workflows, tools, agents, workflows, and enterprise action framework.
+- Trusted graph promotion, governed query/context assembly, AI Trace, chat-to-artifact generation, recommendations, full review task workflows, decisions, broader learning workflows, tools, agents, workflows, and enterprise action framework.
 - Production secrets, CI/CD, Kubernetes, Keycloak, Temporal, live enterprise connectors, or source-system write-back.
 
 See `ARCHITECTURE.md` and `docs/local-development.md` for details.

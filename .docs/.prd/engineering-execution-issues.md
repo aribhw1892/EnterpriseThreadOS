@@ -242,6 +242,8 @@ Type: AFK
 Blocked by: Issue 9
 User stories covered: 17, 18, 19, 20, 21, 22, 23, 45, 71, 73, 104
 
+Implementation status: Implemented in the current source as Slice 10. See `ETOS.Backend/DataQuality/`, EF migration `Slice10DataQualityIssues`, `ETOS.Backend.Tests/DataQualityTests.cs`, and `ETOS.Frontend/src/app/imports/page.tsx`.
+
 ## What to build
 
 Implement DataQualityIssueArtifact, rule-based import validation issues, manual issue creation from platform contexts, severity, trust impact, source evidence, assignment hooks, and monitoring-agent placeholders for already-created issue types.

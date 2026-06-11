@@ -490,6 +490,85 @@ export type TrustScoreRecord = {
   recalculatedAt: string;
 };
 
+export type DataQualityIssueSourceLink = {
+  id: string;
+  tenantId: string;
+  dataQualityIssueId: string;
+  sourceType: string;
+  sourceId: string;
+  label?: string | null;
+  safeSummary: string;
+  createdAt: string;
+};
+
+export type DataQualityTrustImpact = {
+  id: string;
+  tenantId: string;
+  dataQualityIssueId: string;
+  targetEntityType: string;
+  graphNodeId?: string | null;
+  graphRelationshipId?: string | null;
+  identityCandidateLinkId?: string | null;
+  scorePenalty: number;
+  resultingTrustState: string | number;
+  excludedFromTrustedRecommendations: boolean;
+  breakdown: Record<string, number>;
+  createdAt: string;
+};
+
+export type DataQualityIssue = {
+  id: string;
+  tenantId: string;
+  title: string;
+  issueCode: string;
+  severity: string;
+  status: string;
+  origin: string;
+  affectedEntityType: string;
+  importBatchId?: string | null;
+  importMappingVersionId?: string | null;
+  importStagingGraphRunId?: string | null;
+  importValidationIssueId?: string | null;
+  importFileEvidenceId?: string | null;
+  identityCandidateLinkId?: string | null;
+  securityEventId?: string | null;
+  graphNodeId?: string | null;
+  graphRelationshipId?: string | null;
+  trustImpactPenalty: number;
+  resultingTrustState: string | number;
+  excludedFromTrustedRecommendations: boolean;
+  reviewPriority: string;
+  reviewTaskReady: boolean;
+  reviewTaskHint?: string | null;
+  reviewHookCreatedAt?: string | null;
+  uniqueSourceKey?: string | null;
+  evidenceSummary: string;
+  rationale?: string | null;
+  createdByUserId: string;
+  createdAt: string;
+  updatedAt: string;
+  sourceLinks: DataQualityIssueSourceLink[];
+  trustImpacts: DataQualityTrustImpact[];
+};
+
+export type DataQualityIssueGeneration = {
+  importBatchId: string;
+  createdCount: number;
+  existingCount: number;
+  issues: DataQualityIssue[];
+};
+
+export type MonitoringIssueTypeDefinition = {
+  id: string;
+  tenantId: string;
+  issueTypeKey: string;
+  displayName: string;
+  safeSummary: string;
+  isEnabled: boolean;
+  allowsLiveSourceScanning: boolean;
+  createdAt: string;
+};
+
 export type ImportPreview = {
   batchId: string;
   evidenceId: string;
@@ -743,12 +822,25 @@ export async function getImportLists() {
     tenantHeaders && firstBatch
       ? await fetchApi<TrustScoreRecord[]>(`/api/admin/identity-resolution/batches/${firstBatch.id}/trust-scores`, tenantHeaders)
       : emptyObject<TrustScoreRecord[]>();
+  const dataQualityIssues = tenantHeaders
+    ? await fetchApi<DataQualityIssue[]>("/api/admin/data-quality/issues", tenantHeaders)
+    : missingContext<DataQualityIssue[]>();
+  const monitoringPlaceholders = tenantHeaders
+    ? await fetchApi<MonitoringIssueTypeDefinition[]>("/api/admin/data-quality/monitoring-placeholders", tenantHeaders)
+    : missingContext<MonitoringIssueTypeDefinition[]>();
+  const firstBatchDataQualityIssues = {
+    data: dataQualityIssues.data?.filter((issue) => issue.importBatchId === firstBatch?.id) ?? [],
+    error: dataQualityIssues.error,
+  } satisfies ApiResult<DataQualityIssue[]>;
 
   return {
     batches,
     firstBatchDetail,
     firstBatchIdentityCandidates,
     firstBatchTrustScores,
+    dataQualityIssues,
+    firstBatchDataQualityIssues,
+    monitoringPlaceholders,
   };
 }
 
@@ -1293,6 +1385,86 @@ export async function markLatestIdentityCandidateConflicted(): Promise<ApiResult
   return await postApi<IdentityCandidateLink>(
     `/api/admin/identity-resolution/candidates/${candidate.id}/mark-conflicted`,
     { rationale: "Marked conflicted from the imports admin UI." },
+    tenantHeaders,
+  );
+}
+
+export async function generateDataQualityIssuesForLatestImport(): Promise<ApiResult<DataQualityIssueGeneration>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<DataQualityIssueGeneration>();
+  }
+
+  const lists = await getImportLists();
+  const batch = lists.batches.data?.find((item) => item.status === "Validated" || item.status === "Staged");
+  if (!batch) {
+    return { data: null, error: "No validated or staged import batch is available for data quality issue generation." };
+  }
+
+  return await postApi<DataQualityIssueGeneration>(
+    `/api/admin/data-quality/imports/batches/${batch.id}/issues/generate`,
+    {},
+    tenantHeaders,
+  );
+}
+
+export async function createDataQualityIssueFromLatestSecurityEvent(): Promise<ApiResult<DataQualityIssue>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<DataQualityIssue>();
+  }
+
+  const governance = await getGovernanceLists();
+  const securityEvent = governance.securityEvents.data?.find((item) => item.reviewTaskReady && !item.reviewTaskCreatedAt);
+  if (!securityEvent) {
+    return { data: null, error: "No review-ready security event is available for a data quality review hook." };
+  }
+
+  return await postApi<DataQualityIssue>(
+    `/api/admin/data-quality/security-events/${securityEvent.id}/issues/create`,
+    {},
+    tenantHeaders,
+  );
+}
+
+export async function createManualDataQualityIssueForLatestBatch(): Promise<ApiResult<DataQualityIssue>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<DataQualityIssue>();
+  }
+
+  const lists = await getImportLists();
+  const batch = lists.batches.data?.[0];
+  if (!batch) {
+    return { data: null, error: "No import batch is available for manual data quality issue creation." };
+  }
+
+  return await postApi<DataQualityIssue>(
+    "/api/admin/data-quality/issues",
+    {
+      title: "Manual import review note",
+      issueCode: "manual_import_review",
+      severity: "Medium",
+      affectedEntityType: "ImportBatch",
+      importBatchId: batch.id,
+      importValidationIssueId: null,
+      importFileEvidenceId: null,
+      identityCandidateLinkId: null,
+      graphNodeId: null,
+      graphRelationshipId: null,
+      genericSourceId: null,
+      evidenceSummary: "Manual data-quality issue created from the imports page for the latest batch.",
+      rationale: "Demo review hook for Issue 10.",
+    },
     tenantHeaders,
   );
 }

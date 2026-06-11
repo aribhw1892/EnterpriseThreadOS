@@ -1,5 +1,6 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
+using ETOS.Backend.DataQuality;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Imports;
@@ -100,6 +101,14 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<IdentityLearningEvidence> IdentityLearningEvidence => Set<IdentityLearningEvidence>();
 
     public DbSet<TrustScoreRecord> TrustScoreRecords => Set<TrustScoreRecord>();
+
+    public DbSet<DataQualityIssue> DataQualityIssues => Set<DataQualityIssue>();
+
+    public DbSet<DataQualityIssueSourceLink> DataQualityIssueSourceLinks => Set<DataQualityIssueSourceLink>();
+
+    public DbSet<DataQualityTrustImpact> DataQualityTrustImpacts => Set<DataQualityTrustImpact>();
+
+    public DbSet<MonitoringIssueTypeDefinition> MonitoringIssueTypeDefinitions => Set<MonitoringIssueTypeDefinition>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -477,6 +486,112 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
         ConfigureOntologyTables(modelBuilder);
         ConfigureImportTables(modelBuilder);
         ConfigureIdentityResolutionTables(modelBuilder);
+        ConfigureDataQualityTables(modelBuilder);
+    }
+
+    private static void ConfigureDataQualityTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DataQualityIssue>(entity =>
+        {
+            entity.ToTable("data_quality_issues");
+            entity.HasKey(issue => issue.Id);
+            entity.Property(issue => issue.TenantId).IsRequired();
+            entity.Property(issue => issue.Title).HasMaxLength(200).IsRequired();
+            entity.Property(issue => issue.IssueCode).HasMaxLength(120).IsRequired();
+            entity.Property(issue => issue.NormalizedIssueCode).HasMaxLength(120).IsRequired();
+            entity.Property(issue => issue.Severity).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(issue => issue.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(issue => issue.Origin).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(issue => issue.AffectedEntityType).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(issue => issue.TrustImpactPenalty).HasPrecision(5, 3).IsRequired();
+            entity.Property(issue => issue.ResultingTrustState).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(issue => issue.ReviewPriority).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(issue => issue.ReviewTaskHint).HasMaxLength(500);
+            entity.Property(issue => issue.UniqueSourceKey).HasMaxLength(300);
+            entity.Property(issue => issue.EvidenceSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(issue => issue.Rationale).HasMaxLength(1000);
+            entity.Property(issue => issue.CreatedAt).IsRequired();
+            entity.Property(issue => issue.UpdatedAt).IsRequired();
+            entity.HasIndex(issue => new { issue.TenantId, issue.Status, issue.Severity, issue.CreatedAt });
+            entity.HasIndex(issue => new { issue.TenantId, issue.Origin, issue.CreatedAt });
+            entity.HasIndex(issue => new { issue.TenantId, issue.NormalizedIssueCode });
+            entity.HasIndex(issue => new { issue.TenantId, issue.UniqueSourceKey }).IsUnique();
+            entity.HasOne(issue => issue.ImportBatch)
+                .WithMany()
+                .HasForeignKey(issue => issue.ImportBatchId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(issue => issue.ImportMappingVersion)
+                .WithMany()
+                .HasForeignKey(issue => issue.ImportMappingVersionId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(issue => issue.ImportStagingGraphRun)
+                .WithMany()
+                .HasForeignKey(issue => issue.ImportStagingGraphRunId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(issue => issue.ImportValidationIssue)
+                .WithMany()
+                .HasForeignKey(issue => issue.ImportValidationIssueId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(issue => issue.ImportFileEvidence)
+                .WithMany()
+                .HasForeignKey(issue => issue.ImportFileEvidenceId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(issue => issue.IdentityCandidateLink)
+                .WithMany()
+                .HasForeignKey(issue => issue.IdentityCandidateLinkId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(issue => issue.SecurityEvent)
+                .WithMany()
+                .HasForeignKey(issue => issue.SecurityEventId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<DataQualityIssueSourceLink>(entity =>
+        {
+            entity.ToTable("data_quality_issue_source_links");
+            entity.HasKey(link => link.Id);
+            entity.Property(link => link.TenantId).IsRequired();
+            entity.Property(link => link.SourceType).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(link => link.SourceId).HasMaxLength(200).IsRequired();
+            entity.Property(link => link.Label).HasMaxLength(200);
+            entity.Property(link => link.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(link => link.CreatedAt).IsRequired();
+            entity.HasIndex(link => new { link.TenantId, link.DataQualityIssueId, link.SourceType, link.SourceId }).IsUnique();
+            entity.HasOne(link => link.DataQualityIssue)
+                .WithMany(issue => issue.SourceLinks)
+                .HasForeignKey(link => link.DataQualityIssueId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<DataQualityTrustImpact>(entity =>
+        {
+            entity.ToTable("data_quality_trust_impacts");
+            entity.HasKey(impact => impact.Id);
+            entity.Property(impact => impact.TenantId).IsRequired();
+            entity.Property(impact => impact.TargetEntityType).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(impact => impact.ScorePenalty).HasPrecision(5, 3).IsRequired();
+            entity.Property(impact => impact.ResultingTrustState).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(impact => impact.BreakdownJson).HasMaxLength(4000).IsRequired();
+            entity.Property(impact => impact.CreatedAt).IsRequired();
+            entity.HasIndex(impact => new { impact.TenantId, impact.DataQualityIssueId, impact.TargetEntityType });
+            entity.HasOne(impact => impact.DataQualityIssue)
+                .WithMany(issue => issue.TrustImpacts)
+                .HasForeignKey(impact => impact.DataQualityIssueId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<MonitoringIssueTypeDefinition>(entity =>
+        {
+            entity.ToTable("monitoring_issue_type_definitions");
+            entity.HasKey(definition => definition.Id);
+            entity.Property(definition => definition.TenantId).IsRequired();
+            entity.Property(definition => definition.IssueTypeKey).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.NormalizedIssueTypeKey).HasMaxLength(120).IsRequired();
+            entity.Property(definition => definition.DisplayName).HasMaxLength(200).IsRequired();
+            entity.Property(definition => definition.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(definition => definition.CreatedAt).IsRequired();
+            entity.HasIndex(definition => new { definition.TenantId, definition.NormalizedIssueTypeKey }).IsUnique();
+        });
     }
 
     private static void ConfigureIdentityResolutionTables(ModelBuilder modelBuilder)

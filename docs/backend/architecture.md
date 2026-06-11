@@ -18,6 +18,7 @@
 - `Ontology/`: versioned ontology, semantic layer, lifecycle vocabulary, tenant attribute schema, BOM metadata, and model package publishing.
 - `Imports/`: tenant-scoped import batches, raw file evidence metadata, CSV/Excel parsing, mapping preview/approval, validation, and staging graph creation.
 - `IdentityResolution/`: tenant-scoped identity rules, deterministic candidate links, review decisions, learning evidence, trust scores, and identity-link graph relationships.
+- `DataQuality/`: tenant-scoped durable data-quality issues, source links, trust-impact metadata, security-event review hooks, inert monitoring placeholders, and issue endpoints.
 - `Platform/Extensions/`: architecture-honest extension point catalog for deferred capabilities.
 
 ## Startup Flow
@@ -142,7 +143,7 @@ Parser/library choices:
 - Excel `.xls` and `.xlsx` parsing uses `ExcelDataReader` because ETOS only needs read/import behavior, not workbook editing, styling, formula evaluation, or export generation.
 - If CSV imports need richer customer-facing diagnostics, custom delimiters, cultures, comments, or broader edge-case coverage, prefer switching the CSV path to `CsvHelper`.
 
-The import module creates only untrusted staging graph records. Identity resolution consumes those staged records through the identity-resolution module. Trusted graph promotion, snapshots, diffs, and data-quality review artifacts remain deferred to later owning issues.
+The import module creates only untrusted staging graph records. Identity resolution consumes those staged records through the identity-resolution module. Data-quality issues consume import validation records through the data-quality module. Trusted graph promotion, snapshots, and diffs remain deferred to later owning issues.
 
 ### Identity Resolution And Trust
 
@@ -158,6 +159,19 @@ The identity-resolution module currently includes:
 - admin endpoints under `/api/admin/identity-resolution`.
 
 Identity resolution does not promote staged records into trusted graph space. It records candidate identity links and trust metadata that later graph promotion and recommendation slices can consume.
+
+### Data Quality Issues
+
+The data-quality module currently includes:
+
+- tenant-scoped `DataQualityIssue` records generated from import validation issues or explicit manual/security-event review hooks.
+- `DataQualityIssueSourceLink` records for import batches, validation issues, file evidence, mappings, staging runs, identity candidates, security events, graph ids, and generic platform contexts.
+- `DataQualityTrustImpact` records with deterministic severity penalties, resulting trust state, recommendation-exclusion metadata, and review priority.
+- security-event-to-quality-issue hooks that preserve safe summaries without creating full review tasks.
+- disabled `MonitoringIssueTypeDefinition` placeholders for future monitoring agents that inspect already-created issue types only.
+- admin endpoints under `/api/admin/data-quality`.
+
+Data quality does not implement full `ReviewTaskArtifact` behavior. Assignment, blocking, escalation, completion, decisions, and task chains remain owned by later review-task and decision slices.
 
 ### Tenancy
 
@@ -182,6 +196,7 @@ Do not turn extension metadata into fake implementations. Future providers need 
 - ontology/model package tables for canonical object/schema/version governance.
 - import tables for batches, file evidence, immutable mapping versions, column/lifecycle mappings, validation issues, and staging graph runs.
 - identity-resolution tables for rules, candidate links, review decisions, learning evidence, and trust score records.
+- data-quality tables for durable issues, issue source links, trust-impact records, and monitoring issue type placeholders.
 
 Use EF Core migrations for schema changes:
 
@@ -241,8 +256,10 @@ Issue 8 import tests cover raw evidence audit linkage, mapping approval immutabi
 
 Issue 9 identity-resolution tests cover cross-source candidate generation, idempotency, approval-created graph relationships, rejection learning evidence, conflict exclusion, trust score effects, and cross-tenant denial behavior.
 
+Issue 10 data-quality tests cover import-validation issue generation, idempotency, manual issue tenant/source validation, security-event review hooks, trust-impact metadata, and inert monitoring placeholders.
+
 ## Planned Backend Areas
 
-The PRD and issue backlog define later modules for data quality review artifacts, trusted graph promotion/snapshots/diffs, documents, governed query/context, AI Trace, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration.
+The PRD and issue backlog define later modules for trusted graph promotion/snapshots/diffs, documents, governed query/context, AI Trace, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration.
 
 Do not document or code these as implemented until the source code exists.

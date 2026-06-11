@@ -1,5 +1,6 @@
 import {
   ApiResult,
+  DataQualityIssue,
   IdentityCandidateLink,
   ImportBatch,
   ImportBatchDetail,
@@ -12,10 +13,14 @@ import {
   approveLatestIdentityCandidate,
   adminUserId,
   approveLatestImportMapping,
+  createDataQualityIssueFromLatestSecurityEvent,
   createDemoComparisonImportFlow,
   createDemoImportFlow,
+  createManualDataQualityIssueForLatestBatch,
+  generateDataQualityIssuesForLatestImport,
   generateLatestIdentityCandidates,
   getImportLists,
+  MonitoringIssueTypeDefinition,
   markLatestIdentityCandidateConflicted,
   runIdentityResolutionDemoFlow,
   selectedTenantId,
@@ -90,6 +95,27 @@ async function markIdentityCandidateConflicted() {
   revalidatePath("/imports");
 }
 
+async function generateDataQualityIssues() {
+  "use server";
+
+  await generateDataQualityIssuesForLatestImport();
+  revalidatePath("/imports");
+}
+
+async function createManualDataQualityIssue() {
+  "use server";
+
+  await createManualDataQualityIssueForLatestBatch();
+  revalidatePath("/imports");
+}
+
+async function createSecurityEventDataQualityIssue() {
+  "use server";
+
+  await createDataQualityIssueFromLatestSecurityEvent();
+  revalidatePath("/imports");
+}
+
 function formatStatus(status: string | number) {
   if (typeof status === "number") {
     return (
@@ -111,8 +137,10 @@ function StatusBadge({ status }: { status: string | number }) {
   const className =
     normalized === "staged" || normalized === "completed" || normalized === "approved" || normalized === "trusted"
       ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
-      : normalized === "failed" || normalized === "error" || normalized === "conflicted"
+      : normalized === "failed" || normalized === "error" || normalized === "conflicted" || normalized === "critical"
         ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200"
+        : normalized === "high" || normalized === "medium"
+          ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200"
         : "bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-200";
 
   return (
@@ -340,6 +368,98 @@ function TrustScoreCard(score: TrustScoreRecord) {
   );
 }
 
+function DataQualityIssueCard(issue: DataQualityIssue) {
+  const trustBreakdown = issue.trustImpacts
+    .flatMap((impact) => Object.entries(impact.breakdown).map(([key, value]) => `${key}: ${value}`))
+    .join(", ");
+  const sourceLinks = issue.sourceLinks
+    .map((link) => `${link.sourceType}${link.label ? ` (${link.label})` : ""}`)
+    .join(", ");
+
+  return (
+    <article key={issue.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{issue.title}</h3>
+          <p className="mt-1 text-sm text-slate-400">
+            {issue.origin} issue on {issue.affectedEntityType}
+          </p>
+        </div>
+        <div className="flex flex-wrap justify-end gap-2">
+          <StatusBadge status={issue.severity} />
+          <StatusBadge status={issue.status} />
+        </div>
+      </div>
+      <p className="mt-3 text-sm text-slate-300">{issue.evidenceSummary}</p>
+      <div className="mt-3 grid gap-1 text-xs text-slate-500 md:grid-cols-2">
+        <p>Code: {issue.issueCode}</p>
+        <p>Priority: {issue.reviewPriority}</p>
+        <p>Trust penalty: {(issue.trustImpactPenalty * 100).toFixed(1)}%</p>
+        <p>Resulting trust: {formatStatus(issue.resultingTrustState)}</p>
+        <p>Excluded from trusted recommendations: {issue.excludedFromTrustedRecommendations ? "yes" : "no"}</p>
+        <p>Review hook: {issue.reviewTaskReady ? issue.reviewTaskHint ?? "ready" : "not ready"}</p>
+        <p>Import batch: {issue.importBatchId ?? "n/a"}</p>
+        <p>Security event: {issue.securityEventId ?? "n/a"}</p>
+        <p className="md:col-span-2">Sources: {sourceLinks || "none"}</p>
+        <p className="md:col-span-2">Trust breakdown: {trustBreakdown || "none"}</p>
+      </div>
+    </article>
+  );
+}
+
+function MonitoringPlaceholderCard(definition: MonitoringIssueTypeDefinition) {
+  return (
+    <article key={definition.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{definition.displayName}</h3>
+          <p className="mt-1 font-mono text-xs text-cyan-200">{definition.issueTypeKey}</p>
+        </div>
+        <StatusBadge status={definition.isEnabled ? "enabled" : "disabled"} />
+      </div>
+      <div className="mt-3 grid gap-1 text-xs text-slate-500">
+        <p>{definition.safeSummary}</p>
+        <p>Live source scanning: {definition.allowsLiveSourceScanning ? "enabled" : "disabled"}</p>
+      </div>
+    </article>
+  );
+}
+
+function DataQualityPanel({
+  issues,
+  monitoringPlaceholders,
+}: {
+  issues: ApiResult<DataQualityIssue[]>;
+  monitoringPlaceholders: ApiResult<MonitoringIssueTypeDefinition[]>;
+}) {
+  return (
+    <div className="grid gap-6 xl:grid-cols-2">
+      {issues.error ? (
+        <ErrorState error={issues.error} />
+      ) : (
+        <ListSection
+          title="Data Quality Issues"
+          description="Durable quality issues promoted from import validation, manual review hooks, and security events."
+          items={issues.data ?? []}
+          emptyMessage="No data quality issues have been generated for the latest batch."
+          renderItem={DataQualityIssueCard}
+        />
+      )}
+      {monitoringPlaceholders.error ? (
+        <ErrorState error={monitoringPlaceholders.error} />
+      ) : (
+        <ListSection
+          title="Monitoring Placeholders"
+          description="Disabled MVP contracts for future monitoring agents that inspect existing issue types only."
+          items={monitoringPlaceholders.data ?? []}
+          emptyMessage="No monitoring placeholders are available."
+          renderItem={MonitoringPlaceholderCard}
+        />
+      )}
+    </div>
+  );
+}
+
 function FirstBatchDetail({ result }: { result: ApiResult<ImportBatchDetail> }) {
   if (result.error) {
     return <ErrorState error={result.error} />;
@@ -445,11 +565,12 @@ export default async function ImportsPage() {
           <div className="mt-6 grid gap-4 xl:grid-cols-2">
             <ButtonGroup
               title="Recommended Demo"
-              description="Creates two source batches, approves mappings, validates rows, stages both batches, and generates identity candidates."
+              description="Creates source batches, approves mappings, validates rows, stages them, generates identity candidates, and can promote validation issues."
             >
               <ActionButton action={runIdentityDemo}>Run identity demo</ActionButton>
               <ActionButton action={approveIdentityCandidate}>Approve first reviewable candidate</ActionButton>
               <ActionButton action={markIdentityCandidateConflicted}>Mark first candidate conflicted</ActionButton>
+              <ActionButton action={generateDataQualityIssues}>Generate quality issues</ActionButton>
             </ButtonGroup>
             <ButtonGroup
               title="Manual Latest-Batch Tools"
@@ -461,6 +582,8 @@ export default async function ImportsPage() {
               <ActionButton action={validateBatch}>Validate latest batch only</ActionButton>
               <ActionButton action={stageBatch}>Stage latest batch only</ActionButton>
               <ActionButton action={generateIdentityCandidates}>Generate candidates for latest batch</ActionButton>
+              <ActionButton action={createManualDataQualityIssue}>Create manual quality issue</ActionButton>
+              <ActionButton action={createSecurityEventDataQualityIssue}>Create issue from security event</ActionButton>
             </ButtonGroup>
           </div>
         </header>
@@ -489,6 +612,10 @@ export default async function ImportsPage() {
         <IdentityResolutionPanel
           candidates={lists.firstBatchIdentityCandidates}
           trustScores={lists.firstBatchTrustScores}
+        />
+        <DataQualityPanel
+          issues={lists.firstBatchDataQualityIssues}
+          monitoringPlaceholders={lists.monitoringPlaceholders}
         />
       </div>
     </main>

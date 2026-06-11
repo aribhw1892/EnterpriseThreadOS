@@ -1,5 +1,6 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
+using ETOS.Backend.DataQuality;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
@@ -111,6 +112,7 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IImportFileParser, CsvImportFileParser>();
         services.AddScoped<IImportService, ImportService>();
         services.AddScoped<IIdentityResolutionService, IdentityResolutionService>();
+        services.AddScoped<IDataQualityIssueService, DataQualityIssueService>();
         services.AddScoped<IDevelopmentIdentitySeeder, DevelopmentIdentitySeeder>();
 
         return services;
