@@ -174,3 +174,46 @@ public sealed record ImportStagingGraphRunResponse(
     string? FailureSummary,
     DateTimeOffset CreatedAt,
     DateTimeOffset? CompletedAt);
+
+public sealed record ImportPromotionRunResponse(
+    Guid Id,
+    Guid TenantId,
+    Guid ImportBatchId,
+    Guid ImportStagingGraphRunId,
+    ImportPromotionRunStatus Status,
+    int PromotedNodeCount,
+    int PromotedRelationshipCount,
+    IReadOnlyCollection<Guid> SourceEvidenceIds,
+    Guid? AuditRecordId,
+    string? FailureSummary,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? CompletedAt);
+
+public sealed record RejectedStagingSummaryResponse(
+    Guid Id,
+    Guid TenantId,
+    Guid ImportBatchId,
+    Guid ImportStagingGraphRunId,
+    string ValidationSummaryJson,
+    string DecisionSummaryJson,
+    int NodeCount,
+    int RelationshipCount,
+    IReadOnlyCollection<Guid> SourceEvidenceIds,
+    Guid? AuditRecordId,
+    DateTimeOffset CreatedAt);
+
+public sealed record BomComparisonRunResponse(
+    Guid Id,
+    Guid TenantId,
+    Guid ImportBatchId,
+    string? SourceContext,
+    string CadSummaryJson,
+    string EbomSummaryJson,
+    int MissingInCadCount,
+    int MissingInEbomCount,
+    int QuantityMismatchCount,
+    int UsageReferenceMismatchCount,
+    int UnresolvedIdentityCount,
+    string ResultJson,
+    Guid? AuditRecordId,
+    DateTimeOffset CreatedAt);

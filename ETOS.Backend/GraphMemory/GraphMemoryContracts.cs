@@ -37,6 +37,14 @@ public sealed record GraphTraversalResult(
     IReadOnlyCollection<BaseNode> Nodes,
     IReadOnlyCollection<BaseRelationship> Relationships);
 
+public sealed record GraphReadModel(
+    IReadOnlyCollection<BaseNode> Nodes,
+    IReadOnlyCollection<BaseRelationship> Relationships);
+
+public sealed record GraphPromotionCopyResult(
+    IReadOnlyCollection<Guid> TrustedNodeIds,
+    IReadOnlyCollection<Guid> TrustedRelationshipIds);
+
 public sealed record GraphHealthResponse(
     string Provider,
     string Status,
@@ -49,6 +57,9 @@ public sealed record GraphSnapshotContract(
     Guid TenantId,
     GraphSpace GraphSpace,
     DateTimeOffset CapturedAt,
+    int NodeCount,
+    int RelationshipCount,
+    string ChecksumSha256,
     string SafeSummary);
 
 public sealed record GraphDiffContract(
@@ -57,4 +68,5 @@ public sealed record GraphDiffContract(
     Guid FromSnapshotId,
     Guid ToSnapshotId,
     DateTimeOffset CreatedAt,
+    string ChecksumSha256,
     string SafeSummary);

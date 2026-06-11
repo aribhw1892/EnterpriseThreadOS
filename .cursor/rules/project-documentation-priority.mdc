@@ -1,8 +1,6 @@
 ---
-description: Prefer project documentation in PRD, issues, then supporting context order when gathering requirements.
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Project Documentation Priority
 
 - When project documentation is relevant or required, consult it before making assumptions.

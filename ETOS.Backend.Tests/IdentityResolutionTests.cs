@@ -505,12 +505,14 @@ public sealed class IdentityResolutionTests
     {
         public List<CreateGraphNodeRequest> CreatedNodeRequests { get; } = [];
         public List<CreateGraphRelationshipRequest> CreatedRelationshipRequests { get; } = [];
+        public List<BaseNode> Nodes { get; } = [];
+        public List<BaseRelationship> Relationships { get; } = [];
 
         public Task<BaseNode> CreateNodeAsync(CreateGraphNodeRequest request, CancellationToken cancellationToken)
         {
             CreatedNodeRequests.Add(request);
             var now = DateTimeOffset.UtcNow;
-            return Task.FromResult(new BaseNode(
+            var node = new BaseNode(
                 Guid.NewGuid(),
                 request.TenantId,
                 request.GraphSpace,
@@ -519,12 +521,14 @@ public sealed class IdentityResolutionTests
                 request.Attributes ?? new Dictionary<string, string?>(),
                 request.SourceReference,
                 now,
-                now));
+                now);
+            Nodes.Add(node);
+            return Task.FromResult(node);
         }
 
         public Task<BaseNode?> GetNodeAsync(Guid tenantId, Guid nodeId, CancellationToken cancellationToken)
         {
-            return Task.FromResult<BaseNode?>(null);
+            return Task.FromResult(Nodes.SingleOrDefault(node => node.TenantId == tenantId && node.NodeId == nodeId));
         }
 
         public Task<BaseNode> UpdateNodeAsync(UpdateGraphNodeRequest request, CancellationToken cancellationToken)
@@ -536,7 +540,7 @@ public sealed class IdentityResolutionTests
         {
             CreatedRelationshipRequests.Add(request);
             var now = DateTimeOffset.UtcNow;
-            return Task.FromResult(new BaseRelationship(
+            var relationship = new BaseRelationship(
                 Guid.NewGuid(),
                 request.TenantId,
                 request.FromNodeId,
@@ -546,12 +550,45 @@ public sealed class IdentityResolutionTests
                 request.Attributes ?? new Dictionary<string, string?>(),
                 request.SourceReference,
                 now,
-                now));
+                now);
+            Relationships.Add(relationship);
+            return Task.FromResult(relationship);
         }
 
         public Task<GraphTraversalResult> TraverseAsync(TraverseGraphRequest request, CancellationToken cancellationToken)
         {
             throw new NotSupportedException();
+        }
+
+        public Task<GraphReadModel> ListGraphAsync(
+            Guid tenantId,
+            GraphSpace? graphSpace,
+            string? sourceBatchId,
+            IReadOnlyCollection<Guid>? nodeIds,
+            IReadOnlyCollection<Guid>? relationshipIds,
+            CancellationToken cancellationToken)
+        {
+            var nodes = Nodes
+                .Where(node => node.TenantId == tenantId
+                    && (graphSpace is null || node.GraphSpace == graphSpace)
+                    && (sourceBatchId is null || node.SourceReference?.SourceBatchId == sourceBatchId)
+                    && (nodeIds is null || nodeIds.Count == 0 || nodeIds.Contains(node.NodeId)))
+                .ToList();
+            var relationships = Relationships
+                .Where(relationship => relationship.TenantId == tenantId
+                    && (sourceBatchId is null || relationship.SourceReference?.SourceBatchId == sourceBatchId)
+                    && (relationshipIds is null || relationshipIds.Count == 0 || relationshipIds.Contains(relationship.RelationshipId)))
+                .ToList();
+            return Task.FromResult(new GraphReadModel(nodes, relationships));
+        }
+
+        public Task<GraphPromotionCopyResult> PromoteStagingAsync(
+            Guid tenantId,
+            IReadOnlyCollection<Guid> stagingNodeIds,
+            IReadOnlyCollection<Guid> stagingRelationshipIds,
+            CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new GraphPromotionCopyResult([], []));
         }
     }
 }

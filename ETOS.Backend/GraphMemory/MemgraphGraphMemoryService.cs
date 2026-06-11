@@ -29,6 +29,26 @@ public sealed class MemgraphGraphMemoryService : IGraphMemoryService, IGraphHeal
         throw Deferred();
     }
 
+    public Task<GraphReadModel> ListGraphAsync(
+        Guid tenantId,
+        GraphSpace? graphSpace,
+        string? sourceBatchId,
+        IReadOnlyCollection<Guid>? nodeIds,
+        IReadOnlyCollection<Guid>? relationshipIds,
+        CancellationToken cancellationToken)
+    {
+        throw Deferred();
+    }
+
+    public Task<GraphPromotionCopyResult> PromoteStagingAsync(
+        Guid tenantId,
+        IReadOnlyCollection<Guid> stagingNodeIds,
+        IReadOnlyCollection<Guid> stagingRelationshipIds,
+        CancellationToken cancellationToken)
+    {
+        throw Deferred();
+    }
+
     public Task<GraphHealthResponse> CheckAsync(CancellationToken cancellationToken)
     {
         throw Deferred();

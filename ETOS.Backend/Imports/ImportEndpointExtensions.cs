@@ -66,6 +66,36 @@ public static class ImportEndpointExtensions
             CancellationToken cancellationToken) =>
             await ExecuteAsync(() => service.StageBatchAsync(batchId, cancellationToken)));
 
+        group.MapPost("/batches/{batchId:guid}/promote", async (
+            Guid batchId,
+            IImportService service,
+            CancellationToken cancellationToken) =>
+            await ExecuteAsync(() => service.PromoteBatchAsync(batchId, cancellationToken)));
+
+        group.MapPost("/batches/{batchId:guid}/reject-staging", async (
+            Guid batchId,
+            IImportService service,
+            CancellationToken cancellationToken) =>
+            await ExecuteAsync(() => service.RejectStagingAsync(batchId, cancellationToken)));
+
+        group.MapGet("/batches/{batchId:guid}/promotion-runs", async (
+            Guid batchId,
+            IImportService service,
+            CancellationToken cancellationToken) =>
+            await ExecuteAsync(() => service.ListPromotionRunsAsync(batchId, cancellationToken)));
+
+        group.MapPost("/batches/{batchId:guid}/bom-comparison", async (
+            Guid batchId,
+            IImportService service,
+            CancellationToken cancellationToken) =>
+            await ExecuteAsync(() => service.CreateBomComparisonAsync(batchId, cancellationToken)));
+
+        group.MapGet("/batches/{batchId:guid}/bom-comparisons", async (
+            Guid batchId,
+            IImportService service,
+            CancellationToken cancellationToken) =>
+            await ExecuteAsync(() => service.ListBomComparisonsAsync(batchId, cancellationToken)));
+
         return endpoints;
     }
 

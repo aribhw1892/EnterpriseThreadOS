@@ -23,6 +23,9 @@ public sealed class ImportBatch : ITenantScoped
     public List<ImportMappingVersion> MappingVersions { get; set; } = [];
     public List<ImportValidationIssue> ValidationIssues { get; set; } = [];
     public List<ImportStagingGraphRun> StagingRuns { get; set; } = [];
+    public List<ImportPromotionRun> PromotionRuns { get; set; } = [];
+    public List<RejectedStagingSummary> RejectedStagingSummaries { get; set; } = [];
+    public List<BomComparisonRun> BomComparisonRuns { get; set; } = [];
 }
 
 public sealed class ImportFileEvidence : ITenantScoped
@@ -126,6 +129,60 @@ public sealed class ImportStagingGraphRun : ITenantScoped
     public DateTimeOffset? CompletedAt { get; set; }
 }
 
+public sealed class ImportPromotionRun : ITenantScoped
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid ImportBatchId { get; set; }
+    public ImportBatch? ImportBatch { get; set; }
+    public Guid ImportStagingGraphRunId { get; set; }
+    public ImportStagingGraphRun? ImportStagingGraphRun { get; set; }
+    public ImportPromotionRunStatus Status { get; set; } = ImportPromotionRunStatus.Running;
+    public int PromotedNodeCount { get; set; }
+    public int PromotedRelationshipCount { get; set; }
+    public string SourceEvidenceIdsJson { get; set; } = "[]";
+    public Guid? AuditRecordId { get; set; }
+    public string? FailureSummary { get; set; }
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? CompletedAt { get; set; }
+}
+
+public sealed class RejectedStagingSummary : ITenantScoped
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid ImportBatchId { get; set; }
+    public ImportBatch? ImportBatch { get; set; }
+    public Guid ImportStagingGraphRunId { get; set; }
+    public ImportStagingGraphRun? ImportStagingGraphRun { get; set; }
+    public required string ValidationSummaryJson { get; set; }
+    public required string DecisionSummaryJson { get; set; }
+    public int NodeCount { get; set; }
+    public int RelationshipCount { get; set; }
+    public string SourceEvidenceIdsJson { get; set; } = "[]";
+    public Guid? AuditRecordId { get; set; }
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+}
+
+public sealed class BomComparisonRun : ITenantScoped
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid ImportBatchId { get; set; }
+    public ImportBatch? ImportBatch { get; set; }
+    public string? SourceContext { get; set; }
+    public required string CadSummaryJson { get; set; }
+    public required string EbomSummaryJson { get; set; }
+    public int MissingInCadCount { get; set; }
+    public int MissingInEbomCount { get; set; }
+    public int QuantityMismatchCount { get; set; }
+    public int UsageReferenceMismatchCount { get; set; }
+    public int UnresolvedIdentityCount { get; set; }
+    public required string ResultJson { get; set; }
+    public Guid? AuditRecordId { get; set; }
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+}
+
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ImportBatchStatus
 {
@@ -135,7 +192,9 @@ public enum ImportBatchStatus
     MappingApproved = 3,
     Validated = 4,
     Staged = 5,
-    Failed = 6
+    Failed = 6,
+    Promoted = 7,
+    Rejected = 8
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -155,6 +214,14 @@ public enum ImportIssueSeverity
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ImportStagingRunStatus
+{
+    Running = 0,
+    Completed = 1,
+    Failed = 2
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum ImportPromotionRunStatus
 {
     Running = 0,
     Completed = 1,

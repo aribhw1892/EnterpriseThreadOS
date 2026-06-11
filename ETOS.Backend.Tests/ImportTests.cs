@@ -150,6 +150,150 @@ public sealed class ImportTests
         Assert.Equal("import_tenant_mismatch", denial.Reason);
     }
 
+    [Fact]
+    public async Task PromotionIsBlockedByValidationErrors()
+    {
+        var graphMemory = new RecordingGraphMemoryService();
+        await using var application = CreateApplication(graphMemory);
+        using var client = application.CreateClient();
+        var context = await CreatePublishedModelContextAsync(client);
+        var batch = await CreateImportBatchAsync(client, context);
+        await UploadCsvAsync(client, context, batch.Id, "partNumber,lifecycle,cost\nP-100,released,12.50\n");
+        var mapping = await CreateMappingAsync(client, context, batch.Id, ["released"]);
+        await ApproveMappingAsync(client, context, mapping.Id);
+        await StageBatchAsync(client, context, batch.Id);
+
+        await using (var scope = application.Services.CreateAsyncScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<EnterpriseThreadDbContext>();
+            dbContext.ImportValidationIssues.Add(new ImportValidationIssue
+            {
+                Id = Guid.NewGuid(),
+                TenantId = context.TenantId,
+                ImportBatchId = batch.Id,
+                ImportMappingVersionId = mapping.Id,
+                Severity = ImportIssueSeverity.Error,
+                IssueCode = "blocking_issue",
+                Message = "Blocking issue.",
+                CreatedAt = DateTimeOffset.UtcNow
+            });
+            await dbContext.SaveChangesAsync();
+        }
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/batches/{batch.Id}/promote")
+        {
+            Content = JsonContent.Create(new { })
+        };
+        AddTenantHeaders(request, context.TenantId, context.UserId);
+        var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.DoesNotContain(graphMemory.Nodes, node => node.GraphSpace == GraphSpace.Trusted);
+    }
+
+    [Fact]
+    public async Task PromotionCopiesStagingGraphToTrustedAndRecordsAudit()
+    {
+        var graphMemory = new RecordingGraphMemoryService();
+        await using var application = CreateApplication(graphMemory);
+        using var client = application.CreateClient();
+        var context = await CreatePublishedModelContextAsync(client);
+        var batch = await CreateImportBatchAsync(client, context);
+        await UploadCsvAsync(client, context, batch.Id, "partNumber,lifecycle,cost\nP-100,released,12.50\nP-200,released,15.25\n");
+        var mapping = await CreateMappingAsync(client, context, batch.Id, ["released"]);
+        await ApproveMappingAsync(client, context, mapping.Id);
+        await StageBatchAsync(client, context, batch.Id);
+
+        var promotion = await PromoteBatchAsync(client, context, batch.Id);
+
+        Assert.Equal(ImportPromotionRunStatus.Completed, promotion.Status);
+        Assert.Equal(2, promotion.PromotedNodeCount);
+        Assert.NotNull(promotion.AuditRecordId);
+        Assert.Equal(2, graphMemory.Nodes.Count(node => node.GraphSpace == GraphSpace.Trusted && node.TrustState == TrustState.Trusted));
+    }
+
+    [Fact]
+    public async Task RejectedStagingStoresSummariesWithoutRawPayload()
+    {
+        await using var application = CreateApplication();
+        using var client = application.CreateClient();
+        var context = await CreatePublishedModelContextAsync(client);
+        var batch = await CreateImportBatchAsync(client, context);
+        const string csv = "partNumber,lifecycle,cost\nP-100,released,12.50\n";
+        await UploadCsvAsync(client, context, batch.Id, csv);
+        var mapping = await CreateMappingAsync(client, context, batch.Id, ["released"]);
+        await ApproveMappingAsync(client, context, mapping.Id);
+        await StageBatchAsync(client, context, batch.Id);
+
+        var rejected = await RejectStagingAsync(client, context, batch.Id);
+
+        Assert.Equal(1, rejected.NodeCount);
+        Assert.DoesNotContain(csv, rejected.ValidationSummaryJson, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(csv, rejected.DecisionSummaryJson, StringComparison.OrdinalIgnoreCase);
+        await using var scope = application.Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<EnterpriseThreadDbContext>();
+        var updatedBatch = await dbContext.ImportBatches.SingleAsync(item => item.Id == batch.Id);
+        Assert.Equal(ImportBatchStatus.Rejected, updatedBatch.Status);
+    }
+
+    [Fact]
+    public async Task BomMetadataStagesRelationshipsAndComparisonReportsMismatches()
+    {
+        var graphMemory = new RecordingGraphMemoryService();
+        await using var application = CreateApplication(graphMemory);
+        using var client = application.CreateClient();
+        var context = await CreatePublishedModelContextAsync(client);
+        var batch = await CreateImportBatchAsync(client, context);
+        var csv = "bomSide,partNumber,lifecycle,cost,parent,child,quantity,unit,usage\nCAD,A,released,1,A,B,2,ea,R1\nEBOM,A,released,1,A,B,3,ea,R2\nCAD,A,released,1,A,C,1,ea,R3\nEBOM,A,released,1,A,D,1,ea,R4\n";
+        await UploadCsvAsync(client, context, batch.Id, csv);
+        var mapping = await CreateMappingAsync(client, context, batch.Id, ["released"]);
+        await ApproveMappingAsync(client, context, mapping.Id);
+
+        var staging = await StageBatchAsync(client, context, batch.Id);
+        var comparison = await CreateBomComparisonAsync(client, context, batch.Id);
+
+        Assert.Equal(4, staging.RelationshipCount);
+        Assert.Equal(1, comparison.MissingInCadCount);
+        Assert.Equal(1, comparison.MissingInEbomCount);
+        Assert.Equal(1, comparison.QuantityMismatchCount);
+        Assert.Equal(1, comparison.UsageReferenceMismatchCount);
+    }
+
+    [Fact]
+    public async Task SnapshotsPersistDeterministicPayloadsAndDiffsReportChanges()
+    {
+        var graphMemory = new RecordingGraphMemoryService();
+        await using var application = CreateApplication(graphMemory);
+        using var client = application.CreateClient();
+        var context = await CreatePublishedModelContextAsync(client);
+        var batch = await CreateImportBatchAsync(client, context);
+        await UploadCsvAsync(client, context, batch.Id, "partNumber,lifecycle,cost\nP-100,released,12.50\n");
+        var mapping = await CreateMappingAsync(client, context, batch.Id, ["released"]);
+        await ApproveMappingAsync(client, context, mapping.Id);
+        await StageBatchAsync(client, context, batch.Id);
+        await PromoteBatchAsync(client, context, batch.Id);
+
+        var first = await CaptureSnapshotAsync(client, context, GraphSpace.Trusted);
+        await graphMemory.CreateNodeAsync(
+            new CreateGraphNodeRequest(
+                context.TenantId,
+                GraphSpace.Trusted,
+                "part",
+                TrustState.Trusted,
+                new Dictionary<string, string?> { ["partNumber"] = "P-200" },
+                new GraphSourceReference("demo-pdm", "P-200", batch.Id.ToString())),
+            CancellationToken.None);
+        var second = await CaptureSnapshotAsync(client, context, GraphSpace.Trusted);
+        var diff = await CreateGraphDiffAsync(client, context, first.SnapshotId, second.SnapshotId);
+
+        Assert.NotEqual(first.ChecksumSha256, second.ChecksumSha256);
+        Assert.Contains("node addition", diff.SafeSummary, StringComparison.OrdinalIgnoreCase);
+        await using var scope = application.Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<EnterpriseThreadDbContext>();
+        Assert.Equal(2, await dbContext.GraphSnapshots.CountAsync());
+        Assert.Equal(1, await dbContext.GraphDiffs.CountAsync());
+    }
+
     private static WebApplicationFactory<Program> CreateApplication(RecordingGraphMemoryService? graphMemory = null)
     {
         var databaseName = Guid.NewGuid().ToString();
@@ -466,6 +610,91 @@ public sealed class ImportTests
         return run;
     }
 
+    private static async Task<ImportPromotionRunResponse> PromoteBatchAsync(HttpClient client, TestContext context, Guid batchId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/batches/{batchId}/promote")
+        {
+            Content = JsonContent.Create(new { })
+        };
+        AddTenantHeaders(request, context.TenantId, context.UserId);
+        var response = await client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
+        var run = System.Text.Json.JsonSerializer.Deserialize<ImportPromotionRunResponse>(
+            body,
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+        Assert.NotNull(run);
+        return run;
+    }
+
+    private static async Task<RejectedStagingSummaryResponse> RejectStagingAsync(HttpClient client, TestContext context, Guid batchId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/batches/{batchId}/reject-staging")
+        {
+            Content = JsonContent.Create(new { })
+        };
+        AddTenantHeaders(request, context.TenantId, context.UserId);
+        var response = await client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
+        var summary = System.Text.Json.JsonSerializer.Deserialize<RejectedStagingSummaryResponse>(
+            body,
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+        Assert.NotNull(summary);
+        return summary;
+    }
+
+    private static async Task<BomComparisonRunResponse> CreateBomComparisonAsync(HttpClient client, TestContext context, Guid batchId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/batches/{batchId}/bom-comparison")
+        {
+            Content = JsonContent.Create(new { })
+        };
+        AddTenantHeaders(request, context.TenantId, context.UserId);
+        var response = await client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
+        var comparison = System.Text.Json.JsonSerializer.Deserialize<BomComparisonRunResponse>(
+            body,
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+        Assert.NotNull(comparison);
+        return comparison;
+    }
+
+    private static async Task<GraphSnapshotContract> CaptureSnapshotAsync(HttpClient client, TestContext context, GraphSpace graphSpace)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/admin/graph/snapshots")
+        {
+            Content = JsonContent.Create(new CaptureGraphSnapshotRequest(graphSpace))
+        };
+        AddTenantHeaders(request, context.TenantId, context.UserId);
+        var response = await client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
+        var snapshot = System.Text.Json.JsonSerializer.Deserialize<GraphSnapshotContract>(
+            body,
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+        Assert.NotNull(snapshot);
+        return snapshot;
+    }
+
+    private static async Task<GraphDiffContract> CreateGraphDiffAsync(HttpClient client, TestContext context, Guid fromSnapshotId, Guid toSnapshotId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/admin/graph/diffs")
+        {
+            Content = JsonContent.Create(new CreateGraphDiffRequest(fromSnapshotId, toSnapshotId))
+        };
+        AddTenantHeaders(request, context.TenantId, context.UserId);
+        var response = await client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
+        var diff = System.Text.Json.JsonSerializer.Deserialize<GraphDiffContract>(
+            body,
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+        Assert.NotNull(diff);
+        return diff;
+    }
+
     private static void AddTenantHeaders(HttpRequestMessage request, Guid tenantId, Guid userId)
     {
         request.Headers.Add(TenantHeaderNames.UserId, userId.ToString());
@@ -483,12 +712,15 @@ public sealed class ImportTests
     private sealed class RecordingGraphMemoryService : IGraphMemoryService
     {
         public List<CreateGraphNodeRequest> CreatedNodeRequests { get; } = [];
+        public List<CreateGraphRelationshipRequest> CreatedRelationshipRequests { get; } = [];
+        public List<BaseNode> Nodes { get; } = [];
+        public List<BaseRelationship> Relationships { get; } = [];
 
         public Task<BaseNode> CreateNodeAsync(CreateGraphNodeRequest request, CancellationToken cancellationToken)
         {
             CreatedNodeRequests.Add(request);
             var now = DateTimeOffset.UtcNow;
-            return Task.FromResult(new BaseNode(
+            var node = new BaseNode(
                 Guid.NewGuid(),
                 request.TenantId,
                 request.GraphSpace,
@@ -497,12 +729,14 @@ public sealed class ImportTests
                 request.Attributes ?? new Dictionary<string, string?>(),
                 request.SourceReference,
                 now,
-                now));
+                now);
+            Nodes.Add(node);
+            return Task.FromResult(node);
         }
 
         public Task<BaseNode?> GetNodeAsync(Guid tenantId, Guid nodeId, CancellationToken cancellationToken)
         {
-            return Task.FromResult<BaseNode?>(null);
+            return Task.FromResult(Nodes.SingleOrDefault(node => node.TenantId == tenantId && node.NodeId == nodeId));
         }
 
         public Task<BaseNode> UpdateNodeAsync(UpdateGraphNodeRequest request, CancellationToken cancellationToken)
@@ -512,12 +746,77 @@ public sealed class ImportTests
 
         public Task<BaseRelationship> CreateRelationshipAsync(CreateGraphRelationshipRequest request, CancellationToken cancellationToken)
         {
-            throw new NotSupportedException();
+            CreatedRelationshipRequests.Add(request);
+            var now = DateTimeOffset.UtcNow;
+            var relationship = new BaseRelationship(
+                Guid.NewGuid(),
+                request.TenantId,
+                request.FromNodeId,
+                request.ToNodeId,
+                request.RelationshipType,
+                request.TrustState,
+                request.Attributes ?? new Dictionary<string, string?>(),
+                request.SourceReference,
+                now,
+                now);
+            Relationships.Add(relationship);
+            return Task.FromResult(relationship);
         }
 
         public Task<GraphTraversalResult> TraverseAsync(TraverseGraphRequest request, CancellationToken cancellationToken)
         {
             throw new NotSupportedException();
+        }
+
+        public Task<GraphReadModel> ListGraphAsync(
+            Guid tenantId,
+            GraphSpace? graphSpace,
+            string? sourceBatchId,
+            IReadOnlyCollection<Guid>? nodeIds,
+            IReadOnlyCollection<Guid>? relationshipIds,
+            CancellationToken cancellationToken)
+        {
+            var nodes = Nodes
+                .Where(node => node.TenantId == tenantId
+                    && (graphSpace is null || node.GraphSpace == graphSpace)
+                    && (sourceBatchId is null || node.SourceReference?.SourceBatchId == sourceBatchId)
+                    && (nodeIds is null || nodeIds.Count == 0 || nodeIds.Contains(node.NodeId)))
+                .ToList();
+            var relationships = Relationships
+                .Where(relationship => relationship.TenantId == tenantId
+                    && (sourceBatchId is null || relationship.SourceReference?.SourceBatchId == sourceBatchId)
+                    && (relationshipIds is null || relationshipIds.Count == 0 || relationshipIds.Contains(relationship.RelationshipId)))
+                .ToList();
+            return Task.FromResult(new GraphReadModel(nodes, relationships));
+        }
+
+        public async Task<GraphPromotionCopyResult> PromoteStagingAsync(
+            Guid tenantId,
+            IReadOnlyCollection<Guid> stagingNodeIds,
+            IReadOnlyCollection<Guid> stagingRelationshipIds,
+            CancellationToken cancellationToken)
+        {
+            var staging = await ListGraphAsync(tenantId, GraphSpace.Staging, null, stagingNodeIds, stagingRelationshipIds, cancellationToken);
+            var nodeMap = new Dictionary<Guid, Guid>();
+            foreach (var node in staging.Nodes)
+            {
+                var promoted = await CreateNodeAsync(new CreateGraphNodeRequest(tenantId, GraphSpace.Trusted, node.ObjectType, TrustState.Trusted, node.Attributes, node.SourceReference), cancellationToken);
+                nodeMap[node.NodeId] = promoted.NodeId;
+            }
+
+            var promotedRelationshipIds = new List<Guid>();
+            foreach (var relationship in staging.Relationships)
+            {
+                if (!nodeMap.TryGetValue(relationship.FromNodeId, out var fromNodeId) || !nodeMap.TryGetValue(relationship.ToNodeId, out var toNodeId))
+                {
+                    continue;
+                }
+
+                var promoted = await CreateRelationshipAsync(new CreateGraphRelationshipRequest(tenantId, fromNodeId, toNodeId, relationship.RelationshipType, TrustState.Trusted, relationship.Attributes, relationship.SourceReference), cancellationToken);
+                promotedRelationshipIds.Add(promoted.RelationshipId);
+            }
+
+            return new GraphPromotionCopyResult(nodeMap.Values.ToList(), promotedRelationshipIds);
         }
     }
 }

@@ -961,6 +961,103 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.ToTable("security_events", (string)null);
                 });
 
+            modelBuilder.Entity("ETOS.Backend.GraphMemory.GraphDiff", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ChecksumSha256")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DiffJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<Guid>("FromSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SafeSummary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ToSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FromSnapshotId");
+
+                    b.HasIndex("ToSnapshotId");
+
+                    b.HasIndex("TenantId", "FromSnapshotId", "ToSnapshotId", "CreatedAt");
+
+                    b.ToTable("graph_diffs", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GraphMemory.GraphSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ChecksumSha256")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("GraphSpace")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<int>("NodeCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RelationshipCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SafeSummary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ChecksumSha256");
+
+                    b.HasIndex("TenantId", "GraphSpace", "CreatedAt");
+
+                    b.ToTable("graph_snapshots", (string)null);
+                });
+
             modelBuilder.Entity("ETOS.Backend.Identity.AccessDenialRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1682,6 +1779,67 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.ToTable("trust_score_records", (string)null);
                 });
 
+            modelBuilder.Entity("ETOS.Backend.Imports.BomComparisonRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CadSummaryJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EbomSummaryJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("ImportBatchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("MissingInCadCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MissingInEbomCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantityMismatchCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ResultJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("SourceContext")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("UnresolvedIdentityCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UsageReferenceMismatchCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportBatchId");
+
+                    b.HasIndex("TenantId", "ImportBatchId", "CreatedAt");
+
+                    b.ToTable("bom_comparison_runs", (string)null);
+                });
+
             modelBuilder.Entity("ETOS.Backend.Imports.ImportBatch", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1962,6 +2120,61 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.ToTable("import_mapping_versions", (string)null);
                 });
 
+            modelBuilder.Entity("ETOS.Backend.Imports.ImportPromotionRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FailureSummary")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("ImportBatchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ImportStagingGraphRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PromotedNodeCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PromotedRelationshipCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SourceEvidenceIdsJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportBatchId");
+
+                    b.HasIndex("ImportStagingGraphRunId");
+
+                    b.HasIndex("TenantId", "ImportBatchId", "CreatedAt");
+
+                    b.ToTable("import_promotion_runs", (string)null);
+                });
+
             modelBuilder.Entity("ETOS.Backend.Imports.ImportStagingGraphRun", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2070,6 +2283,59 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "ImportBatchId", "Severity");
 
                     b.ToTable("import_validation_issues", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Imports.RejectedStagingSummary", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DecisionSummaryJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("ImportBatchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ImportStagingGraphRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("NodeCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RelationshipCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SourceEvidenceIdsJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ValidationSummaryJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportBatchId");
+
+                    b.HasIndex("ImportStagingGraphRunId");
+
+                    b.HasIndex("TenantId", "ImportBatchId", "CreatedAt");
+
+                    b.ToTable("rejected_staging_summaries", (string)null);
                 });
 
             modelBuilder.Entity("ETOS.Backend.Ontology.AttributeDefinition", b =>
@@ -3132,6 +3398,25 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Navigation("RelatedAuditRecord");
                 });
 
+            modelBuilder.Entity("ETOS.Backend.GraphMemory.GraphDiff", b =>
+                {
+                    b.HasOne("ETOS.Backend.GraphMemory.GraphSnapshot", "FromSnapshot")
+                        .WithMany()
+                        .HasForeignKey("FromSnapshotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ETOS.Backend.GraphMemory.GraphSnapshot", "ToSnapshot")
+                        .WithMany()
+                        .HasForeignKey("ToSnapshotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FromSnapshot");
+
+                    b.Navigation("ToSnapshot");
+                });
+
             modelBuilder.Entity("ETOS.Backend.Identity.AccessGrant", b =>
                 {
                     b.HasOne("ETOS.Backend.Identity.Tenant", "Tenant")
@@ -3306,6 +3591,17 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Navigation("ImportBatch");
                 });
 
+            modelBuilder.Entity("ETOS.Backend.Imports.BomComparisonRun", b =>
+                {
+                    b.HasOne("ETOS.Backend.Imports.ImportBatch", "ImportBatch")
+                        .WithMany("BomComparisonRuns")
+                        .HasForeignKey("ImportBatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ImportBatch");
+                });
+
             modelBuilder.Entity("ETOS.Backend.Imports.ImportBatch", b =>
                 {
                     b.HasOne("ETOS.Backend.Ontology.ModelPackageVersion", null)
@@ -3365,6 +3661,25 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Navigation("ImportBatch");
                 });
 
+            modelBuilder.Entity("ETOS.Backend.Imports.ImportPromotionRun", b =>
+                {
+                    b.HasOne("ETOS.Backend.Imports.ImportBatch", "ImportBatch")
+                        .WithMany("PromotionRuns")
+                        .HasForeignKey("ImportBatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ETOS.Backend.Imports.ImportStagingGraphRun", "ImportStagingGraphRun")
+                        .WithMany()
+                        .HasForeignKey("ImportStagingGraphRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ImportBatch");
+
+                    b.Navigation("ImportStagingGraphRun");
+                });
+
             modelBuilder.Entity("ETOS.Backend.Imports.ImportStagingGraphRun", b =>
                 {
                     b.HasOne("ETOS.Backend.Imports.ImportBatch", "ImportBatch")
@@ -3400,6 +3715,25 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Navigation("ImportBatch");
 
                     b.Navigation("ImportMappingVersion");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Imports.RejectedStagingSummary", b =>
+                {
+                    b.HasOne("ETOS.Backend.Imports.ImportBatch", "ImportBatch")
+                        .WithMany("RejectedStagingSummaries")
+                        .HasForeignKey("ImportBatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ETOS.Backend.Imports.ImportStagingGraphRun", "ImportStagingGraphRun")
+                        .WithMany()
+                        .HasForeignKey("ImportStagingGraphRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ImportBatch");
+
+                    b.Navigation("ImportStagingGraphRun");
                 });
 
             modelBuilder.Entity("ETOS.Backend.Ontology.AttributeDefinition", b =>
@@ -3645,9 +3979,15 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("ETOS.Backend.Imports.ImportBatch", b =>
                 {
+                    b.Navigation("BomComparisonRuns");
+
                     b.Navigation("FileEvidence");
 
                     b.Navigation("MappingVersions");
+
+                    b.Navigation("PromotionRuns");
+
+                    b.Navigation("RejectedStagingSummaries");
 
                     b.Navigation("StagingRuns");
 

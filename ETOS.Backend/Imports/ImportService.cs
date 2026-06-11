@@ -1,8 +1,10 @@
 using System.Globalization;
 using System.Text.Json;
+using ETOS.Backend.DataQuality;
 using ETOS.Backend.Governance;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
+using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Ontology;
 using FluentValidation;
@@ -21,6 +23,11 @@ public interface IImportService
     Task<ImportMappingVersionResponse> ApproveMappingVersionAsync(Guid mappingVersionId, ApproveImportMappingRequest request, CancellationToken cancellationToken);
     Task<ImportValidationResponse> ValidateBatchAsync(Guid batchId, CancellationToken cancellationToken);
     Task<ImportStagingGraphRunResponse> StageBatchAsync(Guid batchId, CancellationToken cancellationToken);
+    Task<ImportPromotionRunResponse> PromoteBatchAsync(Guid batchId, CancellationToken cancellationToken);
+    Task<RejectedStagingSummaryResponse> RejectStagingAsync(Guid batchId, CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<ImportPromotionRunResponse>> ListPromotionRunsAsync(Guid batchId, CancellationToken cancellationToken);
+    Task<BomComparisonRunResponse> CreateBomComparisonAsync(Guid batchId, CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<BomComparisonRunResponse>> ListBomComparisonsAsync(Guid batchId, CancellationToken cancellationToken);
 }
 
 public sealed class ImportService(
@@ -313,23 +320,71 @@ public sealed class ImportService(
             var nodeIds = new List<Guid>();
             var relationshipIds = new List<Guid>();
             var identityMappings = mapping.ColumnMappings.Where(item => item.IsIdentityField).ToList();
-            foreach (var row in parsed.Rows)
+            var bomHeaders = TryResolveBomHeaders(parsed.Headers);
+            if (bomHeaders is not null)
             {
-                var objectType = identityMappings.First().CanonicalObjectType;
-                var sourceRecordId = BuildSourceRecordId(row, identityMappings);
-                var attributes = BuildGraphAttributes(row, mapping);
-                attributes["lifecycleState"] = ResolveLifecycleValue(row, mapping);
+                foreach (var row in parsed.Rows)
+                {
+                    var parentId = GetRowValue(row, bomHeaders.ParentHeader);
+                    var childId = GetRowValue(row, bomHeaders.ChildHeader);
+                    if (string.IsNullOrWhiteSpace(parentId) || string.IsNullOrWhiteSpace(childId))
+                    {
+                        continue;
+                    }
 
-                var node = await graphMemoryService.CreateNodeAsync(
-                    new CreateGraphNodeRequest(
-                        context.TenantId,
-                        GraphSpace.Staging,
-                        objectType,
-                        TrustState.Unverified,
-                        attributes,
-                        new GraphSourceReference(batch.SourceSystem, sourceRecordId, batch.Id.ToString())),
-                    cancellationToken);
-                nodeIds.Add(node.NodeId);
+                    var parent = await graphMemoryService.CreateNodeAsync(
+                        new CreateGraphNodeRequest(
+                            context.TenantId,
+                            GraphSpace.Staging,
+                            "part",
+                            TrustState.Unverified,
+                            new Dictionary<string, string?> { ["partNumber"] = parentId },
+                            new GraphSourceReference(batch.SourceSystem, parentId, batch.Id.ToString())),
+                        cancellationToken);
+                    var child = await graphMemoryService.CreateNodeAsync(
+                        new CreateGraphNodeRequest(
+                            context.TenantId,
+                            GraphSpace.Staging,
+                            "part",
+                            TrustState.Unverified,
+                            new Dictionary<string, string?> { ["partNumber"] = childId },
+                            new GraphSourceReference(batch.SourceSystem, childId, batch.Id.ToString())),
+                        cancellationToken);
+                    var relationship = await graphMemoryService.CreateRelationshipAsync(
+                        new CreateGraphRelationshipRequest(
+                            context.TenantId,
+                            parent.NodeId,
+                            child.NodeId,
+                            "BOM_CONTAINS",
+                            TrustState.Unverified,
+                            BuildBomRelationshipAttributes(row, bomHeaders),
+                            new GraphSourceReference(batch.SourceSystem, $"{parentId}|{childId}", batch.Id.ToString())),
+                        cancellationToken);
+                    nodeIds.Add(parent.NodeId);
+                    nodeIds.Add(child.NodeId);
+                    relationshipIds.Add(relationship.RelationshipId);
+                }
+            }
+            else
+            {
+                foreach (var row in parsed.Rows)
+                {
+                    var objectType = identityMappings.First().CanonicalObjectType;
+                    var sourceRecordId = BuildSourceRecordId(row, identityMappings);
+                    var attributes = BuildGraphAttributes(row, mapping);
+                    attributes["lifecycleState"] = ResolveLifecycleValue(row, mapping);
+
+                    var node = await graphMemoryService.CreateNodeAsync(
+                        new CreateGraphNodeRequest(
+                            context.TenantId,
+                            GraphSpace.Staging,
+                            objectType,
+                            TrustState.Unverified,
+                            attributes,
+                            new GraphSourceReference(batch.SourceSystem, sourceRecordId, batch.Id.ToString())),
+                        cancellationToken);
+                    nodeIds.Add(node.NodeId);
+                }
             }
 
             run.Status = ImportStagingRunStatus.Completed;
@@ -353,6 +408,309 @@ public sealed class ImportService(
             await dbContext.SaveChangesAsync(cancellationToken);
             throw;
         }
+    }
+
+    public async Task<ImportPromotionRunResponse> PromoteBatchAsync(Guid batchId, CancellationToken cancellationToken)
+    {
+        var context = await RequireImportPermissionAsync("imports.batches.promote", ImportPermissions.Approve, cancellationToken);
+        var batch = await RequireBatchAsync(batchId, context, "imports.batches.promote", cancellationToken);
+        var stagingRun = RequireLatestCompletedStagingRun(batch);
+        await ValidatePromotionGatesAsync(batch, stagingRun, cancellationToken);
+
+        var run = new ImportPromotionRun
+        {
+            Id = Guid.NewGuid(),
+            TenantId = context.TenantId,
+            ImportBatchId = batch.Id,
+            ImportStagingGraphRunId = stagingRun.Id,
+            Status = ImportPromotionRunStatus.Running,
+            SourceEvidenceIdsJson = JsonSerializer.Serialize(batch.FileEvidence.Select(evidence => evidence.Id).Order().ToList(), JsonOptions),
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        dbContext.ImportPromotionRuns.Add(run);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            var copied = await graphMemoryService.PromoteStagingAsync(
+                context.TenantId,
+                DeserializeGuidArray(stagingRun.GraphNodeIdsJson),
+                DeserializeGuidArray(stagingRun.GraphRelationshipIdsJson),
+                cancellationToken);
+            var audit = await RecordAuditAsync(context, "imports.batches.promote", $"Import batch promoted {copied.TrustedNodeIds.Count} trusted node(s) and {copied.TrustedRelationshipIds.Count} trusted relationship(s).", nameof(ImportBatch), batch.Id, cancellationToken);
+            run.Status = ImportPromotionRunStatus.Completed;
+            run.PromotedNodeCount = copied.TrustedNodeIds.Count;
+            run.PromotedRelationshipCount = copied.TrustedRelationshipIds.Count;
+            run.AuditRecordId = audit.Id;
+            run.CompletedAt = DateTimeOffset.UtcNow;
+            batch.Status = ImportBatchStatus.Promoted;
+            await dbContext.SaveChangesAsync(cancellationToken);
+            return ToPromotionRunResponse(run);
+        }
+        catch (Exception exception) when (exception is not RequestValidationException)
+        {
+            run.Status = ImportPromotionRunStatus.Failed;
+            run.FailureSummary = exception.Message.Length > 1000 ? exception.Message[..1000] : exception.Message;
+            run.CompletedAt = DateTimeOffset.UtcNow;
+            await dbContext.SaveChangesAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    public async Task<RejectedStagingSummaryResponse> RejectStagingAsync(Guid batchId, CancellationToken cancellationToken)
+    {
+        var context = await RequireImportPermissionAsync("imports.batches.reject_staging", ImportPermissions.Approve, cancellationToken);
+        var batch = await RequireBatchAsync(batchId, context, "imports.batches.reject_staging", cancellationToken);
+        var stagingRun = RequireLatestCompletedStagingRun(batch);
+        var validationSummary = new
+        {
+            errorCount = batch.ValidationIssues.Count(issue => issue.Severity == ImportIssueSeverity.Error),
+            warningCount = batch.ValidationIssues.Count(issue => issue.Severity == ImportIssueSeverity.Warning),
+            issueCodes = batch.ValidationIssues.Select(issue => issue.IssueCode).Distinct().Order().ToList()
+        };
+        var decisionSummary = await BuildDecisionSummaryAsync(context.TenantId, batch.Id, stagingRun.Id, cancellationToken);
+        var audit = await RecordAuditAsync(context, "imports.batches.reject_staging", "Import staging graph was rejected and summarized.", nameof(ImportBatch), batch.Id, cancellationToken);
+        var summary = new RejectedStagingSummary
+        {
+            Id = Guid.NewGuid(),
+            TenantId = context.TenantId,
+            ImportBatchId = batch.Id,
+            ImportStagingGraphRunId = stagingRun.Id,
+            ValidationSummaryJson = JsonSerializer.Serialize(validationSummary, JsonOptions),
+            DecisionSummaryJson = JsonSerializer.Serialize(decisionSummary, JsonOptions),
+            NodeCount = stagingRun.NodeCount,
+            RelationshipCount = stagingRun.RelationshipCount,
+            SourceEvidenceIdsJson = JsonSerializer.Serialize(batch.FileEvidence.Select(evidence => evidence.Id).Order().ToList(), JsonOptions),
+            AuditRecordId = audit.Id,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        dbContext.RejectedStagingSummaries.Add(summary);
+        batch.Status = ImportBatchStatus.Rejected;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return ToRejectedStagingSummaryResponse(summary);
+    }
+
+    public async Task<IReadOnlyCollection<ImportPromotionRunResponse>> ListPromotionRunsAsync(Guid batchId, CancellationToken cancellationToken)
+    {
+        var context = await RequireImportPermissionAsync("imports.batches.promotion_runs.list", ImportPermissions.Read, cancellationToken);
+        var batch = await RequireBatchAsync(batchId, context, "imports.batches.promotion_runs.list", cancellationToken);
+        return await dbContext.ImportPromotionRuns
+            .AsNoTracking()
+            .Where(run => run.TenantId == context.TenantId && run.ImportBatchId == batch.Id)
+            .OrderByDescending(run => run.CreatedAt)
+            .Select(run => ToPromotionRunResponse(run))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<BomComparisonRunResponse> CreateBomComparisonAsync(Guid batchId, CancellationToken cancellationToken)
+    {
+        var context = await RequireImportPermissionAsync("imports.batches.bom_comparison", ImportPermissions.Read, cancellationToken);
+        var batch = await RequireBatchAsync(batchId, context, "imports.batches.bom_comparison", cancellationToken);
+        var evidence = ResolveEvidence(batch, null);
+        var parsed = await ParseEvidenceAsync(evidence, null, cancellationToken);
+        var result = BuildBomComparison(parsed);
+        var audit = await RecordAuditAsync(context, "imports.batches.bom_comparison", "CAD BOM and EBOM metadata were compared.", nameof(ImportBatch), batch.Id, cancellationToken);
+        var run = new BomComparisonRun
+        {
+            Id = Guid.NewGuid(),
+            TenantId = context.TenantId,
+            ImportBatchId = batch.Id,
+            SourceContext = batch.SourceSystem,
+            CadSummaryJson = JsonSerializer.Serialize(result.CadSummary, JsonOptions),
+            EbomSummaryJson = JsonSerializer.Serialize(result.EbomSummary, JsonOptions),
+            MissingInCadCount = result.MissingInCad.Count,
+            MissingInEbomCount = result.MissingInEbom.Count,
+            QuantityMismatchCount = result.QuantityMismatches.Count,
+            UsageReferenceMismatchCount = result.UsageReferenceMismatches.Count,
+            UnresolvedIdentityCount = result.UnresolvedIdentity.Count,
+            ResultJson = JsonSerializer.Serialize(result, JsonOptions),
+            AuditRecordId = audit.Id,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        dbContext.BomComparisonRuns.Add(run);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return ToBomComparisonRunResponse(run);
+    }
+
+    public async Task<IReadOnlyCollection<BomComparisonRunResponse>> ListBomComparisonsAsync(Guid batchId, CancellationToken cancellationToken)
+    {
+        var context = await RequireImportPermissionAsync("imports.batches.bom_comparisons.list", ImportPermissions.Read, cancellationToken);
+        var batch = await RequireBatchAsync(batchId, context, "imports.batches.bom_comparisons.list", cancellationToken);
+        return await dbContext.BomComparisonRuns
+            .AsNoTracking()
+            .Where(run => run.TenantId == context.TenantId && run.ImportBatchId == batch.Id)
+            .OrderByDescending(run => run.CreatedAt)
+            .Select(run => ToBomComparisonRunResponse(run))
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task ValidatePromotionGatesAsync(ImportBatch batch, ImportStagingGraphRun stagingRun, CancellationToken cancellationToken)
+    {
+        if (batch.Status != ImportBatchStatus.Staged)
+        {
+            throw new RequestValidationException("Only staged import batches can be promoted.");
+        }
+
+        _ = GetApprovedMapping(batch);
+        if (batch.ValidationIssues.Any(issue => issue.Severity == ImportIssueSeverity.Error))
+        {
+            throw new RequestValidationException("Import batch has validation errors and cannot be promoted.");
+        }
+
+        var blockingQualityCount = await dbContext.DataQualityIssues.CountAsync(
+            issue => issue.TenantId == batch.TenantId
+                && (issue.ImportBatchId == batch.Id || issue.ImportStagingGraphRunId == stagingRun.Id)
+                && (issue.Status == DataQualityIssueStatus.Open || issue.Status == DataQualityIssueStatus.Acknowledged)
+                && (issue.Severity == DataQualitySeverity.High || issue.Severity == DataQualitySeverity.Critical),
+            cancellationToken);
+        if (blockingQualityCount > 0)
+        {
+            throw new RequestValidationException("Import batch has unresolved blocking data-quality issues and cannot be promoted.");
+        }
+
+        var blockingIdentityCount = await dbContext.IdentityCandidateLinks.CountAsync(
+            link => link.TenantId == batch.TenantId
+                && (link.ImportBatchId == batch.Id || link.ImportStagingGraphRunId == stagingRun.Id)
+                && (link.State == IdentityCandidateState.Conflicted || link.State == IdentityCandidateState.Provisional || link.State == IdentityCandidateState.Unverified),
+            cancellationToken);
+        if (blockingIdentityCount > 0)
+        {
+            throw new RequestValidationException("Import batch has unresolved identity candidates and cannot be promoted.");
+        }
+    }
+
+    private async Task<object> BuildDecisionSummaryAsync(Guid tenantId, Guid batchId, Guid stagingRunId, CancellationToken cancellationToken)
+    {
+        var identityCounts = await dbContext.IdentityCandidateLinks
+            .AsNoTracking()
+            .Where(link => link.TenantId == tenantId && (link.ImportBatchId == batchId || link.ImportStagingGraphRunId == stagingRunId))
+            .GroupBy(link => link.State)
+            .Select(group => new { state = group.Key.ToString(), count = group.Count() })
+            .ToListAsync(cancellationToken);
+        var qualityCounts = await dbContext.DataQualityIssues
+            .AsNoTracking()
+            .Where(issue => issue.TenantId == tenantId && (issue.ImportBatchId == batchId || issue.ImportStagingGraphRunId == stagingRunId))
+            .GroupBy(issue => issue.Status)
+            .Select(group => new { status = group.Key.ToString(), count = group.Count() })
+            .ToListAsync(cancellationToken);
+        return new { identityCounts, dataQualityCounts = qualityCounts };
+    }
+
+    private static ImportStagingGraphRun RequireLatestCompletedStagingRun(ImportBatch batch)
+    {
+        return batch.StagingRuns
+            .Where(run => run.Status == ImportStagingRunStatus.Completed)
+            .OrderByDescending(run => run.CompletedAt ?? run.CreatedAt)
+            .FirstOrDefault()
+            ?? throw new RequestValidationException("A completed staging graph run is required.");
+    }
+
+    private static BomComparisonResult BuildBomComparison(ParsedImportFile parsed)
+    {
+        var sideHeader = FindHeader(parsed.Headers, "bomSide", "bom_side", "side", "sourceBom", "source_bom")
+            ?? throw new RequestValidationException("BOM comparison requires a CAD/EBOM side column.");
+        var parentHeader = FindHeader(parsed.Headers, "parent", "parentPart", "parent_part", "assembly", "assemblyNumber")
+            ?? throw new RequestValidationException("BOM comparison requires a parent item column.");
+        var childHeader = FindHeader(parsed.Headers, "child", "childPart", "child_part", "component", "componentNumber", "item")
+            ?? throw new RequestValidationException("BOM comparison requires a child item column.");
+        var quantityHeader = FindHeader(parsed.Headers, "quantity", "qty");
+        var unitHeader = FindHeader(parsed.Headers, "unit", "uom");
+        var usageHeader = FindHeader(parsed.Headers, "usage", "findNumber", "find_number", "reference", "referenceDesignator", "reference_designator");
+
+        var lines = parsed.Rows.Select((row, index) => ToBomLine(row, index + 2, sideHeader, parentHeader, childHeader, quantityHeader, unitHeader, usageHeader)).ToList();
+        var cad = lines.Where(line => line.Side == "CAD").ToDictionary(line => line.Key, StringComparer.OrdinalIgnoreCase);
+        var ebom = lines.Where(line => line.Side == "EBOM").ToDictionary(line => line.Key, StringComparer.OrdinalIgnoreCase);
+        var missingInCad = ebom.Keys.Except(cad.Keys, StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        var missingInEbom = cad.Keys.Except(ebom.Keys, StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
+        var quantityMismatches = cad.Keys.Intersect(ebom.Keys, StringComparer.OrdinalIgnoreCase)
+            .Where(key => !string.Equals(cad[key].Quantity, ebom[key].Quantity, StringComparison.OrdinalIgnoreCase)
+                || !string.Equals(cad[key].Unit, ebom[key].Unit, StringComparison.OrdinalIgnoreCase))
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var usageReferenceMismatches = cad.Keys.Intersect(ebom.Keys, StringComparer.OrdinalIgnoreCase)
+            .Where(key => !string.Equals(cad[key].UsageReference, ebom[key].UsageReference, StringComparison.OrdinalIgnoreCase))
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var unresolved = lines
+            .Where(line => string.IsNullOrWhiteSpace(line.ParentIdentity) || string.IsNullOrWhiteSpace(line.ChildIdentity))
+            .Select(line => $"row:{line.RowNumber}")
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return new BomComparisonResult(
+            new BomSideSummary(cad.Count),
+            new BomSideSummary(ebom.Count),
+            missingInCad,
+            missingInEbom,
+            quantityMismatches,
+            usageReferenceMismatches,
+            unresolved);
+    }
+
+    private static BomLine ToBomLine(
+        IReadOnlyDictionary<string, string?> row,
+        int rowNumber,
+        string sideHeader,
+        string parentHeader,
+        string childHeader,
+        string? quantityHeader,
+        string? unitHeader,
+        string? usageHeader)
+    {
+        var side = GetRowValue(row, sideHeader);
+        var normalizedSide = NormalizeLoose(side);
+        var canonicalSide = normalizedSide.Contains("cad", StringComparison.Ordinal) ? "CAD"
+            : normalizedSide.Contains("ebom", StringComparison.Ordinal) || normalizedSide.Contains("engineering", StringComparison.Ordinal) ? "EBOM"
+            : throw new RequestValidationException("BOM side values must identify CAD or EBOM.");
+        var parent = GetRowValue(row, parentHeader);
+        var child = GetRowValue(row, childHeader);
+        return new BomLine(
+            canonicalSide,
+            parent,
+            child,
+            $"{parent}|{child}",
+            quantityHeader is null ? null : GetRowValue(row, quantityHeader),
+            unitHeader is null ? null : GetRowValue(row, unitHeader),
+            usageHeader is null ? null : GetRowValue(row, usageHeader),
+            rowNumber);
+    }
+
+    private static string? FindHeader(IReadOnlyCollection<string> headers, params string[] candidates)
+    {
+        var normalizedCandidates = candidates.Select(NormalizeLoose).ToHashSet();
+        return headers.FirstOrDefault(header => normalizedCandidates.Contains(NormalizeLoose(header)));
+    }
+
+    private static BomHeaders? TryResolveBomHeaders(IReadOnlyCollection<string> headers)
+    {
+        var parentHeader = FindHeader(headers, "parent", "parentPart", "parent_part", "assembly", "assemblyNumber");
+        var childHeader = FindHeader(headers, "child", "childPart", "child_part", "component", "componentNumber", "item");
+        if (parentHeader is null || childHeader is null)
+        {
+            return null;
+        }
+
+        return new BomHeaders(
+            parentHeader,
+            childHeader,
+            FindHeader(headers, "quantity", "qty"),
+            FindHeader(headers, "unit", "uom"),
+            FindHeader(headers, "usage", "findNumber", "find_number", "reference", "referenceDesignator", "reference_designator"));
+    }
+
+    private static Dictionary<string, string?> BuildBomRelationshipAttributes(IReadOnlyDictionary<string, string?> row, BomHeaders headers)
+    {
+        return new Dictionary<string, string?>
+        {
+            ["quantity"] = headers.QuantityHeader is null ? null : GetRowValue(row, headers.QuantityHeader),
+            ["unit"] = headers.UnitHeader is null ? null : GetRowValue(row, headers.UnitHeader),
+            ["usageReference"] = headers.UsageHeader is null ? null : GetRowValue(row, headers.UsageHeader)
+        };
+    }
+
+    private static string GetRowValue(IReadOnlyDictionary<string, string?> row, string header)
+    {
+        return row.TryGetValue(header, out var value) ? value?.Trim() ?? string.Empty : string.Empty;
     }
 
     private async Task<ActiveTenantContext> RequireImportPermissionAsync(string action, string permissionKey, CancellationToken cancellationToken)
@@ -813,6 +1171,58 @@ public sealed class ImportService(
             run.CompletedAt);
     }
 
+    private static ImportPromotionRunResponse ToPromotionRunResponse(ImportPromotionRun run)
+    {
+        return new ImportPromotionRunResponse(
+            run.Id,
+            run.TenantId,
+            run.ImportBatchId,
+            run.ImportStagingGraphRunId,
+            run.Status,
+            run.PromotedNodeCount,
+            run.PromotedRelationshipCount,
+            DeserializeGuidArray(run.SourceEvidenceIdsJson),
+            run.AuditRecordId,
+            run.FailureSummary,
+            run.CreatedAt,
+            run.CompletedAt);
+    }
+
+    private static RejectedStagingSummaryResponse ToRejectedStagingSummaryResponse(RejectedStagingSummary summary)
+    {
+        return new RejectedStagingSummaryResponse(
+            summary.Id,
+            summary.TenantId,
+            summary.ImportBatchId,
+            summary.ImportStagingGraphRunId,
+            summary.ValidationSummaryJson,
+            summary.DecisionSummaryJson,
+            summary.NodeCount,
+            summary.RelationshipCount,
+            DeserializeGuidArray(summary.SourceEvidenceIdsJson),
+            summary.AuditRecordId,
+            summary.CreatedAt);
+    }
+
+    private static BomComparisonRunResponse ToBomComparisonRunResponse(BomComparisonRun run)
+    {
+        return new BomComparisonRunResponse(
+            run.Id,
+            run.TenantId,
+            run.ImportBatchId,
+            run.SourceContext,
+            run.CadSummaryJson,
+            run.EbomSummaryJson,
+            run.MissingInCadCount,
+            run.MissingInEbomCount,
+            run.QuantityMismatchCount,
+            run.UsageReferenceMismatchCount,
+            run.UnresolvedIdentityCount,
+            run.ResultJson,
+            run.AuditRecordId,
+            run.CreatedAt);
+    }
+
     private static IReadOnlyCollection<Guid> DeserializeGuidArray(string? json)
     {
         return string.IsNullOrWhiteSpace(json)
@@ -833,6 +1243,34 @@ public sealed class ImportService(
     private static string NormalizeKey(string value) => value.Trim().ToUpperInvariant();
     private static string NormalizeLoose(string value) => new(value.Where(char.IsLetterOrDigit).Select(char.ToLowerInvariant).ToArray());
     private static string? TrimOptional(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private sealed record BomHeaders(
+        string ParentHeader,
+        string ChildHeader,
+        string? QuantityHeader,
+        string? UnitHeader,
+        string? UsageHeader);
+
+    private sealed record BomLine(
+        string Side,
+        string ParentIdentity,
+        string ChildIdentity,
+        string Key,
+        string? Quantity,
+        string? Unit,
+        string? UsageReference,
+        int RowNumber);
+
+    private sealed record BomSideSummary(int LineCount);
+
+    private sealed record BomComparisonResult(
+        BomSideSummary CadSummary,
+        BomSideSummary EbomSummary,
+        IReadOnlyCollection<string> MissingInCad,
+        IReadOnlyCollection<string> MissingInEbom,
+        IReadOnlyCollection<string> QuantityMismatches,
+        IReadOnlyCollection<string> UsageReferenceMismatches,
+        IReadOnlyCollection<string> UnresolvedIdentity);
 
     private sealed class CreateImportBatchRequestValidator : AbstractValidator<CreateImportBatchRequest>
     {

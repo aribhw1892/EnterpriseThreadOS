@@ -1,6 +1,7 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
+using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Imports;
@@ -91,6 +92,16 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<ImportValidationIssue> ImportValidationIssues => Set<ImportValidationIssue>();
 
     public DbSet<ImportStagingGraphRun> ImportStagingGraphRuns => Set<ImportStagingGraphRun>();
+
+    public DbSet<ImportPromotionRun> ImportPromotionRuns => Set<ImportPromotionRun>();
+
+    public DbSet<RejectedStagingSummary> RejectedStagingSummaries => Set<RejectedStagingSummary>();
+
+    public DbSet<BomComparisonRun> BomComparisonRuns => Set<BomComparisonRun>();
+
+    public DbSet<GraphSnapshot> GraphSnapshots => Set<GraphSnapshot>();
+
+    public DbSet<GraphDiff> GraphDiffs => Set<GraphDiff>();
 
     public DbSet<IdentityResolutionRule> IdentityResolutionRules => Set<IdentityResolutionRule>();
 
@@ -485,8 +496,46 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
 
         ConfigureOntologyTables(modelBuilder);
         ConfigureImportTables(modelBuilder);
+        ConfigureGraphMemoryTables(modelBuilder);
         ConfigureIdentityResolutionTables(modelBuilder);
         ConfigureDataQualityTables(modelBuilder);
+    }
+
+    private static void ConfigureGraphMemoryTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<GraphSnapshot>(entity =>
+        {
+            entity.ToTable("graph_snapshots");
+            entity.HasKey(snapshot => snapshot.Id);
+            entity.Property(snapshot => snapshot.TenantId).IsRequired();
+            entity.Property(snapshot => snapshot.GraphSpace).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(snapshot => snapshot.SnapshotJson).HasMaxLength(16000).IsRequired();
+            entity.Property(snapshot => snapshot.ChecksumSha256).HasMaxLength(128).IsRequired();
+            entity.Property(snapshot => snapshot.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(snapshot => snapshot.CreatedAt).IsRequired();
+            entity.HasIndex(snapshot => new { snapshot.TenantId, snapshot.GraphSpace, snapshot.CreatedAt });
+            entity.HasIndex(snapshot => new { snapshot.TenantId, snapshot.ChecksumSha256 });
+        });
+
+        modelBuilder.Entity<GraphDiff>(entity =>
+        {
+            entity.ToTable("graph_diffs");
+            entity.HasKey(diff => diff.Id);
+            entity.Property(diff => diff.TenantId).IsRequired();
+            entity.Property(diff => diff.DiffJson).HasMaxLength(16000).IsRequired();
+            entity.Property(diff => diff.ChecksumSha256).HasMaxLength(128).IsRequired();
+            entity.Property(diff => diff.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(diff => diff.CreatedAt).IsRequired();
+            entity.HasIndex(diff => new { diff.TenantId, diff.FromSnapshotId, diff.ToSnapshotId, diff.CreatedAt });
+            entity.HasOne(diff => diff.FromSnapshot)
+                .WithMany()
+                .HasForeignKey(diff => diff.FromSnapshotId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(diff => diff.ToSnapshot)
+                .WithMany()
+                .HasForeignKey(diff => diff.ToSnapshotId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
     }
 
     private static void ConfigureDataQualityTables(ModelBuilder modelBuilder)
@@ -846,6 +895,63 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.HasOne(run => run.ImportMappingVersion)
                 .WithMany()
                 .HasForeignKey(run => run.ImportMappingVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ImportPromotionRun>(entity =>
+        {
+            entity.ToTable("import_promotion_runs");
+            entity.HasKey(run => run.Id);
+            entity.Property(run => run.TenantId).IsRequired();
+            entity.Property(run => run.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(run => run.SourceEvidenceIdsJson).HasMaxLength(4000).IsRequired();
+            entity.Property(run => run.FailureSummary).HasMaxLength(1000);
+            entity.Property(run => run.CreatedAt).IsRequired();
+            entity.HasIndex(run => new { run.TenantId, run.ImportBatchId, run.CreatedAt });
+            entity.HasOne(run => run.ImportBatch)
+                .WithMany(batch => batch.PromotionRuns)
+                .HasForeignKey(run => run.ImportBatchId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(run => run.ImportStagingGraphRun)
+                .WithMany()
+                .HasForeignKey(run => run.ImportStagingGraphRunId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RejectedStagingSummary>(entity =>
+        {
+            entity.ToTable("rejected_staging_summaries");
+            entity.HasKey(summary => summary.Id);
+            entity.Property(summary => summary.TenantId).IsRequired();
+            entity.Property(summary => summary.ValidationSummaryJson).HasMaxLength(4000).IsRequired();
+            entity.Property(summary => summary.DecisionSummaryJson).HasMaxLength(4000).IsRequired();
+            entity.Property(summary => summary.SourceEvidenceIdsJson).HasMaxLength(4000).IsRequired();
+            entity.Property(summary => summary.CreatedAt).IsRequired();
+            entity.HasIndex(summary => new { summary.TenantId, summary.ImportBatchId, summary.CreatedAt });
+            entity.HasOne(summary => summary.ImportBatch)
+                .WithMany(batch => batch.RejectedStagingSummaries)
+                .HasForeignKey(summary => summary.ImportBatchId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(summary => summary.ImportStagingGraphRun)
+                .WithMany()
+                .HasForeignKey(summary => summary.ImportStagingGraphRunId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<BomComparisonRun>(entity =>
+        {
+            entity.ToTable("bom_comparison_runs");
+            entity.HasKey(run => run.Id);
+            entity.Property(run => run.TenantId).IsRequired();
+            entity.Property(run => run.SourceContext).HasMaxLength(200);
+            entity.Property(run => run.CadSummaryJson).HasMaxLength(4000).IsRequired();
+            entity.Property(run => run.EbomSummaryJson).HasMaxLength(4000).IsRequired();
+            entity.Property(run => run.ResultJson).HasMaxLength(16000).IsRequired();
+            entity.Property(run => run.CreatedAt).IsRequired();
+            entity.HasIndex(run => new { run.TenantId, run.ImportBatchId, run.CreatedAt });
+            entity.HasOne(run => run.ImportBatch)
+                .WithMany(batch => batch.BomComparisonRuns)
+                .HasForeignKey(run => run.ImportBatchId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
     }

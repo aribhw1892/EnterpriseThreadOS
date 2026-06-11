@@ -246,6 +246,111 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
         return new GraphTraversalResult(startNode, nodes.Values.ToArray(), relationships.Values.ToArray());
     }
 
+    public async Task<GraphReadModel> ListGraphAsync(
+        Guid tenantId,
+        GraphSpace? graphSpace,
+        string? sourceBatchId,
+        IReadOnlyCollection<Guid>? nodeIds,
+        IReadOnlyCollection<Guid>? relationshipIds,
+        CancellationToken cancellationToken)
+    {
+        ValidateTenant(tenantId);
+        var nodeIdStrings = nodeIds?.Select(id => id.ToString()).ToArray() ?? [];
+        var relationshipIdStrings = relationshipIds?.Select(id => id.ToString()).ToArray() ?? [];
+        await using var session = OpenSession();
+
+        var nodeCursor = await session.RunAsync(
+            """
+            MATCH (node:BaseNode { tenantId: $tenantId })
+            WHERE ($graphSpace IS NULL OR node.graphSpace = $graphSpace)
+              AND ($sourceBatchId IS NULL OR node.sourceBatchId = $sourceBatchId)
+              AND (size($nodeIds) = 0 OR node.nodeId IN $nodeIds)
+            RETURN node
+            ORDER BY node.nodeId
+            """,
+            new Dictionary<string, object?>
+            {
+                ["tenantId"] = tenantId.ToString(),
+                ["graphSpace"] = graphSpace?.ToString(),
+                ["sourceBatchId"] = sourceBatchId,
+                ["nodeIds"] = nodeIdStrings
+            });
+        var nodeRecords = await nodeCursor.ToListAsync();
+
+        var relationshipCursor = await session.RunAsync(
+            """
+            MATCH (from:BaseNode { tenantId: $tenantId })-[relationship:BASE_RELATIONSHIP { tenantId: $tenantId }]->(to:BaseNode { tenantId: $tenantId })
+            WHERE ($graphSpace IS NULL OR (from.graphSpace = $graphSpace AND to.graphSpace = $graphSpace))
+              AND ($sourceBatchId IS NULL OR relationship.sourceBatchId = $sourceBatchId)
+              AND (size($relationshipIds) = 0 OR relationship.relationshipId IN $relationshipIds)
+            RETURN relationship, from.nodeId AS fromNodeId, to.nodeId AS toNodeId
+            ORDER BY relationship.relationshipId
+            """,
+            new Dictionary<string, object?>
+            {
+                ["tenantId"] = tenantId.ToString(),
+                ["graphSpace"] = graphSpace?.ToString(),
+                ["sourceBatchId"] = sourceBatchId,
+                ["relationshipIds"] = relationshipIdStrings
+            });
+        var relationshipRecords = await relationshipCursor.ToListAsync();
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return new GraphReadModel(
+            nodeRecords.Select(record => MapNode(record["node"].As<INode>())).ToList(),
+            relationshipRecords.Select(record => MapRelationship(
+                record["relationship"].As<IRelationship>(),
+                Guid.Parse(record["fromNodeId"].As<string>()),
+                Guid.Parse(record["toNodeId"].As<string>()))).ToList());
+    }
+
+    public async Task<GraphPromotionCopyResult> PromoteStagingAsync(
+        Guid tenantId,
+        IReadOnlyCollection<Guid> stagingNodeIds,
+        IReadOnlyCollection<Guid> stagingRelationshipIds,
+        CancellationToken cancellationToken)
+    {
+        var staging = await ListGraphAsync(tenantId, GraphSpace.Staging, null, stagingNodeIds, stagingRelationshipIds, cancellationToken);
+        var nodeMap = new Dictionary<Guid, Guid>();
+        foreach (var node in staging.Nodes.OrderBy(item => item.NodeId))
+        {
+            var promoted = await CreateNodeAsync(
+                new CreateGraphNodeRequest(
+                    tenantId,
+                    GraphSpace.Trusted,
+                    node.ObjectType,
+                    TrustState.Trusted,
+                    node.Attributes,
+                    node.SourceReference),
+                cancellationToken);
+            nodeMap[node.NodeId] = promoted.NodeId;
+        }
+
+        var relationshipIds = new List<Guid>();
+        foreach (var relationship in staging.Relationships.OrderBy(item => item.RelationshipId))
+        {
+            if (!nodeMap.TryGetValue(relationship.FromNodeId, out var fromNodeId)
+                || !nodeMap.TryGetValue(relationship.ToNodeId, out var toNodeId))
+            {
+                continue;
+            }
+
+            var promoted = await CreateRelationshipAsync(
+                new CreateGraphRelationshipRequest(
+                    tenantId,
+                    fromNodeId,
+                    toNodeId,
+                    relationship.RelationshipType,
+                    TrustState.Trusted,
+                    relationship.Attributes,
+                    relationship.SourceReference),
+                cancellationToken);
+            relationshipIds.Add(promoted.RelationshipId);
+        }
+
+        return new GraphPromotionCopyResult(nodeMap.Values.ToList(), relationshipIds);
+    }
+
     private IAsyncSession OpenSession()
     {
         return driver.AsyncSession(builder => builder.WithDatabase(options.Value.Neo4j.Database));

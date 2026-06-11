@@ -36,8 +36,8 @@ public static class GraphMemoryServiceExtensions
         services.AddSingleton<IGraphMemoryService>(ResolveGraphMemoryService);
         services.AddSingleton<IGraphHealthService>(ResolveGraphHealthService);
         services.AddSingleton<IGraphBootstrapService>(ResolveGraphBootstrapService);
-        services.AddSingleton<IGraphSnapshotService, DeferredGraphSnapshotService>();
-        services.AddSingleton<IGraphDiffService, DeferredGraphDiffService>();
+        services.AddScoped<IGraphSnapshotService, DeferredGraphSnapshotService>();
+        services.AddScoped<IGraphDiffService, DeferredGraphDiffService>();
 
         if (IsNeo4jProvider(configuredOptions.Provider) &&
             configuredOptions.Neo4j.Enabled &&
