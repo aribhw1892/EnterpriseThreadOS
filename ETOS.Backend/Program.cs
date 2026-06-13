@@ -2,6 +2,7 @@ using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
+using ETOS.Backend.Explorers;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.AiTrace;
 using ETOS.Backend.GovernedChat;
@@ -48,6 +49,7 @@ app.MapEnterpriseThreadDocumentEndpoints();
 app.MapEnterpriseThreadGovernedQueryEndpoints();
 app.MapEnterpriseThreadAiTraceEndpoints();
 app.MapEnterpriseThreadGovernedChatEndpoints();
+app.MapEnterpriseThreadExplorerEndpoints();
 
 app.Run();
 

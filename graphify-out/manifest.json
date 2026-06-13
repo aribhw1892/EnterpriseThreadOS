@@ -280,8 +280,8 @@
     "semantic_hash": "7175d8dcb5c9497740230a16233b2621"
   },
   "ETOS.Backend/Identity/DevelopmentIdentitySeeder.cs": {
-    "mtime": 1781369381.8285594,
-    "ast_hash": "19dae004e58c935a61c5c2f71984e3af",
+    "mtime": 1781370126.3162706,
+    "ast_hash": "594eb3032cfe3832c4486a949007e957",
     "semantic_hash": ""
   },
   "ETOS.Backend/Identity/EtosTenantStore.cs": {
@@ -495,8 +495,8 @@
     "semantic_hash": "a28cbd2dfd29a7efb24e898e92e920e6"
   },
   "ETOS.Backend/Platform/EnterpriseThreadPlatform.cs": {
-    "mtime": 1781369377.2395966,
-    "ast_hash": "d4859338591e56676f46e89c46c480f2",
+    "mtime": 1781370121.5385144,
+    "ast_hash": "25dad69e46429cf81d37c201fa20aeb3",
     "semantic_hash": ""
   },
   "ETOS.Backend/Platform/Extensions/ExtensionPoint.cs": {
@@ -515,8 +515,8 @@
     "semantic_hash": "fd4125b8aaa80f3f4830120d9d1d285f"
   },
   "ETOS.Backend/Program.cs": {
-    "mtime": 1781369377.496581,
-    "ast_hash": "dbbb2b7723f432905452ebf58bafeff2",
+    "mtime": 1781370121.9175844,
+    "ast_hash": "e4194225bd09926902bddf9cf4a1f37e",
     "semantic_hash": ""
   },
   "ETOS.Backend/Properties/launchSettings.json": {
@@ -590,13 +590,13 @@
     "semantic_hash": "6b7a691af78b5e050aab2ace67ef78de"
   },
   "ETOS.Frontend/src/app/page.tsx": {
-    "mtime": 1781369583.4212897,
-    "ast_hash": "f84ef3dc447abab3660a86a550504043",
+    "mtime": 1781370298.3298018,
+    "ast_hash": "47c59dc7e4a11c8c20cc4ef61b83fdb2",
     "semantic_hash": ""
   },
   "ETOS.Frontend/src/lib/etos-api.ts": {
-    "mtime": 1781369574.575919,
-    "ast_hash": "0cfb4cecf490a7d0d69bf5c951a9b52e",
+    "mtime": 1781370258.9013894,
+    "ast_hash": "5e15501338168722bb85240344dbb981",
     "semantic_hash": ""
   },
   "ETOS.Frontend/tsconfig.json": {
@@ -755,8 +755,8 @@
     "semantic_hash": "18365f2cddbc036ee77612a565320b96"
   },
   "ARCHITECTURE.md": {
-    "mtime": 1781369625.3982527,
-    "ast_hash": "4befedc6c0cfecefe7b67a6f6d881290",
+    "mtime": 1781370337.002493,
+    "ast_hash": "205a96cf9790c65439aa0e090d22de88",
     "semantic_hash": ""
   },
   "ETOS.Frontend/AGENTS.md": {
@@ -1097,6 +1097,111 @@
   ".cursor/plans/issue_15_governed_chat.plan.md": {
     "mtime": 1781369651.135712,
     "ast_hash": "4fadf6915c8984d78f75ab2758e0844b",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend.Tests/ExplorersTests.cs": {
+    "mtime": 1781370247.9862165,
+    "ast_hash": "279ba4d9eeb832acc95bdba52712d8ae",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Explorers/ContextViewService.cs": {
+    "mtime": 1781370160.6229222,
+    "ast_hash": "09432507d31cbbff4be5416b96189d84",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Explorers/ExplorerContracts.cs": {
+    "mtime": 1781370044.771436,
+    "ast_hash": "823c4ee4c6f65d84eaa1d6fae65ab49a",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Explorers/ExplorerEndpointExtensions.cs": {
+    "mtime": 1781370120.801519,
+    "ast_hash": "faa8175e6c611aace102602e9af31252",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Explorers/ExplorerPolicyFilter.cs": {
+    "mtime": 1781370159.3611064,
+    "ast_hash": "5880673635c86af37f35e1552e5f1ced",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Explorers/GovernanceFlowService.cs": {
+    "mtime": 1781370065.7071345,
+    "ast_hash": "126e1f858272e4211eba26f5e073678b",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Explorers/GraphExplorerService.cs": {
+    "mtime": 1781370160.755211,
+    "ast_hash": "190a7844c436866361501aba7780b299",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/app/artifacts/[artifactId]/page.tsx": {
+    "mtime": 1781370275.7061744,
+    "ast_hash": "100f5780664369e23eb0f04b6c90e94c",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/app/artifacts/page.tsx": {
+    "mtime": 1781370274.1900861,
+    "ast_hash": "5a02ba582e0bf3854a8396da8ea7636f",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/app/context-packages/[packageId]/page.tsx": {
+    "mtime": 1781370286.8374703,
+    "ast_hash": "ccd6af58c1ebd314d50e6c824827a412",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/app/context-packages/page.tsx": {
+    "mtime": 1781370284.7855804,
+    "ast_hash": "54b18af8e7edf30f4b8439ee630cb0f2",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/app/decisions/page.tsx": {
+    "mtime": 1781370296.7270865,
+    "ast_hash": "753f66a190db6a466b53bbe47b5b7827",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/app/documents/[documentId]/page.tsx": {
+    "mtime": 1781370282.8235645,
+    "ast_hash": "b6dd7887cd02bbfb490289dbc4f47da3",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/app/explorers/page.tsx": {
+    "mtime": 1781370272.1801138,
+    "ast_hash": "215ff61db623c4f9964d401fd6e81af4",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/app/graph/[nodeId]/page.tsx": {
+    "mtime": 1781370279.74407,
+    "ast_hash": "4895b5f986fbbfb4a570c79aefc582f6",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/app/graph/page.tsx": {
+    "mtime": 1781370277.7489877,
+    "ast_hash": "5142c1c6c86124efd921bca4e45ecc7b",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/components/explorers/ContextView360.tsx": {
+    "mtime": 1781370265.4608164,
+    "ast_hash": "8f838b5849458f2f89eb656ae1f81a68",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/components/explorers/ExplorerListShell.tsx": {
+    "mtime": 1781370262.5474472,
+    "ast_hash": "2b9c3747dd685c6a2c814a96c08ab21f",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/components/explorers/GovernanceFlowPanel.tsx": {
+    "mtime": 1781370267.8333042,
+    "ast_hash": "3ac23e3f2ae8a647b4ace3f35d9e2b3d",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/components/explorers/SectionVisibilityBadge.tsx": {
+    "mtime": 1781370263.1679833,
+    "ast_hash": "06b8f2294f0459e82b3e603b6865516b",
+    "semantic_hash": ""
+  },
+  ".cursor/plans/issue_16_explorers_context_views.plan.md": {
+    "mtime": 1781370133.2134628,
+    "ast_hash": "e2b087e406c3b92de49a9d73304e534b",
     "semantic_hash": ""
   }
 }

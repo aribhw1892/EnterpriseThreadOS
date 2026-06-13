@@ -2,6 +2,7 @@ using ETOS.Backend.AiTrace;
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
+using ETOS.Backend.Explorers;
 using ETOS.Backend.Governance;
 using ETOS.Backend.GovernedChat;
 using ETOS.Backend.GovernedQuery;
@@ -63,6 +64,10 @@ public sealed class DevelopmentIdentitySeeder(
         var governedChatRunPermission = await EnsurePermissionAsync(GovernedChatPermissions.Run, "Run tenant governed chat turns.", cancellationToken);
         var governedChatDraftPermission = await EnsurePermissionAsync(GovernedChatPermissions.Draft, "Create draft artifacts from governed chat.", cancellationToken);
         var governedChatAdminPermission = await EnsurePermissionAsync(GovernedChatPermissions.Admin, "Administer tenant governed chat records.", cancellationToken);
+        var explorersReadPermission = await EnsurePermissionAsync(ExplorerPermissions.Read, "Read tenant explorer surfaces.", cancellationToken);
+        var contextViewReadPermission = await EnsurePermissionAsync(ExplorerPermissions.ContextView, "Read tenant 360° context views.", cancellationToken);
+        var governanceFlowReadPermission = await EnsurePermissionAsync(ExplorerPermissions.GovernanceFlow, "Read tenant governance flow views.", cancellationToken);
+        var graphExplorerReadPermission = await EnsurePermissionAsync(ExplorerPermissions.GraphExplorer, "Read tenant governed graph explorer records.", cancellationToken);
         var adminRole = await EnsureTenantRoleAsync(tenant.Id, cancellationToken);
         var chatRunnerRole = await EnsureChatRunnerRoleAsync(tenant.Id, cancellationToken);
         var chatRunner = await EnsureChatRunnerUserAsync(seedOptions, cancellationToken);
@@ -96,6 +101,10 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governedChatRunPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governedChatDraftPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governedChatAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, explorersReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, contextViewReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governanceFlowReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, graphExplorerReadPermission.Id, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, chatRunner.Id, chatRunnerRole.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, governedChatRunPermission.Id, cancellationToken);

@@ -960,6 +960,149 @@ export type ImportValidation = {
   issues: ImportValidationIssue[];
 };
 
+export type ContextViewSectionVisibility = "Visible" | "Denied" | "Empty";
+
+export type ContextViewItem = {
+  itemId: string;
+  itemType: string;
+  title: string;
+  safeSummary: string;
+  linkRoute?: string | null;
+  attributes?: Record<string, string> | null;
+};
+
+export type ContextViewSection = {
+  sectionKey: string;
+  title: string;
+  visibility: ContextViewSectionVisibility;
+  deniedReason?: string | null;
+  items: ContextViewItem[];
+  metadata?: Record<string, string> | null;
+};
+
+export type ContextViewFilterSummary = {
+  visibleSectionCount: number;
+  deniedSectionCount: number;
+  emptySectionCount: number;
+  policyDeniedCount: number;
+  policyKey?: string | null;
+};
+
+export type GovernanceFlowNode = {
+  nodeId: string;
+  kind: string;
+  title: string;
+  safeSummary: string;
+  status: string;
+  linkRoute?: string | null;
+};
+
+export type GovernanceFlowEdge = {
+  edgeId: string;
+  fromNodeId: string;
+  toNodeId: string;
+  kind: string;
+  label: string;
+};
+
+export type GovernanceFlowPlaceholder = {
+  kind: string;
+  title: string;
+  status: string;
+  prdReference: string;
+  safeSummary: string;
+};
+
+export type GovernanceFlow = {
+  nodes: GovernanceFlowNode[];
+  edges: GovernanceFlowEdge[];
+  futureChainPlaceholders: GovernanceFlowPlaceholder[];
+};
+
+export type ContextView360 = {
+  anchorKind: string;
+  anchorId: string;
+  title: string;
+  safeSummary: string;
+  sections: ContextViewSection[];
+  governanceFlow?: GovernanceFlow | null;
+  filterSummary: ContextViewFilterSummary;
+};
+
+export type GraphExplorerNodeSummary = {
+  nodeId: string;
+  objectType: string;
+  trustState: string;
+  graphSpace: string;
+  safeSummary: string;
+  sourceBatchId?: string | null;
+  allowedAttributes: Record<string, string>;
+};
+
+export type GraphExplorerNodeDetail = GraphExplorerNodeSummary & {
+  contextViewRoute: string;
+  chatRoute: string;
+};
+
+export type GraphExplorerRelationship = {
+  relationshipId: string;
+  relationshipType: string;
+  direction: string;
+  adjacentNodeId: string;
+  adjacentObjectType: string;
+  trustState: string;
+  safeSummary: string;
+};
+
+export type ContextPackageExplorerSummary = {
+  packageId: string;
+  retrievalRunId: string;
+  intentKey: string;
+  strategyKey: string;
+  retrievedCount: number;
+  filteredCount: number;
+  deniedCount: number;
+  safeSummary: string;
+  createdAt: string;
+  aiTraceRecordId?: string | null;
+};
+
+export type ContextPackageExplorerDetail = {
+  packageId: string;
+  retrievalRunId: string;
+  intentKey: string;
+  strategyKey: string;
+  allowedCount: number;
+  deniedCount: number;
+  safeSummary: string;
+  aiTraceRecordId?: string | null;
+  traceRoute?: string | null;
+  deniedSummarySamples: string[];
+};
+
+export type DecisionExplorerItem = {
+  artifactId: string;
+  artifactType: string;
+  title: string;
+  status: string;
+  participantUserIds: string[];
+  evidenceCount: number;
+  conflictState: string;
+  outcomeSummary: string;
+  contextViewRoute: string;
+};
+
+export type ArtifactExplorerSummary = {
+  id: string;
+  artifactType: string;
+  name: string;
+  lifecycleState: string;
+  latestVersionLabel?: string | null;
+  safeSummary: string;
+  contextViewRoute: string;
+  updatedAt: string;
+};
+
 export type ApiResult<T> = {
   data: T | null;
   error: string | null;
@@ -2194,6 +2337,104 @@ export async function createManualDataQualityIssueForLatestBatch(): Promise<ApiR
     },
     tenantHeaders,
   );
+}
+
+function tenantHeadersOrNull(): { userId: string; tenantId: string } | null {
+  if (!adminUserId || !selectedTenantId) {
+    return null;
+  }
+
+  return { userId: adminUserId, tenantId: selectedTenantId };
+}
+
+export async function getContextView360(
+  anchorKind: string,
+  anchorId: string,
+  policyKey?: string | null,
+): Promise<ApiResult<ContextView360>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ContextView360>();
+  }
+
+  const query = new URLSearchParams({ anchorKind, anchorId });
+  if (policyKey) {
+    query.set("policyKey", policyKey);
+  }
+
+  return await fetchApi<ContextView360>(`/api/admin/explorers/context-view?${query.toString()}`, tenantHeaders);
+}
+
+export async function getGovernanceFlow(
+  anchorKind: string,
+  anchorId: string,
+): Promise<ApiResult<GovernanceFlow>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<GovernanceFlow>();
+  }
+
+  const query = new URLSearchParams({ anchorKind, anchorId });
+  return await fetchApi<GovernanceFlow>(`/api/admin/explorers/governance-flow?${query.toString()}`, tenantHeaders);
+}
+
+export async function getExplorerArtifacts(): Promise<ApiResult<ArtifactExplorerSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ArtifactExplorerSummary[]>();
+  }
+
+  return await fetchApi<ArtifactExplorerSummary[]>("/api/admin/explorers/artifacts", tenantHeaders);
+}
+
+export async function getGraphExplorerNodes(): Promise<ApiResult<GraphExplorerNodeSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<GraphExplorerNodeSummary[]>();
+  }
+
+  return await fetchApi<GraphExplorerNodeSummary[]>("/api/admin/explorers/graph/nodes", tenantHeaders);
+}
+
+export async function getGraphExplorerNode(nodeId: string): Promise<ApiResult<GraphExplorerNodeDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<GraphExplorerNodeDetail>();
+  }
+
+  return await fetchApi<GraphExplorerNodeDetail>(`/api/admin/explorers/graph/nodes/${nodeId}`, tenantHeaders);
+}
+
+export async function getContextPackageExplorerList(): Promise<ApiResult<ContextPackageExplorerSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ContextPackageExplorerSummary[]>();
+  }
+
+  return await fetchApi<ContextPackageExplorerSummary[]>("/api/admin/explorers/context-packages", tenantHeaders);
+}
+
+export async function getContextPackageExplorerDetail(
+  packageId: string,
+): Promise<ApiResult<ContextPackageExplorerDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ContextPackageExplorerDetail>();
+  }
+
+  return await fetchApi<ContextPackageExplorerDetail>(
+    `/api/admin/explorers/context-packages/${packageId}`,
+    tenantHeaders,
+  );
+}
+
+export async function getDecisionExplorerList(): Promise<ApiResult<DecisionExplorerItem[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<DecisionExplorerItem[]>();
+  }
+
+  return await fetchApi<DecisionExplorerItem[]>("/api/admin/explorers/decisions", tenantHeaders);
 }
 
 async function fetchApi<T>(

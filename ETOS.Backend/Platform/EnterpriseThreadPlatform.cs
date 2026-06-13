@@ -2,6 +2,7 @@ using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
+using ETOS.Backend.Explorers;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.AiTrace;
 using ETOS.Backend.GovernedChat;
@@ -136,6 +137,13 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IOutputSchemaValidator, OutputSchemaValidator>();
         services.AddScoped<IChatArtifactDraftBuilder, ChatArtifactDraftBuilder>();
         services.AddScoped<IGovernedChatService, GovernedChatService>();
+        services.AddScoped<ExplorerPolicyFilter>();
+        services.AddScoped<IContextViewService, ContextViewService>();
+        services.AddScoped<IGovernanceFlowService, GovernanceFlowService>();
+        services.AddScoped<IGraphExplorerService, GraphExplorerService>();
+        services.AddScoped<IContextPackageExplorerService, ContextPackageExplorerService>();
+        services.AddScoped<IDecisionExplorerFoundationService, DecisionExplorerFoundationService>();
+        services.AddScoped<IArtifactExplorerService, ArtifactExplorerService>();
         services.AddScoped<DeterministicLlmCompletionService>();
         services.AddHttpClient<OpenAiLlmCompletionService>();
         services.AddScoped<ILlmCompletionService>(serviceProvider =>

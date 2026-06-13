@@ -26,6 +26,7 @@ flowchart TB
     platform --> governedquery["Governed Query Module"]
     platform --> aitrace["AI Trace Module"]
     platform --> governedchat["Governed Chat Module"]
+    platform --> explorers["Explorers Module"]
     platform --> persistence["EnterpriseThreadDbContext"]
     platform --> extensions["Extension Point Catalog"]
 
@@ -57,6 +58,7 @@ flowchart TB
 - `ETOS.Backend/GovernedQuery/` contains query intent versions, retrieval strategy versions, fixed platform query intents, retrieval runs, context packages, context access decisions, governed query service with graph-first document-second retrieval, policy-filtered context assembly, and minimal API endpoint mapping.
 - `ETOS.Backend/AiTrace/` contains AI Trace records, artifact links, on-demand export audit metadata, trace explorer service with separate view/export permissions, redaction metadata, export denial security events, and minimal API endpoint mapping.
 - `ETOS.Backend/GovernedChat/` contains governed chat sessions/turns, platform-seeded `PromptTemplateVersion` and `OutputSchemaVersion` artifacts, deterministic default LLM completion with optional OpenAI provider behind config, output schema validation, chat-to-artifact draft creation via the artifact registry, enriched `GovernedChat` AI Trace records with pinned prompt/output labels, and minimal API endpoint mapping.
+- `ETOS.Backend/Explorers/` contains read-only explorer orchestration for tenant-filtered artifact/graph/document/context-package/decision lists, generic 360° context views, governance flow foundation projections, policy/trust-filtered graph browse, and minimal API endpoint mapping. Decision explorer and governance flow are foundation-only until Milestone 4.
 - `ETOS.Backend/Tenancy/` contains tenant-scope conventions used by persisted tenant-owned records.
 - `ETOS.Backend/Platform/Extensions/` exposes deferred extension points for planned platform capabilities without pretending they are active.
 - `ETOS.Frontend/` is a Next.js 16 shell that renders local platform health from the backend.
@@ -85,13 +87,14 @@ Implemented or partially implemented:
 - Governed query and context assembly foundation with fixed platform query intents (object-360-context, bom-impact-context, document-evidence-context), retrieval runs, context packages, policy-filtered LLM-safe context assembly, denied context separation, and trust/conflict filtering.
 - AI Trace foundation for governed-query runs with trace records, artifact links, tenant-scoped trace explorer APIs, separate view/export permissions, on-demand export packages with redaction metadata, export audit records, and a minimal `/ai-traces` UI.
 - Governed chat foundation with natural-language Q&A over governed retrieval context only, evidence/confidence responses, single enriched AI Trace per chat turn (no duplicate query-only trace), platform prompt/output schema pinning, chat-to-artifact drafting for query intents/dashboards/reports as draft artifact versions blocked by existing publish gates, deterministic default LLM provider for CI/local use, optional OpenAI provider behind `GovernedChat:LlmProvider`, and a minimal `/chat` UI.
+- Explorers and 360° context view foundation (Issue 16) with governed explorer APIs, generic context views for artifacts/documents/graph nodes/context packages/AI traces, governance flow foundation with Milestone 4 review-chain placeholders, graph explorer with trust/policy filtering, context-package and decision explorer foundations, shared frontend panels, and `/explorers` hub routes.
 
 Planned by PRD and backlog, but not generally implemented unless future source code says otherwise:
 
 - Graph business flows beyond the current import staging and identity-review foundations: trusted graph promotion, snapshots, diffs, and governed traversals.
 - Full review task workflows for data quality issues, including assignment, blocking, escalation, completion, and decision creation.
 - Live Qdrant indexing/provider execution.
-- Dashboard/report preview rendering and export (Issue 17), explorers/360° context view (Issue 16), recommendations, review tasks, decisions, outcomes, and learning beyond current chat draft artifacts.
+- Dashboard/report preview rendering and export (Issue 17), full recommendation/review-task/decision/outcome/learning workflows beyond current explorer and chat draft foundations.
 - Tool registry, agent runtime, workflow runtime, multi-agent collaboration, and enterprise action framework.
 - Neo4j Agent Memory or any other persistent agent-memory provider. These remain deferred behind EnterpriseThreadOS-owned contracts and must not replace the platform graph memory abstraction.
 - Live enterprise connectors, source-system write actions, external collaboration portal, Keycloak, Temporal, Kubernetes, and production multi-tenant deployment hardening.

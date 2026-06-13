@@ -397,6 +397,18 @@ export default async function Home() {
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <Link
+                href="/explorers"
+                className="rounded-full border border-cyan-300 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"
+              >
+                Explorers
+              </Link>
+              <Link
+                href="/artifacts"
+                className="rounded-full border border-cyan-300 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"
+              >
+                Artifacts
+              </Link>
+              <Link
                 href="/model-artifacts"
                 className="rounded-full bg-cyan-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
               >
@@ -503,7 +515,7 @@ export default async function Home() {
         <section className="grid gap-4 lg:grid-cols-2">
           <ListSection
             title="Artifacts"
-            description="Governed BaseArtifact records in the selected tenant."
+            description="Governed BaseArtifact records in the selected tenant. Open the artifact explorer for full lists and 360° views."
             result={artifactRegistry.artifacts}
             emptyMessage="No artifacts are available for the selected tenant."
             renderItem={ArtifactCard}
