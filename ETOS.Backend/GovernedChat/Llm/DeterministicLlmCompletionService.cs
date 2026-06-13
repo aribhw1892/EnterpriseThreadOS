@@ -70,7 +70,16 @@ public sealed class DeterministicLlmCompletionService : ILlmCompletionService
             {
                 ["widgetId"] = "primary-context",
                 ["title"] = "Governed context",
-                ["queryIntentRef"] = ExtractIntentKey(prompt) ?? "object-360-context"
+                ["kind"] = "governed_query",
+                ["queryIntentRef"] = ExtractIntentKey(prompt) ?? "object-360-context",
+                ["visualization"] = "summary_list"
+            },
+            new JsonObject
+            {
+                ["widgetId"] = "open-reviews-kpi",
+                ["title"] = "Open Reviews",
+                ["kind"] = "governance_kpi_placeholder",
+                ["kpiKey"] = "open_reviews"
             });
         }
 
@@ -80,8 +89,19 @@ public sealed class DeterministicLlmCompletionService : ILlmCompletionService
             {
                 ["sectionId"] = "evidence-summary",
                 ["title"] = "Evidence summary",
-                ["queryIntentRef"] = ExtractIntentKey(prompt) ?? "object-360-context"
+                ["kind"] = "governed_query",
+                ["queryIntentRef"] = ExtractIntentKey(prompt) ?? "object-360-context",
+                ["visualization"] = "summary_list"
             });
+        }
+
+        if (required.Contains("defaultAnchor"))
+        {
+            output["defaultAnchor"] = new JsonObject
+            {
+                ["startGraphNodeId"] = null,
+                ["documentArtifactId"] = null
+            };
         }
 
         if (required.Contains("createdFromChat"))

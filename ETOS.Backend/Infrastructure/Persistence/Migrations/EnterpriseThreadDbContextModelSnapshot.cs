@@ -711,6 +711,57 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.ToTable("restricted_context_rules", (string)null);
                 });
 
+            modelBuilder.Entity("ETOS.Backend.Dashboards.DashboardReportExportRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ArtifactType")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("ArtifactVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EvidenceLevel")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("ExportHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid>("ExportedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RedactionMetadataJson")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ArtifactId", "ArtifactVersionId", "CreatedAt");
+
+                    b.ToTable("dashboard_report_export_records", (string)null);
+                });
+
             modelBuilder.Entity("ETOS.Backend.DataQuality.DataQualityIssue", b =>
                 {
                     b.Property<Guid>("Id")

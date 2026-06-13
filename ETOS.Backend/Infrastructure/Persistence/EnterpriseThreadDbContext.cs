@@ -1,6 +1,7 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
+using ETOS.Backend.Dashboards;
 using ETOS.Backend.Documents;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.AiTrace;
@@ -152,6 +153,8 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<GovernedChatSession> GovernedChatSessions => Set<GovernedChatSession>();
 
     public DbSet<GovernedChatTurn> GovernedChatTurns => Set<GovernedChatTurn>();
+
+    public DbSet<DashboardReportExportRecord> DashboardReportExportRecords => Set<DashboardReportExportRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -535,6 +538,7 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
         ConfigureGovernedQueryTables(modelBuilder);
         ConfigureAiTraceTables(modelBuilder);
         ConfigureGovernedChatTables(modelBuilder);
+        ConfigureDashboardReportTables(modelBuilder);
     }
 
     private static void ConfigureGovernedQueryTables(ModelBuilder modelBuilder)
@@ -727,6 +731,22 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
                 .WithMany(session => session.Turns)
                 .HasForeignKey(turn => turn.SessionId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureDashboardReportTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DashboardReportExportRecord>(entity =>
+        {
+            entity.ToTable("dashboard_report_export_records");
+            entity.HasKey(record => record.Id);
+            entity.Property(record => record.TenantId).IsRequired();
+            entity.Property(record => record.ArtifactType).HasMaxLength(120).IsRequired();
+            entity.Property(record => record.ExportHash).HasMaxLength(128).IsRequired();
+            entity.Property(record => record.RedactionMetadataJson).HasMaxLength(8000).IsRequired();
+            entity.Property(record => record.EvidenceLevel).HasMaxLength(64).IsRequired();
+            entity.Property(record => record.CreatedAt).IsRequired();
+            entity.HasIndex(record => new { record.TenantId, record.ArtifactId, record.ArtifactVersionId, record.CreatedAt });
         });
     }
 

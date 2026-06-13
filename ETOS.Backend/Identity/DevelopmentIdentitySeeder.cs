@@ -1,6 +1,7 @@
 using ETOS.Backend.AiTrace;
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
+using ETOS.Backend.Dashboards;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.Explorers;
 using ETOS.Backend.Governance;
@@ -68,6 +69,10 @@ public sealed class DevelopmentIdentitySeeder(
         var contextViewReadPermission = await EnsurePermissionAsync(ExplorerPermissions.ContextView, "Read tenant 360° context views.", cancellationToken);
         var governanceFlowReadPermission = await EnsurePermissionAsync(ExplorerPermissions.GovernanceFlow, "Read tenant governance flow views.", cancellationToken);
         var graphExplorerReadPermission = await EnsurePermissionAsync(ExplorerPermissions.GraphExplorer, "Read tenant governed graph explorer records.", cancellationToken);
+        var dashboardReportPreviewPermission = await EnsurePermissionAsync(DashboardReportPermissions.Preview, "Preview tenant dashboards and reports.", cancellationToken);
+        var dashboardReportExportPermission = await EnsurePermissionAsync(DashboardReportPermissions.Export, "Export tenant dashboards and reports.", cancellationToken);
+        var dashboardReportReadinessPermission = await EnsurePermissionAsync(DashboardReportPermissions.Readiness, "Mark tenant dashboard and report versions ready.", cancellationToken);
+        var dashboardReportAdminPermission = await EnsurePermissionAsync(DashboardReportPermissions.Admin, "Administer tenant dashboard and report records.", cancellationToken);
         var adminRole = await EnsureTenantRoleAsync(tenant.Id, cancellationToken);
         var chatRunnerRole = await EnsureChatRunnerRoleAsync(tenant.Id, cancellationToken);
         var chatRunner = await EnsureChatRunnerUserAsync(seedOptions, cancellationToken);
@@ -105,12 +110,18 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, contextViewReadPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governanceFlowReadPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, graphExplorerReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, dashboardReportPreviewPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, dashboardReportExportPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, dashboardReportReadinessPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, dashboardReportAdminPermission.Id, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, chatRunner.Id, chatRunnerRole.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, governedChatRunPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, governedQueryRunPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, governedQueryReadPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, aiTraceReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, dashboardReportPreviewPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, dashboardReportReadinessPermission.Id, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await EnsureBootstrapAuditAsync(tenant.Id, admin.Id, tenant.Identifier, cancellationToken);

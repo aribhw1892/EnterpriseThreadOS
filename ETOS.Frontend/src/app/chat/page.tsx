@@ -11,6 +11,7 @@ import {
   selectedTenantId,
 } from "@/lib/etos-api";
 import Link from "next/link";
+import { draftArtifactDetailHref } from "@/lib/etos-api";
 import { revalidatePath } from "next/cache";
 import type { ReactNode } from "react";
 
@@ -129,9 +130,18 @@ function TurnPanel({ turn }: { turn: GovernedChatTurn }) {
           View AI Trace
         </Link>
         {turn.draftArtifact ? (
-          <span className="rounded-full border border-slate-700 px-4 py-2 text-slate-300">
-            Draft {turn.draftArtifact.artifactType} · {turn.draftArtifact.readinessState}
-          </span>
+          draftArtifactDetailHref(turn.draftArtifact.artifactType, turn.draftArtifact.artifactId) ? (
+            <Link
+              href={draftArtifactDetailHref(turn.draftArtifact.artifactType, turn.draftArtifact.artifactId)!}
+              className="rounded-full border border-cyan-300 px-4 py-2 font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"
+            >
+              Open draft {turn.draftArtifact.artifactType} · {turn.draftArtifact.readinessState}
+            </Link>
+          ) : (
+            <span className="rounded-full border border-slate-700 px-4 py-2 text-slate-300">
+              Draft {turn.draftArtifact.artifactType} · {turn.draftArtifact.readinessState}
+            </span>
+          )
         ) : null}
       </div>
     </section>

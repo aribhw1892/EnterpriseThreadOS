@@ -1,5 +1,6 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
+using ETOS.Backend.Dashboards;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
 using ETOS.Backend.Explorers;
@@ -144,6 +145,7 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IContextPackageExplorerService, ContextPackageExplorerService>();
         services.AddScoped<IDecisionExplorerFoundationService, DecisionExplorerFoundationService>();
         services.AddScoped<IArtifactExplorerService, ArtifactExplorerService>();
+        services.AddScoped<IDashboardReportService, DashboardReportService>();
         services.AddScoped<DeterministicLlmCompletionService>();
         services.AddHttpClient<OpenAiLlmCompletionService>();
         services.AddScoped<ILlmCompletionService>(serviceProvider =>

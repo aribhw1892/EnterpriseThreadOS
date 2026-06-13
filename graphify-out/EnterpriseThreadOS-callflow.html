@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>EnterpriseThreadOS — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 5014 nodes, 9448 edges, 228 communities. Commit: 0af01e9</p>
+<p class="subtitle">Generated from graphify knowledge graph: 5293 nodes, 10091 edges, 236 communities. Commit: 28feb1a</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -94,13 +94,13 @@ flowchart LR
     class BUILD_GRAPH_321CBB04 module;
     ANALYSIS_CLUSTERING_C79796DA("Analysis &amp; Clustering<br/><small>89 nodes</small>")
     class ANALYSIS_CLUSTERING_C79796DA module;
-    OUTPUTS_DOCS_ED82387C("Outputs &amp; Docs<br/><small>5 nodes</small>")
+    OUTPUTS_DOCS_ED82387C("Outputs &amp; Docs<br/><small>27 nodes</small>")
     class OUTPUTS_DOCS_ED82387C module;
     CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>43 nodes</small>")
     class CLI_SKILLS_9964CBB8 module;
-    SERVE_API_35EC8E86("Serving API<br/><small>249 nodes</small>")
+    SERVE_API_35EC8E86("Serving API<br/><small>287 nodes</small>")
     class SERVE_API_35EC8E86 module;
-    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>1003 nodes</small>")
+    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>1110 nodes</small>")
     class TESTS_FIXTURES_B84B1DCC module;
     SCHEMA_VERSIONING_AND_VALIDATION_C36176F4("Schema Versioning and Validation<br/><small>119 nodes</small>")
     class SCHEMA_VERSIONING_AND_VALIDATION_C36176F4 module;
@@ -116,15 +116,16 @@ flowchart LR
     class ENTERPRISETHREADOS_ENGINEERING_PRD_006713C9 module;
     ETOS_FRONTEND_BBF23E07("ETOS Frontend<br/><small>101 nodes</small>")
     class ETOS_FRONTEND_BBF23E07 module;
-    OTHER_D0941E68("Other<br/><small>2286 nodes</small>")
+    OTHER_D0941E68("Other<br/><small>2398 nodes</small>")
     class OTHER_D0941E68 module;
-    OTHER_D0941E68 -->|implements x43| EXTRACT_PIPELINE_5F350230
+    OTHER_D0941E68 -->|implements x44| EXTRACT_PIPELINE_5F350230
     SERVE_API_35EC8E86 -->|contains x24| EXTRACT_PIPELINE_5F350230
     EXTRACT_PIPELINE_5F350230 -->|calls x18| SERVE_API_35EC8E86
-    TESTS_FIXTURES_B84B1DCC -->|implements x7| OTHER_D0941E68
+    TESTS_FIXTURES_B84B1DCC -->|implements x6| OTHER_D0941E68
     OTHER_D0941E68 -->|inherits x5| SCHEMA_VERSIONING_AND_VALIDATION_C36176F4
     SERVE_API_35EC8E86 -->|imports x2| OTHER_D0941E68
     TESTS_FIXTURES_B84B1DCC -->|implements| BUILD_GRAPH_321CBB04
+    OTHER_D0941E68 -->|contains| TESTS_FIXTURES_B84B1DCC
     EXTRACT_PIPELINE_5F350230 -->|implements| OTHER_D0941E68
     OTHER_D0941E68 -->|contains| ENTERPRISETHREADOS_AGENT_GUIDE_61C00685
     ENTERPRISETHREADOS_AGENT_GUIDE_61C00685 -->|contains| CLI_SKILLS_9964CBB8
@@ -144,7 +145,7 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Extraction Pipeline</td><td>295</td><td><code>1, 12, 39, 139, 29, 34, 48, 91</code></td></tr><tr><td>Graph Build</td><td>311</td><td><code>98, 13, 132, 22, 28, 186, 27, 135, 41, 155</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>89</td><td><code>133, 199, 136, 137, 180</code></td></tr><tr><td>Outputs &amp; Docs</td><td>5</td><td><code>112, 113, 114, 116, 117</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>43</td><td><code>142, 144, 146, 156, 103, 111, 127, 166</code></td></tr><tr><td>Serving API</td><td>249</td><td><code>210, 178, 14, 169, 216, 26, 19, 200, 220</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>1003</td><td><code>187, 167, 24, 10, 6, 9, 212, 11, 15, 213, 16, 17, 170, 20, 21, 217, 23, 190, 218, 219, 31, 35, 37, 221, 224, 225, 226, 66, 80</code></td></tr><tr><td>Schema Versioning and Validation</td><td>119</td><td><code>0</code></td></tr><tr><td>EnterpriseThreadOS Agent Guide</td><td>109</td><td><code>100</code></td></tr><tr><td>AI Agent Workflow</td><td>101</td><td><code>101</code></td></tr><tr><td>Backend Architecture</td><td>101</td><td><code>102</code></td></tr><tr><td>EnterpriseThreadOS Implementation Issues</td><td>101</td><td><code>107</code></td></tr><tr><td>EnterpriseThreadOS Engineering PRD</td><td>101</td><td><code>108</code></td></tr><tr><td>ETOS Frontend</td><td>101</td><td><code>115</code></td></tr><tr><td>Other</td><td>2286</td><td><code>118, 120, 126, 128, 129, 2, 3, 5, 4, 7, 157, 168, 130, 211, 197, 185, 214, 131, 18, 188, 30, 189, 215, 36, 198, 25, 134, 201, 38, 202, 8, 32, 33, 138, 140, 177, 222, 141, 143, 203, 145, 191, 40, 147, 148, 149, 150, 171, 179, 192, 204, 223, 42, 43, 44, 45, 46, 47, 49, 151, 152, 153, 172, 50, 51, 154, 52, 53, 99, 158, 159, 173, 181, 182, 193, 205, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 160, 161, 162, 174, 175, 183, 194, 206, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 195, 81, 82, 83, 123, 176, 184, 196, 207, 208, 209, 227, 84, 85, 86, 87, 88, 89, 90, 92, 93, 163, 164, 165, 94, 95, 96, 97, 104, 105, 106, 109, 110, 119, 121, 122, 124, 125</code></td></tr>
+      <tr><td>Extraction Pipeline</td><td>295</td><td><code>1, 12, 39, 139, 29, 34, 48, 91</code></td></tr><tr><td>Graph Build</td><td>311</td><td><code>98, 13, 132, 22, 28, 186, 27, 135, 41, 155</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>89</td><td><code>133, 199, 136, 137, 180</code></td></tr><tr><td>Outputs &amp; Docs</td><td>27</td><td><code>225, 112, 113, 114, 116, 117</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>43</td><td><code>142, 144, 146, 156, 103, 111, 127, 166</code></td></tr><tr><td>Serving API</td><td>287</td><td><code>178, 210, 14, 220, 169, 216, 19, 26, 200</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>1110</td><td><code>219, 187, 167, 24, 15, 10, 6, 9, 212, 11, 213, 16, 17, 170, 20, 21, 23, 190, 217, 218, 31, 35, 37, 224, 66, 80, 234</code></td></tr><tr><td>Schema Versioning and Validation</td><td>119</td><td><code>0</code></td></tr><tr><td>EnterpriseThreadOS Agent Guide</td><td>109</td><td><code>100</code></td></tr><tr><td>AI Agent Workflow</td><td>101</td><td><code>101</code></td></tr><tr><td>Backend Architecture</td><td>101</td><td><code>102</code></td></tr><tr><td>EnterpriseThreadOS Implementation Issues</td><td>101</td><td><code>107</code></td></tr><tr><td>EnterpriseThreadOS Engineering PRD</td><td>101</td><td><code>108</code></td></tr><tr><td>ETOS Frontend</td><td>101</td><td><code>115</code></td></tr><tr><td>Other</td><td>2398</td><td><code>118, 120, 126, 128, 129, 2, 3, 4, 5, 7, 157, 168, 130, 221, 211, 197, 185, 214, 131, 18, 188, 30, 189, 215, 36, 198, 25, 134, 201, 38, 202, 226, 8, 32, 33, 138, 140, 177, 222, 141, 143, 203, 228, 145, 191, 229, 40, 147, 148, 149, 150, 171, 179, 192, 204, 223, 42, 43, 44, 45, 46, 47, 49, 151, 152, 153, 172, 230, 50, 51, 154, 52, 53, 99, 158, 159, 173, 181, 182, 193, 205, 231, 232, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 160, 161, 162, 174, 175, 183, 194, 206, 233, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 195, 81, 82, 83, 123, 176, 184, 196, 207, 208, 209, 227, 84, 85, 86, 87, 88, 89, 90, 92, 93, 163, 164, 165, 235, 94, 95, 96, 97, 104, 105, 106, 109, 110, 119, 121, 122, 124, 125</code></td></tr>
     </table>
   </div>
   <div class="card">
@@ -156,8 +157,8 @@ flowchart LR
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>5014 nodes · 9448 edges · 228 communities (193 shown, 35 thin omitted)</li>
-      <li>Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS</li>
+      <li>5293 nodes · 10091 edges · 236 communities (199 shown, 37 thin omitted)</li>
+      <li>Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)</li>
       <li>Token cost: 0 input · 0 output</li>
       <li>1. `EnterpriseThreadOS Implementation Issues` - 115 edges</li>
       <li>2. `AI-Native Enterprise Digital Thread Agentic OS` - 110 edges</li>
@@ -1224,17 +1225,58 @@ flowchart LR
 
 <!-- ====== 5. Outputs & Docs ====== -->
 <h2 id="outputs-docs">5. Outputs &amp; Docs</h2>
-<p>Outputs &amp; Docs groups implementation around etosfrontend, public, filesvg, globesvg, mostly in ETOS.Frontend/public/file.svg, ETOS.Frontend/public/globe.svg, ETOS.Frontend/public/next.svg. This section covers 5 nodes and 0 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Outputs &amp; Docs groups implementation around issue, dashboard, reports, 05df64ddplanmd, mostly in .cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md, ETOS.Frontend/public/file.svg, ETOS.Frontend/public/globe.svg. This section covers 27 nodes and 21 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Outputs &amp; Docs (5 nodes, 0 edges)
+    %% Section: Outputs &amp; Docs (27 nodes, 21 edges)
+    subgraph outputs_docs_cursor_plans_issue_17_dashboard_rep_fc166c34[".cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md"]
+        plans_issue_17_dashboard_reports_05df64dd_plan_i_9f89d357("Issue 17: Dashboard and Report Generation<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_b_a1e04a06("Backend module: ETOS.Backend/Dashboards/<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_afc0a759("dashboard reports 05df64dd.plan.md<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_a_d800d37a("Architecture<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_d_6f478bf3("Docs (minimal)<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_f_2ef37e1c("Frontend<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_a_87013b0b("API endpoints<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_e_011b32d2("Export<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_g_c7c51826("Governance KPI placeholder catalog<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_i_c65eef24("Implementation order<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_k_c7a07895("Key conventions to reuse<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_p_c4397258("Permissions<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+        plans_issue_17_dashboard_reports_05df64dd_plan_p_28f3905d("Prerequisite<br/><small>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small>")
+    end
     etosfrontend_file_svg_828be3af("file.svg")
     etosfrontend_globe_svg_7f89d5a0("globe.svg")
     etosfrontend_next_svg_994e46f2("next.svg")
     etosfrontend_vercel_svg_b4203f77("vercel.svg")
     etosfrontend_window_svg_dc6471e9("window.svg")
+    plans_issue_17_dashboard_reports_05df64dd_plan_afc0a759 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_i_9f89d357
+    plans_issue_17_dashboard_reports_05df64dd_plan_i_9f89d357 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_a_d800d37a
+    plans_issue_17_dashboard_reports_05df64dd_plan_i_9f89d357 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_b_a1e04a06
+    plans_issue_17_dashboard_reports_05df64dd_plan_i_9f89d357 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_d_6f478bf3
+    plans_issue_17_dashboard_reports_05df64dd_plan_i_9f89d357 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_f_2ef37e1c
+    plans_issue_17_dashboard_reports_05df64dd_plan_i_9f89d357 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_g_c7c51826
+    plans_issue_17_dashboard_reports_05df64dd_plan_i_9f89d357 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_i_c65eef24
+    plans_issue_17_dashboard_reports_05df64dd_plan_i_9f89d357 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_k_c7a07895
+    plans_issue_17_dashboard_reports_05df64dd_plan_i_9f89d357 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_p_28f3905d
+    plans_issue_17_dashboard_reports_05df64dd_plan_b_a1e04a06 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_a_87013b0b
+    plans_issue_17_dashboard_reports_05df64dd_plan_b_a1e04a06 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_e_011b32d2
+    plans_issue_17_dashboard_reports_05df64dd_plan_b_a1e04a06 -->|contains| plans_issue_17_dashboard_reports_05df64dd_plan_p_c4397258
+    %% Omitted for readability: 9 nodes, 0 edges
+    class plans_issue_17_dashboard_reports_05df64dd_plan_i_9f89d357 concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_b_a1e04a06 concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_afc0a759 concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_a_d800d37a concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_d_6f478bf3 concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_f_2ef37e1c concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_a_87013b0b concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_e_011b32d2 concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_g_c7c51826 concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_i_c65eef24 concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_k_c7a07895 concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_p_c4397258 concept;
+    class plans_issue_17_dashboard_reports_05df64dd_plan_p_28f3905d concept;
     class etosfrontend_file_svg_828be3af function;
     class etosfrontend_globe_svg_7f89d5a0 function;
     class etosfrontend_next_svg_994e46f2 function;
@@ -1263,6 +1305,182 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
+  <td><code>issue_17_dashboard_reports_05df64dd.plan.md</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing issue_17_dashboard_reports_05df64dd.plan.md.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Issue 17: Dashboard and Report Generation</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Issue 17: Dashboard and Report Generation.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Prerequisite</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Prerequisite.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Scope</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Scope.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>User stories (PRD)</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing User stories (PRD).</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>Architecture</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Architecture.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>Template contract (payload JSON)</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Template contract (payload JSON).</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>Governance KPI placeholder catalog</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Governance KPI placeholder catalog.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>Backend module: `ETOS.Backend/Dashboards/`</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Backend module: `ETOS.Backend/Dashboards/`.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>Permissions</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Permissions.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>API endpoints</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing API endpoints.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>Readiness workflow</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Readiness workflow.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>Preview response shape (sketch)</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Preview response shape (sketch).</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>Export</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Export.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>Registration</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Registration.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>Frontend</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Frontend.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>Tests: `ETOS.Backend.Tests/DashboardReportTests.cs`</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Tests: `ETOS.Backend.Tests/DashboardReportTests.cs`.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>Docs (minimal)</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Docs (minimal).</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>Verification</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Verification.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>Implementation order</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Implementation order.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>Key conventions to reuse</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Key conventions to reuse.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>Risk guardrails</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Risk guardrails.</td>
+</tr>
+<tr>
+  <td>23</td>
   <td><code>file.svg</code><br><small style="color:var(--muted)">ETOS.Frontend/public/file.svg</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td>External entry / no inbound edge</td>
@@ -1270,7 +1488,7 @@ flowchart LR
   <td>file.svg node in ETOS.Frontend/public/file.svg.</td>
 </tr>
 <tr>
-  <td>2</td>
+  <td>24</td>
   <td><code>globe.svg</code><br><small style="color:var(--muted)">ETOS.Frontend/public/globe.svg</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td>External entry / no inbound edge</td>
@@ -1278,7 +1496,7 @@ flowchart LR
   <td>globe.svg node in ETOS.Frontend/public/globe.svg.</td>
 </tr>
 <tr>
-  <td>3</td>
+  <td>25</td>
   <td><code>next.svg</code><br><small style="color:var(--muted)">ETOS.Frontend/public/next.svg</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td>External entry / no inbound edge</td>
@@ -1286,7 +1504,7 @@ flowchart LR
   <td>next.svg node in ETOS.Frontend/public/next.svg.</td>
 </tr>
 <tr>
-  <td>4</td>
+  <td>26</td>
   <td><code>vercel.svg</code><br><small style="color:var(--muted)">ETOS.Frontend/public/vercel.svg</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td>External entry / no inbound edge</td>
@@ -1294,7 +1512,7 @@ flowchart LR
   <td>vercel.svg node in ETOS.Frontend/public/vercel.svg.</td>
 </tr>
 <tr>
-  <td>5</td>
+  <td>27</td>
   <td><code>window.svg</code><br><small style="color:var(--muted)">ETOS.Frontend/public/window.svg</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td>External entry / no inbound edge</td>
@@ -1308,7 +1526,8 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>ETOS.Frontend/public/file.svg</code></td><td>1 nodes</td></tr>
+      <tr><td><code>.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</code></td><td>22 nodes</td></tr>
+<tr><td><code>ETOS.Frontend/public/file.svg</code></td><td>1 nodes</td></tr>
 <tr><td><code>ETOS.Frontend/public/globe.svg</code></td><td>1 nodes</td></tr>
 <tr><td><code>ETOS.Frontend/public/next.svg</code></td><td>1 nodes</td></tr>
 <tr><td><code>ETOS.Frontend/public/vercel.svg</code></td><td>1 nodes</td></tr>
@@ -1317,7 +1536,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: No high-confidence call edges detected. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x21. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -1669,12 +1888,12 @@ flowchart LR
 
 <!-- ====== 7. Serving API ====== -->
 <h2 id="serve-api">7. Serving API</h2>
-<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, .cursor/plans/issue_16_explorers_context_views.plan.md, src/app/page.tsx. This section covers 249 nodes and 451 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, .cursor/plans/issue_16_explorers_context_views.plan.md, src/app/page.tsx. This section covers 287 nodes and 541 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Serving API (249 nodes, 451 edges)
+    %% Section: Serving API (287 nodes, 541 edges)
     subgraph serve_api_src_lib_etos_api_ts_396531a3["src/lib/etos-api.ts"]
         lib_etos_api_exportaitrace_19819258("exportAiTrace()<br/><small>src/lib/etos-api.ts</small>")
         lib_etos_api_rungovernedqueryforgraphnode_87055b54("runGovernedQueryForGraphNode()<br/><small>src/lib/etos-api.ts</small>")
@@ -1689,13 +1908,11 @@ flowchart LR
         ai_traces_page_renderapierror_d332a0e4("renderApiError()<br/><small>app/ai-traces/page.tsx</small>")
         ai_traces_page_aitracespage_07550e62("AiTracesPage()<br/><small>app/ai-traces/page.tsx</small>")
     end
-    subgraph serve_api_artifacts_artifactId_page_tsx_c8f1edb3["artifacts/[artifactId]/page.tsx"]
-        artifactid_page_528be4b4("page.tsx")
-        artifactid_page_artifactdetailpage_4f924569("ArtifactDetailPage()<br/><small>artifacts/[artifactId]/page.tsx</small>")
-    end
     artifacts_page_artifactsexplorerpage_734b9ca0("ArtifactsExplorerPage()<br/><small>app/artifacts/page.tsx</small>")
     chat_page_569bcbe7("page.tsx")
     documents_page_cd6176ee("page.tsx")
+    artifactid_page_artifactdetailpage_4f924569("ArtifactDetailPage()<br/><small>artifacts/[artifactId]/page.tsx</small>")
+    dashboards_dashboardreportdetailview_a9bbab07("DashboardReportDetailView.tsx")
     documentid_page_93f85ce0("page.tsx")
     nodeid_page_a70586a3("page.tsx")
     app_page_c77e992c("page.tsx")
@@ -1706,13 +1923,11 @@ flowchart LR
     artifactid_page_artifactdetailpage_4f924569 -->|calls| lib_etos_api_getcontextview360_21b472e7
     artifactid_page_artifactdetailpage_4f924569 -->|calls| lib_etos_api_getgovernanceflow_c7430dce
     artifacts_page_artifactsexplorerpage_734b9ca0 -->|calls| lib_etos_api_getexplorerartifacts_e6260c54
-    artifactid_page_528be4b4 -->|imports| lib_etos_api_getcontextview360_21b472e7
-    artifactid_page_528be4b4 -->|imports| lib_etos_api_getgovernanceflow_c7430dce
     documentid_page_93f85ce0 -->|imports| lib_etos_api_getcontextview360_21b472e7
     documentid_page_93f85ce0 -->|imports| lib_etos_api_getgovernanceflow_c7430dce
     nodeid_page_a70586a3 -->|imports| lib_etos_api_getcontextview360_21b472e7
     nodeid_page_a70586a3 -->|imports| lib_etos_api_getgovernanceflow_c7430dce
-    %% Omitted for readability: 231 nodes, 0 edges
+    %% Omitted for readability: 269 nodes, 0 edges
     class lib_etos_api_exportaitrace_19819258 function;
     class lib_etos_api_rungovernedqueryforgraphnode_87055b54 function;
     class lib_etos_api_getaitracelists_32116ca3 function;
@@ -1723,11 +1938,11 @@ flowchart LR
     class ai_traces_page_rundemogovernedquery_d3c3e1ba ui;
     class ai_traces_page_renderapierror_d332a0e4 api;
     class ai_traces_page_aitracespage_07550e62 ui;
-    class artifactid_page_528be4b4 ui;
-    class artifactid_page_artifactdetailpage_4f924569 ui;
     class artifacts_page_artifactsexplorerpage_734b9ca0 ui;
     class chat_page_569bcbe7 ui;
     class documents_page_cd6176ee ui;
+    class artifactid_page_artifactdetailpage_4f924569 ui;
+    class dashboards_dashboardreportdetailview_a9bbab07 ui;
     class documentid_page_93f85ce0 ui;
     class nodeid_page_a70586a3 ui;
     class app_page_c77e992c ui;
@@ -1754,243 +1969,243 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">artifacts/[artifactId]/page.tsx</small></td>
+  <td><code>SectionVisibilityBadge.tsx</code><br><small style="color:var(--muted)">components/explorers/SectionVisibilityBadge.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>ContextView360()</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small><br><code>ContextView360.tsx</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small><br><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+7 more</td>
-  <td>Module file in artifacts/[artifactId]/page.tsx.</td>
+  <td><code>ContextView360.tsx</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small></td>
+  <td><code>ContextViewSectionVisibility</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td>Module file in components/explorers/SectionVisibilityBadge.tsx.</td>
 </tr>
 <tr>
   <td>2</td>
-  <td><code>ArtifactDetailPage()</code><br><small style="color:var(--muted)">artifacts/[artifactId]/page.tsx</small></td>
+  <td><code>SectionVisibilityBadge()</code><br><small style="color:var(--muted)">components/explorers/SectionVisibilityBadge.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>getContextView360()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>getGovernanceFlow()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td>Organizes documentation pages, navigation, or content lookup.</td>
+  <td><code>ContextView360.tsx</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>SectionVisibilityBadge() node in components/explorers/SectionVisibilityBadge.tsx.</td>
 </tr>
 <tr>
   <td>3</td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">app/artifacts/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>ArtifactExplorerSummary</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>ExplorerListShell()</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small><br>+3 more</td>
-  <td>Module file in app/artifacts/page.tsx.</td>
+  <td><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-endpoint">API</span></td>
+  <td><code>ContextView360.tsx</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small><br><code>DashboardReportDetailView.tsx</code><br><small style="color:var(--muted)">components/dashboards/DashboardReportDetailView.tsx</small><br><code>ExplorerListShell.tsx</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small><br>+18 more</td>
+  <td>No direct outbound edge</td>
+  <td>Module file in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>4</td>
-  <td><code>ArtifactCard()</code><br><small style="color:var(--muted)">app/artifacts/page.tsx</small></td>
+  <td><code>ComponentHealth</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ArtifactCard() node in app/artifacts/page.tsx.</td>
+  <td>ComponentHealth node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>5</td>
-  <td><code>ArtifactsExplorerPage()</code><br><small style="color:var(--muted)">app/artifacts/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>PlatformHealth</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>getExplorerArtifacts()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td>Organizes documentation pages, navigation, or content lookup.</td>
+  <td>No direct outbound edge</td>
+  <td>PlatformHealth node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>6</td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">context-packages/[packageId]/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>ClassificationSchemeVersion</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ContextView360()</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small><br><code>ContextView360.tsx</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small><br><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+5 more</td>
-  <td>Module file in context-packages/[packageId]/page.tsx.</td>
+  <td>No direct outbound edge</td>
+  <td>ClassificationSchemeVersion node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>7</td>
-  <td><code>ContextPackageDetailPage()</code><br><small style="color:var(--muted)">context-packages/[packageId]/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>PolicyAffectedArtifact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>getContextPackageExplorerDetail()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>getContextView360()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td>Organizes documentation pages, navigation, or content lookup.</td>
+  <td>No direct outbound edge</td>
+  <td>PolicyAffectedArtifact node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>8</td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">app/context-packages/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>ModelPackagePreview</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ContextPackageExplorerSummary</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>ExplorerListShell()</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small><br>+3 more</td>
-  <td>Module file in app/context-packages/page.tsx.</td>
+  <td>No direct outbound edge</td>
+  <td>ModelPackagePreview node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>9</td>
-  <td><code>ContextPackageCard()</code><br><small style="color:var(--muted)">app/context-packages/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>ImportLifecycleMapping</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ContextPackageCard() node in app/context-packages/page.tsx.</td>
+  <td>ImportLifecycleMapping node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>10</td>
-  <td><code>ContextPackagesExplorerPage()</code><br><small style="color:var(--muted)">app/context-packages/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>IdentityResolutionDecision</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>getContextPackageExplorerList()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td>Organizes documentation pages, navigation, or content lookup.</td>
+  <td>No direct outbound edge</td>
+  <td>IdentityResolutionDecision node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>11</td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">app/decisions/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>IdentityCandidateGeneration</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>DecisionExplorerItem</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>ExplorerListShell()</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small><br>+3 more</td>
-  <td>Module file in app/decisions/page.tsx.</td>
+  <td>No direct outbound edge</td>
+  <td>IdentityCandidateGeneration node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>12</td>
-  <td><code>DecisionCard()</code><br><small style="color:var(--muted)">app/decisions/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>DataQualityIssueSourceLink</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>DecisionCard() node in app/decisions/page.tsx.</td>
+  <td>DataQualityIssueSourceLink node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>13</td>
-  <td><code>DecisionsExplorerPage()</code><br><small style="color:var(--muted)">app/decisions/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>DataQualityTrustImpact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>getDecisionExplorerList()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td>Organizes documentation pages, navigation, or content lookup.</td>
+  <td>No direct outbound edge</td>
+  <td>DataQualityTrustImpact node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>14</td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">documents/[documentId]/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>DataQualityIssueGeneration</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ContextView360()</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small><br><code>ContextView360.tsx</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small><br><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+7 more</td>
-  <td>Module file in documents/[documentId]/page.tsx.</td>
+  <td>No direct outbound edge</td>
+  <td>DataQualityIssueGeneration node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>15</td>
-  <td><code>DocumentDetailPage()</code><br><small style="color:var(--muted)">documents/[documentId]/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>QueryIntentVersion</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>getContextView360()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>getGovernanceFlow()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td>Organizes documentation pages, navigation, or content lookup.</td>
+  <td>No direct outbound edge</td>
+  <td>QueryIntentVersion node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>16</td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">app/explorers/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>RetrievalStrategyVersion</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ExplorerListShell.tsx</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small><br><code>ExplorerNavLink()</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small></td>
-  <td>Module file in app/explorers/page.tsx.</td>
+  <td>No direct outbound edge</td>
+  <td>RetrievalStrategyVersion node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>17</td>
-  <td><code>explorerCards</code><br><small style="color:var(--muted)">app/explorers/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>ContextItem</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>explorerCards node in app/explorers/page.tsx.</td>
+  <td>ContextItem node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>18</td>
-  <td><code>ExplorersHubPage()</code><br><small style="color:var(--muted)">app/explorers/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>DeniedContextSummary</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Organizes documentation pages, navigation, or content lookup.</td>
+  <td>DeniedContextSummary node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>19</td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">graph/[nodeId]/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>SensitiveDeniedContextReference</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ContextView360()</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small><br><code>ContextView360.tsx</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small><br><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+8 more</td>
-  <td>Module file in graph/[nodeId]/page.tsx.</td>
+  <td>No direct outbound edge</td>
+  <td>SensitiveDeniedContextReference node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>20</td>
-  <td><code>GraphNodeDetailPage()</code><br><small style="color:var(--muted)">graph/[nodeId]/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>ContextAccessDecision</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>getContextView360()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>getGovernanceFlow()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>getGraphExplorerNode()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td>Builds dependency relationships and graph data.</td>
+  <td>No direct outbound edge</td>
+  <td>ContextAccessDecision node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>21</td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">app/graph/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>ContextPackage</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>ExplorerListShell()</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small><br><code>ExplorerListShell.tsx</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small><br>+3 more</td>
-  <td>Module file in app/graph/page.tsx.</td>
+  <td>No direct outbound edge</td>
+  <td>ContextPackage node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>22</td>
-  <td><code>GraphNodeCard()</code><br><small style="color:var(--muted)">app/graph/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>RetrievalRun</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Builds dependency relationships and graph data.</td>
+  <td>RetrievalRun node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>23</td>
-  <td><code>GraphExplorerPage()</code><br><small style="color:var(--muted)">app/graph/page.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>RetrievalRunSummary</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>getGraphExplorerNodes()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td>Builds dependency relationships and graph data.</td>
+  <td>No direct outbound edge</td>
+  <td>RetrievalRunSummary node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>24</td>
-  <td><code>ContextView360.tsx</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">artifacts/[artifactId]/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">documents/[documentId]/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">context-packages/[packageId]/page.tsx</small><br>+1 more</td>
-  <td><code>ContextView360</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>SectionVisibilityBadge()</code><br><small style="color:var(--muted)">components/explorers/SectionVisibilityBadge.tsx</small><br>+1 more</td>
-  <td>Module file in components/explorers/ContextView360.tsx.</td>
+  <td><code>AiTraceSourceSummary</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>AiTraceSourceSummary node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>25</td>
-  <td><code>ContextView360()</code><br><small style="color:var(--muted)">components/explorers/ContextView360.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">artifacts/[artifactId]/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">documents/[documentId]/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">context-packages/[packageId]/page.tsx</small><br>+1 more</td>
+  <td><code>AiTraceConfidenceImpact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ContextView360() node in components/explorers/ContextView360.tsx.</td>
+  <td>AiTraceConfidenceImpact node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>26</td>
-  <td><code>ExplorerListShell.tsx</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">artifacts/[artifactId]/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">app/decisions/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">app/artifacts/page.tsx</small><br>+6 more</td>
-  <td><code>ApiResult</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td>Module file in components/explorers/ExplorerListShell.tsx.</td>
+  <td><code>AiTraceArtifactLink</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>AiTraceArtifactLink node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>27</td>
-  <td><code>ExplorerListShell()</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">app/graph/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">app/context-packages/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">app/artifacts/page.tsx</small><br>+1 more</td>
+  <td><code>TraceContextSummary</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ExplorerListShell() node in components/explorers/ExplorerListShell.tsx.</td>
+  <td>TraceContextSummary node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>28</td>
-  <td><code>ExplorerErrorState()</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">artifacts/[artifactId]/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">documents/[documentId]/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">context-packages/[packageId]/page.tsx</small><br>+1 more</td>
+  <td><code>TraceDeniedSummary</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ExplorerErrorState() node in components/explorers/ExplorerListShell.tsx.</td>
+  <td>TraceDeniedSummary node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
   <td>29</td>
-  <td><code>ExplorerEmptyState()</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>GovernedChatSessionDetail</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ExplorerEmptyState() node in components/explorers/ExplorerListShell.tsx.</td>
+  <td>Supports retrieval-augmented Q&amp;A or streaming chat.</td>
 </tr>
 <tr>
   <td>30</td>
-  <td><code>ExplorerNavLink()</code><br><small style="color:var(--muted)">components/explorers/ExplorerListShell.tsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">artifacts/[artifactId]/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">app/decisions/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">app/artifacts/page.tsx</small><br>+6 more</td>
+  <td><code>GovernedChatTurnSummary</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ExplorerNavLink() node in components/explorers/ExplorerListShell.tsx.</td>
+  <td>Supports retrieval-augmented Q&amp;A or streaming chat.</td>
 </tr>
 </table>
 
@@ -1999,33 +2214,32 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>src/lib/etos-api.ts</code></td><td>116 nodes</td></tr>
+      <tr><td><code>src/lib/etos-api.ts</code></td><td>135 nodes</td></tr>
 <tr><td><code>.cursor/plans/issue_16_explorers_context_views.plan.md</code></td><td>25 nodes</td></tr>
 <tr><td><code>src/app/page.tsx</code></td><td>21 nodes</td></tr>
 <tr><td><code>app/documents/page.tsx</code></td><td>17 nodes</td></tr>
 <tr><td><code>app/model-artifacts/page.tsx</code></td><td>13 nodes</td></tr>
 <tr><td><code>app/ai-traces/page.tsx</code></td><td>11 nodes</td></tr>
 <tr><td><code>app/chat/page.tsx</code></td><td>11 nodes</td></tr>
-<tr><td><code>components/explorers/ExplorerListShell.tsx</code></td><td>5 nodes</td></tr>
+<tr><td><code>components/dashboards/DashboardReportDetailView.tsx</code></td><td>9 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x228, imports x100, calls x89, imports x34. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x261, imports x121, calls x114, imports x43. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 8. Tests & Fixtures ====== -->
 <h2 id="tests-fixtures">8. Tests &amp; Fixtures</h2>
-<p>Tests &amp; Fixtures groups implementation around etosbackendtests, explorerstestscs, aitracetestscs, documentmemorytestscs, mostly in ETOS.Backend.Tests/ExplorersTests.cs, ETOS.Backend.Tests/AiTraceTests.cs, ETOS.Backend.Tests/DocumentMemoryTests.cs. This section covers 1003 nodes and 2563 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Tests &amp; Fixtures groups implementation around etosbackendtests, explorerstestscs, dashboardreporttestscs, aitracetestscs, mostly in ETOS.Backend.Tests/ExplorersTests.cs, ETOS.Backend.Tests/DashboardReportTests.cs, ETOS.Backend.Tests/AiTraceTests.cs. This section covers 1110 nodes and 2847 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Tests &amp; Fixtures (1003 nodes, 2563 edges)
+    %% Section: Tests &amp; Fixtures (1110 nodes, 2847 edges)
     subgraph tests_fixtures_ETOS_Backend_Tests_AiTraceTests_c_6e43e330["ETOS.Backend.Tests/AiTraceTests.cs"]
-        etos_backend_tests_aitracetests_allowallpolicyse_e90898b4("AllowAllPolicyService<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
         etos_backend_tests_aitracetests_aitracetests_bb426524("AiTraceTests<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
         etos_backend_tests_aitracetests_aitracetests_cre_3ac20077("CreateAiTraceService()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
         etos_backend_tests_aitracetests_aitracetests_cre_42dd5752("CreateDbContext()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
@@ -2040,6 +2254,7 @@ flowchart LR
         etos_backend_tests_aitracetests_aitracetests_sen_74bdfd65("SensitiveDeniedReferencesHiddenFromReadOnlyUser()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
     end
     etos_backend_tests_classificationpolicytests_cla_921288d1("ClassificationPolicyTests<br/><small>ETOS.Backend.Tests/ClassificationPolicyTests.cs</small>")
+    etos_backend_tests_dashboardreporttests_dashboar_bce206ef("DashboardReportTests<br/><small>ETOS.Backend.Tests/DashboardReportTests.cs</small>")
     etos_backend_tests_explorerstests_explorerstests_9705c161("ExplorersTests<br/><small>ETOS.Backend.Tests/ExplorersTests.cs</small>")
     etos_backend_tests_identityresolutiontests_ident_a7bd97f7("IdentityResolutionTests<br/><small>ETOS.Backend.Tests/IdentityResolutionTests.cs</small>")
     etos_backend_tests_importtests_importtests_419a3725("ImportTests<br/><small>ETOS.Backend.Tests/ImportTests.cs</small>")
@@ -2068,8 +2283,7 @@ flowchart LR
     etos_backend_tests_aitracetests_aitracetests_exp_fb8b130a -->|calls| etos_backend_tests_aitracetests_aitracetests_see_8556d69a
     etos_backend_tests_aitracetests_aitracetests_exp_fb8b130a -->|calls| etos_backend_tests_aitracetests_aitracetests_see_475bcf4c
     etos_backend_tests_aitracetests_aitracetests_exp_3444dcb7 -->|calls| etos_backend_tests_aitracetests_aitracetests_cre_3ac20077
-    %% Omitted for readability: 985 nodes, 12 edges
-    class etos_backend_tests_aitracetests_allowallpolicyse_e90898b4 test;
+    %% Omitted for readability: 1092 nodes, 12 edges
     class etos_backend_tests_aitracetests_aitracetests_bb426524 test;
     class etos_backend_tests_aitracetests_aitracetests_cre_3ac20077 test;
     class etos_backend_tests_aitracetests_aitracetests_cre_42dd5752 test;
@@ -2083,6 +2297,7 @@ flowchart LR
     class etos_backend_tests_aitracetests_aitracetests_see_475bcf4c test;
     class etos_backend_tests_aitracetests_aitracetests_sen_74bdfd65 test;
     class etos_backend_tests_classificationpolicytests_cla_921288d1 test;
+    class etos_backend_tests_dashboardreporttests_dashboar_bce206ef test;
     class etos_backend_tests_explorerstests_explorerstests_9705c161 test;
     class etos_backend_tests_identityresolutiontests_ident_a7bd97f7 test;
     class etos_backend_tests_importtests_importtests_419a3725 test;
@@ -2110,7 +2325,7 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
-  <td><code>AiTraceTests.cs</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>DashboardReportTests.cs</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
@@ -2118,235 +2333,235 @@ flowchart LR
 </tr>
 <tr>
   <td>2</td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateGovernedQueryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+8 more</td>
+  <td><code>ChatCreatedDashboardTemplatePreviewsViaGovernedQuery()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateArtifactRegistryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateChatService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+16 more</td>
   <td>Verifies imports, entry points, or version behavior.</td>
 </tr>
 <tr>
   <td>3</td>
-  <td><code>.GovernedQueryRunCreatesLinkedAiTraceRecord()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.ChatCreatedDashboardTemplatePreviewsViaGovernedQuery()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateGovernedQueryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
-  <td>.GovernedQueryRunCreatesLinkedAiTraceRecord() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>Supports retrieval-augmented Q&amp;A or streaming chat.</td>
 </tr>
 <tr>
   <td>4</td>
-  <td><code>Task</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>Task</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Task node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>Task node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>5</td>
-  <td><code>Fact</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>Fact</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Fact node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>Fact node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>6</td>
-  <td><code>.ReadPermissionAllowsListAndGetButExportRequiresExportPermission()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.PreviewExcludesDeniedContextFromBlockSummaries()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>SeedTenantUserAndDocument()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
-  <td>Exports documentation data to a target format.</td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.PreviewExcludesDeniedContextFromBlockSummaries() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>7</td>
-  <td><code>.ExportSuccessWritesExportRecordAndAuditMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.PreviewRejectsUnsupportedQueryIntentRef()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>SeedTenantUserAndDocument()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
-  <td>Exports documentation data to a target format.</td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>SeedInvalidDashboardVersion()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.PreviewRejectsUnsupportedQueryIntentRef() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>8</td>
-  <td><code>.ExportDeniedCreatesExportDeniedSecurityEvent()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.UserWithoutExportPermissionCannotExport()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>SeedTenantUserAndDocument()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
   <td>Exports documentation data to a target format.</td>
 </tr>
 <tr>
   <td>9</td>
-  <td><code>.CrossTenantTraceAccessIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.ExportWritesAuditRecordAndRedactionMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>SeedTenantUserAndDocument()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
-  <td>.CrossTenantTraceAccessIsDenied() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>Exports documentation data to a target format.</td>
 </tr>
 <tr>
   <td>10</td>
-  <td><code>.SensitiveDeniedReferencesHiddenFromReadOnlyUser()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.MarkReadyFailsWhenObject360WidgetMissingAnchor()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateGovernedQueryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
-  <td>.SensitiveDeniedReferencesHiddenFromReadOnlyUser() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>SeedDashboardVersionWithoutAnchor()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.MarkReadyFailsWhenObject360WidgetMissingAnchor() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>11</td>
-  <td><code>.SeedTraceAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.MarkReadyThenPublishSucceedsWhenDependenciesPublished()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CrossTenantTraceAccessIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>ExportDeniedCreatesExportDeniedSecurityEvent()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+2 more</td>
-  <td><code>CreateGovernedQueryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td>.SeedTraceAsync() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateArtifactRegistryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+2 more</td>
+  <td>.MarkReadyThenPublishSucceedsWhenDependenciesPublished() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>12</td>
-  <td><code>EnterpriseThreadDbContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.PublishBlockedWhileStillDraft()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>EnterpriseThreadDbContext node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateArtifactRegistryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.PublishBlockedWhileStillDraft() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>13</td>
-  <td><code>TestContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.DependencyImpactReflectsUnpublishedOutputSchemaDependency()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateArtifactRegistryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>Builds dependency relationships and graph data.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>.KpiPlaceholderBlockReturnsDeferredCatalogMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.KpiPlaceholderBlockReturnsDeferredCatalogMetadata() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>.CrossTenantPreviewIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.CrossTenantPreviewIsDenied() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>.CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>ChatCreatedDashboardTemplatePreviewsViaGovernedQuery()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CrossTenantPreviewIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+7 more</td>
+  <td><code>CreateChatService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td>.CreateDashboardDraftAsync() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>EnterpriseThreadDbContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>EnterpriseThreadDbContext node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>TestContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
   <td>Verifies imports, entry points, or version behavior.</td>
 </tr>
 <tr>
-  <td>14</td>
-  <td><code>Guid</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Guid node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
-</tr>
-<tr>
-  <td>15</td>
-  <td><code>.CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CrossTenantTraceAccessIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>ExportDeniedCreatesExportDeniedSecurityEvent()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+4 more</td>
-  <td>No direct outbound edge</td>
-  <td>.CreateDbContext() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
-</tr>
-<tr>
-  <td>16</td>
-  <td><code>.SeedTenantUserAndDocument()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CrossTenantTraceAccessIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>ExportDeniedCreatesExportDeniedSecurityEvent()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+4 more</td>
-  <td>No direct outbound edge</td>
-  <td>.SeedTenantUserAndDocument() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
-</tr>
-<tr>
-  <td>17</td>
-  <td><code>.CreateGovernedQueryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>GovernedQueryRunCreatesLinkedAiTraceRecord()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>SeedTraceAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
-  <td>No direct outbound edge</td>
-  <td>.CreateGovernedQueryService() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
-</tr>
-<tr>
-  <td>18</td>
-  <td><code>IGraphMemoryService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Builds dependency relationships and graph data.</td>
-</tr>
-<tr>
   <td>19</td>
-  <td><code>IClassificationPolicyService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>Guid</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>IClassificationPolicyService node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>Guid node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>20</td>
-  <td><code>GovernedQueryService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>ArtifactId</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>GovernedQueryService node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>ArtifactId node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>21</td>
-  <td><code>.CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>VersionId</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CrossTenantTraceAccessIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>ExportDeniedCreatesExportDeniedSecurityEvent()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+4 more</td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>.CreateAiTraceService() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>VersionId node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>22</td>
-  <td><code>IAccessPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.SeedDashboardVersionWithoutAnchor()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>MarkReadyFailsWhenObject360WidgetMissingAnchor()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>IAccessPermissionService node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>.SeedDashboardVersionWithoutAnchor() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>23</td>
-  <td><code>IAuditRecorder</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>ArtifactVersion</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>IAuditRecorder node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>ArtifactVersion node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>24</td>
-  <td><code>AiTraceService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.SeedInvalidDashboardVersion()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>PreviewRejectsUnsupportedQueryIntentRef()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>AiTraceService node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>.SeedInvalidDashboardVersion() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>25</td>
-  <td><code>StaticTenantContextResolver</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>ResolveAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td>StaticTenantContextResolver node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td><code>ChatCreatedDashboardTemplatePreviewsViaGovernedQuery()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CrossTenantPreviewIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+7 more</td>
+  <td>No direct outbound edge</td>
+  <td>.CreateDashboardReportService() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>26</td>
-  <td><code>.ResolveAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>IClassificationPolicyService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>StaticTenantContextResolver</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>.ResolveAsync() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>IClassificationPolicyService node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>27</td>
-  <td><code>CancellationToken</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>IAccessPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>CancellationToken node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>IAccessPermissionService node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>28</td>
-  <td><code>ActiveTenantContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>RecordingAuditRecorder</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ActiveTenantContext node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>RecordingAuditRecorder node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>29</td>
-  <td><code>AllowAllPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>DashboardReportService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>HasPermissionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>HasTenantAccessAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
-  <td>AllowAllPermissionService node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>No direct outbound edge</td>
+  <td>DashboardReportService node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>30</td>
-  <td><code>.HasTenantAccessAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>.CreateChatService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>AllowAllPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>.HasTenantAccessAsync() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+  <td>Supports retrieval-augmented Q&amp;A or streaming chat.</td>
 </tr>
 </table>
 
@@ -2356,18 +2571,18 @@ flowchart LR
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>ETOS.Backend.Tests/ExplorersTests.cs</code></td><td>135 nodes</td></tr>
+<tr><td><code>ETOS.Backend.Tests/DashboardReportTests.cs</code></td><td>104 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/AiTraceTests.cs</code></td><td>95 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/DocumentMemoryTests.cs</code></td><td>93 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/GovernedChatTests.cs</code></td><td>93 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/GovernedQueryTests.cs</code></td><td>86 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/ImportTests.cs</code></td><td>82 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/IdentityResolutionTests.cs</code></td><td>67 nodes</td></tr>
-<tr><td><code>ETOS.Backend.Tests/ClassificationPolicyTests.cs</code></td><td>43 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x1462, calls x480, method x433, contains x108. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x1632, calls x526, method x481, contains x118. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -4753,12 +4968,12 @@ flowchart LR
 
 <!-- ====== 16. Other ====== -->
 <h2 id="other">16. Other</h2>
-<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-007-601-700.md, .prd/.initialConversation/chatgpt-conversation-part-008-701-800.md, .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md. This section covers 2286 nodes and 4127 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-007-601-700.md, .prd/.initialConversation/chatgpt-conversation-part-008-701-800.md, .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md. This section covers 2398 nodes and 4374 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Other (2286 nodes, 4127 edges)
+    %% Section: Other (2398 nodes, 4374 edges)
     subgraph other_ETOS_Backend_AiTrace_AiTraceRecorder_cs_d21a07d2["ETOS.Backend/AiTrace/AiTraceRecorder.cs"]
         aitrace_aitracerecorder_iaitracerecorder_ceeb0585("IAiTraceRecorder<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
         aitrace_aitracerecorder_iaitracerecorder_createf_72b00ca5("CreateFromChatTurnAsync()<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
@@ -4793,7 +5008,7 @@ flowchart LR
     aitrace_aitracerecorder_iaitracerecorder_ceeb0585 -->|method| aitrace_aitracerecorder_iaitracerecorder_createf_72b00ca5
     aitrace_aitracerecorder_iaitracerecorder_ceeb0585 -->|method| aitrace_aitracerecorder_iaitracerecorder_createf_fcf9e52a
     aitrace_aitracerecorder_aitracerecorder_3505e498 -->|method| aitrace_aitracerecorder_aitracerecorder_buildart_4b40650f
-    %% Omitted for readability: 2268 nodes, 0 edges
+    %% Omitted for readability: 2380 nodes, 0 edges
     class aitrace_aitracerecorder_iaitracerecorder_ceeb0585 klass;
     class aitrace_aitracerecorder_iaitracerecorder_createf_72b00ca5 async;
     class aitrace_aitracerecorder_iaitracerecorder_createf_fcf9e52a async;
@@ -5092,7 +5307,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x1866, contains x962, calls x633, method x596. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x2017, contains x979, calls x666, method x642. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -5103,18 +5318,18 @@ flowchart LR
   <div class="card">
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>Nodes</td><td>5014</td></tr>
-      <tr><td>Edges</td><td>9448</td></tr>
+      <tr><td>Nodes</td><td>5293</td></tr>
+      <tr><td>Edges</td><td>10091</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
-      <tr><td>Communities</td><td>228</td></tr>
+      <tr><td>Communities</td><td>236</td></tr>
       <tr><td>Documented Sections</td><td>15</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>EXTRACTED</td><td>9448</td></tr>
-      <tr><td>INFERRED</td><td>0</td></tr>
+      <tr><td>EXTRACTED</td><td>10089</td></tr>
+      <tr><td>INFERRED</td><td>2</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
   </div>
@@ -5122,7 +5337,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>EnterpriseThreadOS — Architecture Documentation</p>
-  <p>Generated: 2026-06-13 17:05 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-06-13 17:16 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

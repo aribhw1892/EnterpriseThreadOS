@@ -438,6 +438,18 @@ export default async function Home() {
               >
                 Governed Chat
               </Link>
+              <Link
+                href="/dashboards"
+                className="rounded-full border border-cyan-300 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"
+              >
+                Dashboards
+              </Link>
+              <Link
+                href="/reports"
+                className="rounded-full border border-cyan-300 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"
+              >
+                Reports
+              </Link>
               <StatusBadge status={health?.status ?? "unavailable"} />
             </div>
           </div>

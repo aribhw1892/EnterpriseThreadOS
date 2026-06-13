@@ -14,6 +14,8 @@ public interface IChatArtifactDraftBuilder
         PlatformArtifactVersion outputSchema,
         PlatformArtifactVersion promptTemplate,
         string draftOutputJson,
+        Guid? startGraphNodeId,
+        Guid? documentArtifactId,
         CancellationToken cancellationToken);
 }
 
@@ -28,6 +30,8 @@ public sealed class ChatArtifactDraftBuilder(EnterpriseThreadDbContext dbContext
         PlatformArtifactVersion outputSchema,
         PlatformArtifactVersion promptTemplate,
         string draftOutputJson,
+        Guid? startGraphNodeId,
+        Guid? documentArtifactId,
         CancellationToken cancellationToken)
     {
         var artifactType = draftKind switch
@@ -57,7 +61,9 @@ public sealed class ChatArtifactDraftBuilder(EnterpriseThreadDbContext dbContext
             draftOutputJson,
             turn,
             outputSchema.VersionLabel,
-            promptTemplate.VersionLabel);
+            promptTemplate.VersionLabel,
+            startGraphNodeId,
+            documentArtifactId);
 
         var version = new ArtifactVersion
         {
@@ -134,7 +140,9 @@ public sealed class ChatArtifactDraftBuilder(EnterpriseThreadDbContext dbContext
         string draftOutputJson,
         GovernedChatTurn turn,
         string outputSchemaVersionLabel,
-        string promptTemplateVersionLabel)
+        string promptTemplateVersionLabel,
+        Guid? startGraphNodeId,
+        Guid? documentArtifactId)
     {
         var node = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(draftOutputJson, JsonOptions)
             ?? new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
@@ -144,6 +152,11 @@ public sealed class ChatArtifactDraftBuilder(EnterpriseThreadDbContext dbContext
         enriched["promptTemplateVersionLabel"] = JsonSerializer.SerializeToElement(promptTemplateVersionLabel);
         enriched["outputSchemaVersionLabel"] = JsonSerializer.SerializeToElement(outputSchemaVersionLabel);
         enriched["createdFromChat"] = JsonSerializer.SerializeToElement(true);
+        enriched["defaultAnchor"] = JsonSerializer.SerializeToElement(new
+        {
+            startGraphNodeId,
+            documentArtifactId
+        });
         return JsonSerializer.Serialize(enriched, JsonOptions);
     }
 }

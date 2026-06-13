@@ -226,6 +226,8 @@ public sealed class GovernedChatService(
                 draftSchema,
                 platformArtifacts.PromptTemplate,
                 draftOutputJson,
+                startGraphNodeId,
+                documentArtifactId,
                 cancellationToken);
 
             turn.DraftArtifactId = draftArtifact.ArtifactId;

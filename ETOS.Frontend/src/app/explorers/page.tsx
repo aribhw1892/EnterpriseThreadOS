@@ -8,6 +8,8 @@ const explorerCards = [
   { href: "/context-packages", title: "Context packages", description: "Retrieval runs and assembled governed context packages." },
   { href: "/ai-traces", title: "AI traces", description: "Existing AI Trace explorer with cross-links from 360 views." },
   { href: "/decisions", title: "Decisions", description: "Decision explorer foundation until Milestone 4 workflow lands." },
+  { href: "/dashboards", title: "Dashboards", description: "Chat-generated dashboard templates with governed preview and export." },
+  { href: "/reports", title: "Reports", description: "Chat-generated report templates with governed preview and export." },
 ];
 
 export default function ExplorersHubPage() {

@@ -925,6 +925,101 @@ export type GovernedChatTurn = {
   draftArtifact?: GovernedChatDraftArtifact | null;
 };
 
+export type DashboardReportArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  updatedAt: string;
+};
+
+export type DashboardReportTemplateBlock = {
+  blockId: string;
+  title: string;
+  kind: string;
+  queryIntentRef?: string | null;
+  visualization?: string | null;
+  kpiKey?: string | null;
+  staticText?: string | null;
+};
+
+export type DashboardReportTemplate = {
+  artifactId: string;
+  versionId: string;
+  artifactType: string;
+  versionLabel: string;
+  name: string;
+  summary?: string | null;
+  defaultAnchor: {
+    startGraphNodeId?: string | null;
+    documentArtifactId?: string | null;
+  };
+  blocks: DashboardReportTemplateBlock[];
+};
+
+export type DashboardReportPreviewBlock = {
+  blockId: string;
+  title: string;
+  kind: string;
+  safeSummary: string;
+  allowedCount: number;
+  deniedCount: number;
+  queryIntentRef?: string | null;
+  kpiKey?: string | null;
+  status: string;
+};
+
+export type DashboardReportPreview = {
+  artifactId: string;
+  versionId: string;
+  artifactType: string;
+  versionLabel: string;
+  blocks: DashboardReportPreviewBlock[];
+  filterSummary: {
+    policyKey?: string | null;
+    totalBlocks: number;
+    governedQueryBlocks: number;
+    deniedContextTotal: number;
+    allowedContextTotal: number;
+  };
+};
+
+export type ArtifactReadiness = {
+  artifactId: string;
+  versionId: string;
+  storedReadinessState: string;
+  recalculatedReadinessState: string;
+  blockingReasons: string[];
+  compatibilityStatus: string;
+  policyRiskStatus: string;
+};
+
+export type PublishArtifactVersionResult = {
+  succeeded: boolean;
+  readinessState: string;
+  blockingReasons: string[];
+  compatibilityStatus: string;
+  policyRiskStatus: string;
+  version: ArtifactVersion;
+};
+
+export type ArtifactImpact = {
+  dependencies: ArtifactDependency[];
+  dependents: {
+    dependencyId: string;
+    tenantId: string;
+    dependentArtifactId: string;
+    dependentArtifactName: string;
+    dependentVersionId: string;
+    dependentVersionLabel: string;
+    dependencyKind: string;
+    createdAt: string;
+  }[];
+};
+
 export type ImportPreview = {
   batchId: string;
   evidenceId: string;
@@ -2435,6 +2530,223 @@ export async function getDecisionExplorerList(): Promise<ApiResult<DecisionExplo
   }
 
   return await fetchApi<DecisionExplorerItem[]>("/api/admin/explorers/decisions", tenantHeaders);
+}
+
+export async function getDashboardArtifacts(): Promise<ApiResult<DashboardReportArtifactSummary[]>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<DashboardReportArtifactSummary[]>();
+  }
+
+  return await fetchApi<DashboardReportArtifactSummary[]>("/api/admin/dashboards/artifacts", tenantHeaders);
+}
+
+export async function getReportArtifacts(): Promise<ApiResult<DashboardReportArtifactSummary[]>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<DashboardReportArtifactSummary[]>();
+  }
+
+  return await fetchApi<DashboardReportArtifactSummary[]>("/api/admin/reports/artifacts", tenantHeaders);
+}
+
+export async function getDashboardReportTemplate(
+  kind: "dashboard" | "report",
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<DashboardReportTemplate>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<DashboardReportTemplate>();
+  }
+
+  const base = kind === "dashboard" ? "/api/admin/dashboards" : "/api/admin/reports";
+  return await fetchApi<DashboardReportTemplate>(`${base}/${artifactId}/versions/${versionId}/template`, tenantHeaders);
+}
+
+export async function previewDashboardReport(
+  kind: "dashboard" | "report",
+  artifactId: string,
+  versionId: string,
+  body: {
+    startGraphNodeId?: string | null;
+    documentArtifactId?: string | null;
+    policyKey?: string | null;
+  } = {},
+): Promise<ApiResult<DashboardReportPreview>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<DashboardReportPreview>();
+  }
+
+  const base = kind === "dashboard" ? "/api/admin/dashboards" : "/api/admin/reports";
+  return await postApi<DashboardReportPreview>(
+    `${base}/${artifactId}/versions/${versionId}/preview`,
+    body,
+    tenantHeaders,
+  );
+}
+
+export async function markDashboardReportReady(
+  kind: "dashboard" | "report",
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>();
+  }
+
+  const base = kind === "dashboard" ? "/api/admin/dashboards" : "/api/admin/reports";
+  return await postApi(`${base}/${artifactId}/versions/${versionId}/mark-ready`, {}, tenantHeaders);
+}
+
+export async function getArtifactVersions(artifactId: string): Promise<ApiResult<ArtifactVersion[]>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<ArtifactVersion[]>();
+  }
+
+  return await fetchApi<ArtifactVersion[]>(`/api/admin/artifacts/${artifactId}/versions`, tenantHeaders);
+}
+
+export async function getArtifactReadiness(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<ArtifactReadiness>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<ArtifactReadiness>();
+  }
+
+  return await fetchApi<ArtifactReadiness>(
+    `/api/admin/artifacts/${artifactId}/versions/${versionId}/readiness`,
+    tenantHeaders,
+  );
+}
+
+export async function getArtifactImpact(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<ArtifactImpact>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<ArtifactImpact>();
+  }
+
+  return await fetchApi<ArtifactImpact>(
+    `/api/admin/artifacts/${artifactId}/versions/${versionId}/impact`,
+    tenantHeaders,
+  );
+}
+
+export async function publishArtifactVersion(
+  artifactId: string,
+  versionId: string,
+  summary?: string,
+): Promise<ApiResult<PublishArtifactVersionResult>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<PublishArtifactVersionResult>();
+  }
+
+  return await postApi<PublishArtifactVersionResult>(
+    `/api/admin/artifacts/${artifactId}/versions/${versionId}/publish`,
+    { summary: summary ?? null },
+    tenantHeaders,
+  );
+}
+
+export async function exportDashboardReport(
+  kind: "dashboard" | "report",
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<{ fileName: string; sizeBytes: number }>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<{ fileName: string; sizeBytes: number }>();
+  }
+
+  const base = kind === "dashboard" ? "/api/admin/dashboards" : "/api/admin/reports";
+
+  try {
+    const headers = new Headers();
+    headers.set("X-ETOS-User-Id", tenantHeaders.userId);
+    headers.set("X-ETOS-Tenant-Id", tenantHeaders.tenantId);
+    headers.set("Content-Type", "application/json");
+
+    const response = await fetch(`${apiBaseUrl}${base}/${artifactId}/versions/${versionId}/export`, {
+      method: "POST",
+      cache: "no-store",
+      headers,
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      const problem = await readProblem(response);
+      return {
+        data: null,
+        error: problem ?? `${response.status} ${response.statusText}`,
+      };
+    }
+
+    const contentDisposition = response.headers.get("content-disposition") ?? "";
+    const fileNameMatch = /filename="?([^";]+)"?/i.exec(contentDisposition);
+    const fileName = fileNameMatch?.[1] ?? `${kind}-${artifactId}.json`;
+    const buffer = await response.arrayBuffer();
+
+    return {
+      data: { fileName, sizeBytes: buffer.byteLength },
+      error: null,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : "Dashboard/report export failed.",
+    };
+  }
+}
+
+export function draftArtifactDetailHref(artifactType: string, artifactId: string): string | null {
+  if (artifactType === "DashboardVersion") {
+    return `/dashboards/${artifactId}`;
+  }
+
+  if (artifactType === "ReportVersion") {
+    return `/reports/${artifactId}`;
+  }
+
+  return null;
 }
 
 async function fetchApi<T>(

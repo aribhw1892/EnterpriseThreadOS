@@ -1,5 +1,6 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
+using ETOS.Backend.Dashboards;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
 using ETOS.Backend.Explorers;
@@ -50,6 +51,7 @@ app.MapEnterpriseThreadGovernedQueryEndpoints();
 app.MapEnterpriseThreadAiTraceEndpoints();
 app.MapEnterpriseThreadGovernedChatEndpoints();
 app.MapEnterpriseThreadExplorerEndpoints();
+app.MapEnterpriseThreadDashboardReportEndpoints();
 
 app.Run();
 

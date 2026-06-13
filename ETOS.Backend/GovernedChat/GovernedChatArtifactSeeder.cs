@@ -220,11 +220,12 @@ public sealed class GovernedChatArtifactSeeder(EnterpriseThreadDbContext dbConte
         return Serialize(new
         {
             type = "object",
-            required = new[] { "name", "summary", "widgets", "createdFromChat" },
+            required = new[] { "name", "summary", "defaultAnchor", "widgets", "createdFromChat" },
             properties = new
             {
                 name = new { type = "string" },
                 summary = new { type = "string" },
+                defaultAnchor = new { type = "object" },
                 widgets = new { type = "array" },
                 createdFromChat = new { type = "boolean" }
             }
@@ -236,11 +237,12 @@ public sealed class GovernedChatArtifactSeeder(EnterpriseThreadDbContext dbConte
         return Serialize(new
         {
             type = "object",
-            required = new[] { "name", "summary", "sections", "createdFromChat" },
+            required = new[] { "name", "summary", "defaultAnchor", "sections", "createdFromChat" },
             properties = new
             {
                 name = new { type = "string" },
                 summary = new { type = "string" },
+                defaultAnchor = new { type = "object" },
                 sections = new { type = "array" },
                 createdFromChat = new { type = "boolean" }
             }
