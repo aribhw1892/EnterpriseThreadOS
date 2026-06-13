@@ -3,6 +3,8 @@ using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.Governance;
+using ETOS.Backend.GovernedChat;
+using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.IdentityResolution;
 using Microsoft.AspNetCore.Identity;
@@ -55,7 +57,15 @@ public sealed class DevelopmentIdentitySeeder(
         var aiTraceReadPermission = await EnsurePermissionAsync(AiTracePermissions.Read, "Read tenant AI Trace records.", cancellationToken);
         var aiTraceExportPermission = await EnsurePermissionAsync(AiTracePermissions.Export, "Export tenant AI Trace packages.", cancellationToken);
         var aiTraceAdminPermission = await EnsurePermissionAsync(AiTracePermissions.Admin, "Administer tenant AI Trace records.", cancellationToken);
+        var governedQueryReadPermission = await EnsurePermissionAsync(GovernedQueryPermissions.Read, "Read tenant governed query records.", cancellationToken);
+        var governedQueryRunPermission = await EnsurePermissionAsync(GovernedQueryPermissions.Run, "Run tenant governed query retrieval.", cancellationToken);
+        var governedQueryAdminPermission = await EnsurePermissionAsync(GovernedQueryPermissions.Admin, "Administer tenant governed query records.", cancellationToken);
+        var governedChatRunPermission = await EnsurePermissionAsync(GovernedChatPermissions.Run, "Run tenant governed chat turns.", cancellationToken);
+        var governedChatDraftPermission = await EnsurePermissionAsync(GovernedChatPermissions.Draft, "Create draft artifacts from governed chat.", cancellationToken);
+        var governedChatAdminPermission = await EnsurePermissionAsync(GovernedChatPermissions.Admin, "Administer tenant governed chat records.", cancellationToken);
         var adminRole = await EnsureTenantRoleAsync(tenant.Id, cancellationToken);
+        var chatRunnerRole = await EnsureChatRunnerRoleAsync(tenant.Id, cancellationToken);
+        var chatRunner = await EnsureChatRunnerUserAsync(seedOptions, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, admin.Id, adminRole.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, adminPermission.Id, cancellationToken);
@@ -80,6 +90,18 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, aiTraceReadPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, aiTraceExportPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, aiTraceAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governedQueryReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governedQueryRunPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governedQueryAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governedChatRunPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governedChatDraftPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governedChatAdminPermission.Id, cancellationToken);
+
+        await EnsureMembershipAsync(tenant.Id, chatRunner.Id, chatRunnerRole.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, governedChatRunPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, governedQueryRunPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, governedQueryReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, aiTraceReadPermission.Id, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await EnsureBootstrapAuditAsync(tenant.Id, admin.Id, tenant.Identifier, cancellationToken);
@@ -192,6 +214,62 @@ public sealed class DevelopmentIdentitySeeder(
 
         dbContext.Permissions.Add(permission);
         return permission;
+    }
+
+    private async Task<TenantRole> EnsureChatRunnerRoleAsync(Guid tenantId, CancellationToken cancellationToken)
+    {
+        var normalizedRoleName = Normalize("Chat Runner");
+        var existing = await dbContext.TenantRoles.SingleOrDefaultAsync(
+            role => role.TenantId == tenantId && role.NormalizedName == normalizedRoleName,
+            cancellationToken);
+
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var role = new TenantRole
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            Name = "Chat Runner",
+            NormalizedName = normalizedRoleName,
+            Description = "Run governed chat without draft artifact permissions.",
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        dbContext.TenantRoles.Add(role);
+        return role;
+    }
+
+    private async Task<EtosUser> EnsureChatRunnerUserAsync(SeedIdentityOptions seedOptions, CancellationToken cancellationToken)
+    {
+        const string email = "chat-runner@example.test";
+        var normalizedEmail = email.ToUpperInvariant();
+        var existing = await dbContext.Users.SingleOrDefaultAsync(user => user.NormalizedEmail == normalizedEmail, cancellationToken);
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var user = new EtosUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = email,
+            Email = email,
+            DisplayName = "ETOS Chat Runner",
+            EmailConfirmed = true,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        var result = await userManager.CreateAsync(user, seedOptions.AdminPassword);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Development chat runner seed failed: {string.Join("; ", result.Errors.Select(error => error.Description))}");
+        }
+
+        return user;
     }
 
     private async Task<TenantRole> EnsureTenantRoleAsync(Guid tenantId, CancellationToken cancellationToken)

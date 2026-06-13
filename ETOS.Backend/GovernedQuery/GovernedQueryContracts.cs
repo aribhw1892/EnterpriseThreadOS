@@ -15,7 +15,8 @@ public sealed record RunGovernedQueryRequest(
     Guid? DocumentArtifactId,
     string? PolicyKey,
     string? QueryText,
-    int MaxDepth);
+    int MaxDepth,
+    bool CreateAiTrace = true);
 
 public sealed record QueryIntentVersionResponse(
     Guid Id,

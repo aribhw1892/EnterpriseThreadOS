@@ -1,4 +1,6 @@
 using System.Text.Json;
+using ETOS.Backend.Artifacts;
+using ETOS.Backend.GovernedChat;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +10,8 @@ namespace ETOS.Backend.AiTrace;
 public interface IAiTraceRecorder
 {
     Task<Guid> CreateFromRetrievalRunAsync(Guid retrievalRunId, Guid? auditRecordId, CancellationToken cancellationToken);
+
+    Task<Guid> CreateFromChatTurnAsync(Guid chatTurnId, Guid? auditRecordId, CancellationToken cancellationToken);
 }
 
 public sealed class AiTraceRecorder(EnterpriseThreadDbContext dbContext) : IAiTraceRecorder
@@ -62,6 +66,89 @@ public sealed class AiTraceRecorder(EnterpriseThreadDbContext dbContext) : IAiTr
         dbContext.AiTraceRecords.Add(trace);
         await dbContext.SaveChangesAsync(cancellationToken);
         return trace.Id;
+    }
+
+    public async Task<Guid> CreateFromChatTurnAsync(Guid chatTurnId, Guid? auditRecordId, CancellationToken cancellationToken)
+    {
+        var turn = await dbContext.GovernedChatTurns
+            .SingleOrDefaultAsync(item => item.Id == chatTurnId, cancellationToken)
+            ?? throw new InvalidOperationException("Governed chat turn was not found for AI Trace creation.");
+
+        var run = await dbContext.RetrievalRuns
+            .Include(item => item.QueryIntentVersion)
+            .Include(item => item.RetrievalStrategyVersion)
+            .SingleOrDefaultAsync(item => item.Id == turn.RetrievalRunId, cancellationToken)
+            ?? throw new InvalidOperationException("Retrieval run was not found for governed chat AI Trace creation.");
+
+        var package = await dbContext.ContextPackages
+            .SingleOrDefaultAsync(item => item.Id == turn.ContextPackageId, cancellationToken)
+            ?? throw new InvalidOperationException("Context package was not found for governed chat AI Trace creation.");
+
+        var promptVersion = await dbContext.ArtifactVersions
+            .SingleOrDefaultAsync(item => item.Id == turn.PromptTemplateVersionId, cancellationToken);
+        var outputSchemaVersion = await dbContext.ArtifactVersions
+            .SingleOrDefaultAsync(item => item.Id == turn.OutputSchemaVersionId, cancellationToken);
+
+        var filteredItems = DeserializeContextItems(package.FilteredContextJson);
+        var trustFilteredCount = Math.Max(0, run.RetrievedCount - run.FilteredCount);
+        var confidence = JsonSerializer.Deserialize<GovernedChatConfidenceResponse>(turn.ConfidenceJson, JsonOptions);
+
+        var trace = new AiTraceRecord
+        {
+            Id = Guid.NewGuid(),
+            TenantId = turn.TenantId,
+            RetrievalRunId = run.Id,
+            ContextPackageId = package.Id,
+            AuditRecordId = auditRecordId,
+            GovernedChatTurnId = turn.Id,
+            TraceKind = AiTraceKind.GovernedChat,
+            IntentKey = run.QueryIntentVersion!.IntentKey,
+            StrategyKey = run.RetrievalStrategyVersion!.StrategyKey,
+            QueryText = turn.UserMessage,
+            Status = run.Status,
+            SafeSummary = $"AI Trace for governed chat turn with {package.AllowedCount} allowed and {package.DeniedCount} denied context items.",
+            SourcesSummaryJson = Serialize(BuildSourcesSummary(filteredItems)),
+            FilteredSummariesJson = Serialize(filteredItems.Select(ToFilteredSummary).ToList()),
+            DeniedSafeSummariesJson = package.DeniedSummariesJson,
+            SensitiveDeniedReferencesJson = package.SensitiveDeniedReferencesJson,
+            ConfidenceImpactJson = Serialize(new AiTraceConfidenceImpactResponse(
+                run.RetrievedCount,
+                run.FilteredCount,
+                run.DeniedCount,
+                trustFilteredCount,
+                package.PolicyKey,
+                confidence?.Notes ?? "Governed chat confidence derived from retrieval and policy filtering.")),
+            PromptTemplateVersionLabel = promptVersion?.VersionLabel,
+            OutputSchemaVersionLabel = outputSchemaVersion?.VersionLabel,
+            GeneratedOutputJson = turn.GeneratedOutputJson,
+            RequestedByUserId = run.RequestedByUserId,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        trace.ArtifactLinks.AddRange(BuildChatArtifactLinks(trace.TenantId, trace.Id, turn, run, package));
+        dbContext.AiTraceRecords.Add(trace);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return trace.Id;
+    }
+
+    private static List<AiTraceArtifactLink> BuildChatArtifactLinks(
+        Guid tenantId,
+        Guid traceId,
+        GovernedChatTurn turn,
+        RetrievalRun run,
+        ContextPackage package)
+    {
+        var links = BuildArtifactLinks(tenantId, traceId, run, package);
+        links.Add(CreateLink(tenantId, traceId, AiTraceArtifactLinkKind.PromptTemplate, nameof(ArtifactVersion), turn.PromptTemplateVersionId.ToString()));
+        links.Add(CreateLink(tenantId, traceId, AiTraceArtifactLinkKind.OutputSchema, nameof(ArtifactVersion), turn.OutputSchemaVersionId.ToString()));
+        links.Add(CreateLink(tenantId, traceId, AiTraceArtifactLinkKind.GovernedChatTurn, nameof(GovernedChatTurn), turn.Id.ToString()));
+
+        if (turn.DraftArtifactVersionId is not null)
+        {
+            links.Add(CreateLink(tenantId, traceId, AiTraceArtifactLinkKind.DraftArtifact, nameof(ArtifactVersion), turn.DraftArtifactVersionId.Value.ToString()));
+        }
+
+        return links;
     }
 
     private static List<AiTraceArtifactLink> BuildArtifactLinks(

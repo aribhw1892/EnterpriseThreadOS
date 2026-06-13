@@ -4,6 +4,7 @@ using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.AiTrace;
+using ETOS.Backend.GovernedChat;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
@@ -46,6 +47,7 @@ app.MapEnterpriseThreadGraphMemoryEndpoints();
 app.MapEnterpriseThreadDocumentEndpoints();
 app.MapEnterpriseThreadGovernedQueryEndpoints();
 app.MapEnterpriseThreadAiTraceEndpoints();
+app.MapEnterpriseThreadGovernedChatEndpoints();
 
 app.Run();
 

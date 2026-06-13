@@ -140,6 +140,9 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .HasMaxLength(16000)
                         .HasColumnType("character varying(16000)");
 
+                    b.Property<Guid?>("GovernedChatTurnId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("IntentKey")
                         .IsRequired()
                         .HasMaxLength(120)
@@ -1416,6 +1419,124 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "Severity", "CreatedAt");
 
                     b.ToTable("security_events", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedChat.GovernedChatSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DocumentArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("LastTurnAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("StartGraphNodeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StartedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "CreatedAt");
+
+                    b.ToTable("governed_chat_sessions", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedChat.GovernedChatTurn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AiTraceRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssistantSafeSummary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ConfidenceJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("ContextPackageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DraftArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DraftArtifactKind")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid?>("DraftArtifactVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EvidenceJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("GeneratedOutputJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<Guid>("OutputSchemaArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OutputSchemaVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PromptTemplateArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PromptTemplateVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RetrievalRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserMessage")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId");
+
+                    b.HasIndex("TenantId", "CreatedAt");
+
+                    b.HasIndex("TenantId", "SessionId", "CreatedAt");
+
+                    b.ToTable("governed_chat_turns", (string)null);
                 });
 
             modelBuilder.Entity("ETOS.Backend.GovernedQuery.ContextAccessDecision", b =>
@@ -4282,6 +4403,17 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Navigation("RelatedAuditRecord");
                 });
 
+            modelBuilder.Entity("ETOS.Backend.GovernedChat.GovernedChatTurn", b =>
+                {
+                    b.HasOne("ETOS.Backend.GovernedChat.GovernedChatSession", "Session")
+                        .WithMany("Turns")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Session");
+                });
+
             modelBuilder.Entity("ETOS.Backend.GovernedQuery.ContextAccessDecision", b =>
                 {
                     b.HasOne("ETOS.Backend.GovernedQuery.ContextPackage", "ContextPackage")
@@ -4892,6 +5024,11 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("ETOS.Backend.Governance.AuditRecord", b =>
                 {
                     b.Navigation("SecurityEvents");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedChat.GovernedChatSession", b =>
+                {
+                    b.Navigation("Turns");
                 });
 
             modelBuilder.Entity("ETOS.Backend.GovernedQuery.ContextPackage", b =>

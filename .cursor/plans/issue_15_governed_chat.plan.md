@@ -4,34 +4,34 @@ overview: "Add governed chat over Slice 13 retrieval + Slice 14 AI Trace: LLM-sa
 todos:
   - id: llm-abstraction
     content: Add ILlmCompletionService with deterministic default provider and optional config-gated real provider
-    status: in_progress
+    status: completed
   - id: prompt-output-seed
     content: Seed platform PromptTemplateVersion and OutputSchemaVersion artifacts; add schema validation helper
-    status: pending
+    status: completed
   - id: models-migration
     content: Add GovernedChat models, DbContext config, Slice15GovernedChatChatToArtifact migration
-    status: pending
+    status: completed
   - id: chat-service
     content: Build GovernedChatService (ask, list turns, draft artifacts) orchestrating retrieval, LLM, trace, and artifact registry
-    status: pending
+    status: completed
   - id: aitrace-extension
     content: Extend AiTraceKind/recorder for GovernedChat traces with pinned prompt/output labels and generated output JSON
-    status: pending
+    status: completed
   - id: governed-query-flag
     content: Add optional skip-AiTrace on governed query run path so chat owns single enriched trace per turn
-    status: pending
+    status: completed
   - id: permissions-seed
     content: Add governed_chat.run/draft/admin permissions to DevelopmentIdentitySeeder
-    status: pending
+    status: completed
   - id: backend-tests
     content: Add GovernedChatTests for filtering, trace links, draft creation, publish blocking, tenant isolation
-    status: pending
+    status: completed
   - id: frontend-chat
     content: Add etos-api types/helpers and /chat page with ask form, response evidence panel, draft actions, trace link
-    status: pending
+    status: completed
   - id: docs-verify
     content: Update ARCHITECTURE.md, run dotnet/npm verification, graphify update
-    status: pending
+    status: completed
 isProject: false
 ---
 

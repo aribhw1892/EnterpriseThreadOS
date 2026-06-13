@@ -855,6 +855,76 @@ export type AiTraceDetail = {
   createdAt: string;
 };
 
+export type GovernedChatSessionSummary = {
+  id: string;
+  tenantId: string;
+  title: string;
+  startedByUserId: string;
+  startGraphNodeId?: string | null;
+  documentArtifactId?: string | null;
+  createdAt: string;
+  lastTurnAt?: string | null;
+  turnCount: number;
+};
+
+export type GovernedChatSessionDetail = {
+  id: string;
+  tenantId: string;
+  title: string;
+  startedByUserId: string;
+  startGraphNodeId?: string | null;
+  documentArtifactId?: string | null;
+  createdAt: string;
+  lastTurnAt?: string | null;
+  turns: GovernedChatTurnSummary[];
+};
+
+export type GovernedChatTurnSummary = {
+  id: string;
+  sessionId: string;
+  userMessage: string;
+  assistantSafeSummary: string;
+  aiTraceRecordId?: string | null;
+  draftArtifactKind?: string | null;
+  createdAt: string;
+};
+
+export type GovernedChatEvidence = {
+  contextId: string;
+  contextType: string;
+  safeSummary: string;
+};
+
+export type GovernedChatConfidence = {
+  overall: number;
+  retrievalCount: number;
+  allowedCount: number;
+  deniedCount: number;
+  trustFilteredCount: number;
+  notes: string;
+};
+
+export type GovernedChatDraftArtifact = {
+  artifactId: string;
+  versionId: string;
+  artifactType: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type GovernedChatTurn = {
+  turnId: string;
+  sessionId: string;
+  assistantSafeSummary: string;
+  evidence: GovernedChatEvidence[];
+  confidence: GovernedChatConfidence;
+  deniedSummaryCount: number;
+  aiTraceRecordId: string;
+  retrievalRunId: string;
+  contextPackageId: string;
+  draftArtifact?: GovernedChatDraftArtifact | null;
+};
+
 export type ImportPreview = {
   batchId: string;
   evidenceId: string;
@@ -1269,9 +1339,105 @@ export async function runGovernedQueryForGraphNode(
       policyKey: "published-policy",
       queryText: "Frontend governed context preview.",
       maxDepth: 2,
+      createAiTrace: true,
     },
     tenantHeaders,
   );
+}
+
+export async function getGovernedChatLists(): Promise<{
+  sessions: ApiResult<GovernedChatSessionSummary[]>;
+}> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+
+  const sessions = tenantHeaders
+    ? await fetchApi<GovernedChatSessionSummary[]>("/api/admin/governed-chat/sessions", tenantHeaders)
+    : missingContext<GovernedChatSessionSummary[]>();
+
+  return { sessions };
+}
+
+export async function createGovernedChatSession(
+  title?: string,
+  startGraphNodeId?: string,
+): Promise<ApiResult<GovernedChatSessionSummary>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<GovernedChatSessionSummary>();
+  }
+
+  return await postApi<GovernedChatSessionSummary>(
+    "/api/admin/governed-chat/sessions",
+    {
+      title: title ?? "Governed chat session",
+      startGraphNodeId: startGraphNodeId ?? "33333333-3333-3333-3333-333333333333",
+      documentArtifactId: null,
+    },
+    tenantHeaders,
+  );
+}
+
+export async function askGovernedChatTurn(
+  sessionId: string,
+  message: string,
+  intentKey = "object-360-context",
+  draftArtifactKind?: "QueryIntent" | "Dashboard" | "Report",
+): Promise<ApiResult<GovernedChatTurn>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<GovernedChatTurn>();
+  }
+
+  return await postApi<GovernedChatTurn>(
+    `/api/admin/governed-chat/sessions/${sessionId}/turns`,
+    {
+      message,
+      intentKey,
+      startGraphNodeId: null,
+      documentArtifactId: null,
+      policyKey: "published-policy",
+      draftArtifactKind,
+    },
+    tenantHeaders,
+  );
+}
+
+export async function getGovernedChatSession(
+  sessionId: string,
+): Promise<ApiResult<GovernedChatSessionDetail>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<GovernedChatSessionDetail>();
+  }
+
+  return await fetchApi<GovernedChatSessionDetail>(
+    `/api/admin/governed-chat/sessions/${sessionId}`,
+    tenantHeaders,
+  );
+}
+
+export async function getGovernedChatTurn(turnId: string): Promise<ApiResult<GovernedChatTurn>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<GovernedChatTurn>();
+  }
+
+  return await fetchApi<GovernedChatTurn>(`/api/admin/governed-chat/turns/${turnId}`, tenantHeaders);
 }
 
 export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackageVersion>> {

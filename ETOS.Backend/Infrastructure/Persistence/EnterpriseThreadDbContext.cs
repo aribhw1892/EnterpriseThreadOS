@@ -4,6 +4,7 @@ using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.AiTrace;
+using ETOS.Backend.GovernedChat;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Governance;
@@ -147,6 +148,10 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<AiTraceArtifactLink> AiTraceArtifactLinks => Set<AiTraceArtifactLink>();
 
     public DbSet<AiTraceExportRecord> AiTraceExportRecords => Set<AiTraceExportRecord>();
+
+    public DbSet<GovernedChatSession> GovernedChatSessions => Set<GovernedChatSession>();
+
+    public DbSet<GovernedChatTurn> GovernedChatTurns => Set<GovernedChatTurn>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -529,6 +534,7 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
         ConfigureDocumentTables(modelBuilder);
         ConfigureGovernedQueryTables(modelBuilder);
         ConfigureAiTraceTables(modelBuilder);
+        ConfigureGovernedChatTables(modelBuilder);
     }
 
     private static void ConfigureGovernedQueryTables(ModelBuilder modelBuilder)
@@ -652,6 +658,7 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.Property(trace => trace.OutputSchemaVersionLabel).HasMaxLength(120);
             entity.Property(trace => trace.GeneratedOutputJson).HasMaxLength(16000);
             entity.Property(trace => trace.TraceKind).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(trace => trace.GovernedChatTurnId);
             entity.Property(trace => trace.CreatedAt).IsRequired();
             entity.HasIndex(trace => new { trace.TenantId, trace.CreatedAt });
             entity.HasIndex(trace => new { trace.TenantId, trace.RetrievalRunId });
@@ -686,6 +693,39 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.HasOne(record => record.AiTraceRecord)
                 .WithMany(trace => trace.ExportRecords)
                 .HasForeignKey(record => record.AiTraceRecordId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureGovernedChatTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<GovernedChatSession>(entity =>
+        {
+            entity.ToTable("governed_chat_sessions");
+            entity.HasKey(session => session.Id);
+            entity.Property(session => session.TenantId).IsRequired();
+            entity.Property(session => session.Title).HasMaxLength(200).IsRequired();
+            entity.Property(session => session.CreatedAt).IsRequired();
+            entity.HasIndex(session => new { session.TenantId, session.CreatedAt });
+        });
+
+        modelBuilder.Entity<GovernedChatTurn>(entity =>
+        {
+            entity.ToTable("governed_chat_turns");
+            entity.HasKey(turn => turn.Id);
+            entity.Property(turn => turn.TenantId).IsRequired();
+            entity.Property(turn => turn.UserMessage).HasMaxLength(2000).IsRequired();
+            entity.Property(turn => turn.AssistantSafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(turn => turn.GeneratedOutputJson).HasMaxLength(16000).IsRequired();
+            entity.Property(turn => turn.EvidenceJson).HasMaxLength(16000).IsRequired();
+            entity.Property(turn => turn.ConfidenceJson).HasMaxLength(4000).IsRequired();
+            entity.Property(turn => turn.DraftArtifactKind).HasConversion<string>().HasMaxLength(64);
+            entity.Property(turn => turn.CreatedAt).IsRequired();
+            entity.HasIndex(turn => new { turn.TenantId, turn.SessionId, turn.CreatedAt });
+            entity.HasIndex(turn => new { turn.TenantId, turn.CreatedAt });
+            entity.HasOne(turn => turn.Session)
+                .WithMany(session => session.Turns)
+                .HasForeignKey(turn => turn.SessionId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
     }

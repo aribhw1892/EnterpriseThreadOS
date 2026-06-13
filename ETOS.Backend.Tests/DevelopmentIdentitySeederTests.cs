@@ -83,8 +83,9 @@ public sealed class DevelopmentIdentitySeederTests
         await seeder.SeedAsync(CancellationToken.None);
 
         Assert.Equal(1, await dbContext.Users.CountAsync(user => user.Email == "admin@etos.com"));
+        Assert.Equal(1, await dbContext.Users.CountAsync(user => user.Email == "chat-runner@example.test"));
         Assert.Equal(1, await dbContext.Tenants.CountAsync(tenant => tenant.Identifier == "local"));
-        Assert.Equal(1, await dbContext.TenantMemberships.CountAsync());
+        Assert.Equal(2, await dbContext.TenantMemberships.CountAsync());
         Assert.Equal(1, await dbContext.AuditRecords.CountAsync(record => record.Action == "development.seed.completed"));
     }
 

@@ -126,7 +126,10 @@ public sealed class GovernedQueryService(
             cancellationToken);
         run.AuditRecordId = audit.Id;
         await dbContext.SaveChangesAsync(cancellationToken);
-        await aiTraceRecorder.CreateFromRetrievalRunAsync(run.Id, audit.Id, cancellationToken);
+        if (request.CreateAiTrace)
+        {
+            await aiTraceRecorder.CreateFromRetrievalRunAsync(run.Id, audit.Id, cancellationToken);
+        }
 
         return await GetRunInternalAsync(run.Id, context, "governed_query.run.get_created", cancellationToken);
     }

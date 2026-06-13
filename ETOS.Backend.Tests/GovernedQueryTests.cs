@@ -273,6 +273,9 @@ public sealed class GovernedQueryTests
     {
         public Task<Guid> CreateFromRetrievalRunAsync(Guid retrievalRunId, Guid? auditRecordId, CancellationToken cancellationToken)
             => Task.FromResult(Guid.NewGuid());
+
+        public Task<Guid> CreateFromChatTurnAsync(Guid chatTurnId, Guid? auditRecordId, CancellationToken cancellationToken)
+            => Task.FromResult(Guid.NewGuid());
     }
 
     private sealed class RecordingGraphMemoryService(Guid startNodeId) : IGraphMemoryService

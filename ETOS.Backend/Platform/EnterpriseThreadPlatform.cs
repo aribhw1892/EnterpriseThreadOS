@@ -4,6 +4,8 @@ using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.AiTrace;
+using ETOS.Backend.GovernedChat;
+using ETOS.Backend.GovernedChat.Llm;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
@@ -58,6 +60,9 @@ public static class EnterpriseThreadPlatform
         services.AddOptions<DocumentFileStorageOptions>()
             .Bind(configuration.GetSection(DocumentFileStorageOptions.SectionName))
             .ValidateOnStart();
+
+        services.AddOptions<GovernedChatLlmOptions>()
+            .Bind(configuration.GetSection(GovernedChatLlmOptions.SectionName));
 
         services.AddEnterpriseThreadGraphMemory(configuration);
 
@@ -127,6 +132,23 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IGovernedQueryService, GovernedQueryService>();
         services.AddScoped<IAiTraceRecorder, AiTraceRecorder>();
         services.AddScoped<IAiTraceService, AiTraceService>();
+        services.AddScoped<IGovernedChatArtifactSeeder, GovernedChatArtifactSeeder>();
+        services.AddScoped<IOutputSchemaValidator, OutputSchemaValidator>();
+        services.AddScoped<IChatArtifactDraftBuilder, ChatArtifactDraftBuilder>();
+        services.AddScoped<IGovernedChatService, GovernedChatService>();
+        services.AddScoped<DeterministicLlmCompletionService>();
+        services.AddHttpClient<OpenAiLlmCompletionService>();
+        services.AddScoped<ILlmCompletionService>(serviceProvider =>
+        {
+            var llmOptions = serviceProvider.GetRequiredService<IOptions<GovernedChatLlmOptions>>().Value;
+            if (string.Equals(llmOptions.LlmProvider, "OpenAI", StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(llmOptions.OpenAiApiKey))
+            {
+                return serviceProvider.GetRequiredService<OpenAiLlmCompletionService>();
+            }
+
+            return serviceProvider.GetRequiredService<DeterministicLlmCompletionService>();
+        });
         services.AddScoped<IDevelopmentIdentitySeeder, DevelopmentIdentitySeeder>();
 
         return services;

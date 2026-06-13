@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>EnterpriseThreadOS — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 4364 nodes, 7887 edges, 197 communities. Commit: a595888</p>
+<p class="subtitle">Generated from graphify knowledge graph: 4656 nodes, 8482 edges, 210 communities. Commit: 6719407</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -88,19 +88,19 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>294 nodes</small>")
+    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>292 nodes</small>")
     class EXTRACT_PIPELINE_5F350230 module;
-    BUILD_GRAPH_321CBB04("Graph Build<br/><small>312 nodes</small>")
+    BUILD_GRAPH_321CBB04("Graph Build<br/><small>311 nodes</small>")
     class BUILD_GRAPH_321CBB04 module;
-    ANALYSIS_CLUSTERING_C79796DA("Analysis &amp; Clustering<br/><small>65 nodes</small>")
+    ANALYSIS_CLUSTERING_C79796DA("Analysis &amp; Clustering<br/><small>89 nodes</small>")
     class ANALYSIS_CLUSTERING_C79796DA module;
     OUTPUTS_DOCS_ED82387C("Outputs &amp; Docs<br/><small>5 nodes</small>")
     class OUTPUTS_DOCS_ED82387C module;
     CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>43 nodes</small>")
     class CLI_SKILLS_9964CBB8 module;
-    SERVE_API_35EC8E86("Serving API<br/><small>143 nodes</small>")
+    SERVE_API_35EC8E86("Serving API<br/><small>168 nodes</small>")
     class SERVE_API_35EC8E86 module;
-    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>752 nodes</small>")
+    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>844 nodes</small>")
     class TESTS_FIXTURES_B84B1DCC module;
     SCHEMA_VERSIONING_AND_VALIDATION_C36176F4("Schema Versioning and Validation<br/><small>119 nodes</small>")
     class SCHEMA_VERSIONING_AND_VALIDATION_C36176F4 module;
@@ -116,20 +116,18 @@ flowchart LR
     class ENTERPRISETHREADOS_ENGINEERING_PRD_006713C9 module;
     ETOS_FRONTEND_BBF23E07("ETOS Frontend<br/><small>101 nodes</small>")
     class ETOS_FRONTEND_BBF23E07 module;
-    OTHER_D0941E68("Other<br/><small>2017 nodes</small>")
+    OTHER_D0941E68("Other<br/><small>2171 nodes</small>")
     class OTHER_D0941E68 module;
-    OTHER_D0941E68 -->|implements x41| EXTRACT_PIPELINE_5F350230
-    SERVE_API_35EC8E86 -->|contains x40| EXTRACT_PIPELINE_5F350230
-    EXTRACT_PIPELINE_5F350230 -->|imports x10| SERVE_API_35EC8E86
-    TESTS_FIXTURES_B84B1DCC -->|implements x5| OTHER_D0941E68
+    OTHER_D0941E68 -->|implements x43| EXTRACT_PIPELINE_5F350230
+    SERVE_API_35EC8E86 -->|contains x22| EXTRACT_PIPELINE_5F350230
+    EXTRACT_PIPELINE_5F350230 -->|calls x19| SERVE_API_35EC8E86
+    TESTS_FIXTURES_B84B1DCC -->|implements x7| OTHER_D0941E68
     OTHER_D0941E68 -->|inherits x5| SCHEMA_VERSIONING_AND_VALIDATION_C36176F4
-    BUILD_GRAPH_321CBB04 -->|implements x2| TESTS_FIXTURES_B84B1DCC
     SERVE_API_35EC8E86 -->|imports x2| OTHER_D0941E68
     TESTS_FIXTURES_B84B1DCC -->|implements| BUILD_GRAPH_321CBB04
-    BUILD_GRAPH_321CBB04 -->|implements| OTHER_D0941E68
-    OTHER_D0941E68 -->|contains| TESTS_FIXTURES_B84B1DCC
     EXTRACT_PIPELINE_5F350230 -->|implements| OTHER_D0941E68
     OTHER_D0941E68 -->|contains| ENTERPRISETHREADOS_AGENT_GUIDE_61C00685
+    ENTERPRISETHREADOS_AGENT_GUIDE_61C00685 -->|contains| CLI_SKILLS_9964CBB8
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -146,19 +144,19 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Extraction Pipeline</td><td>294</td><td><code>1, 12, 39, 139, 29, 34, 48, 91</code></td></tr><tr><td>Graph Build</td><td>312</td><td><code>98, 13, 132, 22, 28, 186, 27, 135, 41, 155</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>65</td><td><code>133, 136, 137, 180</code></td></tr><tr><td>Outputs &amp; Docs</td><td>5</td><td><code>112, 113, 114, 116, 117</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>43</td><td><code>142, 144, 146, 156, 103, 111, 127, 166</code></td></tr><tr><td>Serving API</td><td>143</td><td><code>14, 178, 169, 26, 19, 24</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>752</td><td><code>187, 167, 15, 10, 6, 9, 11, 16, 17, 20, 21, 23, 190, 31, 35, 37, 66, 80</code></td></tr><tr><td>Schema Versioning and Validation</td><td>119</td><td><code>0</code></td></tr><tr><td>EnterpriseThreadOS Agent Guide</td><td>109</td><td><code>100</code></td></tr><tr><td>AI Agent Workflow</td><td>101</td><td><code>101</code></td></tr><tr><td>Backend Architecture</td><td>101</td><td><code>102</code></td></tr><tr><td>EnterpriseThreadOS Implementation Issues</td><td>101</td><td><code>107</code></td></tr><tr><td>EnterpriseThreadOS Engineering PRD</td><td>101</td><td><code>108</code></td></tr><tr><td>ETOS Frontend</td><td>101</td><td><code>115</code></td></tr><tr><td>Other</td><td>2017</td><td><code>118, 120, 126, 128, 129, 2, 3, 4, 5, 7, 157, 168, 130, 185, 131, 18, 188, 30, 36, 189, 170, 134, 25, 38, 8, 32, 33, 138, 140, 177, 141, 143, 145, 191, 40, 147, 148, 149, 150, 171, 179, 192, 42, 43, 44, 45, 46, 47, 49, 151, 152, 153, 172, 50, 51, 154, 52, 58, 99, 158, 159, 173, 181, 182, 193, 53, 54, 55, 56, 57, 59, 60, 61, 62, 63, 64, 65, 67, 160, 161, 162, 174, 175, 183, 194, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 195, 81, 82, 83, 123, 176, 184, 196, 84, 85, 86, 87, 88, 89, 90, 92, 93, 163, 164, 165, 94, 95, 96, 97, 104, 105, 106, 109, 110, 119, 121, 122, 124, 125</code></td></tr>
+      <tr><td>Extraction Pipeline</td><td>292</td><td><code>1, 12, 39, 139, 29, 34, 48, 91</code></td></tr><tr><td>Graph Build</td><td>311</td><td><code>98, 13, 132, 22, 28, 186, 27, 135, 41, 155</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>89</td><td><code>133, 199, 136, 137, 180</code></td></tr><tr><td>Outputs &amp; Docs</td><td>5</td><td><code>112, 113, 114, 116, 117</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>43</td><td><code>142, 144, 146, 156, 103, 111, 127, 166</code></td></tr><tr><td>Serving API</td><td>168</td><td><code>14, 178, 169, 19, 26, 200</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>844</td><td><code>187, 24, 167, 15, 10, 6, 9, 11, 16, 17, 20, 21, 23, 190, 31, 35, 37, 66, 80</code></td></tr><tr><td>Schema Versioning and Validation</td><td>119</td><td><code>0</code></td></tr><tr><td>EnterpriseThreadOS Agent Guide</td><td>109</td><td><code>100</code></td></tr><tr><td>AI Agent Workflow</td><td>101</td><td><code>101</code></td></tr><tr><td>Backend Architecture</td><td>101</td><td><code>102</code></td></tr><tr><td>EnterpriseThreadOS Implementation Issues</td><td>101</td><td><code>107</code></td></tr><tr><td>EnterpriseThreadOS Engineering PRD</td><td>101</td><td><code>108</code></td></tr><tr><td>ETOS Frontend</td><td>101</td><td><code>115</code></td></tr><tr><td>Other</td><td>2171</td><td><code>118, 120, 126, 128, 129, 2, 3, 5, 4, 7, 157, 168, 130, 197, 185, 131, 18, 188, 30, 189, 36, 198, 170, 25, 134, 201, 38, 202, 8, 32, 33, 138, 140, 177, 141, 143, 203, 145, 191, 40, 147, 148, 149, 150, 171, 179, 192, 204, 42, 43, 44, 45, 46, 47, 49, 151, 152, 153, 172, 50, 51, 154, 52, 53, 99, 158, 159, 173, 181, 182, 193, 205, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 160, 161, 162, 174, 175, 183, 194, 206, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 195, 81, 82, 83, 123, 176, 184, 196, 207, 208, 209, 84, 85, 86, 87, 88, 89, 90, 92, 93, 163, 164, 165, 94, 95, 96, 97, 104, 105, 106, 109, 110, 119, 121, 122, 124, 125</code></td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Core Flow</h4>
-    <div class="arrow-chain">Analysis &amp; Clustering -&gt; Extraction Pipeline -&gt; Serving API -&gt; Other -&gt; Schema Versioning and Validation -&gt; Graph Build -&gt; Tests &amp; Fixtures</div>
+    <div class="arrow-chain">Analysis &amp; Clustering -&gt; Extraction Pipeline -&gt; Serving API -&gt; Other -&gt; Schema Versioning and Validation -&gt; Graph Build -&gt; Outputs &amp; Docs</div>
   </div>
 </div>
 <div class="grid">
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>4364 nodes · 7887 edges · 197 communities (166 shown, 31 thin omitted)</li>
+      <li>4656 nodes · 8482 edges · 210 communities (176 shown, 34 thin omitted)</li>
       <li>Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS</li>
       <li>Token cost: 0 input · 0 output</li>
       <li>1. `EnterpriseThreadOS Implementation Issues` - 115 edges</li>
@@ -170,12 +168,12 @@ flowchart LR
 <hr>
 <!-- ====== 2. Extraction Pipeline ====== -->
 <h2 id="extract-pipeline">2. Extraction Pipeline</h2>
-<p>Extraction Pipeline groups implementation around imports, etosbackend, importservicecs, etosfrontend, mostly in ETOS.Backend/Imports/ImportService.cs, app/imports/page.tsx, src/lib/etos-api.ts. This section covers 294 nodes and 666 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Extraction Pipeline groups implementation around imports, etosbackend, importservicecs, etosfrontend, mostly in ETOS.Backend/Imports/ImportService.cs, app/imports/page.tsx, src/lib/etos-api.ts. This section covers 292 nodes and 654 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Extraction Pipeline (294 nodes, 666 edges)
+    %% Section: Extraction Pipeline (292 nodes, 654 edges)
     subgraph extract_pipeline_ETOS_Backend_Imports_ImportFile_f251b09d["ETOS.Backend/Imports/ImportFileParser.cs"]
         imports_importfileparser_iimportfileparser_5c239621("IImportFileParser<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
         imports_importfileparser_iimportfileparser_parse_6027d6bf("ParseAsync()<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
@@ -192,6 +190,7 @@ flowchart LR
         imports_importservice_importservice_stagebatchas_a2a84b18("StageBatchAsync()<br/><small>ETOS.Backend/Imports/ImportService.cs</small>")
         imports_importservice_iimportservice_8dc8950c("IImportService<br/><small>ETOS.Backend/Imports/ImportService.cs</small>")
         imports_importservice_importservice_createmappin_c96af6b3("CreateMappingVersionAsync()<br/><small>ETOS.Backend/Imports/ImportService.cs</small>")
+        imports_importservice_importservice_validatebatc_49d7267b("ValidateBatchAsync()<br/><small>ETOS.Backend/Imports/ImportService.cs</small>")
     end
     subgraph extract_pipeline_ETOS_Backend_Imports_ImportEndp_a870d429["ETOS.Backend/Imports/ImportEndpointExtensions.cs"]
         imports_importendpointextensions_importendpointe_15acee1f("ImportEndpointExtensions<br/><small>ETOS.Backend/Imports/ImportEndpointExtensions.cs</small>")
@@ -199,7 +198,6 @@ flowchart LR
         imports_importendpointextensions_importendpointe_c50180db("MapEnterpriseThreadImportEndpoints()<br/><small>ETOS.Backend/Imports/ImportEndpointExtensions.cs</small>")
     end
     imports_page_3fecd83d("page.tsx")
-    lib_etos_api_getimportlists_2b6edf5b("getImportLists()<br/><small>src/lib/etos-api.ts</small>")
     imports_importendpointextensions_importendpointe_15acee1f -->|method| imports_importendpointextensions_importendpointe_a9c484f9
     imports_importendpointextensions_importendpointe_15acee1f -->|method| imports_importendpointextensions_importendpointe_c50180db
     imports_importendpointextensions_importendpointe_c50180db -->|calls| imports_importendpointextensions_importendpointe_a9c484f9
@@ -217,8 +215,8 @@ flowchart LR
     imports_importfileparser_csvimportfileparser_rea_9a7d3f16 -->|calls| imports_importfileparser_csvimportfileparser_par_a627dd5c
     imports_importservice_importservice_e3aca74c -->|method| imports_importservice_importservice_createmappin_c96af6b3
     imports_importservice_importservice_e3aca74c -->|method| imports_importservice_importservice_stagebatchas_a2a84b18
-    imports_page_3fecd83d -->|imports| lib_etos_api_getimportlists_2b6edf5b
-    %% Omitted for readability: 276 nodes, 0 edges
+    imports_importservice_importservice_e3aca74c -->|method| imports_importservice_importservice_validatebatc_49d7267b
+    %% Omitted for readability: 274 nodes, 0 edges
     class imports_importfileparser_iimportfileparser_5c239621 klass;
     class imports_importfileparser_iimportfileparser_parse_6027d6bf async;
     class imports_importfileparser_csvimportfileparser_9ebfabdc klass;
@@ -232,11 +230,11 @@ flowchart LR
     class imports_importservice_importservice_stagebatchas_a2a84b18 async;
     class imports_importservice_iimportservice_8dc8950c klass;
     class imports_importservice_importservice_createmappin_c96af6b3 async;
+    class imports_importservice_importservice_validatebatc_49d7267b async;
     class imports_importendpointextensions_importendpointe_15acee1f api;
     class imports_importendpointextensions_importendpointe_a9c484f9 async;
     class imports_importendpointextensions_importendpointe_c50180db api;
     class imports_page_3fecd83d ui;
-    class lib_etos_api_getimportlists_2b6edf5b function;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -507,7 +505,7 @@ flowchart LR
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>ETOS.Backend/Imports/ImportService.cs</code></td><td>127 nodes</td></tr>
 <tr><td><code>app/imports/page.tsx</code></td><td>32 nodes</td></tr>
-<tr><td><code>src/lib/etos-api.ts</code></td><td>24 nodes</td></tr>
+<tr><td><code>src/lib/etos-api.ts</code></td><td>22 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-2-identity_ffcbe231.plan.md</code></td><td>17 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportFileParser.cs</code></td><td>17 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportFileStorage.cs</code></td><td>15 nodes</td></tr>
@@ -517,19 +515,19 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x292, calls x155, contains x94, method x86. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x292, calls x143, contains x94, method x86. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 3. Graph Build ====== -->
 <h2 id="build-graph">3. Graph Build</h2>
-<p>Graph Build groups implementation around docs, execution, engineering, issuesmd, mostly in .docs/.prd/engineering-execution-issues.md, .cursor/plans/slice-6-graph-memory_8a3f2c1b.plan.md, ETOS.Backend/GraphMemory/MemgraphGraphMemoryService.cs. This section covers 312 nodes and 349 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Graph Build groups implementation around docs, execution, engineering, issuesmd, mostly in .docs/.prd/engineering-execution-issues.md, .cursor/plans/slice-6-graph-memory_8a3f2c1b.plan.md, ETOS.Backend/GraphMemory/MemgraphGraphMemoryService.cs. This section covers 311 nodes and 348 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Graph Build (312 nodes, 349 edges)
+    %% Section: Graph Build (311 nodes, 348 edges)
     subgraph build_graph_ETOS_Backend_GraphMemory_IGraphMemor_167ccc11["ETOS.Backend/GraphMemory/IGraphMemoryService.cs"]
         graphmemory_igraphmemoryservice_igraphmemoryserv_ccaf1ba0("IGraphMemoryService<br/><small>ETOS.Backend/GraphMemory/IGraphMemoryService.cs</small>")
         graphmemory_igraphmemoryservice_igraphmemoryserv_9c7eb93a("CreateNodeAsync()<br/><small>ETOS.Backend/GraphMemory/IGraphMemoryService.cs</small>")
@@ -572,7 +570,7 @@ flowchart LR
     graphmemory_memgraphgraphmemoryservice_memgraphg_95d1796e -->|calls| graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3
     graphmemory_memgraphgraphmemoryservice_memgraphg_9ddb39fc -->|calls| graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3
     graphmemory_memgraphgraphmemoryservice_memgraphg_461fa564 -->|calls| graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3
-    %% Omitted for readability: 294 nodes, 0 edges
+    %% Omitted for readability: 293 nodes, 0 edges
     class graphmemory_igraphmemoryservice_igraphmemoryserv_ccaf1ba0 klass;
     class graphmemory_igraphmemoryservice_igraphmemoryserv_9c7eb93a async;
     class graphmemory_igraphmemoryservice_igraphmemoryserv_faead137 async;
@@ -878,71 +876,70 @@ flowchart LR
 
 <!-- ====== 4. Analysis & Clustering ====== -->
 <h2 id="analysis-clustering">4. Analysis &amp; Clustering</h2>
-<p>Analysis &amp; Clustering groups implementation around slice, cursor, plans, artifacts, mostly in .cursor/plans/slice-4-artifacts_4bd3e22c.plan.md, .cursor/plans/slice-3-audit_cb5f4911.plan.md, .cursor/plans/slice-7-ontology_83914dfb.plan.md. This section covers 65 nodes and 61 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Analysis &amp; Clustering groups implementation around cursor, plans, slice, governed, mostly in .cursor/plans/slice-4-artifacts_4bd3e22c.plan.md, .cursor/plans/issue_15_governed_chat.plan.md, .cursor/plans/slice-3-audit_cb5f4911.plan.md. This section covers 89 nodes and 84 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Analysis &amp; Clustering (65 nodes, 61 edges)
-    subgraph analysis_clustering_cursor_plans_slice_13_Govern_48833fa2[".cursor/plans/slice-13-Governed-Query-Intents.md"]
-        plans_slice_13_governed_query_intents_slice_13_g_53188b61("Slice 13: Governed Query Intents and Co...<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
-        plans_slice_13_governed_query_intents_assumption_e06e377d("Assumptions<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
-        plans_slice_13_governed_query_intents_frontend_fafae9d2("Frontend<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
-        plans_slice_13_governed_query_intents_implementa_566761f4("Implementation Details<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
-        plans_slice_13_governed_query_intents_key_change_2bf52896("Key Changes<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
-        plans_slice_13_governed_query_intents_summary_bd630d2a("Summary<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
-        plans_slice_13_governed_query_intents_test_plan_bf7b31f6("Test Plan<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
-        plans_slice_13_governed_query_intents_baedcfbc("slice-13-Governed-Query-Intents.md")
-    end
-    subgraph analysis_clustering_cursor_plans_slice_3_audit_c_73f7af09[".cursor/plans/slice-3-audit_cb5f4911.plan.md"]
-        plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736("Slice 3 Audit And Security Events<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059("Task Breakdown<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_assumptions_666151da("Assumptions<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_critical_path_dd85e5e7("Critical Path<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_existing_found_7d8cb7a7("Existing Foundation<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
+    %% Section: Analysis &amp; Clustering (89 nodes, 84 edges)
+    subgraph analysis_clustering_cursor_plans_issue_15_govern_99c92fdd[".cursor/plans/issue_15_governed_chat.plan.md"]
+        plans_issue_15_governed_chat_plan_issue_15_gover_00a57f0d("Issue 15: Governed Chat and Chat-to-Art...<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
+        plans_issue_15_governed_chat_plan_backend_design_94891761("Backend design<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
+        plans_issue_15_governed_chat_plan_1ca96739("15 governed chat.plan.md<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
+        plans_issue_15_governed_chat_plan_api_endpoints_b5b3b168("API endpoints<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
+        plans_issue_15_governed_chat_plan_acceptance_cri_8374e4a9("Acceptance criteria mapping<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
+        plans_issue_15_governed_chat_plan_aitrace_extens_cbaf663d("AiTrace extension<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
+        plans_issue_15_governed_chat_plan_architecture_ce2a4e51("Architecture<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
+        plans_issue_15_governed_chat_plan_docs_touch_min_9c62397b("Docs touch (minimal)<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
+        plans_issue_15_governed_chat_plan_draft_publish_a6d0f91c("Draft + publish governance<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
+        plans_issue_15_governed_chat_plan_end_to_end_cha_74b6e18e("End-to-end chat turn flow<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
     end
     subgraph analysis_clustering_cursor_plans_slice_4_artifac_352c8109[".cursor/plans/slice-4-artifacts_4bd3e22c.plan.md"]
         plans_slice_4_artifacts_4bd3e22c_plan_slice_4_ba_96ee6094("Slice 4 Base Artifact Registry And Depe...<br/><small>.cursor/plans/slice-4-artifacts_4bd3e22c.plan.md</small>")
         plans_slice_4_artifacts_4bd3e22c_plan_task_break_6a6bc411("Task Breakdown<br/><small>.cursor/plans/slice-4-artifacts_4bd3e22c.plan.md</small>")
         plans_slice_4_artifacts_4bd3e22c_plan_domain_mod_ad3cfffb("Domain Model (MVP)<br/><small>.cursor/plans/slice-4-artifacts_4bd3e22c.plan.md</small>")
     end
+    subgraph analysis_clustering_cursor_plans_slice_3_audit_c_73f7af09[".cursor/plans/slice-3-audit_cb5f4911.plan.md"]
+        plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736("Slice 3 Audit And Security Events<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
+        plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059("Task Breakdown<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
+    end
     subgraph analysis_clustering_cursor_plans_slice_7_ontolog_a18a0c33[".cursor/plans/slice-7-ontology_83914dfb.plan.md"]
         plans_slice_7_ontology_83914dfb_plan_issue_7_can_3e0b79fe("Issue 7 Canonical Ontology And Tenant S...<br/><small>.cursor/plans/slice-7-ontology_83914dfb.plan.md</small>")
         plans_slice_7_ontology_83914dfb_plan_task_breakd_569bcdaf("Task Breakdown<br/><small>.cursor/plans/slice-7-ontology_83914dfb.plan.md</small>")
     end
-    plans_slice_13_governed_query_intents_baedcfbc -->|contains| plans_slice_13_governed_query_intents_slice_13_g_53188b61
-    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_assumption_e06e377d
-    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_frontend_fafae9d2
-    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_implementa_566761f4
-    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_key_change_2bf52896
-    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_summary_bd630d2a
-    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_test_plan_bf7b31f6
-    plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_assumptions_666151da
-    plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_critical_path_dd85e5e7
-    plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_existing_found_7d8cb7a7
+    plans_slice_13_governed_query_intents_slice_13_g_53188b61("Slice 13: Governed Query Intents and Co...<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
+    plans_issue_15_governed_chat_plan_1ca96739 -->|contains| plans_issue_15_governed_chat_plan_issue_15_gover_00a57f0d
+    plans_issue_15_governed_chat_plan_issue_15_gover_00a57f0d -->|contains| plans_issue_15_governed_chat_plan_acceptance_cri_8374e4a9
+    plans_issue_15_governed_chat_plan_issue_15_gover_00a57f0d -->|contains| plans_issue_15_governed_chat_plan_architecture_ce2a4e51
+    plans_issue_15_governed_chat_plan_issue_15_gover_00a57f0d -->|contains| plans_issue_15_governed_chat_plan_backend_design_94891761
+    plans_issue_15_governed_chat_plan_issue_15_gover_00a57f0d -->|contains| plans_issue_15_governed_chat_plan_docs_touch_min_9c62397b
+    plans_issue_15_governed_chat_plan_issue_15_gover_00a57f0d -->|contains| plans_issue_15_governed_chat_plan_end_to_end_cha_74b6e18e
+    plans_issue_15_governed_chat_plan_backend_design_94891761 -->|contains| plans_issue_15_governed_chat_plan_aitrace_extens_cbaf663d
+    plans_issue_15_governed_chat_plan_backend_design_94891761 -->|contains| plans_issue_15_governed_chat_plan_api_endpoints_b5b3b168
+    plans_issue_15_governed_chat_plan_backend_design_94891761 -->|contains| plans_issue_15_governed_chat_plan_draft_publish_a6d0f91c
     plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059
     plans_slice_4_artifacts_4bd3e22c_plan_slice_4_ba_96ee6094 -->|contains| plans_slice_4_artifacts_4bd3e22c_plan_domain_mod_ad3cfffb
     plans_slice_4_artifacts_4bd3e22c_plan_slice_4_ba_96ee6094 -->|contains| plans_slice_4_artifacts_4bd3e22c_plan_task_break_6a6bc411
     plans_slice_7_ontology_83914dfb_plan_issue_7_can_3e0b79fe -->|contains| plans_slice_7_ontology_83914dfb_plan_task_breakd_569bcdaf
-    %% Omitted for readability: 47 nodes, 0 edges
-    class plans_slice_13_governed_query_intents_slice_13_g_53188b61 concept;
-    class plans_slice_13_governed_query_intents_assumption_e06e377d concept;
-    class plans_slice_13_governed_query_intents_frontend_fafae9d2 concept;
-    class plans_slice_13_governed_query_intents_implementa_566761f4 concept;
-    class plans_slice_13_governed_query_intents_key_change_2bf52896 concept;
-    class plans_slice_13_governed_query_intents_summary_bd630d2a concept;
-    class plans_slice_13_governed_query_intents_test_plan_bf7b31f6 concept;
-    class plans_slice_13_governed_query_intents_baedcfbc concept;
-    class plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 concept;
-    class plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059 concept;
-    class plans_slice_3_audit_cb5f4911_plan_assumptions_666151da concept;
-    class plans_slice_3_audit_cb5f4911_plan_critical_path_dd85e5e7 concept;
-    class plans_slice_3_audit_cb5f4911_plan_existing_found_7d8cb7a7 concept;
+    %% Omitted for readability: 71 nodes, 0 edges
+    class plans_issue_15_governed_chat_plan_issue_15_gover_00a57f0d concept;
+    class plans_issue_15_governed_chat_plan_backend_design_94891761 concept;
+    class plans_issue_15_governed_chat_plan_1ca96739 concept;
+    class plans_issue_15_governed_chat_plan_api_endpoints_b5b3b168 concept;
+    class plans_issue_15_governed_chat_plan_acceptance_cri_8374e4a9 concept;
+    class plans_issue_15_governed_chat_plan_aitrace_extens_cbaf663d concept;
+    class plans_issue_15_governed_chat_plan_architecture_ce2a4e51 concept;
+    class plans_issue_15_governed_chat_plan_docs_touch_min_9c62397b concept;
+    class plans_issue_15_governed_chat_plan_draft_publish_a6d0f91c concept;
+    class plans_issue_15_governed_chat_plan_end_to_end_cha_74b6e18e concept;
     class plans_slice_4_artifacts_4bd3e22c_plan_slice_4_ba_96ee6094 concept;
     class plans_slice_4_artifacts_4bd3e22c_plan_task_break_6a6bc411 concept;
     class plans_slice_4_artifacts_4bd3e22c_plan_domain_mod_ad3cfffb concept;
+    class plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 concept;
+    class plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059 concept;
     class plans_slice_7_ontology_83914dfb_plan_issue_7_can_3e0b79fe concept;
     class plans_slice_7_ontology_83914dfb_plan_task_breakd_569bcdaf concept;
+    class plans_slice_13_governed_query_intents_slice_13_g_53188b61 concept;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -1158,51 +1155,51 @@ flowchart LR
 </tr>
 <tr>
   <td>25</td>
-  <td><code>slice-3-audit_cb5f4911.plan.md</code><br><small style="color:var(--muted)">.cursor/plans/slice-3-audit_cb5f4911.plan.md</small></td>
+  <td><code>issue_15_governed_chat.plan.md</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing slice-3-audit_cb5f4911.plan.md.</td>
+  <td>Documentation node describing issue_15_governed_chat.plan.md.</td>
 </tr>
 <tr>
   <td>26</td>
-  <td><code>Slice 3 Audit And Security Events</code><br><small style="color:var(--muted)">.cursor/plans/slice-3-audit_cb5f4911.plan.md</small></td>
+  <td><code>Issue 15: Governed Chat and Chat-to-Artifact Drafting</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing Slice 3 Audit And Security Events.</td>
+  <td>Documentation node describing Issue 15: Governed Chat and Chat-to-Artifact Drafting.</td>
 </tr>
 <tr>
   <td>27</td>
-  <td><code>Goal</code><br><small style="color:var(--muted)">.cursor/plans/slice-3-audit_cb5f4911.plan.md</small></td>
+  <td><code>Prerequisite</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing Goal.</td>
+  <td>Documentation node describing Prerequisite.</td>
 </tr>
 <tr>
   <td>28</td>
-  <td><code>Scope Source</code><br><small style="color:var(--muted)">.cursor/plans/slice-3-audit_cb5f4911.plan.md</small></td>
+  <td><code>Scope</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing Scope Source.</td>
+  <td>Documentation node describing Scope.</td>
 </tr>
 <tr>
   <td>29</td>
-  <td><code>Existing Foundation</code><br><small style="color:var(--muted)">.cursor/plans/slice-3-audit_cb5f4911.plan.md</small></td>
+  <td><code>Architecture</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing Existing Foundation.</td>
+  <td>Documentation node describing Architecture.</td>
 </tr>
 <tr>
   <td>30</td>
-  <td><code>Assumptions</code><br><small style="color:var(--muted)">.cursor/plans/slice-3-audit_cb5f4911.plan.md</small></td>
+  <td><code>End-to-end chat turn flow</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing Assumptions.</td>
+  <td>Documentation node describing End-to-end chat turn flow.</td>
 </tr>
 </table>
 
@@ -1211,7 +1208,8 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>.cursor/plans/slice-4-artifacts_4bd3e22c.plan.md</code></td><td>24 nodes</td></tr>
+      <tr><td><code>.cursor/plans/issue_15_governed_chat.plan.md</code></td><td>24 nodes</td></tr>
+<tr><td><code>.cursor/plans/slice-4-artifacts_4bd3e22c.plan.md</code></td><td>24 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-3-audit_cb5f4911.plan.md</code></td><td>17 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-7-ontology_83914dfb.plan.md</code></td><td>16 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-13-Governed-Query-Intents.md</code></td><td>8 nodes</td></tr>
@@ -1219,7 +1217,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x61. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x84. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -1671,20 +1669,12 @@ flowchart LR
 
 <!-- ====== 7. Serving API ====== -->
 <h2 id="serve-api">7. Serving API</h2>
-<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, src/app/page.tsx, app/documents/page.tsx. This section covers 143 nodes and 218 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, src/app/page.tsx, app/documents/page.tsx. This section covers 168 nodes and 282 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Serving API (143 nodes, 218 edges)
-    subgraph serve_api_src_lib_etos_api_ts_396531a3["src/lib/etos-api.ts"]
-        lib_etos_api_getdocumentlists_03e84205("getDocumentLists()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_exportaitrace_19819258("exportAiTrace()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_rungovernedqueryforgraphnode_87055b54("runGovernedQueryForGraphNode()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_getaitracelists_32116ca3("getAiTraceLists()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_createdemodocumentflow_5de24b21("createDemoDocumentFlow()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_requestlatestdocumentvectorindex_575d07fb("requestLatestDocumentVectorIndex()<br/><small>src/lib/etos-api.ts</small>")
-    end
+    %% Section: Serving API (168 nodes, 282 edges)
     subgraph serve_api_app_ai_traces_page_tsx_542a0a54["app/ai-traces/page.tsx"]
         ai_traces_page_972248dc("page.tsx")
         ai_traces_page_exportlatesttrace_8597d612("exportLatestTrace()<br/><small>app/ai-traces/page.tsx</small>")
@@ -1692,48 +1682,54 @@ flowchart LR
         ai_traces_page_renderapierror_d332a0e4("renderApiError()<br/><small>app/ai-traces/page.tsx</small>")
         ai_traces_page_aitracespage_07550e62("AiTracesPage()<br/><small>app/ai-traces/page.tsx</small>")
     end
-    subgraph serve_api_app_documents_page_tsx_8c83656d["app/documents/page.tsx"]
-        documents_page_cd6176ee("page.tsx")
-        documents_page_createdemodocument_c5eea162("createDemoDocument()<br/><small>app/documents/page.tsx</small>")
-        documents_page_requestvectorindex_f15594ac("requestVectorIndex()<br/><small>app/documents/page.tsx</small>")
-        documents_page_createextractionissue_7b0ccb65("createExtractionIssue()<br/><small>app/documents/page.tsx</small>")
+    subgraph serve_api_src_lib_etos_api_ts_396531a3["src/lib/etos-api.ts"]
+        lib_etos_api_exportaitrace_19819258("exportAiTrace()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_rungovernedqueryforgraphnode_87055b54("runGovernedQueryForGraphNode()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_getaitracelists_32116ca3("getAiTraceLists()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_creategovernedchatsession_08bb569f("createGovernedChatSession()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_askgovernedchatturn_a282ea12("askGovernedChatTurn()<br/><small>src/lib/etos-api.ts</small>")
+    end
+    subgraph serve_api_app_chat_page_tsx_5bbb68d6["app/chat/page.tsx"]
+        chat_page_569bcbe7("page.tsx")
+        chat_page_createsessionaction_dbd9aec8("createSessionAction()<br/><small>app/chat/page.tsx</small>")
+        chat_page_askturnaction_e1f29d3b("askTurnAction()<br/><small>app/chat/page.tsx</small>")
+        chat_page_renderapierror_f9b812fd("renderApiError()<br/><small>app/chat/page.tsx</small>")
     end
     subgraph serve_api_src_app_page_tsx_9599101b["src/app/page.tsx"]
         app_page_c77e992c("page.tsx")
         app_page_home_8cd6c4cc("Home()<br/><small>src/app/page.tsx</small>")
     end
+    documents_page_cd6176ee("page.tsx")
     model_artifacts_page_317eae05("page.tsx")
     ai_traces_page_exportlatesttrace_8597d612 -->|calls| lib_etos_api_exportaitrace_19819258
     ai_traces_page_rundemogovernedquery_d3c3e1ba -->|calls| lib_etos_api_rungovernedqueryforgraphnode_87055b54
     ai_traces_page_renderapierror_d332a0e4 -->|calls| ai_traces_page_aitracespage_07550e62
     ai_traces_page_aitracespage_07550e62 -->|calls| lib_etos_api_getaitracelists_32116ca3
-    documents_page_createdemodocument_c5eea162 -->|calls| lib_etos_api_createdemodocumentflow_5de24b21
-    documents_page_requestvectorindex_f15594ac -->|calls| lib_etos_api_requestlatestdocumentvectorindex_575d07fb
-    lib_etos_api_getdocumentlists_03e84205 -->|calls| lib_etos_api_requestlatestdocumentvectorindex_575d07fb
+    chat_page_createsessionaction_dbd9aec8 -->|calls| lib_etos_api_creategovernedchatsession_08bb569f
+    chat_page_askturnaction_e1f29d3b -->|calls| lib_etos_api_askgovernedchatturn_a282ea12
     ai_traces_page_972248dc -->|imports| lib_etos_api_exportaitrace_19819258
     ai_traces_page_972248dc -->|imports| lib_etos_api_getaitracelists_32116ca3
     ai_traces_page_972248dc -->|imports| lib_etos_api_rungovernedqueryforgraphnode_87055b54
-    documents_page_cd6176ee -->|imports| lib_etos_api_createdemodocumentflow_5de24b21
-    documents_page_cd6176ee -->|imports| lib_etos_api_getdocumentlists_03e84205
-    documents_page_cd6176ee -->|imports| lib_etos_api_requestlatestdocumentvectorindex_575d07fb
-    %% Omitted for readability: 125 nodes, 0 edges
-    class lib_etos_api_getdocumentlists_03e84205 function;
-    class lib_etos_api_exportaitrace_19819258 function;
-    class lib_etos_api_rungovernedqueryforgraphnode_87055b54 function;
-    class lib_etos_api_getaitracelists_32116ca3 function;
-    class lib_etos_api_createdemodocumentflow_5de24b21 function;
-    class lib_etos_api_requestlatestdocumentvectorindex_575d07fb function;
+    chat_page_569bcbe7 -->|imports| lib_etos_api_askgovernedchatturn_a282ea12
+    chat_page_569bcbe7 -->|imports| lib_etos_api_creategovernedchatsession_08bb569f
+    %% Omitted for readability: 150 nodes, 0 edges
     class ai_traces_page_972248dc ui;
     class ai_traces_page_exportlatesttrace_8597d612 ui;
     class ai_traces_page_rundemogovernedquery_d3c3e1ba ui;
     class ai_traces_page_renderapierror_d332a0e4 api;
     class ai_traces_page_aitracespage_07550e62 ui;
-    class documents_page_cd6176ee ui;
-    class documents_page_createdemodocument_c5eea162 ui;
-    class documents_page_requestvectorindex_f15594ac ui;
-    class documents_page_createextractionissue_7b0ccb65 ui;
+    class lib_etos_api_exportaitrace_19819258 function;
+    class lib_etos_api_rungovernedqueryforgraphnode_87055b54 function;
+    class lib_etos_api_getaitracelists_32116ca3 function;
+    class lib_etos_api_creategovernedchatsession_08bb569f function;
+    class lib_etos_api_askgovernedchatturn_a282ea12 function;
+    class chat_page_569bcbe7 ui;
+    class chat_page_createsessionaction_dbd9aec8 ui;
+    class chat_page_askturnaction_e1f29d3b ui;
+    class chat_page_renderapierror_f9b812fd api;
     class app_page_c77e992c ui;
     class app_page_home_8cd6c4cc ui;
+    class documents_page_cd6176ee ui;
     class model_artifacts_page_317eae05 ui;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
@@ -1758,14 +1754,22 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
+  <td><code>createSecurityEventDataQualityIssue()</code><br><small style="color:var(--muted)">app/imports/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>AccessGrant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>ApiResult</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>Artifact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+17 more</td>
-  <td>Module file in src/app/page.tsx.</td>
+  <td><code>createDataQualityIssueFromLatestSecurit...</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td>createSecurityEventDataQualityIssue() node in app/imports/page.tsx.</td>
 </tr>
 <tr>
   <td>2</td>
+  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>AccessGrant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>ApiResult</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>Artifact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+18 more</td>
+  <td>Module file in src/app/page.tsx.</td>
+</tr>
+<tr>
+  <td>3</td>
   <td><code>StatusBadge()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1773,7 +1777,7 @@ flowchart LR
   <td>StatusBadge() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>3</td>
+  <td>4</td>
   <td><code>EmptyState()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1781,7 +1785,7 @@ flowchart LR
   <td>EmptyState() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>4</td>
+  <td>5</td>
   <td><code>ErrorState()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1789,7 +1793,7 @@ flowchart LR
   <td>ErrorState() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>5</td>
+  <td>6</td>
   <td><code>ListSection()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1797,7 +1801,7 @@ flowchart LR
   <td>ListSection() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>6</td>
+  <td>7</td>
   <td><code>TenantCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1805,7 +1809,7 @@ flowchart LR
   <td>TenantCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>7</td>
+  <td>8</td>
   <td><code>UserCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1813,7 +1817,7 @@ flowchart LR
   <td>UserCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>8</td>
+  <td>9</td>
   <td><code>RoleCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1821,7 +1825,7 @@ flowchart LR
   <td>RoleCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>9</td>
+  <td>10</td>
   <td><code>MembershipCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1829,7 +1833,7 @@ flowchart LR
   <td>MembershipCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>10</td>
+  <td>11</td>
   <td><code>GrantCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1837,7 +1841,7 @@ flowchart LR
   <td>GrantCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>11</td>
+  <td>12</td>
   <td><code>AuditRecordCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1845,7 +1849,7 @@ flowchart LR
   <td>AuditRecordCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>12</td>
+  <td>13</td>
   <td><code>SecurityEventCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1853,7 +1857,7 @@ flowchart LR
   <td>SecurityEventCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>13</td>
+  <td>14</td>
   <td><code>ArtifactCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1861,7 +1865,7 @@ flowchart LR
   <td>ArtifactCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>14</td>
+  <td>15</td>
   <td><code>ArtifactVersionCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1869,7 +1873,7 @@ flowchart LR
   <td>ArtifactVersionCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>15</td>
+  <td>16</td>
   <td><code>ArtifactRelationshipCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1877,7 +1881,7 @@ flowchart LR
   <td>ArtifactRelationshipCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>16</td>
+  <td>17</td>
   <td><code>ArtifactDependencyCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1885,7 +1889,7 @@ flowchart LR
   <td>Builds dependency relationships and graph data.</td>
 </tr>
 <tr>
-  <td>17</td>
+  <td>18</td>
   <td><code>ClassificationSchemeCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1893,7 +1897,7 @@ flowchart LR
   <td>ClassificationSchemeCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>18</td>
+  <td>19</td>
   <td><code>PolicyVersionCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1901,7 +1905,7 @@ flowchart LR
   <td>PolicyVersionCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>19</td>
+  <td>20</td>
   <td><code>RestrictedContextRuleCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1909,7 +1913,7 @@ flowchart LR
   <td>RestrictedContextRuleCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>20</td>
+  <td>21</td>
   <td><code>PolicyImpactCard()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -1917,15 +1921,15 @@ flowchart LR
   <td>PolicyImpactCard() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>21</td>
+  <td>22</td>
   <td><code>Home()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>getArtifactRegistryLists()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>getClassificationPolicyLists()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>getIdentityLists()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+1 more</td>
+  <td><code>getArtifactRegistryLists()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>getClassificationPolicyLists()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>getGovernanceLists()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+2 more</td>
   <td>Home() node in src/app/page.tsx.</td>
 </tr>
 <tr>
-  <td>22</td>
+  <td>23</td>
   <td><code>Tenant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1933,7 +1937,7 @@ flowchart LR
   <td>Tenant node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>23</td>
+  <td>24</td>
   <td><code>TenantRole</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1941,7 +1945,7 @@ flowchart LR
   <td>TenantRole node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>24</td>
+  <td>25</td>
   <td><code>TenantMembership</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1949,7 +1953,7 @@ flowchart LR
   <td>TenantMembership node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>25</td>
+  <td>26</td>
   <td><code>AccessGrant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1957,7 +1961,7 @@ flowchart LR
   <td>AccessGrant node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>26</td>
+  <td>27</td>
   <td><code>AuditRecord</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1965,7 +1969,7 @@ flowchart LR
   <td>AuditRecord node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>27</td>
+  <td>28</td>
   <td><code>SecurityEvent</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1973,7 +1977,7 @@ flowchart LR
   <td>SecurityEvent node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>28</td>
+  <td>29</td>
   <td><code>ArtifactVersion</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1981,20 +1985,12 @@ flowchart LR
   <td>ArtifactVersion node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>29</td>
+  <td>30</td>
   <td><code>Artifact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td>No direct outbound edge</td>
   <td>Artifact node in src/lib/etos-api.ts.</td>
-</tr>
-<tr>
-  <td>30</td>
-  <td><code>ArtifactRelationship</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
-  <td>No direct outbound edge</td>
-  <td>ArtifactRelationship node in src/lib/etos-api.ts.</td>
 </tr>
 </table>
 
@@ -2003,29 +1999,30 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>src/lib/etos-api.ts</code></td><td>79 nodes</td></tr>
+      <tr><td><code>src/lib/etos-api.ts</code></td><td>93 nodes</td></tr>
 <tr><td><code>src/app/page.tsx</code></td><td>21 nodes</td></tr>
 <tr><td><code>app/documents/page.tsx</code></td><td>17 nodes</td></tr>
 <tr><td><code>app/model-artifacts/page.tsx</code></td><td>13 nodes</td></tr>
 <tr><td><code>app/ai-traces/page.tsx</code></td><td>11 nodes</td></tr>
+<tr><td><code>app/chat/page.tsx</code></td><td>11 nodes</td></tr>
 <tr><td><code>app/imports/page.tsx</code></td><td>2 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x136, imports x45, calls x33, imports x4. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x160, calls x63, imports x54, imports x5. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 8. Tests & Fixtures ====== -->
 <h2 id="tests-fixtures">8. Tests &amp; Fixtures</h2>
-<p>Tests &amp; Fixtures groups implementation around etosbackendtests, aitracetestscs, documentmemorytestscs, governedquerytestscs, mostly in ETOS.Backend.Tests/AiTraceTests.cs, ETOS.Backend.Tests/DocumentMemoryTests.cs, ETOS.Backend.Tests/GovernedQueryTests.cs. This section covers 752 nodes and 1914 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Tests &amp; Fixtures groups implementation around etosbackendtests, aitracetestscs, governedchattestscs, documentmemorytestscs, mostly in ETOS.Backend.Tests/AiTraceTests.cs, ETOS.Backend.Tests/GovernedChatTests.cs, ETOS.Backend.Tests/DocumentMemoryTests.cs. This section covers 844 nodes and 2155 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Tests &amp; Fixtures (752 nodes, 1914 edges)
+    %% Section: Tests &amp; Fixtures (844 nodes, 2155 edges)
     subgraph tests_fixtures_ETOS_Backend_Tests_AiTraceTests_c_6e43e330["ETOS.Backend.Tests/AiTraceTests.cs"]
         etos_backend_tests_aitracetests_allowallpolicyse_e90898b4("AllowAllPolicyService<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
         etos_backend_tests_aitracetests_aitracetests_bb426524("AiTraceTests<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
@@ -2070,7 +2067,7 @@ flowchart LR
     etos_backend_tests_aitracetests_aitracetests_exp_fb8b130a -->|calls| etos_backend_tests_aitracetests_aitracetests_see_8556d69a
     etos_backend_tests_aitracetests_aitracetests_exp_fb8b130a -->|calls| etos_backend_tests_aitracetests_aitracetests_see_475bcf4c
     etos_backend_tests_aitracetests_aitracetests_exp_3444dcb7 -->|calls| etos_backend_tests_aitracetests_aitracetests_cre_3ac20077
-    %% Omitted for readability: 734 nodes, 12 edges
+    %% Omitted for readability: 826 nodes, 12 edges
     class etos_backend_tests_aitracetests_allowallpolicyse_e90898b4 test;
     class etos_backend_tests_aitracetests_aitracetests_bb426524 test;
     class etos_backend_tests_aitracetests_aitracetests_cre_3ac20077 test;
@@ -2359,17 +2356,17 @@ flowchart LR
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>ETOS.Backend.Tests/AiTraceTests.cs</code></td><td>95 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/DocumentMemoryTests.cs</code></td><td>93 nodes</td></tr>
-<tr><td><code>ETOS.Backend.Tests/GovernedQueryTests.cs</code></td><td>85 nodes</td></tr>
+<tr><td><code>ETOS.Backend.Tests/GovernedChatTests.cs</code></td><td>93 nodes</td></tr>
+<tr><td><code>ETOS.Backend.Tests/GovernedQueryTests.cs</code></td><td>86 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/ImportTests.cs</code></td><td>82 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/IdentityResolutionTests.cs</code></td><td>67 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/ClassificationPolicyTests.cs</code></td><td>43 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/DataQualityTests.cs</code></td><td>35 nodes</td></tr>
-<tr><td><code>ETOS.Backend.Tests/OntologyTests.cs</code></td><td>35 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x1057, calls x406, method x317, contains x79. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x1210, calls x434, method x360, contains x87. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -4755,18 +4752,18 @@ flowchart LR
 
 <!-- ====== 16. Other ====== -->
 <h2 id="other">16. Other</h2>
-<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-007-601-700.md, .prd/.initialConversation/chatgpt-conversation-part-008-701-800.md, .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md. This section covers 2017 nodes and 3454 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-007-601-700.md, .prd/.initialConversation/chatgpt-conversation-part-008-701-800.md, .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md. This section covers 2171 nodes and 3743 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Other (2017 nodes, 3454 edges)
+    %% Section: Other (2171 nodes, 3743 edges)
     subgraph other_ETOS_Backend_AiTrace_AiTraceRecorder_cs_d21a07d2["ETOS.Backend/AiTrace/AiTraceRecorder.cs"]
         aitrace_aitracerecorder_iaitracerecorder_ceeb0585("IAiTraceRecorder<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
+        aitrace_aitracerecorder_iaitracerecorder_createf_72b00ca5("CreateFromChatTurnAsync()<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
         aitrace_aitracerecorder_iaitracerecorder_createf_fcf9e52a("CreateFromRetrievalRunAsync()<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
         aitrace_aitracerecorder_aitracerecorder_3505e498("AiTraceRecorder<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
         aitrace_aitracerecorder_aitracerecorder_buildart_4b40650f("BuildArtifactLinks()<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
-        aitrace_aitracerecorder_aitracerecorder_buildsou_8fa9ea65("BuildSourcesSummary()<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
     end
     subgraph other_ETOS_Backend_AiTrace_AiTraceEndpointExtens_b18346e0["ETOS.Backend/AiTrace/AiTraceEndpointExtensions.cs"]
         aitrace_aitraceendpointextensions_aitraceendpoin_d05e0817("AiTraceEndpointExtensions<br/><small>ETOS.Backend/AiTrace/AiTraceEndpointExtensions.cs</small>")
@@ -4792,15 +4789,15 @@ flowchart LR
     aitrace_aitraceendpointextensions_aitraceendpoin_c814fea5 -->|calls| aitrace_aitraceendpointextensions_aitraceendpoin_8916e3c7
     aitrace_aitraceexportbuilder_aitraceexportbuilde_b39c7da7 -->|method| aitrace_aitraceexportbuilder_aitraceexportbuilde_55d046be
     aitrace_aitraceexportbuilder_aitraceexportbuilde_b39c7da7 -->|method| aitrace_aitraceexportbuilder_aitraceexportbuilde_a816939c
+    aitrace_aitracerecorder_iaitracerecorder_ceeb0585 -->|method| aitrace_aitracerecorder_iaitracerecorder_createf_72b00ca5
     aitrace_aitracerecorder_iaitracerecorder_ceeb0585 -->|method| aitrace_aitracerecorder_iaitracerecorder_createf_fcf9e52a
     aitrace_aitracerecorder_aitracerecorder_3505e498 -->|method| aitrace_aitracerecorder_aitracerecorder_buildart_4b40650f
-    aitrace_aitracerecorder_aitracerecorder_3505e498 -->|method| aitrace_aitracerecorder_aitracerecorder_buildsou_8fa9ea65
-    %% Omitted for readability: 1999 nodes, 0 edges
+    %% Omitted for readability: 2153 nodes, 0 edges
     class aitrace_aitracerecorder_iaitracerecorder_ceeb0585 klass;
+    class aitrace_aitracerecorder_iaitracerecorder_createf_72b00ca5 async;
     class aitrace_aitracerecorder_iaitracerecorder_createf_fcf9e52a async;
     class aitrace_aitracerecorder_aitracerecorder_3505e498 klass;
     class aitrace_aitracerecorder_aitracerecorder_buildart_4b40650f function;
-    class aitrace_aitracerecorder_aitracerecorder_buildsou_8fa9ea65 function;
     class aitrace_aitraceendpointextensions_aitraceendpoin_d05e0817 api;
     class aitrace_aitraceendpointextensions_aitraceendpoin_2be4fd0f async;
     class aitrace_aitraceendpointextensions_aitraceendpoin_8916e3c7 async;
@@ -5094,7 +5091,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x1487, contains x933, calls x494, method x482. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x1632, contains x954, calls x550, method x540. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -5105,17 +5102,17 @@ flowchart LR
   <div class="card">
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>Nodes</td><td>4364</td></tr>
-      <tr><td>Edges</td><td>7887</td></tr>
+      <tr><td>Nodes</td><td>4656</td></tr>
+      <tr><td>Edges</td><td>8482</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
-      <tr><td>Communities</td><td>197</td></tr>
+      <tr><td>Communities</td><td>210</td></tr>
       <tr><td>Documented Sections</td><td>15</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>EXTRACTED</td><td>7887</td></tr>
+      <tr><td>EXTRACTED</td><td>8482</td></tr>
       <tr><td>INFERRED</td><td>0</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
@@ -5124,7 +5121,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>EnterpriseThreadOS — Architecture Documentation</p>
-  <p>Generated: 2026-06-13 16:42 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-06-13 16:55 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->
