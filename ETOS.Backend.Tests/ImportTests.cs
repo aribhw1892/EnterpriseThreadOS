@@ -102,6 +102,27 @@ public sealed class ImportTests
     }
 
     [Fact]
+    public async Task ValidationPersistsSuspiciousNumericWarningsAndAllowsStaging()
+    {
+        await using var application = CreateApplication();
+        using var client = application.CreateClient();
+        var context = await CreatePublishedModelContextAsync(client);
+        var batch = await CreateImportBatchAsync(client, context);
+        await UploadCsvAsync(client, context, batch.Id, "partNumber,lifecycle,cost\nP-100,released,-12.50\n");
+        var mapping = await CreateMappingAsync(client, context, batch.Id, lifecycleValues: ["released"]);
+        await ApproveMappingAsync(client, context, mapping.Id);
+
+        var validation = await ValidateBatchAsync(client, context, batch.Id);
+        var stagingRun = await StageBatchAsync(client, context, batch.Id);
+
+        Assert.True(validation.IsValid);
+        Assert.Equal(0, validation.ErrorCount);
+        Assert.Equal(1, validation.WarningCount);
+        Assert.Contains(validation.Issues, issue => issue.IssueCode == "suspicious_numeric_value");
+        Assert.Equal(ImportStagingRunStatus.Completed, stagingRun.Status);
+    }
+
+    [Fact]
     public async Task StagingCreatesUnverifiedStagingGraphNodesWithSourceReferences()
     {
         var graphMemory = new RecordingGraphMemoryService();

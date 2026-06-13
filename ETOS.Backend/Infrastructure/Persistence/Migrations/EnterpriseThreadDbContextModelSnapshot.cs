@@ -22,6 +22,190 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ETOS.Backend.AiTrace.AiTraceArtifactLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AiTraceRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LinkKind")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AiTraceRecordId");
+
+                    b.HasIndex("TenantId", "AiTraceRecordId", "LinkKind");
+
+                    b.ToTable("ai_trace_artifact_links", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.AiTrace.AiTraceExportRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AiTraceRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EvidenceLevel")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("ExportHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid>("ExportedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RedactionMetadataJson")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AiTraceRecordId");
+
+                    b.HasIndex("TenantId", "AiTraceRecordId", "CreatedAt");
+
+                    b.ToTable("ai_trace_export_records", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.AiTrace.AiTraceRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ConfidenceImpactJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("ContextPackageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeniedSafeSummariesJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("FilteredSummariesJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("GeneratedOutputJson")
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("IntentKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("OutputSchemaVersionLabel")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("PromptTemplateVersionLabel")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("QueryText")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RetrievalRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SafeSummary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("SensitiveDeniedReferencesJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("SourcesSummaryJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("StrategyKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TraceKind")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "CreatedAt");
+
+                    b.HasIndex("TenantId", "RetrievalRunId");
+
+                    b.ToTable("ai_trace_records", (string)null);
+                });
+
             modelBuilder.Entity("ETOS.Backend.Artifacts.Artifact", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1232,6 +1416,344 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "Severity", "CreatedAt");
 
                     b.ToTable("security_events", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedQuery.ContextAccessDecision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContextId")
+                        .IsRequired()
+                        .HasMaxLength(240)
+                        .HasColumnType("character varying(240)");
+
+                    b.Property<Guid>("ContextPackageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContextType")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("SafeSummary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContextPackageId");
+
+                    b.HasIndex("TenantId", "ContextPackageId", "DisplayOrder");
+
+                    b.ToTable("context_access_decisions", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedQuery.ContextPackage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AllowedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DeniedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DeniedSummariesJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("FilteredContextJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("LlmVisibleContextJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<Guid?>("PolicyEvaluationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PolicyKey")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("RetrievalRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RetrievedContextJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("SafeSummary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("SensitiveDeniedReferencesJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RetrievalRunId");
+
+                    b.HasIndex("TenantId", "RetrievalRunId", "CreatedAt");
+
+                    b.ToTable("context_packages", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedQuery.QueryIntentVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("IntentKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("IntentKind")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("NormalizedIntentKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("NormalizedVersionLabel")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VersionLabel")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "NormalizedIntentKey", "NormalizedVersionLabel")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Source", "IsEnabled");
+
+                    b.ToTable("query_intent_versions", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedQuery.RetrievalRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DeniedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("DocumentArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("FilteredCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("QueryIntentVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("QueryText")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RetrievalStrategyVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RetrievedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SafeSummary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid?>("StartGraphNodeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QueryIntentVersionId");
+
+                    b.HasIndex("RetrievalStrategyVersionId");
+
+                    b.HasIndex("TenantId", "CreatedAt");
+
+                    b.HasIndex("TenantId", "QueryIntentVersionId", "CreatedAt");
+
+                    b.ToTable("retrieval_runs", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedQuery.RetrievalStrategyVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("AllowsSemanticFallback")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("AllowsVectorFallback")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("GraphSpace")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("NormalizedStrategyKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("NormalizedVersionLabel")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("RelationshipTypesJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("RequiredTrustState")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("StrategyKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VersionLabel")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "NormalizedStrategyKey", "NormalizedVersionLabel")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Source", "IsEnabled");
+
+                    b.ToTable("retrieval_strategy_versions", (string)null);
                 });
 
             modelBuilder.Entity("ETOS.Backend.GraphMemory.GraphDiff", b =>
@@ -3471,6 +3993,28 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.ToTable("identity_user_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("ETOS.Backend.AiTrace.AiTraceArtifactLink", b =>
+                {
+                    b.HasOne("ETOS.Backend.AiTrace.AiTraceRecord", "AiTraceRecord")
+                        .WithMany("ArtifactLinks")
+                        .HasForeignKey("AiTraceRecordId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AiTraceRecord");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.AiTrace.AiTraceExportRecord", b =>
+                {
+                    b.HasOne("ETOS.Backend.AiTrace.AiTraceRecord", "AiTraceRecord")
+                        .WithMany("ExportRecords")
+                        .HasForeignKey("AiTraceRecordId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AiTraceRecord");
+                });
+
             modelBuilder.Entity("ETOS.Backend.Artifacts.Artifact", b =>
                 {
                     b.HasOne("ETOS.Backend.Identity.EtosUser", "OwnerUser")
@@ -3736,6 +4280,47 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("RelatedAuditRecord");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedQuery.ContextAccessDecision", b =>
+                {
+                    b.HasOne("ETOS.Backend.GovernedQuery.ContextPackage", "ContextPackage")
+                        .WithMany("AccessDecisions")
+                        .HasForeignKey("ContextPackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ContextPackage");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedQuery.ContextPackage", b =>
+                {
+                    b.HasOne("ETOS.Backend.GovernedQuery.RetrievalRun", "RetrievalRun")
+                        .WithMany("ContextPackages")
+                        .HasForeignKey("RetrievalRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("RetrievalRun");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedQuery.RetrievalRun", b =>
+                {
+                    b.HasOne("ETOS.Backend.GovernedQuery.QueryIntentVersion", "QueryIntentVersion")
+                        .WithMany()
+                        .HasForeignKey("QueryIntentVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ETOS.Backend.GovernedQuery.RetrievalStrategyVersion", "RetrievalStrategyVersion")
+                        .WithMany()
+                        .HasForeignKey("RetrievalStrategyVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("QueryIntentVersion");
+
+                    b.Navigation("RetrievalStrategyVersion");
                 });
 
             modelBuilder.Entity("ETOS.Backend.GraphMemory.GraphDiff", b =>
@@ -4250,6 +4835,13 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ETOS.Backend.AiTrace.AiTraceRecord", b =>
+                {
+                    b.Navigation("ArtifactLinks");
+
+                    b.Navigation("ExportRecords");
+                });
+
             modelBuilder.Entity("ETOS.Backend.Artifacts.Artifact", b =>
                 {
                     b.Navigation("SourceRelationships");
@@ -4300,6 +4892,16 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("ETOS.Backend.Governance.AuditRecord", b =>
                 {
                     b.Navigation("SecurityEvents");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedQuery.ContextPackage", b =>
+                {
+                    b.Navigation("AccessDecisions");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.GovernedQuery.RetrievalRun", b =>
+                {
+                    b.Navigation("ContextPackages");
                 });
 
             modelBuilder.Entity("ETOS.Backend.Identity.Permission", b =>

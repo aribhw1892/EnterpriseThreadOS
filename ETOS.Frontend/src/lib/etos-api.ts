@@ -657,6 +657,204 @@ export type CadParsingStatus = {
   safeSummary: string;
 };
 
+export type QueryIntentVersion = {
+  id: string;
+  tenantId: string;
+  intentKey: string;
+  versionLabel: string;
+  name: string;
+  summary?: string | null;
+  intentKind: string;
+  source: string;
+  isEnabled: boolean;
+  createdAt: string;
+};
+
+export type RetrievalStrategyVersion = {
+  id: string;
+  tenantId: string;
+  strategyKey: string;
+  versionLabel: string;
+  name: string;
+  summary?: string | null;
+  graphSpace: string;
+  requiredTrustState: string;
+  relationshipTypes: string[];
+  allowsSemanticFallback: boolean;
+  allowsVectorFallback: boolean;
+  source: string;
+  isEnabled: boolean;
+  createdAt: string;
+};
+
+export type ContextItem = {
+  contextId: string;
+  contextType: string;
+  classificationKey: string;
+  attributeKey?: string | null;
+  documentId?: string | null;
+  sourceKind: string;
+  displayOrder: number;
+  safeSummary: string;
+};
+
+export type DeniedContextSummary = {
+  contextId: string;
+  contextType: string;
+  safeSummary: string;
+  reason: string;
+};
+
+export type SensitiveDeniedContextReference = {
+  contextId: string;
+  contextType: string;
+  documentId?: string | null;
+  classificationKey: string;
+  attributeKey?: string | null;
+  reason: string;
+};
+
+export type ContextAccessDecision = {
+  id: string;
+  tenantId: string;
+  contextPackageId: string;
+  contextId: string;
+  contextType: string;
+  result: string;
+  safeSummary: string;
+  reason?: string | null;
+  displayOrder: number;
+  createdAt: string;
+};
+
+export type ContextPackage = {
+  id: string;
+  tenantId: string;
+  retrievalRunId: string;
+  policyKey?: string | null;
+  policyEvaluationId?: string | null;
+  retrievedContext: ContextItem[];
+  filteredContext: ContextItem[];
+  llmVisibleContext: ContextItem[];
+  deniedSummaries: DeniedContextSummary[];
+  sensitiveDeniedReferences: SensitiveDeniedContextReference[];
+  accessDecisions: ContextAccessDecision[];
+  allowedCount: number;
+  deniedCount: number;
+  safeSummary: string;
+  createdAt: string;
+};
+
+export type RetrievalRun = {
+  id: string;
+  tenantId: string;
+  queryIntent: QueryIntentVersion;
+  retrievalStrategy: RetrievalStrategyVersion;
+  startGraphNodeId?: string | null;
+  documentArtifactId?: string | null;
+  queryText: string;
+  status: string;
+  retrievedCount: number;
+  filteredCount: number;
+  deniedCount: number;
+  safeSummary: string;
+  requestedByUserId: string;
+  auditRecordId?: string | null;
+  createdAt: string;
+  completedAt?: string | null;
+  contextPackage?: ContextPackage | null;
+};
+
+export type RetrievalRunSummary = {
+  id: string;
+  tenantId: string;
+  intentKey: string;
+  strategyKey: string;
+  startGraphNodeId?: string | null;
+  documentArtifactId?: string | null;
+  status: string;
+  retrievedCount: number;
+  filteredCount: number;
+  deniedCount: number;
+  safeSummary: string;
+  requestedByUserId: string;
+  createdAt: string;
+  completedAt?: string | null;
+};
+
+export type AiTraceSummary = {
+  id: string;
+  tenantId: string;
+  traceKind: string;
+  intentKey: string;
+  strategyKey: string;
+  status: string;
+  safeSummary: string;
+  requestedByUserId: string;
+  createdAt: string;
+};
+
+export type AiTraceSourceSummary = {
+  sourceKind: string;
+  count: number;
+  safeReferences: string[];
+};
+
+export type AiTraceConfidenceImpact = {
+  retrievedCount: number;
+  filteredCount: number;
+  deniedCount: number;
+  trustFilteredCount: number;
+  policyKey?: string | null;
+  notes: string;
+};
+
+export type AiTraceArtifactLink = {
+  id: string;
+  linkKind: string;
+  objectType: string;
+  objectId: string;
+};
+
+export type TraceContextSummary = {
+  contextId: string;
+  contextType: string;
+  sourceKind: string;
+  safeSummary: string;
+};
+
+export type TraceDeniedSummary = {
+  contextId: string;
+  contextType: string;
+  safeSummary: string;
+  reason: string;
+};
+
+export type AiTraceDetail = {
+  id: string;
+  tenantId: string;
+  retrievalRunId: string;
+  contextPackageId: string;
+  auditRecordId?: string | null;
+  traceKind: string;
+  intentKey: string;
+  strategyKey: string;
+  queryText: string;
+  status: string;
+  safeSummary: string;
+  sourcesSummary: AiTraceSourceSummary[];
+  filteredSummaries: TraceContextSummary[];
+  deniedSafeSummaries: TraceDeniedSummary[];
+  sensitiveDeniedReferences?: SensitiveDeniedContextReference[] | null;
+  confidenceImpact: AiTraceConfidenceImpact;
+  promptTemplateVersionLabel?: string | null;
+  outputSchemaVersionLabel?: string | null;
+  generatedOutputJson?: string | null;
+  artifactLinks: AiTraceArtifactLink[];
+  requestedByUserId: string;
+  createdAt: string;
+};
+
 export type ImportPreview = {
   batchId: string;
   evidenceId: string;
@@ -963,6 +1161,117 @@ export async function getDocumentLists() {
     cadParsing,
     dataQualityIssues,
   };
+}
+
+export async function getGovernedQueryLists() {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+
+  const runs = tenantHeaders
+    ? await fetchApi<RetrievalRunSummary[]>("/api/admin/governed-query/runs", tenantHeaders)
+    : missingContext<RetrievalRunSummary[]>();
+  const latestRunId = runs.data?.[0]?.id;
+  const latestRun = tenantHeaders && latestRunId
+    ? await fetchApi<RetrievalRun>(`/api/admin/governed-query/runs/${latestRunId}`, tenantHeaders)
+    : emptyObject<RetrievalRun>();
+
+  return {
+    runs,
+    latestRun,
+  };
+}
+
+export async function getAiTraceLists() {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+
+  const traces = tenantHeaders
+    ? await fetchApi<AiTraceSummary[]>("/api/admin/ai-traces", tenantHeaders)
+    : missingContext<AiTraceSummary[]>();
+  const latestTraceId = traces.data?.[0]?.id;
+  const latestTrace = tenantHeaders && latestTraceId
+    ? await fetchApi<AiTraceDetail>(`/api/admin/ai-traces/${latestTraceId}`, tenantHeaders)
+    : emptyObject<AiTraceDetail>();
+
+  return {
+    traces,
+    latestTrace,
+  };
+}
+
+export async function exportAiTrace(traceId: string): Promise<ApiResult<{ fileName: string; sizeBytes: number }>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<{ fileName: string; sizeBytes: number }>();
+  }
+
+  try {
+    const headers = new Headers();
+    headers.set("X-ETOS-User-Id", tenantHeaders.userId);
+    headers.set("X-ETOS-Tenant-Id", tenantHeaders.tenantId);
+
+    const response = await fetch(`${apiBaseUrl}/api/admin/ai-traces/${traceId}/export`, {
+      method: "POST",
+      cache: "no-store",
+      headers,
+    });
+
+    if (!response.ok) {
+      const problem = await readProblem(response);
+      return {
+        data: null,
+        error: problem ?? `${response.status} ${response.statusText}`,
+      };
+    }
+
+    const contentDisposition = response.headers.get("content-disposition") ?? "";
+    const fileNameMatch = /filename="?([^";]+)"?/i.exec(contentDisposition);
+    const fileName = fileNameMatch?.[1] ?? `ai-trace-${traceId}.json`;
+    const buffer = await response.arrayBuffer();
+
+    return {
+      data: { fileName, sizeBytes: buffer.byteLength },
+      error: null,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : "AI Trace export failed.",
+    };
+  }
+}
+
+export async function runGovernedQueryForGraphNode(
+  startGraphNodeId: string,
+  intentKey = "object-360-context",
+): Promise<ApiResult<RetrievalRun>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<RetrievalRun>();
+  }
+
+  return await postApi<RetrievalRun>(
+    "/api/admin/governed-query/run",
+    {
+      intentKey,
+      startGraphNodeId,
+      documentArtifactId: null,
+      policyKey: "published-policy",
+      queryText: "Frontend governed context preview.",
+      maxDepth: 2,
+    },
+    tenantHeaders,
+  );
 }
 
 export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackageVersion>> {
@@ -1366,7 +1675,7 @@ async function createDemoImportForSource(
   const csv = [
     "partNumber,lifecycle,cost",
     "P-100,released,12.50",
-    "P-200,in-review,21.00",
+    "P-200,in-review,-21.00",
   ].join("\n");
   const formData = new FormData();
   formData.set("file", new Blob([csv], { type: "text/csv" }), "demo-import.csv");
@@ -1436,7 +1745,7 @@ async function createPreparedDemoImportForSource(
   const csv = [
     "partNumber,lifecycle,cost",
     "P-100,released,12.50",
-    "P-200,in-review,21.00",
+    "P-200,in-review,-21.00",
   ].join("\n");
   const formData = new FormData();
   formData.set("file", new Blob([csv], { type: "text/csv" }), "demo-import.csv");
@@ -1643,9 +1952,17 @@ export async function generateDataQualityIssuesForLatestImport(): Promise<ApiRes
   }
 
   const lists = await getImportLists();
-  const batch = lists.batches.data?.find((item) => item.status === "Validated" || item.status === "Staged");
+  const batch = lists.batches.data?.find(
+    (item) =>
+      item.status === "Validated"
+      || item.status === "Staged"
+      || (item.status === "Failed" && item.validationIssueCount > 0),
+  );
   if (!batch) {
-    return { data: null, error: "No validated or staged import batch is available for data quality issue generation." };
+    return {
+      data: null,
+      error: "No validated, staged, or failed validation import batch with issues is available for data quality issue generation.",
+    };
   }
 
   return await postApi<DataQualityIssueGeneration>(

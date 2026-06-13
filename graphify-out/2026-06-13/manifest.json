@@ -1,0 +1,967 @@
+{
+  "ETOS.Backend.Tests/ArtifactRegistryTests.cs": {
+    "mtime": 1781034163.54815,
+    "ast_hash": "b492b51b13295582a4a5d7801a57e008",
+    "semantic_hash": "b492b51b13295582a4a5d7801a57e008"
+  },
+  "ETOS.Backend.Tests/ClassificationPolicyTests.cs": {
+    "mtime": 1781097191.675204,
+    "ast_hash": "95e7b75b83c480f963dfaa388341dc03",
+    "semantic_hash": "95e7b75b83c480f963dfaa388341dc03"
+  },
+  "ETOS.Backend.Tests/ConfigurationTests.cs": {
+    "mtime": 1781102914.106341,
+    "ast_hash": "4e733966f2bd542e01bfef1d56e7de1d",
+    "semantic_hash": "4e733966f2bd542e01bfef1d56e7de1d"
+  },
+  "ETOS.Backend.Tests/DataQualityTests.cs": {
+    "mtime": 1781367344.4225702,
+    "ast_hash": "21180a03d6fd2fcc119a6781658ccbf8",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend.Tests/DevelopmentIdentitySeederTests.cs": {
+    "mtime": 1781033203.3030498,
+    "ast_hash": "8e55d73dc2362a4780da103dc64a8034",
+    "semantic_hash": "8e55d73dc2362a4780da103dc64a8034"
+  },
+  "ETOS.Backend.Tests/ETOS.Backend.Tests.csproj": {
+    "mtime": 1781103319.625503,
+    "ast_hash": "e03bcdf0adc7a5b9f36e6a6dcc35856c",
+    "semantic_hash": "e03bcdf0adc7a5b9f36e6a6dcc35856c"
+  },
+  "ETOS.Backend.Tests/GovernanceAuditTests.cs": {
+    "mtime": 1781032799.124565,
+    "ast_hash": "17acd69d3f0c608ab5d6eeb336408738",
+    "semantic_hash": "17acd69d3f0c608ab5d6eeb336408738"
+  },
+  "ETOS.Backend.Tests/GraphMemoryTests.cs": {
+    "mtime": 1781103896.9350803,
+    "ast_hash": "68a125960ba40b9f7956a1c0efd7bdf3",
+    "semantic_hash": "68a125960ba40b9f7956a1c0efd7bdf3"
+  },
+  "ETOS.Backend.Tests/HealthEndpointTests.cs": {
+    "mtime": 1780842001.0620272,
+    "ast_hash": "72e2359c0d95067ec2b3afe8ce2cf4d7",
+    "semantic_hash": "72e2359c0d95067ec2b3afe8ce2cf4d7"
+  },
+  "ETOS.Backend.Tests/IdentityAccessTests.cs": {
+    "mtime": 1781032255.0553594,
+    "ast_hash": "3830a0fc287bda5f026b66a62feb4cb4",
+    "semantic_hash": "3830a0fc287bda5f026b66a62feb4cb4"
+  },
+  "ETOS.Backend.Tests/IdentityResolutionTests.cs": {
+    "mtime": 1781177075.0067425,
+    "ast_hash": "2f73bb014d7d922f32b3720a576d1354",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend.Tests/ImportTests.cs": {
+    "mtime": 1781367344.4225702,
+    "ast_hash": "3088017ed963d9589b8421bd3b9a65ba",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend.Tests/OntologyTests.cs": {
+    "mtime": 1781107790.3414297,
+    "ast_hash": "32cad6b3e35274c14a1f3c28e41c8f3f",
+    "semantic_hash": "32cad6b3e35274c14a1f3c28e41c8f3f"
+  },
+  "ETOS.Backend.Tests/TenantPersistenceTests.cs": {
+    "mtime": 1781096876.8031065,
+    "ast_hash": "bfa63e8b41e1657a632477cda321482b",
+    "semantic_hash": "bfa63e8b41e1657a632477cda321482b"
+  },
+  "ETOS.Backend/Artifacts/ArtifactContracts.cs": {
+    "mtime": 1781033771.0859175,
+    "ast_hash": "a16ac394c264893e432c42819b15a64f",
+    "semantic_hash": "a16ac394c264893e432c42819b15a64f"
+  },
+  "ETOS.Backend/Artifacts/ArtifactEndpointExtensions.cs": {
+    "mtime": 1781033892.923068,
+    "ast_hash": "3ddec9ae8373bee33fe5cdbcb5fa4cfd",
+    "semantic_hash": "3ddec9ae8373bee33fe5cdbcb5fa4cfd"
+  },
+  "ETOS.Backend/Artifacts/ArtifactModels.cs": {
+    "mtime": 1781033758.4609618,
+    "ast_hash": "0399fcf8f6560ab0adcf2143ec669345",
+    "semantic_hash": "0399fcf8f6560ab0adcf2143ec669345"
+  },
+  "ETOS.Backend/Artifacts/ArtifactRegistryService.cs": {
+    "mtime": 1781097696.9289384,
+    "ast_hash": "1af31ece3d56deb49dfee2165edbac53",
+    "semantic_hash": "1af31ece3d56deb49dfee2165edbac53"
+  },
+  "ETOS.Backend/Classification/ClassificationContracts.cs": {
+    "mtime": 1781096876.8031065,
+    "ast_hash": "65d5b375b7f84ef635bf86a7cdb4ffda",
+    "semantic_hash": "65d5b375b7f84ef635bf86a7cdb4ffda"
+  },
+  "ETOS.Backend/Classification/ClassificationEndpointExtensions.cs": {
+    "mtime": 1781096876.8031065,
+    "ast_hash": "d652161681dc2302bcc29f809e2f62d1",
+    "semantic_hash": "d652161681dc2302bcc29f809e2f62d1"
+  },
+  "ETOS.Backend/Classification/ClassificationModels.cs": {
+    "mtime": 1781096876.8031065,
+    "ast_hash": "61c97cd85c988f0223883bc08d424ce3",
+    "semantic_hash": "61c97cd85c988f0223883bc08d424ce3"
+  },
+  "ETOS.Backend/Classification/ClassificationPolicyService.cs": {
+    "mtime": 1781108970.3816507,
+    "ast_hash": "7e9acd6f0057e03c0161af8fb7615f16",
+    "semantic_hash": "7e9acd6f0057e03c0161af8fb7615f16"
+  },
+  "ETOS.Backend/DataQuality/DataQualityContracts.cs": {
+    "mtime": 1781174596.4100885,
+    "ast_hash": "98c260cb8e097d5f6db9177b5de016fa",
+    "semantic_hash": "98c260cb8e097d5f6db9177b5de016fa"
+  },
+  "ETOS.Backend/DataQuality/DataQualityEndpointExtensions.cs": {
+    "mtime": 1781174596.409091,
+    "ast_hash": "2bfb6b3a64ed3c80d340e4775677ec33",
+    "semantic_hash": "2bfb6b3a64ed3c80d340e4775677ec33"
+  },
+  "ETOS.Backend/DataQuality/DataQualityModels.cs": {
+    "mtime": 1781191644.4541333,
+    "ast_hash": "e7413443e41e7d5acf52d739fe782e5e",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/DataQuality/DataQualityService.cs": {
+    "mtime": 1781367344.4225702,
+    "ast_hash": "7a07363de6b9484cb952b9088a3662bf",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/ETOS.Backend.csproj": {
+    "mtime": 1781111122.9959624,
+    "ast_hash": "de35affe99c39dd928996059afb2bbdc",
+    "semantic_hash": "de35affe99c39dd928996059afb2bbdc"
+  },
+  "ETOS.Backend/Governance/AuditRecorder.cs": {
+    "mtime": 1781032448.914917,
+    "ast_hash": "e8fce1d76bbdf8e3cf89dacdf6988e03",
+    "semantic_hash": "e8fce1d76bbdf8e3cf89dacdf6988e03"
+  },
+  "ETOS.Backend/Governance/GovernanceContracts.cs": {
+    "mtime": 1781032426.8072844,
+    "ast_hash": "41443b6f9cb15fab2e373838db2b3adc",
+    "semantic_hash": "41443b6f9cb15fab2e373838db2b3adc"
+  },
+  "ETOS.Backend/Governance/GovernanceEndpointExtensions.cs": {
+    "mtime": 1781032456.2414114,
+    "ast_hash": "24d356ac48355f110dc259464709f419",
+    "semantic_hash": "24d356ac48355f110dc259464709f419"
+  },
+  "ETOS.Backend/Governance/GovernanceModels.cs": {
+    "mtime": 1781032776.1829164,
+    "ast_hash": "544d6ccbfa4816d528d58665a67b7cf8",
+    "semantic_hash": "544d6ccbfa4816d528d58665a67b7cf8"
+  },
+  "ETOS.Backend/GraphMemory/DeferredGraphDiffService.cs": {
+    "mtime": 1781177042.9891262,
+    "ast_hash": "6bbdaa39b3dccabbf915c95588a114b7",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GraphMemory/DeferredGraphSnapshotService.cs": {
+    "mtime": 1781176791.2705972,
+    "ast_hash": "e8a2c1384705a705286ee632f66b3b69",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GraphMemory/GraphBootstrapHostedService.cs": {
+    "mtime": 1781103431.2242715,
+    "ast_hash": "752c37f6f486ddf45c870701ab54dd62",
+    "semantic_hash": "752c37f6f486ddf45c870701ab54dd62"
+  },
+  "ETOS.Backend/GraphMemory/GraphMemoryContracts.cs": {
+    "mtime": 1781176726.8931572,
+    "ast_hash": "c4f6764da7c320c2f78bfd39a9f82010",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GraphMemory/GraphMemoryModels.cs": {
+    "mtime": 1781176722.671796,
+    "ast_hash": "a59bac7b854cc32ed8439203fdc2840e",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GraphMemory/GraphMemoryOptions.cs": {
+    "mtime": 1781103370.611287,
+    "ast_hash": "85c5d160cc5818179b014c636c913ee9",
+    "semantic_hash": "85c5d160cc5818179b014c636c913ee9"
+  },
+  "ETOS.Backend/GraphMemory/GraphMemoryServiceExtensions.cs": {
+    "mtime": 1781176815.7395437,
+    "ast_hash": "60aa3bc936e6cfa4f9f84fa1fe1a85af",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GraphMemory/IGraphBootstrapService.cs": {
+    "mtime": 1781103358.9753728,
+    "ast_hash": "95b585c8109a1aa075d2e70d48f04f3f",
+    "semantic_hash": "95b585c8109a1aa075d2e70d48f04f3f"
+  },
+  "ETOS.Backend/GraphMemory/IGraphDiffService.cs": {
+    "mtime": 1781176737.363504,
+    "ast_hash": "d5e20918a8ce97dadf9a380b5f995b66",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GraphMemory/IGraphHealthService.cs": {
+    "mtime": 1781103356.3503942,
+    "ast_hash": "c08c35e70b129eefbd578ee0cf28cecd",
+    "semantic_hash": "c08c35e70b129eefbd578ee0cf28cecd"
+  },
+  "ETOS.Backend/GraphMemory/IGraphMemoryService.cs": {
+    "mtime": 1781176730.6473382,
+    "ast_hash": "ae6b77c236ed09cf4a11ecf2440a60b3",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GraphMemory/IGraphSnapshotService.cs": {
+    "mtime": 1781176733.5412028,
+    "ast_hash": "47b55652e2df63da01734e2e5a74715d",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GraphMemory/MemgraphGraphMemoryService.cs": {
+    "mtime": 1781176768.2857509,
+    "ast_hash": "d1e3bf30cb9cfd48dd39bced62ad5478",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GraphMemory/Neo4jGraphBootstrapService.cs": {
+    "mtime": 1781103415.1304078,
+    "ast_hash": "fdf6311bdf824679e0546032495ae1f6",
+    "semantic_hash": "fdf6311bdf824679e0546032495ae1f6"
+  },
+  "ETOS.Backend/GraphMemory/Neo4jGraphDriverFactory.cs": {
+    "mtime": 1781103407.8314996,
+    "ast_hash": "9daaf1774dddd5f573a39936bfe6b477",
+    "semantic_hash": "9daaf1774dddd5f573a39936bfe6b477"
+  },
+  "ETOS.Backend/GraphMemory/Neo4jGraphHealthService.cs": {
+    "mtime": 1781103423.710263,
+    "ast_hash": "77df658cf634f90f4560ce4b80f6a285",
+    "semantic_hash": "77df658cf634f90f4560ce4b80f6a285"
+  },
+  "ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs": {
+    "mtime": 1781176761.3522089,
+    "ast_hash": "6fb891354b7491a08471d4046506f469",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Health/HealthContracts.cs": {
+    "mtime": 1780763787.057803,
+    "ast_hash": "4c18c5ad4080563e22f8bb1c0ee76c14",
+    "semantic_hash": "4c18c5ad4080563e22f8bb1c0ee76c14"
+  },
+  "ETOS.Backend/Health/HealthEndpointExtensions.cs": {
+    "mtime": 1780763811.5739436,
+    "ast_hash": "55efaa63b84b26acc5adcaf6f178089e",
+    "semantic_hash": "55efaa63b84b26acc5adcaf6f178089e"
+  },
+  "ETOS.Backend/Health/IInfrastructureHealthService.cs": {
+    "mtime": 1780763791.6119123,
+    "ast_hash": "da24825938047164b91cada3a38f5185",
+    "semantic_hash": "da24825938047164b91cada3a38f5185"
+  },
+  "ETOS.Backend/Health/InfrastructureHealthService.cs": {
+    "mtime": 1781103558.901099,
+    "ast_hash": "e2b1a32e4a18445dc484ca7769ab0748",
+    "semantic_hash": "e2b1a32e4a18445dc484ca7769ab0748"
+  },
+  "ETOS.Backend/IdentityResolution/IdentityResolutionContracts.cs": {
+    "mtime": 1781111788.6514752,
+    "ast_hash": "224431ef9acbb55a832d57f306409b3f",
+    "semantic_hash": "224431ef9acbb55a832d57f306409b3f"
+  },
+  "ETOS.Backend/IdentityResolution/IdentityResolutionEndpointExtensions.cs": {
+    "mtime": 1781111920.3981621,
+    "ast_hash": "7c4778c3914620cb1f73b6256cb70358",
+    "semantic_hash": "7c4778c3914620cb1f73b6256cb70358"
+  },
+  "ETOS.Backend/IdentityResolution/IdentityResolutionModels.cs": {
+    "mtime": 1781111778.9277785,
+    "ast_hash": "5f49a0a0b0d49c7b4bb913b1cdfce505",
+    "semantic_hash": "5f49a0a0b0d49c7b4bb913b1cdfce505"
+  },
+  "ETOS.Backend/IdentityResolution/IdentityResolutionService.cs": {
+    "mtime": 1781111910.1796858,
+    "ast_hash": "7175d8dcb5c9497740230a16233b2621",
+    "semantic_hash": "7175d8dcb5c9497740230a16233b2621"
+  },
+  "ETOS.Backend/Identity/DevelopmentIdentitySeeder.cs": {
+    "mtime": 1781174596.412754,
+    "ast_hash": "a35d11ca7d20c238a710a8ca0b61e8c9",
+    "semantic_hash": "a35d11ca7d20c238a710a8ca0b61e8c9"
+  },
+  "ETOS.Backend/Identity/EtosTenantStore.cs": {
+    "mtime": 1781032254.9541328,
+    "ast_hash": "b52eb6b51c3a594803bb7b9d5cf39977",
+    "semantic_hash": "b52eb6b51c3a594803bb7b9d5cf39977"
+  },
+  "ETOS.Backend/Identity/IdentityAdminService.cs": {
+    "mtime": 1781032501.0584836,
+    "ast_hash": "a294544c110bdad479ce3c0698cfc7c3",
+    "semantic_hash": "a294544c110bdad479ce3c0698cfc7c3"
+  },
+  "ETOS.Backend/Identity/IdentityContracts.cs": {
+    "mtime": 1781032254.8882658,
+    "ast_hash": "f6d9068ff7f4f263bc6936919fdc6429",
+    "semantic_hash": "f6d9068ff7f4f263bc6936919fdc6429"
+  },
+  "ETOS.Backend/Identity/IdentityEndpointExtensions.cs": {
+    "mtime": 1781032255.0018504,
+    "ast_hash": "31e77a6ff872d6481f23d94f55c4eea9",
+    "semantic_hash": "31e77a6ff872d6481f23d94f55c4eea9"
+  },
+  "ETOS.Backend/Identity/IdentityModels.cs": {
+    "mtime": 1781032254.853018,
+    "ast_hash": "e938e66082a205da43f92e15c9219352",
+    "semantic_hash": "e938e66082a205da43f92e15c9219352"
+  },
+  "ETOS.Backend/Identity/LocalHeaderAuthenticationHandler.cs": {
+    "mtime": 1781032254.9037724,
+    "ast_hash": "96e8c10a341d8311f32f3cd4a289afd5",
+    "semantic_hash": "96e8c10a341d8311f32f3cd4a289afd5"
+  },
+  "ETOS.Backend/Identity/SeedIdentityOptions.cs": {
+    "mtime": 1781032255.1671553,
+    "ast_hash": "e28d754aff1b0b0159cdfd9a23187ad4",
+    "semantic_hash": "e28d754aff1b0b0159cdfd9a23187ad4"
+  },
+  "ETOS.Backend/Identity/TenantContext.cs": {
+    "mtime": 1781032487.6741738,
+    "ast_hash": "4b9324497150da86362e9abeb6687984",
+    "semantic_hash": "4b9324497150da86362e9abeb6687984"
+  },
+  "ETOS.Backend/Imports/ImportContracts.cs": {
+    "mtime": 1781176822.5142212,
+    "ast_hash": "31527556b747923b4088f68f40214002",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Imports/ImportEndpointExtensions.cs": {
+    "mtime": 1781176909.2738664,
+    "ast_hash": "74db9fc82e23d2e4782e8dcc0a0a48f1",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Imports/ImportFileParser.cs": {
+    "mtime": 1781111026.0698602,
+    "ast_hash": "24a9bad3bd685b233aff100dd1e25d69",
+    "semantic_hash": "24a9bad3bd685b233aff100dd1e25d69"
+  },
+  "ETOS.Backend/Imports/ImportFileStorage.cs": {
+    "mtime": 1781110041.9944084,
+    "ast_hash": "5701239685e48c5ff406ffb6a8de02d8",
+    "semantic_hash": "5701239685e48c5ff406ffb6a8de02d8"
+  },
+  "ETOS.Backend/Imports/ImportModels.cs": {
+    "mtime": 1781176713.640376,
+    "ast_hash": "2291f94494340b1758bfdd8187ddd944",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Imports/ImportService.cs": {
+    "mtime": 1781367344.4225702,
+    "ast_hash": "8ee54472ef0feba321f7cb259d7be6db",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Infrastructure/Configuration/FrontendOptions.cs": {
+    "mtime": 1780763741.151692,
+    "ast_hash": "e3ec7574652c690b72e4347e897c82cb",
+    "semantic_hash": "e3ec7574652c690b72e4347e897c82cb"
+  },
+  "ETOS.Backend/Infrastructure/Configuration/InfrastructureHealthOptions.cs": {
+    "mtime": 1781102867.216725,
+    "ast_hash": "59e23309843d0cbc3c68f1b89bacf3a1",
+    "semantic_hash": "59e23309843d0cbc3c68f1b89bacf3a1"
+  },
+  "ETOS.Backend/Infrastructure/Configuration/OperationalStoreOptions.cs": {
+    "mtime": 1780763736.1153066,
+    "ast_hash": "4ebfd3f3dca17b6433e92d90a17a894c",
+    "semantic_hash": "4ebfd3f3dca17b6433e92d90a17a894c"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/EnterpriseThreadDbContext.cs": {
+    "mtime": 1781367344.4225702,
+    "ast_hash": "4af066d8ce4ed2bd416d4bd39b1b5a0f",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Infrastructure/Persistence/EnterpriseThreadDbContextFactory.cs": {
+    "mtime": 1780763767.995577,
+    "ast_hash": "5f41b8f4f7bee1a649ccb4116998efd3",
+    "semantic_hash": "5f41b8f4f7bee1a649ccb4116998efd3"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260607141920_InitialOperationalStore.Designer.cs": {
+    "mtime": 1780841960.1627035,
+    "ast_hash": "b3af0a91138ce1c7ea908b787feae4df",
+    "semantic_hash": "b3af0a91138ce1c7ea908b787feae4df"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260607141920_InitialOperationalStore.cs": {
+    "mtime": 1780841960.1617043,
+    "ast_hash": "83e8ca3041a50381a5a49ac35caaee78",
+    "semantic_hash": "83e8ca3041a50381a5a49ac35caaee78"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260609184024_Slice2TenantIdentityAccess.Designer.cs": {
+    "mtime": 1781030424.3811839,
+    "ast_hash": "d026e6480f6eeb9f15602545446ecef1",
+    "semantic_hash": "d026e6480f6eeb9f15602545446ecef1"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260609184024_Slice2TenantIdentityAccess.cs": {
+    "mtime": 1781030424.380128,
+    "ast_hash": "48a517c4ac4317452a28e1dee786469d",
+    "semantic_hash": "48a517c4ac4317452a28e1dee786469d"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260609191821_Slice3AuditSecurityEvents.Designer.cs": {
+    "mtime": 1781032701.8840322,
+    "ast_hash": "8804efbe009110d79e316951856ec517",
+    "semantic_hash": "8804efbe009110d79e316951856ec517"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260609191821_Slice3AuditSecurityEvents.cs": {
+    "mtime": 1781032701.8830316,
+    "ast_hash": "51af789b0f6582a8d7b533b6248b9a92",
+    "semantic_hash": "51af789b0f6582a8d7b533b6248b9a92"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260609194017_Slice4ArtifactRegistry.Designer.cs": {
+    "mtime": 1781034017.946881,
+    "ast_hash": "1730de312a2895c2b4dbc14a42539989",
+    "semantic_hash": "1730de312a2895c2b4dbc14a42539989"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260609194017_Slice4ArtifactRegistry.cs": {
+    "mtime": 1781034017.9458847,
+    "ast_hash": "5c4e1795345a742a26150f70a2ae0578",
+    "semantic_hash": "5c4e1795345a742a26150f70a2ae0578"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260610131043_Slice5ClassificationPolicy.Designer.cs": {
+    "mtime": 1781097043.5187106,
+    "ast_hash": "970e2d086930eaad16fb95d66031a1c9",
+    "semantic_hash": "970e2d086930eaad16fb95d66031a1c9"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260610131043_Slice5ClassificationPolicy.cs": {
+    "mtime": 1781097043.5145798,
+    "ast_hash": "5c188f36c579b6036d652164c67e2c1a",
+    "semantic_hash": "5c188f36c579b6036d652164c67e2c1a"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260610160514_Slice7CanonicalOntology.Designer.cs": {
+    "mtime": 1781107514.1292834,
+    "ast_hash": "239be0813b33d34773e14ad1819516fc",
+    "semantic_hash": "239be0813b33d34773e14ad1819516fc"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260610160514_Slice7CanonicalOntology.cs": {
+    "mtime": 1781107514.1282823,
+    "ast_hash": "7d9f05ef2569cf641a5bc96078d74595",
+    "semantic_hash": "7d9f05ef2569cf641a5bc96078d74595"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260610165140_Slice8ImportMappingStaging.Designer.cs": {
+    "mtime": 1781110301.022906,
+    "ast_hash": "22b6641dcf0f7664130da782c40cc585",
+    "semantic_hash": "22b6641dcf0f7664130da782c40cc585"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260610165140_Slice8ImportMappingStaging.cs": {
+    "mtime": 1781110301.0219054,
+    "ast_hash": "62a2d0a2697dae6c7eb986354cb5da87",
+    "semantic_hash": "62a2d0a2697dae6c7eb986354cb5da87"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260610172201_Slice9IdentityResolutionTrust.Designer.cs": {
+    "mtime": 1781112121.1888568,
+    "ast_hash": "60fbf21c070530521f035a4ea7d90233",
+    "semantic_hash": "60fbf21c070530521f035a4ea7d90233"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260610172201_Slice9IdentityResolutionTrust.cs": {
+    "mtime": 1781112121.1878576,
+    "ast_hash": "337ce78bef43961c9d95de6d7f8af5b2",
+    "semantic_hash": "337ce78bef43961c9d95de6d7f8af5b2"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260610180949_Slice10DataQualityIssues.Designer.cs": {
+    "mtime": 1781114989.6319292,
+    "ast_hash": "206f68a12e2dcac88865bf1340c49e3c",
+    "semantic_hash": "206f68a12e2dcac88865bf1340c49e3c"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260610180949_Slice10DataQualityIssues.cs": {
+    "mtime": 1781114989.6309285,
+    "ast_hash": "9df571df408944dd308482b14bed348b",
+    "semantic_hash": "9df571df408944dd308482b14bed348b"
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/EnterpriseThreadDbContextModelSnapshot.cs": {
+    "mtime": 1781366049.1257825,
+    "ast_hash": "354d61ac43387fa4cb79cc4d5a1a6413",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Ontology/OntologyContracts.cs": {
+    "mtime": 1781106922.4280906,
+    "ast_hash": "08169881dfe10508ab53450a99c736e0",
+    "semantic_hash": "08169881dfe10508ab53450a99c736e0"
+  },
+  "ETOS.Backend/Ontology/OntologyEndpointExtensions.cs": {
+    "mtime": 1781108517.5105765,
+    "ast_hash": "8ee295b20daace7c3bfa9977c511dd31",
+    "semantic_hash": "8ee295b20daace7c3bfa9977c511dd31"
+  },
+  "ETOS.Backend/Ontology/OntologyModels.cs": {
+    "mtime": 1781107081.6946044,
+    "ast_hash": "1d60ee67ebbee1871faa48c71e44761f",
+    "semantic_hash": "1d60ee67ebbee1871faa48c71e44761f"
+  },
+  "ETOS.Backend/Ontology/OntologyService.cs": {
+    "mtime": 1781107234.0285814,
+    "ast_hash": "a28cbd2dfd29a7efb24e898e92e920e6",
+    "semantic_hash": "a28cbd2dfd29a7efb24e898e92e920e6"
+  },
+  "ETOS.Backend/Platform/EnterpriseThreadPlatform.cs": {
+    "mtime": 1781367344.4225702,
+    "ast_hash": "d175f46849b8158806eab77a023d995f",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Platform/Extensions/ExtensionPoint.cs": {
+    "mtime": 1780763773.6560092,
+    "ast_hash": "7c2282460c8fd244ef87d3f4c4bf0f19",
+    "semantic_hash": "7c2282460c8fd244ef87d3f4c4bf0f19"
+  },
+  "ETOS.Backend/Platform/Extensions/IExtensionPointCatalog.cs": {
+    "mtime": 1780763776.105062,
+    "ast_hash": "17184a1b4556ff741bca550b0b9652d9",
+    "semantic_hash": "17184a1b4556ff741bca550b0b9652d9"
+  },
+  "ETOS.Backend/Platform/Extensions/StaticExtensionPointCatalog.cs": {
+    "mtime": 1781102873.522485,
+    "ast_hash": "fd4125b8aaa80f3f4830120d9d1d285f",
+    "semantic_hash": "fd4125b8aaa80f3f4830120d9d1d285f"
+  },
+  "ETOS.Backend/Program.cs": {
+    "mtime": 1781367344.4225702,
+    "ast_hash": "706d0cf09fb067605ed06b6dcde25787",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Properties/launchSettings.json": {
+    "mtime": 1780763550.1079583,
+    "ast_hash": "85b90b8781b8390ff8248309a59882c4",
+    "semantic_hash": "85b90b8781b8390ff8248309a59882c4"
+  },
+  "ETOS.Backend/Tenancy/ITenantScoped.cs": {
+    "mtime": 1780763748.6184206,
+    "ast_hash": "4d3c4360ba5e7fce2c0318ca359dc553",
+    "semantic_hash": "4d3c4360ba5e7fce2c0318ca359dc553"
+  },
+  "ETOS.Backend/Tenancy/TenantScopeValidator.cs": {
+    "mtime": 1780763758.5646331,
+    "ast_hash": "a6c365dfb21746dc22aba9fd3e8991b5",
+    "semantic_hash": "a6c365dfb21746dc22aba9fd3e8991b5"
+  },
+  "ETOS.Backend/Tenancy/TenantScopedSampleRecord.cs": {
+    "mtime": 1780763752.3735456,
+    "ast_hash": "388ed34b22176757ed5b7630b28e5521",
+    "semantic_hash": "388ed34b22176757ed5b7630b28e5521"
+  },
+  "ETOS.Backend/appsettings.Development.json": {
+    "mtime": 1781032255.20166,
+    "ast_hash": "e94e6d614b9e3ad4828e117e5d4b670e",
+    "semantic_hash": "e94e6d614b9e3ad4828e117e5d4b670e"
+  },
+  "ETOS.Backend/appsettings.json": {
+    "mtime": 1781102862.7033274,
+    "ast_hash": "1587b19fa006ac18a3df53a222a6d3aa",
+    "semantic_hash": "1587b19fa006ac18a3df53a222a6d3aa"
+  },
+  "ETOS.Frontend/eslint.config.mjs": {
+    "mtime": 1780763287.9329858,
+    "ast_hash": "dfa1f5f6a7037bf39dc510f30b180002",
+    "semantic_hash": "dfa1f5f6a7037bf39dc510f30b180002"
+  },
+  "ETOS.Frontend/next-env.d.ts": {
+    "mtime": 1781113139.6716356,
+    "ast_hash": "d0f8375ae1199dc7acd3977fc33b78b8",
+    "semantic_hash": "d0f8375ae1199dc7acd3977fc33b78b8"
+  },
+  "ETOS.Frontend/next.config.ts": {
+    "mtime": 1780763287.9871647,
+    "ast_hash": "9b77af189a21a7a64e4bd7a426f64176",
+    "semantic_hash": "9b77af189a21a7a64e4bd7a426f64176"
+  },
+  "ETOS.Frontend/package.json": {
+    "mtime": 1780842017.4281332,
+    "ast_hash": "28d15b74f7394f6f3686f6960c84890a",
+    "semantic_hash": "28d15b74f7394f6f3686f6960c84890a"
+  },
+  "ETOS.Frontend/postcss.config.mjs": {
+    "mtime": 1780763287.9457343,
+    "ast_hash": "239f3ebf717465dc636818a1a619398d",
+    "semantic_hash": "239f3ebf717465dc636818a1a619398d"
+  },
+  "ETOS.Frontend/src/app/imports/page.tsx": {
+    "mtime": 1781367344.4225702,
+    "ast_hash": "0de3e885a9af37707296ed26a1033077",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/app/layout.tsx": {
+    "mtime": 1780842021.5225594,
+    "ast_hash": "2ab3cf56d96ec4acdda240fb534a578b",
+    "semantic_hash": "2ab3cf56d96ec4acdda240fb534a578b"
+  },
+  "ETOS.Frontend/src/app/model-artifacts/page.tsx": {
+    "mtime": 1781109309.1246822,
+    "ast_hash": "6b7a691af78b5e050aab2ace67ef78de",
+    "semantic_hash": "6b7a691af78b5e050aab2ace67ef78de"
+  },
+  "ETOS.Frontend/src/app/page.tsx": {
+    "mtime": 1781203368.5293913,
+    "ast_hash": "2e8cd7f2e41d5982aea980966d9f3c7e",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/lib/etos-api.ts": {
+    "mtime": 1781367344.4225702,
+    "ast_hash": "cec561c35ba8e510ecbaf890672d3b6d",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/tsconfig.json": {
+    "mtime": 1780763578.4419763,
+    "ast_hash": "ee17fd1c97c735e9f3564e3f5251f125",
+    "semantic_hash": "ee17fd1c97c735e9f3564e3f5251f125"
+  },
+  "EnterpriseThreadOS.sln": {
+    "mtime": 1780763553.0558949,
+    "ast_hash": "4d665706feb8d769dcbec962e67997bb",
+    "semantic_hash": "4d665706feb8d769dcbec962e67997bb"
+  },
+  "dotnet-tools.json": {
+    "mtime": 1780841952.006677,
+    "ast_hash": "f46c346f2dc94413d8c9e547986882c1",
+    "semantic_hash": "f46c346f2dc94413d8c9e547986882c1"
+  },
+  ".context/.checkpoints/engineering-execution-checkpoints.md": {
+    "mtime": 1781174596.4110882,
+    "ast_hash": "924d85983e0e69dfff68913583237daa",
+    "semantic_hash": "924d85983e0e69dfff68913583237daa"
+  },
+  ".cursor/plans/issue_1_bootstrap_e42d24e0.plan.md": {
+    "mtime": 1780763468.8575873,
+    "ast_hash": "20781e6e68137c0210707e96c060d918",
+    "semantic_hash": "20781e6e68137c0210707e96c060d918"
+  },
+  ".cursor/plans/neo4j_graph_decision_5dc4efa8.plan.md": {
+    "mtime": 1781097435.8694136,
+    "ast_hash": "f2e371af3395aad9022beba82d4fbb6d",
+    "semantic_hash": "f2e371af3395aad9022beba82d4fbb6d"
+  },
+  ".cursor/plans/slice-2-identity_ffcbe231.plan.md": {
+    "mtime": 1781030963.4116404,
+    "ast_hash": "3e4805b6c378539a0281346069d420c6",
+    "semantic_hash": "3e4805b6c378539a0281346069d420c6"
+  },
+  ".cursor/plans/slice-3-audit_cb5f4911.plan.md": {
+    "mtime": 1781033002.8072693,
+    "ast_hash": "560be2bc1f5114131949db12f7277b4b",
+    "semantic_hash": "560be2bc1f5114131949db12f7277b4b"
+  },
+  ".cursor/plans/slice-4-artifacts_4bd3e22c.plan.md": {
+    "mtime": 1781034471.9956586,
+    "ast_hash": "f5018b86fccd2a373fbc31ffbbc25a0b",
+    "semantic_hash": "f5018b86fccd2a373fbc31ffbbc25a0b"
+  },
+  ".cursor/plans/slice-5-policy_46d1247d.plan.md": {
+    "mtime": 1781097632.5857413,
+    "ast_hash": "5fd508348c9984649f9d41127afa9030",
+    "semantic_hash": "5fd508348c9984649f9d41127afa9030"
+  },
+  ".cursor/plans/slice-6-graph-memory_8a3f2c1b.plan.md": {
+    "mtime": 1781104507.1164062,
+    "ast_hash": "91f04d22fc8ff601aceb1f5bfd51770e",
+    "semantic_hash": "91f04d22fc8ff601aceb1f5bfd51770e"
+  },
+  ".cursor/plans/slice-7-ontology_83914dfb.plan.md": {
+    "mtime": 1781108583.3785608,
+    "ast_hash": "856232352567749f18512f9fdd992647",
+    "semantic_hash": "856232352567749f18512f9fdd992647"
+  },
+  ".cursor/plans/slice-8_imports_062273a3.plan.md": {
+    "mtime": 1781110951.0788128,
+    "ast_hash": "b948f5fb60b68bcd3cb0326ab6002540",
+    "semantic_hash": "b948f5fb60b68bcd3cb0326ab6002540"
+  },
+  ".cursor/plans/slice-9_identity_2f97d62a.plan.md": {
+    "mtime": 1781112922.1279104,
+    "ast_hash": "c5b67b6b29bdd2d1e493aa2e4e9d5330",
+    "semantic_hash": "c5b67b6b29bdd2d1e493aa2e4e9d5330"
+  },
+  ".cursor/skills/caveman/SKILL.md": {
+    "mtime": 1781172356.2826982,
+    "ast_hash": "9c9b22aacd0791eb9029d6a3dbcd2ca0",
+    "semantic_hash": "9c9b22aacd0791eb9029d6a3dbcd2ca0"
+  },
+  ".cursor/skills/projectcheckpoint/SKILL.md": {
+    "mtime": 1781033632.6208477,
+    "ast_hash": "3c75eabb3e12e9595d7ac7aec15253e8",
+    "semantic_hash": "3c75eabb3e12e9595d7ac7aec15253e8"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-001-1-100.md": {
+    "mtime": 1780761314.197383,
+    "ast_hash": "0ad793e510fa16af8aed26dcf816c414",
+    "semantic_hash": "0ad793e510fa16af8aed26dcf816c414"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-002-101-200.md": {
+    "mtime": 1780760306.4380536,
+    "ast_hash": "fee239f8aebc858af555683994f209ff",
+    "semantic_hash": "fee239f8aebc858af555683994f209ff"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-003-201-300.md": {
+    "mtime": 1780760384.5978572,
+    "ast_hash": "f139729f098d695fe74fefddc252ea8d",
+    "semantic_hash": "f139729f098d695fe74fefddc252ea8d"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md": {
+    "mtime": 1780760386.0984955,
+    "ast_hash": "8b1690e8f4dc8d2564581a250f0f1f5d",
+    "semantic_hash": "8b1690e8f4dc8d2564581a250f0f1f5d"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md": {
+    "mtime": 1780760461.129156,
+    "ast_hash": "dd48a90365df0255a3db4e15db1cfb5a",
+    "semantic_hash": "dd48a90365df0255a3db4e15db1cfb5a"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-006-501-600.md": {
+    "mtime": 1780760517.441183,
+    "ast_hash": "d10ac6d44e405b4d6ed7e04ea0eb3dbd",
+    "semantic_hash": "d10ac6d44e405b4d6ed7e04ea0eb3dbd"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-007-601-700.md": {
+    "mtime": 1780760522.0061452,
+    "ast_hash": "41de46ff5cb170072b4f3ee04e6027c4",
+    "semantic_hash": "41de46ff5cb170072b4f3ee04e6027c4"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md": {
+    "mtime": 1780760560.958149,
+    "ast_hash": "7a3df4ecf40e955515b3bc8ef88c87ef",
+    "semantic_hash": "7a3df4ecf40e955515b3bc8ef88c87ef"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md": {
+    "mtime": 1780760623.846369,
+    "ast_hash": "3018dd3a3ce5c15a0d89276746e3fbd1",
+    "semantic_hash": "3018dd3a3ce5c15a0d89276746e3fbd1"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-010-901-1000.md": {
+    "mtime": 1780760644.3857374,
+    "ast_hash": "e2e887c735c2c65f9b0cec6b6ba8cb4c",
+    "semantic_hash": "e2e887c735c2c65f9b0cec6b6ba8cb4c"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-011-1001-1100.md": {
+    "mtime": 1780760689.1639762,
+    "ast_hash": "14f3d5d3cbc878349cbb2f680ef09800",
+    "semantic_hash": "14f3d5d3cbc878349cbb2f680ef09800"
+  },
+  ".docs/.prd/.initialConversation/chatgpt-conversation-part-012-1101-1152.md": {
+    "mtime": 1780760775.854705,
+    "ast_hash": "cdb5fbd0433df6af6590451253c94834",
+    "semantic_hash": "cdb5fbd0433df6af6590451253c94834"
+  },
+  ".docs/.prd/engineering-execution-issues.md": {
+    "mtime": 1781367868.363096,
+    "ast_hash": "c47b8dbb6f6cc3af5570b7c00b68a81f",
+    "semantic_hash": ""
+  },
+  ".docs/.prd/engineering-execution-prd.md": {
+    "mtime": 1781107235.116569,
+    "ast_hash": "54751cb2495e9d82bce15c911a0ffa0b",
+    "semantic_hash": "54751cb2495e9d82bce15c911a0ffa0b"
+  },
+  "AGENTS.md": {
+    "mtime": 1781102942.8427157,
+    "ast_hash": "18365f2cddbc036ee77612a565320b96",
+    "semantic_hash": "18365f2cddbc036ee77612a565320b96"
+  },
+  "ARCHITECTURE.md": {
+    "mtime": 1781367863.2430851,
+    "ast_hash": "ff431e72f5fce8e0a6458e23e7add988",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/AGENTS.md": {
+    "mtime": 1780763622.5104728,
+    "ast_hash": "9e09241799026ac05be315a2f0b50055",
+    "semantic_hash": "9e09241799026ac05be315a2f0b50055"
+  },
+  "ETOS.Frontend/CLAUDE.md": {
+    "mtime": 1780763622.5114725,
+    "ast_hash": "5c27369b226fcf2be8a6cfe52224e767",
+    "semantic_hash": "5c27369b226fcf2be8a6cfe52224e767"
+  },
+  "ETOS.Frontend/README.md": {
+    "mtime": 1781102894.195917,
+    "ast_hash": "51e6bedfe1218b014cde85e78ff07bf3",
+    "semantic_hash": "51e6bedfe1218b014cde85e78ff07bf3"
+  },
+  "README.md": {
+    "mtime": 1781202838.432241,
+    "ast_hash": "b35749fbea197c57c4e6826c7bd1c70e",
+    "semantic_hash": ""
+  },
+  "docs/ai-agent-workflow.md": {
+    "mtime": 1781102950.0239289,
+    "ast_hash": "858033826f26d939b88dc9f2fe30ca1d",
+    "semantic_hash": "858033826f26d939b88dc9f2fe30ca1d"
+  },
+  "docs/architecture/adr/0002-artifact-lifecycle.md": {
+    "mtime": 1781033703.8469539,
+    "ast_hash": "511af76372d1c1d370ffd13911ad4bd3",
+    "semantic_hash": "511af76372d1c1d370ffd13911ad4bd3"
+  },
+  "docs/architecture/adr/README.md": {
+    "mtime": 1781029485.3241456,
+    "ast_hash": "0b42a848c4e2a87dfd14ede403ff3d3d",
+    "semantic_hash": "0b42a848c4e2a87dfd14ede403ff3d3d"
+  },
+  "docs/architecture/extension-points.md": {
+    "mtime": 1781102946.9281342,
+    "ast_hash": "4c6f118fb15e2e724bc77a92d7834622",
+    "semantic_hash": "4c6f118fb15e2e724bc77a92d7834622"
+  },
+  "docs/backend/architecture.md": {
+    "mtime": 1781202556.8254073,
+    "ast_hash": "3081a5762d9e87218ed8b5c0e223607e",
+    "semantic_hash": ""
+  },
+  "docs/frontend/architecture.md": {
+    "mtime": 1781202771.1898167,
+    "ast_hash": "33af68e41eccec14c59676c17802defa",
+    "semantic_hash": ""
+  },
+  "docs/local-development.md": {
+    "mtime": 1781202901.8509946,
+    "ast_hash": "a7cff8dc75eab9d2cffba2ba4294c4a2",
+    "semantic_hash": ""
+  },
+  "infra/local/docker-compose.yml": {
+    "mtime": 1781104831.994099,
+    "ast_hash": "298730d5396a7b3f018d9c2a15417bc0",
+    "semantic_hash": "298730d5396a7b3f018d9c2a15417bc0"
+  },
+  "ETOS.Backend/GraphMemory/GraphMemoryEndpointExtensions.cs": {
+    "mtime": 1781176920.5277267,
+    "ast_hash": "f90c2a4efa229036816ca37abc9f208a",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260611112510_Issue11TrustedGraphPromotion.Designer.cs": {
+    "mtime": 1781177110.4289756,
+    "ast_hash": "f7f79c378f0622c83ce9b74021f09b54",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260611112510_Issue11TrustedGraphPromotion.cs": {
+    "mtime": 1781177110.427976,
+    "ast_hash": "ac1df6f4c2af1d12eb7ecb6a11c54af2",
+    "semantic_hash": ""
+  },
+  ".cursor/plans/slice-11_e69df934.plan.md": {
+    "mtime": 1781177318.4963975,
+    "ast_hash": "5ec3b2f6b04123a52c7b3a0944bbddf0",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/public/file.svg": {
+    "mtime": 1780763287.9507353,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/public/globe.svg": {
+    "mtime": 1780763287.9578085,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/public/next.svg": {
+    "mtime": 1780763287.9633749,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/public/vercel.svg": {
+    "mtime": 1780763287.9693766,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/public/window.svg": {
+    "mtime": 1780763287.9733746,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend.Tests/DocumentMemoryTests.cs": {
+    "mtime": 1781202428.0157347,
+    "ast_hash": "7e62ead2ed9ee74d199219bcb9ca7424",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Documents/DocumentContracts.cs": {
+    "mtime": 1781191441.6826787,
+    "ast_hash": "cd85fb840afde8d9bbe8ebfecb448de1",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Documents/DocumentEndpointExtensions.cs": {
+    "mtime": 1781191687.8132255,
+    "ast_hash": "8a1322c739e6ccf4811789799b2ddfda",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Documents/DocumentModels.cs": {
+    "mtime": 1781191412.6113162,
+    "ast_hash": "b3737d63bd93ab91989e719adec025d2",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Documents/DocumentService.cs": {
+    "mtime": 1781191776.881921,
+    "ast_hash": "ec5499ed6a08f5867006fe7ec0959ee4",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Documents/DocumentStorage.cs": {
+    "mtime": 1781191468.2749603,
+    "ast_hash": "a45d43a1716303f33b743f1863a89792",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260611153011_Issue12DocumentMemoryObjectLinking.Designer.cs": {
+    "mtime": 1781191811.5751896,
+    "ast_hash": "fe3176b39b35f635f91ee75897ff1590",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260611153011_Issue12DocumentMemoryObjectLinking.cs": {
+    "mtime": 1781191811.5736856,
+    "ast_hash": "db0abdb912a77d0bc1a9ab03b79a7269",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/src/app/documents/page.tsx": {
+    "mtime": 1781203536.5789733,
+    "ast_hash": "037abfa109fd38f34f9a8600a457275f",
+    "semantic_hash": ""
+  },
+  ".cursor/plans/slice-12-document-memory-object-linking.md": {
+    "mtime": 1781191274.2161427,
+    "ast_hash": "dfb78c885f104040153e11df9cab21c4",
+    "semantic_hash": ""
+  },
+  ".cursor/plans/slice_10_quality_558f624b.plan.md": {
+    "mtime": 1781115244.912684,
+    "ast_hash": "011304cb8a11beec71ed9553b454e2e5",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend.Tests/GovernedQueryTests.cs": {
+    "mtime": 1781366153.2438252,
+    "ast_hash": "a4ac29733768ceaeb2ba7064855ebfe8",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GovernedQuery/GovernedQueryContracts.cs": {
+    "mtime": 1781365829.38994,
+    "ast_hash": "7689262f75e15697bec52c0891366174",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GovernedQuery/GovernedQueryEndpointExtensions.cs": {
+    "mtime": 1781365974.317926,
+    "ast_hash": "9ee7225f986e66be604f477593f1dabc",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GovernedQuery/GovernedQueryModels.cs": {
+    "mtime": 1781365675.8709707,
+    "ast_hash": "5ec5e706dd600c03e5324e6361ab5ea9",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/GovernedQuery/GovernedQueryService.cs": {
+    "mtime": 1781366418.145146,
+    "ast_hash": "1cdc9f4fda2e3a3bcf26bca953384f81",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260613155409_Slice13GovernedQueryContextAssembly.Designer.cs": {
+    "mtime": 1781366049.124782,
+    "ast_hash": "fafd6f81f96e32b62f322190a03b4be2",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Infrastructure/Persistence/Migrations/20260613155409_Slice13GovernedQueryContextAssembly.cs": {
+    "mtime": 1781366049.122782,
+    "ast_hash": "01a83e0ac742733dc9bc5719005c7350",
+    "semantic_hash": ""
+  },
+  ".cursor/plans/slice-13-Governed-Query-Intents.md": {
+    "mtime": 1781366290.0278928,
+    "ast_hash": "8bc7fbf23b9c697436f8acf5953d7f6c",
+    "semantic_hash": ""
+  },
+  ".docs/.gapAnalysis/issues-1-13-gap-analysis.md": {
+    "mtime": 1781367467.3874657,
+    "ast_hash": "c4c70a103bbab2a30675a4e495510fe5",
+    "semantic_hash": ""
+  }
+}

@@ -3,6 +3,8 @@ using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
 using ETOS.Backend.GraphMemory;
+using ETOS.Backend.AiTrace;
+using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Imports;
@@ -129,6 +131,22 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<DocumentObjectLink> DocumentObjectLinks => Set<DocumentObjectLink>();
 
     public DbSet<DocumentVectorIndexRecord> DocumentVectorIndexRecords => Set<DocumentVectorIndexRecord>();
+
+    public DbSet<QueryIntentVersion> QueryIntentVersions => Set<QueryIntentVersion>();
+
+    public DbSet<RetrievalStrategyVersion> RetrievalStrategyVersions => Set<RetrievalStrategyVersion>();
+
+    public DbSet<RetrievalRun> RetrievalRuns => Set<RetrievalRun>();
+
+    public DbSet<ContextPackage> ContextPackages => Set<ContextPackage>();
+
+    public DbSet<ContextAccessDecision> ContextAccessDecisions => Set<ContextAccessDecision>();
+
+    public DbSet<AiTraceRecord> AiTraceRecords => Set<AiTraceRecord>();
+
+    public DbSet<AiTraceArtifactLink> AiTraceArtifactLinks => Set<AiTraceArtifactLink>();
+
+    public DbSet<AiTraceExportRecord> AiTraceExportRecords => Set<AiTraceExportRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -509,6 +527,167 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
         ConfigureIdentityResolutionTables(modelBuilder);
         ConfigureDataQualityTables(modelBuilder);
         ConfigureDocumentTables(modelBuilder);
+        ConfigureGovernedQueryTables(modelBuilder);
+        ConfigureAiTraceTables(modelBuilder);
+    }
+
+    private static void ConfigureGovernedQueryTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<QueryIntentVersion>(entity =>
+        {
+            entity.ToTable("query_intent_versions");
+            entity.HasKey(intent => intent.Id);
+            entity.Property(intent => intent.TenantId).IsRequired();
+            entity.Property(intent => intent.IntentKey).HasMaxLength(120).IsRequired();
+            entity.Property(intent => intent.NormalizedIntentKey).HasMaxLength(120).IsRequired();
+            entity.Property(intent => intent.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(intent => intent.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(intent => intent.Name).HasMaxLength(200).IsRequired();
+            entity.Property(intent => intent.Summary).HasMaxLength(1000);
+            entity.Property(intent => intent.IntentKind).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(intent => intent.Source).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(intent => intent.CreatedAt).IsRequired();
+            entity.HasIndex(intent => new { intent.TenantId, intent.NormalizedIntentKey, intent.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(intent => new { intent.TenantId, intent.Source, intent.IsEnabled });
+        });
+
+        modelBuilder.Entity<RetrievalStrategyVersion>(entity =>
+        {
+            entity.ToTable("retrieval_strategy_versions");
+            entity.HasKey(strategy => strategy.Id);
+            entity.Property(strategy => strategy.TenantId).IsRequired();
+            entity.Property(strategy => strategy.StrategyKey).HasMaxLength(120).IsRequired();
+            entity.Property(strategy => strategy.NormalizedStrategyKey).HasMaxLength(120).IsRequired();
+            entity.Property(strategy => strategy.VersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(strategy => strategy.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
+            entity.Property(strategy => strategy.Name).HasMaxLength(200).IsRequired();
+            entity.Property(strategy => strategy.Summary).HasMaxLength(1000);
+            entity.Property(strategy => strategy.GraphSpace).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(strategy => strategy.RequiredTrustState).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(strategy => strategy.RelationshipTypesJson).HasMaxLength(4000).IsRequired();
+            entity.Property(strategy => strategy.Source).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(strategy => strategy.CreatedAt).IsRequired();
+            entity.HasIndex(strategy => new { strategy.TenantId, strategy.NormalizedStrategyKey, strategy.NormalizedVersionLabel }).IsUnique();
+            entity.HasIndex(strategy => new { strategy.TenantId, strategy.Source, strategy.IsEnabled });
+        });
+
+        modelBuilder.Entity<RetrievalRun>(entity =>
+        {
+            entity.ToTable("retrieval_runs");
+            entity.HasKey(run => run.Id);
+            entity.Property(run => run.TenantId).IsRequired();
+            entity.Property(run => run.QueryText).HasMaxLength(1000).IsRequired();
+            entity.Property(run => run.Status).HasMaxLength(64).IsRequired();
+            entity.Property(run => run.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(run => run.CreatedAt).IsRequired();
+            entity.HasIndex(run => new { run.TenantId, run.CreatedAt });
+            entity.HasIndex(run => new { run.TenantId, run.QueryIntentVersionId, run.CreatedAt });
+            entity.HasOne(run => run.QueryIntentVersion)
+                .WithMany()
+                .HasForeignKey(run => run.QueryIntentVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(run => run.RetrievalStrategyVersion)
+                .WithMany()
+                .HasForeignKey(run => run.RetrievalStrategyVersionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ContextPackage>(entity =>
+        {
+            entity.ToTable("context_packages");
+            entity.HasKey(package => package.Id);
+            entity.Property(package => package.TenantId).IsRequired();
+            entity.Property(package => package.PolicyKey).HasMaxLength(120);
+            entity.Property(package => package.RetrievedContextJson).HasMaxLength(16000).IsRequired();
+            entity.Property(package => package.FilteredContextJson).HasMaxLength(16000).IsRequired();
+            entity.Property(package => package.DeniedSummariesJson).HasMaxLength(16000).IsRequired();
+            entity.Property(package => package.SensitiveDeniedReferencesJson).HasMaxLength(16000).IsRequired();
+            entity.Property(package => package.LlmVisibleContextJson).HasMaxLength(16000).IsRequired();
+            entity.Property(package => package.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(package => package.CreatedAt).IsRequired();
+            entity.HasIndex(package => new { package.TenantId, package.RetrievalRunId, package.CreatedAt });
+            entity.HasOne(package => package.RetrievalRun)
+                .WithMany(run => run.ContextPackages)
+                .HasForeignKey(package => package.RetrievalRunId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ContextAccessDecision>(entity =>
+        {
+            entity.ToTable("context_access_decisions");
+            entity.HasKey(decision => decision.Id);
+            entity.Property(decision => decision.TenantId).IsRequired();
+            entity.Property(decision => decision.ContextId).HasMaxLength(240).IsRequired();
+            entity.Property(decision => decision.ContextType).HasMaxLength(120).IsRequired();
+            entity.Property(decision => decision.Result).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(decision => decision.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(decision => decision.Reason).HasMaxLength(1000);
+            entity.Property(decision => decision.CreatedAt).IsRequired();
+            entity.HasIndex(decision => new { decision.TenantId, decision.ContextPackageId, decision.DisplayOrder });
+            entity.HasOne(decision => decision.ContextPackage)
+                .WithMany(package => package.AccessDecisions)
+                .HasForeignKey(decision => decision.ContextPackageId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureAiTraceTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AiTraceRecord>(entity =>
+        {
+            entity.ToTable("ai_trace_records");
+            entity.HasKey(trace => trace.Id);
+            entity.Property(trace => trace.TenantId).IsRequired();
+            entity.Property(trace => trace.IntentKey).HasMaxLength(120).IsRequired();
+            entity.Property(trace => trace.StrategyKey).HasMaxLength(120).IsRequired();
+            entity.Property(trace => trace.QueryText).HasMaxLength(1000).IsRequired();
+            entity.Property(trace => trace.Status).HasMaxLength(64).IsRequired();
+            entity.Property(trace => trace.SafeSummary).HasMaxLength(1000).IsRequired();
+            entity.Property(trace => trace.SourcesSummaryJson).HasMaxLength(16000).IsRequired();
+            entity.Property(trace => trace.FilteredSummariesJson).HasMaxLength(16000).IsRequired();
+            entity.Property(trace => trace.DeniedSafeSummariesJson).HasMaxLength(16000).IsRequired();
+            entity.Property(trace => trace.SensitiveDeniedReferencesJson).HasMaxLength(16000).IsRequired();
+            entity.Property(trace => trace.ConfidenceImpactJson).HasMaxLength(4000).IsRequired();
+            entity.Property(trace => trace.PromptTemplateVersionLabel).HasMaxLength(120);
+            entity.Property(trace => trace.OutputSchemaVersionLabel).HasMaxLength(120);
+            entity.Property(trace => trace.GeneratedOutputJson).HasMaxLength(16000);
+            entity.Property(trace => trace.TraceKind).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(trace => trace.CreatedAt).IsRequired();
+            entity.HasIndex(trace => new { trace.TenantId, trace.CreatedAt });
+            entity.HasIndex(trace => new { trace.TenantId, trace.RetrievalRunId });
+        });
+
+        modelBuilder.Entity<AiTraceArtifactLink>(entity =>
+        {
+            entity.ToTable("ai_trace_artifact_links");
+            entity.HasKey(link => link.Id);
+            entity.Property(link => link.TenantId).IsRequired();
+            entity.Property(link => link.ObjectType).HasMaxLength(120).IsRequired();
+            entity.Property(link => link.ObjectId).HasMaxLength(200).IsRequired();
+            entity.Property(link => link.LinkKind).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(link => link.CreatedAt).IsRequired();
+            entity.HasIndex(link => new { link.TenantId, link.AiTraceRecordId, link.LinkKind });
+            entity.HasOne(link => link.AiTraceRecord)
+                .WithMany(trace => trace.ArtifactLinks)
+                .HasForeignKey(link => link.AiTraceRecordId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AiTraceExportRecord>(entity =>
+        {
+            entity.ToTable("ai_trace_export_records");
+            entity.HasKey(record => record.Id);
+            entity.Property(record => record.TenantId).IsRequired();
+            entity.Property(record => record.ExportHash).HasMaxLength(128).IsRequired();
+            entity.Property(record => record.RedactionMetadataJson).HasMaxLength(8000).IsRequired();
+            entity.Property(record => record.EvidenceLevel).HasMaxLength(64).IsRequired();
+            entity.Property(record => record.CreatedAt).IsRequired();
+            entity.HasIndex(record => new { record.TenantId, record.AiTraceRecordId, record.CreatedAt });
+            entity.HasOne(record => record.AiTraceRecord)
+                .WithMany(trace => trace.ExportRecords)
+                .HasForeignKey(record => record.AiTraceRecordId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
     }
 
     private static void ConfigureDocumentTables(ModelBuilder modelBuilder)

@@ -315,6 +315,8 @@ Type: AFK
 Blocked by: Issue 12
 User stories covered: 35, 36, 37, 38, 39, 40, 46, 52
 
+Implementation status: Implemented in the current source as Slice 13. See `ETOS.Backend/GovernedQuery/`, EF migration `Slice13GovernedQueryContextAssembly`, `ETOS.Backend.Tests/GovernedQueryTests.cs`, and typed API helpers in `ETOS.Frontend/src/lib/etos-api.ts`.
+
 ## What to build
 
 Implement QueryIntentVersion, RetrievalStrategyVersion, fixed platform query intents, governed query service, graph-first document-second retrieval, RetrievalRun, ContextPackage, ContextAccessDecision, and LLM-safe context assembly. RetrievalStrategyVersion may include approved graph traversal templates, semantic/vector fallback behavior, and context assembly rules. Keep persistent agent-memory provider integration out of this slice except for explicit placeholder contracts if needed by later agents.

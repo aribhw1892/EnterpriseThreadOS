@@ -441,7 +441,7 @@ function DataQualityPanel({
           title="Data Quality Issues"
           description="Durable quality issues promoted from import validation, manual review hooks, and security events."
           items={issues.data ?? []}
-          emptyMessage="No data quality issues have been generated for the latest batch."
+          emptyMessage="No data quality issues have been generated for this tenant."
           renderItem={DataQualityIssueCard}
         />
       )}
@@ -614,7 +614,7 @@ export default async function ImportsPage() {
           trustScores={lists.firstBatchTrustScores}
         />
         <DataQualityPanel
-          issues={lists.firstBatchDataQualityIssues}
+          issues={lists.dataQualityIssues}
           monitoringPlaceholders={lists.monitoringPlaceholders}
         />
       </div>

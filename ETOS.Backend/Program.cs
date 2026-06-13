@@ -3,6 +3,8 @@ using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
 using ETOS.Backend.GraphMemory;
+using ETOS.Backend.AiTrace;
+using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
@@ -42,6 +44,8 @@ app.MapEnterpriseThreadIdentityResolutionEndpoints();
 app.MapEnterpriseThreadDataQualityEndpoints();
 app.MapEnterpriseThreadGraphMemoryEndpoints();
 app.MapEnterpriseThreadDocumentEndpoints();
+app.MapEnterpriseThreadGovernedQueryEndpoints();
+app.MapEnterpriseThreadAiTraceEndpoints();
 
 app.Run();
 

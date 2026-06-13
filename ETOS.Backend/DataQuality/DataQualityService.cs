@@ -113,9 +113,12 @@ public sealed class DataQualityIssueService(
             .SingleOrDefaultAsync(item => item.Id == batchId, cancellationToken)
             ?? throw new RequestValidationException("Import batch was not found.");
         await EnsureSameTenantAsync(batch.TenantId, context, "data_quality.import_issues.generate", "import_tenant_mismatch", "The requested import batch belongs to a different tenant.", cancellationToken);
-        if (batch.Status is not (ImportBatchStatus.Validated or ImportBatchStatus.Staged))
+        var hasPromotableValidationIssues =
+            batch.ValidationIssues.Count != 0
+            && batch.Status == ImportBatchStatus.Failed;
+        if (batch.Status is not (ImportBatchStatus.Validated or ImportBatchStatus.Staged) && !hasPromotableValidationIssues)
         {
-            throw new RequestValidationException("Data quality issues can only be generated for validated or staged import batches.");
+            throw new RequestValidationException("Data quality issues can only be generated for validated, staged, or failed validation batches with recorded issues.");
         }
 
         var existingKeys = await dbContext.DataQualityIssues

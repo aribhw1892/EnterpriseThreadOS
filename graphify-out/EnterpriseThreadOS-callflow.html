@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>EnterpriseThreadOS — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 3894 nodes, 6920 edges, 177 communities. Commit: 4cb8ecd</p>
+<p class="subtitle">Generated from graphify knowledge graph: 4364 nodes, 7887 edges, 197 communities. Commit: a595888</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -88,19 +88,19 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>280 nodes</small>")
+    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>294 nodes</small>")
     class EXTRACT_PIPELINE_5F350230 module;
-    BUILD_GRAPH_321CBB04("Graph Build<br/><small>331 nodes</small>")
+    BUILD_GRAPH_321CBB04("Graph Build<br/><small>312 nodes</small>")
     class BUILD_GRAPH_321CBB04 module;
-    ANALYSIS_CLUSTERING_C79796DA("Analysis &amp; Clustering<br/><small>57 nodes</small>")
+    ANALYSIS_CLUSTERING_C79796DA("Analysis &amp; Clustering<br/><small>65 nodes</small>")
     class ANALYSIS_CLUSTERING_C79796DA module;
     OUTPUTS_DOCS_ED82387C("Outputs &amp; Docs<br/><small>5 nodes</small>")
     class OUTPUTS_DOCS_ED82387C module;
     CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>43 nodes</small>")
     class CLI_SKILLS_9964CBB8 module;
-    SERVE_API_35EC8E86("Serving API<br/><small>120 nodes</small>")
+    SERVE_API_35EC8E86("Serving API<br/><small>143 nodes</small>")
     class SERVE_API_35EC8E86 module;
-    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>550 nodes</small>")
+    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>752 nodes</small>")
     class TESTS_FIXTURES_B84B1DCC module;
     SCHEMA_VERSIONING_AND_VALIDATION_C36176F4("Schema Versioning and Validation<br/><small>119 nodes</small>")
     class SCHEMA_VERSIONING_AND_VALIDATION_C36176F4 module;
@@ -116,19 +116,20 @@ flowchart LR
     class ENTERPRISETHREADOS_ENGINEERING_PRD_006713C9 module;
     ETOS_FRONTEND_BBF23E07("ETOS Frontend<br/><small>101 nodes</small>")
     class ETOS_FRONTEND_BBF23E07 module;
-    OTHER_D0941E68("Other<br/><small>1775 nodes</small>")
+    OTHER_D0941E68("Other<br/><small>2017 nodes</small>")
     class OTHER_D0941E68 module;
-    OTHER_D0941E68 -->|implements x38| EXTRACT_PIPELINE_5F350230
-    EXTRACT_PIPELINE_5F350230 -->|calls x22| SERVE_API_35EC8E86
-    SERVE_API_35EC8E86 -->|contains x19| EXTRACT_PIPELINE_5F350230
+    OTHER_D0941E68 -->|implements x41| EXTRACT_PIPELINE_5F350230
+    SERVE_API_35EC8E86 -->|contains x40| EXTRACT_PIPELINE_5F350230
+    EXTRACT_PIPELINE_5F350230 -->|imports x10| SERVE_API_35EC8E86
+    TESTS_FIXTURES_B84B1DCC -->|implements x5| OTHER_D0941E68
     OTHER_D0941E68 -->|inherits x5| SCHEMA_VERSIONING_AND_VALIDATION_C36176F4
-    TESTS_FIXTURES_B84B1DCC -->|implements x3| OTHER_D0941E68
-    TESTS_FIXTURES_B84B1DCC -->|implements x2| BUILD_GRAPH_321CBB04
+    BUILD_GRAPH_321CBB04 -->|implements x2| TESTS_FIXTURES_B84B1DCC
+    SERVE_API_35EC8E86 -->|imports x2| OTHER_D0941E68
+    TESTS_FIXTURES_B84B1DCC -->|implements| BUILD_GRAPH_321CBB04
+    BUILD_GRAPH_321CBB04 -->|implements| OTHER_D0941E68
     OTHER_D0941E68 -->|contains| TESTS_FIXTURES_B84B1DCC
-    OTHER_D0941E68 -->|inherits| SERVE_API_35EC8E86
     EXTRACT_PIPELINE_5F350230 -->|implements| OTHER_D0941E68
     OTHER_D0941E68 -->|contains| ENTERPRISETHREADOS_AGENT_GUIDE_61C00685
-    ENTERPRISETHREADOS_AGENT_GUIDE_61C00685 -->|contains| CLI_SKILLS_9964CBB8
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -145,36 +146,36 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Extraction Pipeline</td><td>280</td><td><code>1, 12, 39, 29, 34, 139, 48, 91</code></td></tr><tr><td>Graph Build</td><td>331</td><td><code>98, 13, 15, 132, 22, 28, 27, 135, 41, 155</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>57</td><td><code>133, 136, 137</code></td></tr><tr><td>Outputs &amp; Docs</td><td>5</td><td><code>112, 113, 114, 116, 117</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>43</td><td><code>142, 144, 146, 156, 103, 111, 127, 166</code></td></tr><tr><td>Serving API</td><td>120</td><td><code>14, 169, 26, 19, 24</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>550</td><td><code>167, 10, 6, 9, 11, 16, 17, 20, 21, 23, 31, 35, 37, 66, 80</code></td></tr><tr><td>Schema Versioning and Validation</td><td>119</td><td><code>0</code></td></tr><tr><td>EnterpriseThreadOS Agent Guide</td><td>109</td><td><code>100</code></td></tr><tr><td>AI Agent Workflow</td><td>101</td><td><code>101</code></td></tr><tr><td>Backend Architecture</td><td>101</td><td><code>102</code></td></tr><tr><td>EnterpriseThreadOS Implementation Issues</td><td>101</td><td><code>107</code></td></tr><tr><td>EnterpriseThreadOS Engineering PRD</td><td>101</td><td><code>108</code></td></tr><tr><td>ETOS Frontend</td><td>101</td><td><code>115</code></td></tr><tr><td>Other</td><td>1775</td><td><code>118, 120, 126, 128, 129, 2, 3, 4, 5, 7, 168, 130, 131, 18, 30, 36, 170, 134, 25, 32, 33, 38, 8, 138, 140, 141, 143, 145, 40, 147, 148, 149, 150, 171, 42, 43, 44, 45, 46, 47, 49, 151, 152, 153, 172, 50, 51, 154, 52, 53, 99, 157, 158, 159, 173, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 160, 161, 162, 174, 175, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 81, 82, 83, 123, 176, 84, 85, 86, 87, 88, 89, 90, 92, 93, 163, 164, 165, 94, 95, 96, 97, 104, 105, 106, 109, 110, 119, 121, 122, 124, 125</code></td></tr>
+      <tr><td>Extraction Pipeline</td><td>294</td><td><code>1, 12, 39, 139, 29, 34, 48, 91</code></td></tr><tr><td>Graph Build</td><td>312</td><td><code>98, 13, 132, 22, 28, 186, 27, 135, 41, 155</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>65</td><td><code>133, 136, 137, 180</code></td></tr><tr><td>Outputs &amp; Docs</td><td>5</td><td><code>112, 113, 114, 116, 117</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>43</td><td><code>142, 144, 146, 156, 103, 111, 127, 166</code></td></tr><tr><td>Serving API</td><td>143</td><td><code>14, 178, 169, 26, 19, 24</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>752</td><td><code>187, 167, 15, 10, 6, 9, 11, 16, 17, 20, 21, 23, 190, 31, 35, 37, 66, 80</code></td></tr><tr><td>Schema Versioning and Validation</td><td>119</td><td><code>0</code></td></tr><tr><td>EnterpriseThreadOS Agent Guide</td><td>109</td><td><code>100</code></td></tr><tr><td>AI Agent Workflow</td><td>101</td><td><code>101</code></td></tr><tr><td>Backend Architecture</td><td>101</td><td><code>102</code></td></tr><tr><td>EnterpriseThreadOS Implementation Issues</td><td>101</td><td><code>107</code></td></tr><tr><td>EnterpriseThreadOS Engineering PRD</td><td>101</td><td><code>108</code></td></tr><tr><td>ETOS Frontend</td><td>101</td><td><code>115</code></td></tr><tr><td>Other</td><td>2017</td><td><code>118, 120, 126, 128, 129, 2, 3, 4, 5, 7, 157, 168, 130, 185, 131, 18, 188, 30, 36, 189, 170, 134, 25, 38, 8, 32, 33, 138, 140, 177, 141, 143, 145, 191, 40, 147, 148, 149, 150, 171, 179, 192, 42, 43, 44, 45, 46, 47, 49, 151, 152, 153, 172, 50, 51, 154, 52, 58, 99, 158, 159, 173, 181, 182, 193, 53, 54, 55, 56, 57, 59, 60, 61, 62, 63, 64, 65, 67, 160, 161, 162, 174, 175, 183, 194, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 195, 81, 82, 83, 123, 176, 184, 196, 84, 85, 86, 87, 88, 89, 90, 92, 93, 163, 164, 165, 94, 95, 96, 97, 104, 105, 106, 109, 110, 119, 121, 122, 124, 125</code></td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Core Flow</h4>
-    <div class="arrow-chain">Analysis &amp; Clustering -&gt; Extraction Pipeline -&gt; Serving API -&gt; Graph Build -&gt; Outputs &amp; Docs -&gt; CLI &amp; Skill Installers -&gt; Tests &amp; Fixtures</div>
+    <div class="arrow-chain">Analysis &amp; Clustering -&gt; Extraction Pipeline -&gt; Serving API -&gt; Other -&gt; Schema Versioning and Validation -&gt; Graph Build -&gt; Tests &amp; Fixtures</div>
   </div>
 </div>
 <div class="grid">
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>3894 nodes · 6920 edges · 177 communities (148 shown, 29 thin omitted)</li>
+      <li>4364 nodes · 7887 edges · 197 communities (166 shown, 31 thin omitted)</li>
       <li>Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS</li>
       <li>Token cost: 0 input · 0 output</li>
       <li>1. `EnterpriseThreadOS Implementation Issues` - 115 edges</li>
       <li>2. `AI-Native Enterprise Digital Thread Agentic OS` - 110 edges</li>
-      <li>3. `ImportService` - 63 edges</li>
+      <li>3. `ImportService` - 64 edges</li>
     </ul>
   </div>
 </div>
 <hr>
 <!-- ====== 2. Extraction Pipeline ====== -->
 <h2 id="extract-pipeline">2. Extraction Pipeline</h2>
-<p>Extraction Pipeline groups implementation around imports, etosbackend, importservicecs, etosfrontend, mostly in ETOS.Backend/Imports/ImportService.cs, app/imports/page.tsx, src/lib/etos-api.ts. This section covers 280 nodes and 633 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Extraction Pipeline groups implementation around imports, etosbackend, importservicecs, etosfrontend, mostly in ETOS.Backend/Imports/ImportService.cs, app/imports/page.tsx, src/lib/etos-api.ts. This section covers 294 nodes and 666 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Extraction Pipeline (280 nodes, 633 edges)
+    %% Section: Extraction Pipeline (294 nodes, 666 edges)
     subgraph extract_pipeline_ETOS_Backend_Imports_ImportFile_f251b09d["ETOS.Backend/Imports/ImportFileParser.cs"]
         imports_importfileparser_iimportfileparser_5c239621("IImportFileParser<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
         imports_importfileparser_iimportfileparser_parse_6027d6bf("ParseAsync()<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
@@ -191,7 +192,6 @@ flowchart LR
         imports_importservice_importservice_stagebatchas_a2a84b18("StageBatchAsync()<br/><small>ETOS.Backend/Imports/ImportService.cs</small>")
         imports_importservice_iimportservice_8dc8950c("IImportService<br/><small>ETOS.Backend/Imports/ImportService.cs</small>")
         imports_importservice_importservice_createmappin_c96af6b3("CreateMappingVersionAsync()<br/><small>ETOS.Backend/Imports/ImportService.cs</small>")
-        imports_importservice_importservice_validatebatc_49d7267b("ValidateBatchAsync()<br/><small>ETOS.Backend/Imports/ImportService.cs</small>")
     end
     subgraph extract_pipeline_ETOS_Backend_Imports_ImportEndp_a870d429["ETOS.Backend/Imports/ImportEndpointExtensions.cs"]
         imports_importendpointextensions_importendpointe_15acee1f("ImportEndpointExtensions<br/><small>ETOS.Backend/Imports/ImportEndpointExtensions.cs</small>")
@@ -199,6 +199,7 @@ flowchart LR
         imports_importendpointextensions_importendpointe_c50180db("MapEnterpriseThreadImportEndpoints()<br/><small>ETOS.Backend/Imports/ImportEndpointExtensions.cs</small>")
     end
     imports_page_3fecd83d("page.tsx")
+    lib_etos_api_getimportlists_2b6edf5b("getImportLists()<br/><small>src/lib/etos-api.ts</small>")
     imports_importendpointextensions_importendpointe_15acee1f -->|method| imports_importendpointextensions_importendpointe_a9c484f9
     imports_importendpointextensions_importendpointe_15acee1f -->|method| imports_importendpointextensions_importendpointe_c50180db
     imports_importendpointextensions_importendpointe_c50180db -->|calls| imports_importendpointextensions_importendpointe_a9c484f9
@@ -216,8 +217,8 @@ flowchart LR
     imports_importfileparser_csvimportfileparser_rea_9a7d3f16 -->|calls| imports_importfileparser_csvimportfileparser_par_a627dd5c
     imports_importservice_importservice_e3aca74c -->|method| imports_importservice_importservice_createmappin_c96af6b3
     imports_importservice_importservice_e3aca74c -->|method| imports_importservice_importservice_stagebatchas_a2a84b18
-    imports_importservice_importservice_e3aca74c -->|method| imports_importservice_importservice_validatebatc_49d7267b
-    %% Omitted for readability: 262 nodes, 0 edges
+    imports_page_3fecd83d -->|imports| lib_etos_api_getimportlists_2b6edf5b
+    %% Omitted for readability: 276 nodes, 0 edges
     class imports_importfileparser_iimportfileparser_5c239621 klass;
     class imports_importfileparser_iimportfileparser_parse_6027d6bf async;
     class imports_importfileparser_csvimportfileparser_9ebfabdc klass;
@@ -231,11 +232,11 @@ flowchart LR
     class imports_importservice_importservice_stagebatchas_a2a84b18 async;
     class imports_importservice_iimportservice_8dc8950c klass;
     class imports_importservice_importservice_createmappin_c96af6b3 async;
-    class imports_importservice_importservice_validatebatc_49d7267b async;
     class imports_importendpointextensions_importendpointe_15acee1f api;
     class imports_importendpointextensions_importendpointe_a9c484f9 async;
     class imports_importendpointextensions_importendpointe_c50180db api;
     class imports_page_3fecd83d ui;
+    class lib_etos_api_getimportlists_2b6edf5b function;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -504,9 +505,9 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>ETOS.Backend/Imports/ImportService.cs</code></td><td>126 nodes</td></tr>
-<tr><td><code>app/imports/page.tsx</code></td><td>30 nodes</td></tr>
-<tr><td><code>src/lib/etos-api.ts</code></td><td>19 nodes</td></tr>
+      <tr><td><code>ETOS.Backend/Imports/ImportService.cs</code></td><td>127 nodes</td></tr>
+<tr><td><code>app/imports/page.tsx</code></td><td>32 nodes</td></tr>
+<tr><td><code>src/lib/etos-api.ts</code></td><td>24 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-2-identity_ffcbe231.plan.md</code></td><td>17 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportFileParser.cs</code></td><td>17 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportFileStorage.cs</code></td><td>15 nodes</td></tr>
@@ -516,19 +517,19 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x291, calls x138, contains x87, method x85. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x292, calls x155, contains x94, method x86. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 3. Graph Build ====== -->
 <h2 id="build-graph">3. Graph Build</h2>
-<p>Graph Build groups implementation around execution, engineering, issuesmd, docs, mostly in .docs/.prd/engineering-execution-issues.md, ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs, .cursor/plans/slice-6-graph-memory_8a3f2c1b.plan.md. This section covers 331 nodes and 438 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Graph Build groups implementation around docs, execution, engineering, issuesmd, mostly in .docs/.prd/engineering-execution-issues.md, .cursor/plans/slice-6-graph-memory_8a3f2c1b.plan.md, ETOS.Backend/GraphMemory/MemgraphGraphMemoryService.cs. This section covers 312 nodes and 349 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Graph Build (331 nodes, 438 edges)
+    %% Section: Graph Build (312 nodes, 349 edges)
     subgraph build_graph_ETOS_Backend_GraphMemory_IGraphMemor_167ccc11["ETOS.Backend/GraphMemory/IGraphMemoryService.cs"]
         graphmemory_igraphmemoryservice_igraphmemoryserv_ccaf1ba0("IGraphMemoryService<br/><small>ETOS.Backend/GraphMemory/IGraphMemoryService.cs</small>")
         graphmemory_igraphmemoryservice_igraphmemoryserv_9c7eb93a("CreateNodeAsync()<br/><small>ETOS.Backend/GraphMemory/IGraphMemoryService.cs</small>")
@@ -546,13 +547,11 @@ flowchart LR
         graphmemory_memgraphgraphmemoryservice_memgraphg_0256de2b("CreateNodeAsync()<br/><small>ETOS.Backend/GraphMemory/MemgraphGraphMemoryService.cs</small>")
         graphmemory_memgraphgraphmemoryservice_memgraphg_49ab6e68("CreateRelationshipAsync()<br/><small>ETOS.Backend/GraphMemory/MemgraphGraphMemoryService.cs</small>")
         graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3("Deferred()<br/><small>ETOS.Backend/GraphMemory/MemgraphGraphMemoryService.cs</small>")
+        graphmemory_memgraphgraphmemoryservice_memgraphg_bf83f7da("GetNodeAsync()<br/><small>ETOS.Backend/GraphMemory/MemgraphGraphMemoryService.cs</small>")
+        graphmemory_memgraphgraphmemoryservice_memgraphg_95d1796e("ListGraphAsync()<br/><small>ETOS.Backend/GraphMemory/MemgraphGraphMemoryService.cs</small>")
     end
-    subgraph build_graph_ETOS_Backend_GraphMemory_Neo4jGraphM_be50449d["ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs"]
-        graphmemory_neo4jgraphmemoryservice_neo4jgraphme_fecb3331("Neo4jGraphMemoryService<br/><small>ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs</small>")
-        graphmemory_neo4jgraphmemoryservice_neo4jgraphme_3df464d1("CreateRelationshipAsync()<br/><small>ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs</small>")
-        graphmemory_neo4jgraphmemoryservice_neo4jgraphme_4b6df6f5("CreateNodeAsync()<br/><small>ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs</small>")
-        graphmemory_neo4jgraphmemoryservice_neo4jgraphme_1850e820("GetNodeAsync()<br/><small>ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs</small>")
-    end
+    graphmemory_neo4jgraphbootstrapservice_neo4jgrap_39146d1c("Neo4jGraphBootstrapService<br/><small>ETOS.Backend/GraphMemory/Neo4jGraphBootstrapService.cs</small>")
+    graphmemory_neo4jgraphhealthservice_neo4jgraphhe_e53b673d("Neo4jGraphHealthService<br/><small>ETOS.Backend/GraphMemory/Neo4jGraphHealthService.cs</small>")
     graphmemory_igraphmemoryservice_igraphmemoryserv_ccaf1ba0 -->|method| graphmemory_igraphmemoryservice_igraphmemoryserv_9c7eb93a
     graphmemory_igraphmemoryservice_igraphmemoryserv_ccaf1ba0 -->|method| graphmemory_igraphmemoryservice_igraphmemoryserv_faead137
     graphmemory_igraphmemoryservice_igraphmemoryserv_ccaf1ba0 -->|method| graphmemory_igraphmemoryservice_igraphmemoryserv_57b8e2b2
@@ -565,14 +564,15 @@ flowchart LR
     graphmemory_memgraphgraphmemoryservice_memgraphg_b5670891 -->|method| graphmemory_memgraphgraphmemoryservice_memgraphg_0256de2b
     graphmemory_memgraphgraphmemoryservice_memgraphg_b5670891 -->|method| graphmemory_memgraphgraphmemoryservice_memgraphg_49ab6e68
     graphmemory_memgraphgraphmemoryservice_memgraphg_b5670891 -->|method| graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3
+    graphmemory_memgraphgraphmemoryservice_memgraphg_b5670891 -->|method| graphmemory_memgraphgraphmemoryservice_memgraphg_bf83f7da
+    graphmemory_memgraphgraphmemoryservice_memgraphg_b5670891 -->|method| graphmemory_memgraphgraphmemoryservice_memgraphg_95d1796e
     graphmemory_memgraphgraphmemoryservice_memgraphg_0256de2b -->|calls| graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3
+    graphmemory_memgraphgraphmemoryservice_memgraphg_bf83f7da -->|calls| graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3
     graphmemory_memgraphgraphmemoryservice_memgraphg_49ab6e68 -->|calls| graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3
+    graphmemory_memgraphgraphmemoryservice_memgraphg_95d1796e -->|calls| graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3
     graphmemory_memgraphgraphmemoryservice_memgraphg_9ddb39fc -->|calls| graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3
     graphmemory_memgraphgraphmemoryservice_memgraphg_461fa564 -->|calls| graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3
-    graphmemory_neo4jgraphmemoryservice_neo4jgraphme_fecb3331 -->|method| graphmemory_neo4jgraphmemoryservice_neo4jgraphme_4b6df6f5
-    graphmemory_neo4jgraphmemoryservice_neo4jgraphme_fecb3331 -->|method| graphmemory_neo4jgraphmemoryservice_neo4jgraphme_3df464d1
-    graphmemory_neo4jgraphmemoryservice_neo4jgraphme_fecb3331 -->|method| graphmemory_neo4jgraphmemoryservice_neo4jgraphme_1850e820
-    %% Omitted for readability: 313 nodes, 0 edges
+    %% Omitted for readability: 294 nodes, 0 edges
     class graphmemory_igraphmemoryservice_igraphmemoryserv_ccaf1ba0 klass;
     class graphmemory_igraphmemoryservice_igraphmemoryserv_9c7eb93a async;
     class graphmemory_igraphmemoryservice_igraphmemoryserv_faead137 async;
@@ -587,10 +587,10 @@ flowchart LR
     class graphmemory_memgraphgraphmemoryservice_memgraphg_0256de2b async;
     class graphmemory_memgraphgraphmemoryservice_memgraphg_49ab6e68 async;
     class graphmemory_memgraphgraphmemoryservice_memgraphg_6af920b3 function;
-    class graphmemory_neo4jgraphmemoryservice_neo4jgraphme_fecb3331 klass;
-    class graphmemory_neo4jgraphmemoryservice_neo4jgraphme_3df464d1 async;
-    class graphmemory_neo4jgraphmemoryservice_neo4jgraphme_4b6df6f5 async;
-    class graphmemory_neo4jgraphmemoryservice_neo4jgraphme_1850e820 async;
+    class graphmemory_memgraphgraphmemoryservice_memgraphg_bf83f7da async;
+    class graphmemory_memgraphgraphmemoryservice_memgraphg_95d1796e async;
+    class graphmemory_neo4jgraphbootstrapservice_neo4jgrap_39146d1c klass;
+    class graphmemory_neo4jgraphhealthservice_neo4jgraphhe_e53b673d klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -860,44 +860,46 @@ flowchart LR
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>.docs/.prd/engineering-execution-issues.md</code></td><td>116 nodes</td></tr>
-<tr><td><code>ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs</code></td><td>41 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-6-graph-memory_8a3f2c1b.plan.md</code></td><td>32 nodes</td></tr>
 <tr><td><code>ETOS.Backend/GraphMemory/MemgraphGraphMemoryService.cs</code></td><td>28 nodes</td></tr>
 <tr><td><code>ETOS.Backend/GraphMemory/IGraphMemoryService.cs</code></td><td>23 nodes</td></tr>
 <tr><td><code>ETOS.Frontend/package.json</code></td><td>23 nodes</td></tr>
+<tr><td><code>.docs/.gapAnalysis/issues-1-13-gap-analysis.md</code></td><td>21 nodes</td></tr>
 <tr><td><code>ETOS.Frontend/tsconfig.json</code></td><td>20 nodes</td></tr>
 <tr><td><code>.cursor/plans/issue_1_bootstrap_e42d24e0.plan.md</code></td><td>17 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x223, references x121, calls x53, method x37. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x242, references x74, method x19, calls x9. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 4. Analysis & Clustering ====== -->
 <h2 id="analysis-clustering">4. Analysis &amp; Clustering</h2>
-<p>Analysis &amp; Clustering groups implementation around slice, cursor, plans, artifacts, mostly in .cursor/plans/slice-4-artifacts_4bd3e22c.plan.md, .cursor/plans/slice-3-audit_cb5f4911.plan.md, .cursor/plans/slice-7-ontology_83914dfb.plan.md. This section covers 57 nodes and 54 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Analysis &amp; Clustering groups implementation around slice, cursor, plans, artifacts, mostly in .cursor/plans/slice-4-artifacts_4bd3e22c.plan.md, .cursor/plans/slice-3-audit_cb5f4911.plan.md, .cursor/plans/slice-7-ontology_83914dfb.plan.md. This section covers 65 nodes and 61 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Analysis &amp; Clustering (57 nodes, 54 edges)
+    %% Section: Analysis &amp; Clustering (65 nodes, 61 edges)
+    subgraph analysis_clustering_cursor_plans_slice_13_Govern_48833fa2[".cursor/plans/slice-13-Governed-Query-Intents.md"]
+        plans_slice_13_governed_query_intents_slice_13_g_53188b61("Slice 13: Governed Query Intents and Co...<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
+        plans_slice_13_governed_query_intents_assumption_e06e377d("Assumptions<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
+        plans_slice_13_governed_query_intents_frontend_fafae9d2("Frontend<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
+        plans_slice_13_governed_query_intents_implementa_566761f4("Implementation Details<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
+        plans_slice_13_governed_query_intents_key_change_2bf52896("Key Changes<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
+        plans_slice_13_governed_query_intents_summary_bd630d2a("Summary<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
+        plans_slice_13_governed_query_intents_test_plan_bf7b31f6("Test Plan<br/><small>.cursor/plans/slice-13-Governed-Query-Intents.md</small>")
+        plans_slice_13_governed_query_intents_baedcfbc("slice-13-Governed-Query-Intents.md")
+    end
     subgraph analysis_clustering_cursor_plans_slice_3_audit_c_73f7af09[".cursor/plans/slice-3-audit_cb5f4911.plan.md"]
         plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736("Slice 3 Audit And Security Events<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
         plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059("Task Breakdown<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
         plans_slice_3_audit_cb5f4911_plan_assumptions_666151da("Assumptions<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
         plans_slice_3_audit_cb5f4911_plan_critical_path_dd85e5e7("Critical Path<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
         plans_slice_3_audit_cb5f4911_plan_existing_found_7d8cb7a7("Existing Foundation<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_goal_b8c2c689("Goal<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_out_of_scope_e41ba68c("Out Of Scope<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_scope_source_819bd95d("Scope Source<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_suggested_mile_9bf12279("Suggested Milestones<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_t1_audit_domai_99583b8a("T1 - Audit Domain Model And EF Mapping<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_t2_audit_write_1508ebcd("T2 - Audit Writer Service<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_t3_bridge_slic_d836b3e2("T3 - Bridge Slice 2 Denials Into Issue 3<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_t4_admin_audit_645df0c9("T4 - Admin Audit APIs<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
     end
     subgraph analysis_clustering_cursor_plans_slice_4_artifac_352c8109[".cursor/plans/slice-4-artifacts_4bd3e22c.plan.md"]
         plans_slice_4_artifacts_4bd3e22c_plan_slice_4_ba_96ee6094("Slice 4 Base Artifact Registry And Depe...<br/><small>.cursor/plans/slice-4-artifacts_4bd3e22c.plan.md</small>")
@@ -908,35 +910,34 @@ flowchart LR
         plans_slice_7_ontology_83914dfb_plan_issue_7_can_3e0b79fe("Issue 7 Canonical Ontology And Tenant S...<br/><small>.cursor/plans/slice-7-ontology_83914dfb.plan.md</small>")
         plans_slice_7_ontology_83914dfb_plan_task_breakd_569bcdaf("Task Breakdown<br/><small>.cursor/plans/slice-7-ontology_83914dfb.plan.md</small>")
     end
+    plans_slice_13_governed_query_intents_baedcfbc -->|contains| plans_slice_13_governed_query_intents_slice_13_g_53188b61
+    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_assumption_e06e377d
+    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_frontend_fafae9d2
+    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_implementa_566761f4
+    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_key_change_2bf52896
+    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_summary_bd630d2a
+    plans_slice_13_governed_query_intents_slice_13_g_53188b61 -->|contains| plans_slice_13_governed_query_intents_test_plan_bf7b31f6
     plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_assumptions_666151da
     plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_critical_path_dd85e5e7
     plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_existing_found_7d8cb7a7
-    plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_goal_b8c2c689
-    plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_out_of_scope_e41ba68c
-    plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_scope_source_819bd95d
-    plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_suggested_mile_9bf12279
     plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 -->|contains| plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059
-    plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059 -->|contains| plans_slice_3_audit_cb5f4911_plan_t1_audit_domai_99583b8a
-    plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059 -->|contains| plans_slice_3_audit_cb5f4911_plan_t2_audit_write_1508ebcd
-    plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059 -->|contains| plans_slice_3_audit_cb5f4911_plan_t3_bridge_slic_d836b3e2
-    plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059 -->|contains| plans_slice_3_audit_cb5f4911_plan_t4_admin_audit_645df0c9
     plans_slice_4_artifacts_4bd3e22c_plan_slice_4_ba_96ee6094 -->|contains| plans_slice_4_artifacts_4bd3e22c_plan_domain_mod_ad3cfffb
     plans_slice_4_artifacts_4bd3e22c_plan_slice_4_ba_96ee6094 -->|contains| plans_slice_4_artifacts_4bd3e22c_plan_task_break_6a6bc411
     plans_slice_7_ontology_83914dfb_plan_issue_7_can_3e0b79fe -->|contains| plans_slice_7_ontology_83914dfb_plan_task_breakd_569bcdaf
-    %% Omitted for readability: 39 nodes, 0 edges
+    %% Omitted for readability: 47 nodes, 0 edges
+    class plans_slice_13_governed_query_intents_slice_13_g_53188b61 concept;
+    class plans_slice_13_governed_query_intents_assumption_e06e377d concept;
+    class plans_slice_13_governed_query_intents_frontend_fafae9d2 concept;
+    class plans_slice_13_governed_query_intents_implementa_566761f4 concept;
+    class plans_slice_13_governed_query_intents_key_change_2bf52896 concept;
+    class plans_slice_13_governed_query_intents_summary_bd630d2a concept;
+    class plans_slice_13_governed_query_intents_test_plan_bf7b31f6 concept;
+    class plans_slice_13_governed_query_intents_baedcfbc concept;
     class plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 concept;
     class plans_slice_3_audit_cb5f4911_plan_task_breakdown_b49ed059 concept;
     class plans_slice_3_audit_cb5f4911_plan_assumptions_666151da concept;
     class plans_slice_3_audit_cb5f4911_plan_critical_path_dd85e5e7 concept;
     class plans_slice_3_audit_cb5f4911_plan_existing_found_7d8cb7a7 concept;
-    class plans_slice_3_audit_cb5f4911_plan_goal_b8c2c689 concept;
-    class plans_slice_3_audit_cb5f4911_plan_out_of_scope_e41ba68c concept;
-    class plans_slice_3_audit_cb5f4911_plan_scope_source_819bd95d concept;
-    class plans_slice_3_audit_cb5f4911_plan_suggested_mile_9bf12279 concept;
-    class plans_slice_3_audit_cb5f4911_plan_t1_audit_domai_99583b8a concept;
-    class plans_slice_3_audit_cb5f4911_plan_t2_audit_write_1508ebcd concept;
-    class plans_slice_3_audit_cb5f4911_plan_t3_bridge_slic_d836b3e2 concept;
-    class plans_slice_3_audit_cb5f4911_plan_t4_admin_audit_645df0c9 concept;
     class plans_slice_4_artifacts_4bd3e22c_plan_slice_4_ba_96ee6094 concept;
     class plans_slice_4_artifacts_4bd3e22c_plan_task_break_6a6bc411 concept;
     class plans_slice_4_artifacts_4bd3e22c_plan_domain_mod_ad3cfffb concept;
@@ -1213,11 +1214,12 @@ flowchart LR
       <tr><td><code>.cursor/plans/slice-4-artifacts_4bd3e22c.plan.md</code></td><td>24 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-3-audit_cb5f4911.plan.md</code></td><td>17 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-7-ontology_83914dfb.plan.md</code></td><td>16 nodes</td></tr>
+<tr><td><code>.cursor/plans/slice-13-Governed-Query-Intents.md</code></td><td>8 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x54. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x61. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -1669,68 +1671,67 @@ flowchart LR
 
 <!-- ====== 7. Serving API ====== -->
 <h2 id="serve-api">7. Serving API</h2>
-<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, src/app/page.tsx, app/documents/page.tsx. This section covers 120 nodes and 201 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, src/app/page.tsx, app/documents/page.tsx. This section covers 143 nodes and 218 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Serving API (120 nodes, 201 edges)
+    %% Section: Serving API (143 nodes, 218 edges)
     subgraph serve_api_src_lib_etos_api_ts_396531a3["src/lib/etos-api.ts"]
         lib_etos_api_getdocumentlists_03e84205("getDocumentLists()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_getartifactregistrylists_864dfb70("getArtifactRegistryLists()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_exportaitrace_19819258("exportAiTrace()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_rungovernedqueryforgraphnode_87055b54("runGovernedQueryForGraphNode()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_getaitracelists_32116ca3("getAiTraceLists()<br/><small>src/lib/etos-api.ts</small>")
         lib_etos_api_createdemodocumentflow_5de24b21("createDemoDocumentFlow()<br/><small>src/lib/etos-api.ts</small>")
         lib_etos_api_requestlatestdocumentvectorindex_575d07fb("requestLatestDocumentVectorIndex()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_createextractionissueforlatestdocum_a8f10835("createExtractionIssueForLatestDocument()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_createdemoimportflow_c8eab30d("createDemoImportFlow()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_createdemocomparisonimportflow_ae2fb94c("createDemoComparisonImportFlow()<br/><small>src/lib/etos-api.ts</small>")
+    end
+    subgraph serve_api_app_ai_traces_page_tsx_542a0a54["app/ai-traces/page.tsx"]
+        ai_traces_page_972248dc("page.tsx")
+        ai_traces_page_exportlatesttrace_8597d612("exportLatestTrace()<br/><small>app/ai-traces/page.tsx</small>")
+        ai_traces_page_rundemogovernedquery_d3c3e1ba("runDemoGovernedQuery()<br/><small>app/ai-traces/page.tsx</small>")
+        ai_traces_page_renderapierror_d332a0e4("renderApiError()<br/><small>app/ai-traces/page.tsx</small>")
+        ai_traces_page_aitracespage_07550e62("AiTracesPage()<br/><small>app/ai-traces/page.tsx</small>")
     end
     subgraph serve_api_app_documents_page_tsx_8c83656d["app/documents/page.tsx"]
         documents_page_cd6176ee("page.tsx")
         documents_page_createdemodocument_c5eea162("createDemoDocument()<br/><small>app/documents/page.tsx</small>")
         documents_page_requestvectorindex_f15594ac("requestVectorIndex()<br/><small>app/documents/page.tsx</small>")
         documents_page_createextractionissue_7b0ccb65("createExtractionIssue()<br/><small>app/documents/page.tsx</small>")
-        documents_page_documentspage_926991a0("DocumentsPage()<br/><small>app/documents/page.tsx</small>")
-    end
-    subgraph serve_api_app_imports_page_tsx_2c2909a6["app/imports/page.tsx"]
-        imports_page_createdemoimport_0e2ed45e("createDemoImport()<br/><small>app/imports/page.tsx</small>")
-        imports_page_createcomparisonimport_415c8f25("createComparisonImport()<br/><small>app/imports/page.tsx</small>")
-        imports_page_runidentitydemo_3dba09b2("runIdentityDemo()<br/><small>app/imports/page.tsx</small>")
     end
     subgraph serve_api_src_app_page_tsx_9599101b["src/app/page.tsx"]
         app_page_c77e992c("page.tsx")
         app_page_home_8cd6c4cc("Home()<br/><small>src/app/page.tsx</small>")
     end
     model_artifacts_page_317eae05("page.tsx")
+    ai_traces_page_exportlatesttrace_8597d612 -->|calls| lib_etos_api_exportaitrace_19819258
+    ai_traces_page_rundemogovernedquery_d3c3e1ba -->|calls| lib_etos_api_rungovernedqueryforgraphnode_87055b54
+    ai_traces_page_renderapierror_d332a0e4 -->|calls| ai_traces_page_aitracespage_07550e62
+    ai_traces_page_aitracespage_07550e62 -->|calls| lib_etos_api_getaitracelists_32116ca3
     documents_page_createdemodocument_c5eea162 -->|calls| lib_etos_api_createdemodocumentflow_5de24b21
     documents_page_requestvectorindex_f15594ac -->|calls| lib_etos_api_requestlatestdocumentvectorindex_575d07fb
-    documents_page_createextractionissue_7b0ccb65 -->|calls| lib_etos_api_createextractionissueforlatestdocum_a8f10835
-    documents_page_documentspage_926991a0 -->|calls| lib_etos_api_getdocumentlists_03e84205
-    imports_page_createdemoimport_0e2ed45e -->|calls| lib_etos_api_createdemoimportflow_c8eab30d
-    imports_page_createcomparisonimport_415c8f25 -->|calls| lib_etos_api_createdemocomparisonimportflow_ae2fb94c
-    app_page_home_8cd6c4cc -->|calls| lib_etos_api_getartifactregistrylists_864dfb70
-    lib_etos_api_getdocumentlists_03e84205 -->|calls| lib_etos_api_createextractionissueforlatestdocum_a8f10835
     lib_etos_api_getdocumentlists_03e84205 -->|calls| lib_etos_api_requestlatestdocumentvectorindex_575d07fb
+    ai_traces_page_972248dc -->|imports| lib_etos_api_exportaitrace_19819258
+    ai_traces_page_972248dc -->|imports| lib_etos_api_getaitracelists_32116ca3
+    ai_traces_page_972248dc -->|imports| lib_etos_api_rungovernedqueryforgraphnode_87055b54
     documents_page_cd6176ee -->|imports| lib_etos_api_createdemodocumentflow_5de24b21
-    documents_page_cd6176ee -->|imports| lib_etos_api_createextractionissueforlatestdocum_a8f10835
     documents_page_cd6176ee -->|imports| lib_etos_api_getdocumentlists_03e84205
     documents_page_cd6176ee -->|imports| lib_etos_api_requestlatestdocumentvectorindex_575d07fb
-    app_page_c77e992c -->|imports| lib_etos_api_getartifactregistrylists_864dfb70
-    %% Omitted for readability: 102 nodes, 0 edges
+    %% Omitted for readability: 125 nodes, 0 edges
     class lib_etos_api_getdocumentlists_03e84205 function;
-    class lib_etos_api_getartifactregistrylists_864dfb70 function;
+    class lib_etos_api_exportaitrace_19819258 function;
+    class lib_etos_api_rungovernedqueryforgraphnode_87055b54 function;
+    class lib_etos_api_getaitracelists_32116ca3 function;
     class lib_etos_api_createdemodocumentflow_5de24b21 function;
     class lib_etos_api_requestlatestdocumentvectorindex_575d07fb function;
-    class lib_etos_api_createextractionissueforlatestdocum_a8f10835 function;
-    class lib_etos_api_createdemoimportflow_c8eab30d function;
-    class lib_etos_api_createdemocomparisonimportflow_ae2fb94c function;
+    class ai_traces_page_972248dc ui;
+    class ai_traces_page_exportlatesttrace_8597d612 ui;
+    class ai_traces_page_rundemogovernedquery_d3c3e1ba ui;
+    class ai_traces_page_renderapierror_d332a0e4 api;
+    class ai_traces_page_aitracespage_07550e62 ui;
     class documents_page_cd6176ee ui;
     class documents_page_createdemodocument_c5eea162 ui;
     class documents_page_requestvectorindex_f15594ac ui;
     class documents_page_createextractionissue_7b0ccb65 ui;
-    class documents_page_documentspage_926991a0 ui;
-    class imports_page_createdemoimport_0e2ed45e ui;
-    class imports_page_createcomparisonimport_415c8f25 ui;
-    class imports_page_runidentitydemo_3dba09b2 ui;
     class app_page_c77e992c ui;
     class app_page_home_8cd6c4cc ui;
     class model_artifacts_page_317eae05 ui;
@@ -1760,7 +1761,7 @@ flowchart LR
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>AccessGrant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>ApiResult</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>Artifact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+19 more</td>
+  <td><code>AccessGrant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>ApiResult</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>Artifact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+17 more</td>
   <td>Module file in src/app/page.tsx.</td>
 </tr>
 <tr>
@@ -1917,30 +1918,14 @@ flowchart LR
 </tr>
 <tr>
   <td>21</td>
-  <td><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td><span class="tag tag-endpoint">API</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">app/documents/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">app/model-artifacts/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
-  <td>No direct outbound edge</td>
-  <td>Module file in src/lib/etos-api.ts.</td>
+  <td><code>Home()</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>getArtifactRegistryLists()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>getClassificationPolicyLists()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>getIdentityLists()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+1 more</td>
+  <td>Home() node in src/app/page.tsx.</td>
 </tr>
 <tr>
   <td>22</td>
-  <td><code>ComponentHealth</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>ComponentHealth node in src/lib/etos-api.ts.</td>
-</tr>
-<tr>
-  <td>23</td>
-  <td><code>PlatformHealth</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>PlatformHealth node in src/lib/etos-api.ts.</td>
-</tr>
-<tr>
-  <td>24</td>
   <td><code>Tenant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1948,15 +1933,7 @@ flowchart LR
   <td>Tenant node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>25</td>
-  <td><code>IdentityUser</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
-  <td>No direct outbound edge</td>
-  <td>IdentityUser node in src/lib/etos-api.ts.</td>
-</tr>
-<tr>
-  <td>26</td>
+  <td>23</td>
   <td><code>TenantRole</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1964,7 +1941,7 @@ flowchart LR
   <td>TenantRole node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>27</td>
+  <td>24</td>
   <td><code>TenantMembership</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1972,7 +1949,7 @@ flowchart LR
   <td>TenantMembership node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>28</td>
+  <td>25</td>
   <td><code>AccessGrant</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1980,7 +1957,7 @@ flowchart LR
   <td>AccessGrant node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>29</td>
+  <td>26</td>
   <td><code>AuditRecord</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
@@ -1988,12 +1965,36 @@ flowchart LR
   <td>AuditRecord node in src/lib/etos-api.ts.</td>
 </tr>
 <tr>
-  <td>30</td>
+  <td>27</td>
   <td><code>SecurityEvent</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
   <td>No direct outbound edge</td>
   <td>SecurityEvent node in src/lib/etos-api.ts.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>ArtifactVersion</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>ArtifactVersion node in src/lib/etos-api.ts.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>Artifact</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>Artifact node in src/lib/etos-api.ts.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>ArtifactRelationship</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td><code>page.tsx</code><br><small style="color:var(--muted)">src/app/page.tsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>ArtifactRelationship node in src/lib/etos-api.ts.</td>
 </tr>
 </table>
 
@@ -2002,86 +2003,87 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>src/lib/etos-api.ts</code></td><td>65 nodes</td></tr>
+      <tr><td><code>src/lib/etos-api.ts</code></td><td>79 nodes</td></tr>
 <tr><td><code>src/app/page.tsx</code></td><td>21 nodes</td></tr>
 <tr><td><code>app/documents/page.tsx</code></td><td>17 nodes</td></tr>
 <tr><td><code>app/model-artifacts/page.tsx</code></td><td>13 nodes</td></tr>
-<tr><td><code>app/imports/page.tsx</code></td><td>4 nodes</td></tr>
+<tr><td><code>app/ai-traces/page.tsx</code></td><td>11 nodes</td></tr>
+<tr><td><code>app/imports/page.tsx</code></td><td>2 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x112, calls x45, imports x41, imports x3. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x136, imports x45, calls x33, imports x4. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 8. Tests & Fixtures ====== -->
 <h2 id="tests-fixtures">8. Tests &amp; Fixtures</h2>
-<p>Tests &amp; Fixtures groups implementation around etosbackendtests, documentmemorytestscs, importtestscs, etosbackend, mostly in ETOS.Backend.Tests/DocumentMemoryTests.cs, ETOS.Backend.Tests/ImportTests.cs, ETOS.Backend.Tests/IdentityResolutionTests.cs. This section covers 550 nodes and 1431 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Tests &amp; Fixtures groups implementation around etosbackendtests, aitracetestscs, documentmemorytestscs, governedquerytestscs, mostly in ETOS.Backend.Tests/AiTraceTests.cs, ETOS.Backend.Tests/DocumentMemoryTests.cs, ETOS.Backend.Tests/GovernedQueryTests.cs. This section covers 752 nodes and 1914 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Tests &amp; Fixtures (550 nodes, 1431 edges)
-    subgraph tests_fixtures_ETOS_Backend_Tests_ArtifactRegist_237423f9["ETOS.Backend.Tests/ArtifactRegistryTests.cs"]
-        etos_backend_tests_artifactregistrytests_artifac_08763d20("ArtifactRegistryTests<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_371bb13b("AddDependencyAsync()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_917c710b("AddRelationshipAsync()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_7f701b96("ArtifactVersionsHaveNoUpdateEndpoint()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_d4895897("CreateApplication()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_02d7056e("CreateArtifactAsync()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_65588976("CreateTenantAsync()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_9fff29a2("CreateUserAsync()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_ba744b4a("CreateVersionAsync()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_86d6ae87("CrossTenantArtifactAccessIsDeniedAndAudited()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_7507371a("PublishAsync()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_75fdd0e5("PublishBlocksUntilRequiredDependenciesArePublished()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
-        etos_backend_tests_artifactregistrytests_artifac_a38da541("RelationshipsRejectSelfLinksAndDependenciesReturnImpact()<br/><small>ETOS.Backend.Tests/ArtifactRegistryTests.cs</small>")
+    %% Section: Tests &amp; Fixtures (752 nodes, 1914 edges)
+    subgraph tests_fixtures_ETOS_Backend_Tests_AiTraceTests_c_6e43e330["ETOS.Backend.Tests/AiTraceTests.cs"]
+        etos_backend_tests_aitracetests_allowallpolicyse_e90898b4("AllowAllPolicyService<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_bb426524("AiTraceTests<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_cre_3ac20077("CreateAiTraceService()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_cre_42dd5752("CreateDbContext()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_cre_1c415225("CreateGovernedQueryService()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_cro_ca21c8c3("CrossTenantTraceAccessIsDenied()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_exp_3444dcb7("ExportDeniedCreatesExportDeniedSecurityEvent()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_exp_fb8b130a("ExportSuccessWritesExportRecordAndAuditMetadata()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_gov_977dc1fb("GovernedQueryRunCreatesLinkedAiTraceRecord()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_rea_6a709a5b("ReadPermissionAllowsListAndGetButExportRequiresExportPermission()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_see_8556d69a("SeedTenantUserAndDocument()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_see_475bcf4c("SeedTraceAsync()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
+        etos_backend_tests_aitracetests_aitracetests_sen_74bdfd65("SensitiveDeniedReferencesHiddenFromReadOnlyUser()<br/><small>ETOS.Backend.Tests/AiTraceTests.cs</small>")
     end
     etos_backend_tests_classificationpolicytests_cla_921288d1("ClassificationPolicyTests<br/><small>ETOS.Backend.Tests/ClassificationPolicyTests.cs</small>")
     etos_backend_tests_documentmemorytests_allowallp_d0599af3("AllowAllPolicyService<br/><small>ETOS.Backend.Tests/DocumentMemoryTests.cs</small>")
     etos_backend_tests_identityresolutiontests_ident_a7bd97f7("IdentityResolutionTests<br/><small>ETOS.Backend.Tests/IdentityResolutionTests.cs</small>")
     etos_backend_tests_importtests_importtests_419a3725("ImportTests<br/><small>ETOS.Backend.Tests/ImportTests.cs</small>")
     etos_backend_tests_ontologytests_ontologytests_0ac3b3cc("OntologyTests<br/><small>ETOS.Backend.Tests/OntologyTests.cs</small>")
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_371bb13b
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_917c710b
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_7f701b96
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_d4895897
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_02d7056e
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_65588976
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_9fff29a2
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_ba744b4a
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_86d6ae87
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_7507371a
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_75fdd0e5
-    etos_backend_tests_artifactregistrytests_artifac_08763d20 -->|method| etos_backend_tests_artifactregistrytests_artifac_a38da541
-    etos_backend_tests_artifactregistrytests_artifac_75fdd0e5 -->|calls| etos_backend_tests_artifactregistrytests_artifac_371bb13b
-    etos_backend_tests_artifactregistrytests_artifac_75fdd0e5 -->|calls| etos_backend_tests_artifactregistrytests_artifac_d4895897
-    etos_backend_tests_artifactregistrytests_artifac_75fdd0e5 -->|calls| etos_backend_tests_artifactregistrytests_artifac_02d7056e
-    etos_backend_tests_artifactregistrytests_artifac_75fdd0e5 -->|calls| etos_backend_tests_artifactregistrytests_artifac_65588976
-    etos_backend_tests_artifactregistrytests_artifac_75fdd0e5 -->|calls| etos_backend_tests_artifactregistrytests_artifac_9fff29a2
-    etos_backend_tests_artifactregistrytests_artifac_75fdd0e5 -->|calls| etos_backend_tests_artifactregistrytests_artifac_ba744b4a
-    etos_backend_tests_artifactregistrytests_artifac_75fdd0e5 -->|calls| etos_backend_tests_artifactregistrytests_artifac_7507371a
-    etos_backend_tests_artifactregistrytests_artifac_86d6ae87 -->|calls| etos_backend_tests_artifactregistrytests_artifac_d4895897
-    etos_backend_tests_artifactregistrytests_artifac_86d6ae87 -->|calls| etos_backend_tests_artifactregistrytests_artifac_02d7056e
-    etos_backend_tests_artifactregistrytests_artifac_86d6ae87 -->|calls| etos_backend_tests_artifactregistrytests_artifac_65588976
-    etos_backend_tests_artifactregistrytests_artifac_86d6ae87 -->|calls| etos_backend_tests_artifactregistrytests_artifac_9fff29a2
-    etos_backend_tests_artifactregistrytests_artifac_a38da541 -->|calls| etos_backend_tests_artifactregistrytests_artifac_371bb13b
-    %% Omitted for readability: 532 nodes, 11 edges
-    class etos_backend_tests_artifactregistrytests_artifac_08763d20 test;
-    class etos_backend_tests_artifactregistrytests_artifac_371bb13b test;
-    class etos_backend_tests_artifactregistrytests_artifac_917c710b test;
-    class etos_backend_tests_artifactregistrytests_artifac_7f701b96 test;
-    class etos_backend_tests_artifactregistrytests_artifac_d4895897 test;
-    class etos_backend_tests_artifactregistrytests_artifac_02d7056e test;
-    class etos_backend_tests_artifactregistrytests_artifac_65588976 test;
-    class etos_backend_tests_artifactregistrytests_artifac_9fff29a2 test;
-    class etos_backend_tests_artifactregistrytests_artifac_ba744b4a test;
-    class etos_backend_tests_artifactregistrytests_artifac_86d6ae87 test;
-    class etos_backend_tests_artifactregistrytests_artifac_7507371a test;
-    class etos_backend_tests_artifactregistrytests_artifac_75fdd0e5 test;
-    class etos_backend_tests_artifactregistrytests_artifac_a38da541 test;
+    etos_backend_tests_aitracetests_aitracetests_bb426524 -->|method| etos_backend_tests_aitracetests_aitracetests_cre_3ac20077
+    etos_backend_tests_aitracetests_aitracetests_bb426524 -->|method| etos_backend_tests_aitracetests_aitracetests_cre_42dd5752
+    etos_backend_tests_aitracetests_aitracetests_bb426524 -->|method| etos_backend_tests_aitracetests_aitracetests_cre_1c415225
+    etos_backend_tests_aitracetests_aitracetests_bb426524 -->|method| etos_backend_tests_aitracetests_aitracetests_cro_ca21c8c3
+    etos_backend_tests_aitracetests_aitracetests_bb426524 -->|method| etos_backend_tests_aitracetests_aitracetests_exp_3444dcb7
+    etos_backend_tests_aitracetests_aitracetests_bb426524 -->|method| etos_backend_tests_aitracetests_aitracetests_exp_fb8b130a
+    etos_backend_tests_aitracetests_aitracetests_bb426524 -->|method| etos_backend_tests_aitracetests_aitracetests_gov_977dc1fb
+    etos_backend_tests_aitracetests_aitracetests_bb426524 -->|method| etos_backend_tests_aitracetests_aitracetests_rea_6a709a5b
+    etos_backend_tests_aitracetests_aitracetests_bb426524 -->|method| etos_backend_tests_aitracetests_aitracetests_see_8556d69a
+    etos_backend_tests_aitracetests_aitracetests_bb426524 -->|method| etos_backend_tests_aitracetests_aitracetests_see_475bcf4c
+    etos_backend_tests_aitracetests_aitracetests_bb426524 -->|method| etos_backend_tests_aitracetests_aitracetests_sen_74bdfd65
+    etos_backend_tests_aitracetests_aitracetests_gov_977dc1fb -->|calls| etos_backend_tests_aitracetests_aitracetests_cre_3ac20077
+    etos_backend_tests_aitracetests_aitracetests_gov_977dc1fb -->|calls| etos_backend_tests_aitracetests_aitracetests_cre_42dd5752
+    etos_backend_tests_aitracetests_aitracetests_gov_977dc1fb -->|calls| etos_backend_tests_aitracetests_aitracetests_cre_1c415225
+    etos_backend_tests_aitracetests_aitracetests_gov_977dc1fb -->|calls| etos_backend_tests_aitracetests_aitracetests_see_8556d69a
+    etos_backend_tests_aitracetests_aitracetests_rea_6a709a5b -->|calls| etos_backend_tests_aitracetests_aitracetests_cre_3ac20077
+    etos_backend_tests_aitracetests_aitracetests_rea_6a709a5b -->|calls| etos_backend_tests_aitracetests_aitracetests_cre_42dd5752
+    etos_backend_tests_aitracetests_aitracetests_rea_6a709a5b -->|calls| etos_backend_tests_aitracetests_aitracetests_see_8556d69a
+    etos_backend_tests_aitracetests_aitracetests_rea_6a709a5b -->|calls| etos_backend_tests_aitracetests_aitracetests_see_475bcf4c
+    etos_backend_tests_aitracetests_aitracetests_exp_fb8b130a -->|calls| etos_backend_tests_aitracetests_aitracetests_cre_3ac20077
+    etos_backend_tests_aitracetests_aitracetests_exp_fb8b130a -->|calls| etos_backend_tests_aitracetests_aitracetests_cre_42dd5752
+    etos_backend_tests_aitracetests_aitracetests_exp_fb8b130a -->|calls| etos_backend_tests_aitracetests_aitracetests_see_8556d69a
+    etos_backend_tests_aitracetests_aitracetests_exp_fb8b130a -->|calls| etos_backend_tests_aitracetests_aitracetests_see_475bcf4c
+    etos_backend_tests_aitracetests_aitracetests_exp_3444dcb7 -->|calls| etos_backend_tests_aitracetests_aitracetests_cre_3ac20077
+    %% Omitted for readability: 734 nodes, 12 edges
+    class etos_backend_tests_aitracetests_allowallpolicyse_e90898b4 test;
+    class etos_backend_tests_aitracetests_aitracetests_bb426524 test;
+    class etos_backend_tests_aitracetests_aitracetests_cre_3ac20077 test;
+    class etos_backend_tests_aitracetests_aitracetests_cre_42dd5752 test;
+    class etos_backend_tests_aitracetests_aitracetests_cre_1c415225 test;
+    class etos_backend_tests_aitracetests_aitracetests_cro_ca21c8c3 test;
+    class etos_backend_tests_aitracetests_aitracetests_exp_3444dcb7 test;
+    class etos_backend_tests_aitracetests_aitracetests_exp_fb8b130a test;
+    class etos_backend_tests_aitracetests_aitracetests_gov_977dc1fb test;
+    class etos_backend_tests_aitracetests_aitracetests_rea_6a709a5b test;
+    class etos_backend_tests_aitracetests_aitracetests_see_8556d69a test;
+    class etos_backend_tests_aitracetests_aitracetests_see_475bcf4c test;
+    class etos_backend_tests_aitracetests_aitracetests_sen_74bdfd65 test;
     class etos_backend_tests_classificationpolicytests_cla_921288d1 test;
     class etos_backend_tests_documentmemorytests_allowallp_d0599af3 test;
     class etos_backend_tests_identityresolutiontests_ident_a7bd97f7 test;
@@ -2110,7 +2112,7 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
-  <td><code>DocumentMemoryTests.cs</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>AiTraceTests.cs</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
@@ -2118,235 +2120,235 @@ flowchart LR
 </tr>
 <tr>
   <td>2</td>
-  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>CadParsingPlaceholderStaysDisabled()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateDocumentWithVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+9 more</td>
+  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateGovernedQueryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+8 more</td>
   <td>Verifies imports, entry points, or version behavior.</td>
 </tr>
 <tr>
   <td>3</td>
-  <td><code>.DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>.GovernedQueryRunCreatesLinkedAiTraceRecord()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateTextFile()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+2 more</td>
-  <td>.DocumentCreationAndVersionUploadCreateArtifactAndMetadata() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateGovernedQueryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
+  <td>.GovernedQueryRunCreatesLinkedAiTraceRecord() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>4</td>
-  <td><code>Task</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>Task</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Task node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>Task node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>5</td>
-  <td><code>Fact</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>Fact</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Fact node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>Fact node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>6</td>
-  <td><code>.UncertainDocumentLinksCreateReviewableDataQualityIssues()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>.ReadPermissionAllowsListAndGetButExportRequiresExportPermission()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateDocumentWithVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+1 more</td>
-  <td>.UncertainDocumentLinksCreateReviewableDataQualityIssues() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>SeedTenantUserAndDocument()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
+  <td>Exports documentation data to a target format.</td>
 </tr>
 <tr>
   <td>7</td>
-  <td><code>.ExtractionFailuresCreateDocumentVersionIssues()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>.ExportSuccessWritesExportRecordAndAuditMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateTextFile()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+1 more</td>
-  <td>.ExtractionFailuresCreateDocumentVersionIssues() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>SeedTenantUserAndDocument()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
+  <td>Exports documentation data to a target format.</td>
 </tr>
 <tr>
   <td>8</td>
-  <td><code>.VectorIndexRequestsRecordDisabledProviderWithTenantAndPolicyMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>.ExportDeniedCreatesExportDeniedSecurityEvent()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateDocumentWithVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+1 more</td>
-  <td>.VectorIndexRequestsRecordDisabledProviderWithTenantAndPolicyMetadata() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>SeedTenantUserAndDocument()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
+  <td>Exports documentation data to a target format.</td>
 </tr>
 <tr>
   <td>9</td>
-  <td><code>.PolicyFilteringExcludesRestrictedDocuments()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>.CrossTenantTraceAccessIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>SeedTenantUserAndImport()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td>.PolicyFilteringExcludesRestrictedDocuments() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>SeedTenantUserAndDocument()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
+  <td>.CrossTenantTraceAccessIsDenied() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>10</td>
-  <td><code>.CadParsingPlaceholderStaysDisabled()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>.SensitiveDeniedReferencesHiddenFromReadOnlyUser()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>SeedTenantUserAndImport()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td>.CadParsingPlaceholderStaysDisabled() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><code>CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CreateGovernedQueryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
+  <td>.SensitiveDeniedReferencesHiddenFromReadOnlyUser() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>11</td>
-  <td><code>.CreateDocumentWithVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>.SeedTraceAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>UncertainDocumentLinksCreateReviewableDataQualityIssues()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>VectorIndexRequestsRecordDisabledProviderWithTenantAndPolicyMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td><code>CreateTextFile()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td>.CreateDocumentWithVersionAsync() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CrossTenantTraceAccessIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>ExportDeniedCreatesExportDeniedSecurityEvent()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+2 more</td>
+  <td><code>CreateGovernedQueryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td>.SeedTraceAsync() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>12</td>
-  <td><code>IDocumentService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>EnterpriseThreadDbContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>IDocumentService node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>EnterpriseThreadDbContext node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>13</td>
-  <td><code>DocumentArtifactDetailResponse</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>DocumentArtifactDetailResponse node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
-</tr>
-<tr>
-  <td>14</td>
-  <td><code>.CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td><code>CadParsingPlaceholderStaysDisabled()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+4 more</td>
-  <td>No direct outbound edge</td>
-  <td>.CreateDbContext() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
-</tr>
-<tr>
-  <td>15</td>
-  <td><code>EnterpriseThreadDbContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>EnterpriseThreadDbContext node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
-</tr>
-<tr>
-  <td>16</td>
-  <td><code>.SeedTenantUserAndImport()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td><span class="tag tag-func">Test</span></td>
-  <td><code>CadParsingPlaceholderStaysDisabled()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+4 more</td>
-  <td>No direct outbound edge</td>
-  <td>.SeedTenantUserAndImport() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
-</tr>
-<tr>
-  <td>17</td>
-  <td><code>TestContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>TestContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
   <td>Verifies imports, entry points, or version behavior.</td>
 </tr>
 <tr>
-  <td>18</td>
-  <td><code>.CreateService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td>14</td>
+  <td><code>Guid</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>CadParsingPlaceholderStaysDisabled()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+4 more</td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>.CreateService() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>Guid node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>.CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CrossTenantTraceAccessIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>ExportDeniedCreatesExportDeniedSecurityEvent()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+4 more</td>
+  <td>No direct outbound edge</td>
+  <td>.CreateDbContext() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>.SeedTenantUserAndDocument()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CrossTenantTraceAccessIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>ExportDeniedCreatesExportDeniedSecurityEvent()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+4 more</td>
+  <td>No direct outbound edge</td>
+  <td>.SeedTenantUserAndDocument() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>.CreateGovernedQueryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>GovernedQueryRunCreatesLinkedAiTraceRecord()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>SeedTraceAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+1 more</td>
+  <td>No direct outbound edge</td>
+  <td>.CreateGovernedQueryService() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>IGraphMemoryService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Builds dependency relationships and graph data.</td>
 </tr>
 <tr>
   <td>19</td>
-  <td><code>IClassificationPolicyService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>IClassificationPolicyService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>IClassificationPolicyService node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>IClassificationPolicyService node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>20</td>
-  <td><code>DocumentService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>GovernedQueryService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>DocumentService node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>GovernedQueryService node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>21</td>
-  <td><code>.CreateTextFile()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>.CreateAiTraceService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>CreateDocumentWithVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br>+1 more</td>
+  <td><code>AiTraceTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>CrossTenantTraceAccessIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>ExportDeniedCreatesExportDeniedSecurityEvent()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br>+4 more</td>
   <td>No direct outbound edge</td>
-  <td>.CreateTextFile() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>.CreateAiTraceService() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>22</td>
-  <td><code>IFormFile</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>IAccessPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>IFormFile node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>IAccessPermissionService node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>23</td>
-  <td><code>.Sha256()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>IAuditRecorder</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>DocumentCreationAndVersionUploadCreateArtifactAndMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>DocumentMemoryTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>.Sha256() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>IAuditRecorder node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>24</td>
-  <td><code>StaticTenantContextResolver</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>AiTraceService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ResolveAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td>StaticTenantContextResolver node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>No direct outbound edge</td>
+  <td>AiTraceService node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>25</td>
-  <td><code>.ResolveAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>StaticTenantContextResolver</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>StaticTenantContextResolver</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td>No direct outbound edge</td>
-  <td>.ResolveAsync() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>External entry / no inbound edge</td>
+  <td><code>ResolveAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td>StaticTenantContextResolver node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>26</td>
-  <td><code>CancellationToken</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>.ResolveAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>StaticTenantContextResolver</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>CancellationToken node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>.ResolveAsync() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>27</td>
-  <td><code>ActiveTenantContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>CancellationToken</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ActiveTenantContext node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>CancellationToken node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>28</td>
-  <td><code>AllowAllPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>ActiveTenantContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>HasPermissionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small><br><code>HasTenantAccessAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td>AllowAllPermissionService node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>No direct outbound edge</td>
+  <td>ActiveTenantContext node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>29</td>
-  <td><code>.HasTenantAccessAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>AllowAllPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td><code>AllowAllPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
-  <td>No direct outbound edge</td>
-  <td>.HasTenantAccessAsync() node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>External entry / no inbound edge</td>
+  <td><code>HasPermissionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small><br><code>HasTenantAccessAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
+  <td>AllowAllPermissionService node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 <tr>
   <td>30</td>
-  <td><code>Guid</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DocumentMemoryTests.cs</small></td>
+  <td><code>.HasTenantAccessAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>AllowAllPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AiTraceTests.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>Guid node in ETOS.Backend.Tests/DocumentMemoryTests.cs.</td>
+  <td>.HasTenantAccessAsync() node in ETOS.Backend.Tests/AiTraceTests.cs.</td>
 </tr>
 </table>
 
@@ -2355,19 +2357,19 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>ETOS.Backend.Tests/DocumentMemoryTests.cs</code></td><td>93 nodes</td></tr>
-<tr><td><code>ETOS.Backend.Tests/ImportTests.cs</code></td><td>81 nodes</td></tr>
+      <tr><td><code>ETOS.Backend.Tests/AiTraceTests.cs</code></td><td>95 nodes</td></tr>
+<tr><td><code>ETOS.Backend.Tests/DocumentMemoryTests.cs</code></td><td>93 nodes</td></tr>
+<tr><td><code>ETOS.Backend.Tests/GovernedQueryTests.cs</code></td><td>85 nodes</td></tr>
+<tr><td><code>ETOS.Backend.Tests/ImportTests.cs</code></td><td>82 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/IdentityResolutionTests.cs</code></td><td>67 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/ClassificationPolicyTests.cs</code></td><td>43 nodes</td></tr>
+<tr><td><code>ETOS.Backend.Tests/DataQualityTests.cs</code></td><td>35 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/OntologyTests.cs</code></td><td>35 nodes</td></tr>
-<tr><td><code>ETOS.Backend.Tests/DataQualityTests.cs</code></td><td>34 nodes</td></tr>
-<tr><td><code>ETOS.Backend/Identity/TenantContext.cs</code></td><td>33 nodes</td></tr>
-<tr><td><code>ETOS.Backend.Tests/ArtifactRegistryTests.cs</code></td><td>25 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x761, calls x354, method x237, contains x42. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x1057, calls x406, method x317, contains x79. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -4753,62 +4755,63 @@ flowchart LR
 
 <!-- ====== 16. Other ====== -->
 <h2 id="other">16. Other</h2>
-<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-007-601-700.md, .prd/.initialConversation/chatgpt-conversation-part-008-701-800.md, .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md. This section covers 1775 nodes and 2955 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-007-601-700.md, .prd/.initialConversation/chatgpt-conversation-part-008-701-800.md, .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md. This section covers 2017 nodes and 3454 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Other (1775 nodes, 2955 edges)
-    subgraph other_ETOS_Backend_Artifacts_ArtifactRegistrySer_bc961771["ETOS.Backend/Artifacts/ArtifactRegistryService.cs"]
-        artifacts_artifactregistryservice_artifactregist_5bf4a65c("ArtifactRegistryService<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
-        artifacts_artifactregistryservice_iartifactregis_cc28299e("IArtifactRegistryService<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
-        artifacts_artifactregistryservice_iartifactregis_bf63aefd("AddDependencyAsync()<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
-        artifacts_artifactregistryservice_iartifactregis_9c22e6d5("AddRelationshipAsync()<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
-        artifacts_artifactregistryservice_iartifactregis_478ad8ea("CreateArtifactAsync()<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
-        artifacts_artifactregistryservice_iartifactregis_634aa5ca("CreateVersionAsync()<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
-        artifacts_artifactregistryservice_iartifactregis_b338b439("GetArtifactAsync()<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
-        artifacts_artifactregistryservice_iartifactregis_c0eb927c("GetImpactAsync()<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
-        artifacts_artifactregistryservice_iartifactregis_55433041("GetReadinessAsync()<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
-        artifacts_artifactregistryservice_iartifactregis_5399a720("ListArtifactsAsync()<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
+    %% Section: Other (2017 nodes, 3454 edges)
+    subgraph other_ETOS_Backend_AiTrace_AiTraceRecorder_cs_d21a07d2["ETOS.Backend/AiTrace/AiTraceRecorder.cs"]
+        aitrace_aitracerecorder_iaitracerecorder_ceeb0585("IAiTraceRecorder<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
+        aitrace_aitracerecorder_iaitracerecorder_createf_fcf9e52a("CreateFromRetrievalRunAsync()<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
+        aitrace_aitracerecorder_aitracerecorder_3505e498("AiTraceRecorder<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
+        aitrace_aitracerecorder_aitracerecorder_buildart_4b40650f("BuildArtifactLinks()<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
+        aitrace_aitracerecorder_aitracerecorder_buildsou_8fa9ea65("BuildSourcesSummary()<br/><small>ETOS.Backend/AiTrace/AiTraceRecorder.cs</small>")
     end
-    subgraph other_ETOS_Backend_Artifacts_ArtifactEndpointExt_05f2c0b0["ETOS.Backend/Artifacts/ArtifactEndpointExtensions.cs"]
-        artifacts_artifactendpointextensions_artifactend_16ea151a("ArtifactEndpointExtensions<br/><small>ETOS.Backend/Artifacts/ArtifactEndpointExtensions.cs</small>")
-        artifacts_artifactendpointextensions_artifactend_763de6d7("ExecuteAsync()<br/><small>ETOS.Backend/Artifacts/ArtifactEndpointExtensions.cs</small>")
-        artifacts_artifactendpointextensions_artifactend_b32267fc("MapEnterpriseThreadArtifactEndpoints()<br/><small>ETOS.Backend/Artifacts/ArtifactEndpointExtensions.cs</small>")
+    subgraph other_ETOS_Backend_AiTrace_AiTraceEndpointExtens_b18346e0["ETOS.Backend/AiTrace/AiTraceEndpointExtensions.cs"]
+        aitrace_aitraceendpointextensions_aitraceendpoin_d05e0817("AiTraceEndpointExtensions<br/><small>ETOS.Backend/AiTrace/AiTraceEndpointExtensions.cs</small>")
+        aitrace_aitraceendpointextensions_aitraceendpoin_2be4fd0f("ExecuteAsync()<br/><small>ETOS.Backend/AiTrace/AiTraceEndpointExtensions.cs</small>")
+        aitrace_aitraceendpointextensions_aitraceendpoin_8916e3c7("ExecuteOptionalAsync()<br/><small>ETOS.Backend/AiTrace/AiTraceEndpointExtensions.cs</small>")
+        aitrace_aitraceendpointextensions_aitraceendpoin_c814fea5("MapEnterpriseThreadAiTraceEndpoints()<br/><small>ETOS.Backend/AiTrace/AiTraceEndpointExtensions.cs</small>")
+    end
+    subgraph other_ETOS_Backend_AiTrace_AiTraceExportBuilder_e323e54d["ETOS.Backend/AiTrace/AiTraceExportBuilder.cs"]
+        aitrace_aitraceexportbuilder_aitraceexportbuilde_b39c7da7("AiTraceExportBuilder<br/><small>ETOS.Backend/AiTrace/AiTraceExportBuilder.cs</small>")
+        aitrace_aitraceexportbuilder_aitraceexportbuilde_55d046be("BuildExport()<br/><small>ETOS.Backend/AiTrace/AiTraceExportBuilder.cs</small>")
+        aitrace_aitraceexportbuilder_aitraceexportbuilde_a816939c("SerializeRedactionMetadata()<br/><small>ETOS.Backend/AiTrace/AiTraceExportBuilder.cs</small>")
     end
     classification_classificationpolicyservice_class_737a2aa3("ClassificationPolicyService<br/><small>ETOS.Backend/Classification/ClassificationPolicyService.cs</small>")
     dataquality_dataqualityservice_dataqualityissues_c3a4fac1("DataQualityIssueService<br/><small>ETOS.Backend/DataQuality/DataQualityService.cs</small>")
     documents_documentservice_documentservice_5e7e63ca("DocumentService<br/><small>ETOS.Backend/Documents/DocumentService.cs</small>")
+    governedquery_governedqueryservice_governedquery_9453975b("GovernedQueryService<br/><small>ETOS.Backend/GovernedQuery/GovernedQueryService.cs</small>")
     identity_identityadminservice_identityadminservi_474833e0("IdentityAdminService<br/><small>ETOS.Backend/Identity/IdentityAdminService.cs</small>")
     identityresolution_identityresolutionservice_ide_fee45c54("IdentityResolutionService<br/><small>ETOS.Backend/IdentityResolution/IdentityResolutionService.cs</small>")
-    artifacts_artifactendpointextensions_artifactend_16ea151a -->|method| artifacts_artifactendpointextensions_artifactend_763de6d7
-    artifacts_artifactendpointextensions_artifactend_16ea151a -->|method| artifacts_artifactendpointextensions_artifactend_b32267fc
-    artifacts_artifactendpointextensions_artifactend_b32267fc -->|calls| artifacts_artifactendpointextensions_artifactend_763de6d7
-    artifacts_artifactregistryservice_iartifactregis_cc28299e -->|method| artifacts_artifactregistryservice_iartifactregis_bf63aefd
-    artifacts_artifactregistryservice_iartifactregis_cc28299e -->|method| artifacts_artifactregistryservice_iartifactregis_9c22e6d5
-    artifacts_artifactregistryservice_iartifactregis_cc28299e -->|method| artifacts_artifactregistryservice_iartifactregis_478ad8ea
-    artifacts_artifactregistryservice_iartifactregis_cc28299e -->|method| artifacts_artifactregistryservice_iartifactregis_634aa5ca
-    artifacts_artifactregistryservice_iartifactregis_cc28299e -->|method| artifacts_artifactregistryservice_iartifactregis_b338b439
-    artifacts_artifactregistryservice_iartifactregis_cc28299e -->|method| artifacts_artifactregistryservice_iartifactregis_c0eb927c
-    artifacts_artifactregistryservice_iartifactregis_cc28299e -->|method| artifacts_artifactregistryservice_iartifactregis_55433041
-    artifacts_artifactregistryservice_iartifactregis_cc28299e -->|method| artifacts_artifactregistryservice_iartifactregis_5399a720
-    %% Omitted for readability: 1757 nodes, 0 edges
-    class artifacts_artifactregistryservice_artifactregist_5bf4a65c klass;
-    class artifacts_artifactregistryservice_iartifactregis_cc28299e klass;
-    class artifacts_artifactregistryservice_iartifactregis_bf63aefd async;
-    class artifacts_artifactregistryservice_iartifactregis_9c22e6d5 async;
-    class artifacts_artifactregistryservice_iartifactregis_478ad8ea async;
-    class artifacts_artifactregistryservice_iartifactregis_634aa5ca async;
-    class artifacts_artifactregistryservice_iartifactregis_b338b439 async;
-    class artifacts_artifactregistryservice_iartifactregis_c0eb927c async;
-    class artifacts_artifactregistryservice_iartifactregis_55433041 async;
-    class artifacts_artifactregistryservice_iartifactregis_5399a720 async;
-    class artifacts_artifactendpointextensions_artifactend_16ea151a api;
-    class artifacts_artifactendpointextensions_artifactend_763de6d7 async;
-    class artifacts_artifactendpointextensions_artifactend_b32267fc api;
+    aitrace_aitraceendpointextensions_aitraceendpoin_d05e0817 -->|method| aitrace_aitraceendpointextensions_aitraceendpoin_2be4fd0f
+    aitrace_aitraceendpointextensions_aitraceendpoin_d05e0817 -->|method| aitrace_aitraceendpointextensions_aitraceendpoin_8916e3c7
+    aitrace_aitraceendpointextensions_aitraceendpoin_d05e0817 -->|method| aitrace_aitraceendpointextensions_aitraceendpoin_c814fea5
+    aitrace_aitraceendpointextensions_aitraceendpoin_c814fea5 -->|calls| aitrace_aitraceendpointextensions_aitraceendpoin_2be4fd0f
+    aitrace_aitraceendpointextensions_aitraceendpoin_c814fea5 -->|calls| aitrace_aitraceendpointextensions_aitraceendpoin_8916e3c7
+    aitrace_aitraceexportbuilder_aitraceexportbuilde_b39c7da7 -->|method| aitrace_aitraceexportbuilder_aitraceexportbuilde_55d046be
+    aitrace_aitraceexportbuilder_aitraceexportbuilde_b39c7da7 -->|method| aitrace_aitraceexportbuilder_aitraceexportbuilde_a816939c
+    aitrace_aitracerecorder_iaitracerecorder_ceeb0585 -->|method| aitrace_aitracerecorder_iaitracerecorder_createf_fcf9e52a
+    aitrace_aitracerecorder_aitracerecorder_3505e498 -->|method| aitrace_aitracerecorder_aitracerecorder_buildart_4b40650f
+    aitrace_aitracerecorder_aitracerecorder_3505e498 -->|method| aitrace_aitracerecorder_aitracerecorder_buildsou_8fa9ea65
+    %% Omitted for readability: 1999 nodes, 0 edges
+    class aitrace_aitracerecorder_iaitracerecorder_ceeb0585 klass;
+    class aitrace_aitracerecorder_iaitracerecorder_createf_fcf9e52a async;
+    class aitrace_aitracerecorder_aitracerecorder_3505e498 klass;
+    class aitrace_aitracerecorder_aitracerecorder_buildart_4b40650f function;
+    class aitrace_aitracerecorder_aitracerecorder_buildsou_8fa9ea65 function;
+    class aitrace_aitraceendpointextensions_aitraceendpoin_d05e0817 api;
+    class aitrace_aitraceendpointextensions_aitraceendpoin_2be4fd0f async;
+    class aitrace_aitraceendpointextensions_aitraceendpoin_8916e3c7 async;
+    class aitrace_aitraceendpointextensions_aitraceendpoin_c814fea5 api;
+    class aitrace_aitraceexportbuilder_aitraceexportbuilde_b39c7da7 klass;
+    class aitrace_aitraceexportbuilder_aitraceexportbuilde_55d046be function;
+    class aitrace_aitraceexportbuilder_aitraceexportbuilde_a816939c function;
     class classification_classificationpolicyservice_class_737a2aa3 klass;
     class dataquality_dataqualityservice_dataqualityissues_c3a4fac1 klass;
     class documents_documentservice_documentservice_5e7e63ca klass;
+    class governedquery_governedqueryservice_governedquery_9453975b klass;
     class identity_identityadminservice_identityadminservi_474833e0 klass;
     class identityresolution_identityresolutionservice_ide_fee45c54 klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
@@ -5091,7 +5094,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x1219, contains x898, calls x396, method x390. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x1487, contains x933, calls x494, method x482. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -5102,17 +5105,17 @@ flowchart LR
   <div class="card">
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>Nodes</td><td>3894</td></tr>
-      <tr><td>Edges</td><td>6920</td></tr>
+      <tr><td>Nodes</td><td>4364</td></tr>
+      <tr><td>Edges</td><td>7887</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
-      <tr><td>Communities</td><td>177</td></tr>
+      <tr><td>Communities</td><td>197</td></tr>
       <tr><td>Documented Sections</td><td>15</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>EXTRACTED</td><td>6920</td></tr>
+      <tr><td>EXTRACTED</td><td>7887</td></tr>
       <tr><td>INFERRED</td><td>0</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
@@ -5121,7 +5124,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>EnterpriseThreadOS — Architecture Documentation</p>
-  <p>Generated: 2026-06-11 18:46 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-06-13 16:42 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

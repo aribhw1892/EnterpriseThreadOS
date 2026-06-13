@@ -949,6 +949,12 @@ public sealed class ImportService(
                 if (!IsValueValid(attribute.ValueType, value))
                 {
                     yield return NewIssue(batch, mapping, ImportIssueSeverity.Error, rowNumber, columnMapping.SourceColumn, columnMapping.CanonicalObjectType, "invalid_value_type", $"Value in '{columnMapping.SourceColumn}' is not a valid {attribute.ValueType}.");
+                    continue;
+                }
+
+                if (IsSuspiciousNumericValue(attribute.ValueType, value))
+                {
+                    yield return NewIssue(batch, mapping, ImportIssueSeverity.Warning, rowNumber, columnMapping.SourceColumn, columnMapping.CanonicalObjectType, "suspicious_numeric_value", $"Value in '{columnMapping.SourceColumn}' is negative and should be reviewed.");
                 }
             }
 
@@ -999,6 +1005,13 @@ public sealed class ImportService(
             AttributeValueType.Json => IsJson(value),
             _ => false
         };
+    }
+
+    private static bool IsSuspiciousNumericValue(AttributeValueType valueType, string value)
+    {
+        return valueType == AttributeValueType.Number
+            && decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var parsed)
+            && parsed < 0;
     }
 
     private static bool IsJson(string value)

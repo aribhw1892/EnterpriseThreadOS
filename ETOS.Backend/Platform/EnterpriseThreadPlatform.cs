@@ -3,6 +3,8 @@ using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
 using ETOS.Backend.GraphMemory;
+using ETOS.Backend.AiTrace;
+using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
@@ -122,6 +124,9 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IDocumentVectorIndexingService, DisabledDocumentVectorIndexingService>();
         services.AddScoped<ICadParsingPlaceholder, DisabledCadParsingPlaceholder>();
         services.AddScoped<IDocumentService, DocumentService>();
+        services.AddScoped<IGovernedQueryService, GovernedQueryService>();
+        services.AddScoped<IAiTraceRecorder, AiTraceRecorder>();
+        services.AddScoped<IAiTraceService, AiTraceService>();
         services.AddScoped<IDevelopmentIdentitySeeder, DevelopmentIdentitySeeder>();
 
         return services;

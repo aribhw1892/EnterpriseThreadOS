@@ -37,6 +37,22 @@ public sealed class DataQualityTests
     }
 
     [Fact]
+    public async Task FailedValidationBatchIssuesCanBePromotedToDataQualityIssues()
+    {
+        await using var dbContext = CreateDbContext();
+        var context = CreateTenantContext();
+        var batch = SeedValidatedImport(dbContext, context.TenantId, context.UserId);
+        batch.Status = ImportBatchStatus.Failed;
+        await dbContext.SaveChangesAsync();
+        var service = CreateService(dbContext, context);
+
+        var result = await service.GenerateFromImportValidationAsync(batch.Id, CancellationToken.None);
+
+        Assert.Equal(2, result.CreatedCount);
+        Assert.Equal(2, await dbContext.DataQualityIssues.CountAsync());
+    }
+
+    [Fact]
     public async Task ManualIssueCreationValidatesTenantAndSourceReferences()
     {
         await using var dbContext = CreateDbContext();

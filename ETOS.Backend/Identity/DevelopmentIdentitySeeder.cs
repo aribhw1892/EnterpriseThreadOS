@@ -1,3 +1,4 @@
+using ETOS.Backend.AiTrace;
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
@@ -51,6 +52,9 @@ public sealed class DevelopmentIdentitySeeder(
         var dataQualityManagePermission = await EnsurePermissionAsync(DataQualityPermissions.Manage, "Manage tenant data quality issues and issue generation.", cancellationToken);
         var dataQualityReviewHookPermission = await EnsurePermissionAsync(DataQualityPermissions.ReviewHook, "Create data quality review hooks from governed events.", cancellationToken);
         var dataQualityAdminPermission = await EnsurePermissionAsync(DataQualityPermissions.Admin, "Administer tenant data quality records.", cancellationToken);
+        var aiTraceReadPermission = await EnsurePermissionAsync(AiTracePermissions.Read, "Read tenant AI Trace records.", cancellationToken);
+        var aiTraceExportPermission = await EnsurePermissionAsync(AiTracePermissions.Export, "Export tenant AI Trace packages.", cancellationToken);
+        var aiTraceAdminPermission = await EnsurePermissionAsync(AiTracePermissions.Admin, "Administer tenant AI Trace records.", cancellationToken);
         var adminRole = await EnsureTenantRoleAsync(tenant.Id, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, admin.Id, adminRole.Id, cancellationToken);
@@ -73,6 +77,9 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, dataQualityManagePermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, dataQualityReviewHookPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, dataQualityAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, aiTraceReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, aiTraceExportPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, aiTraceAdminPermission.Id, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await EnsureBootstrapAuditAsync(tenant.Id, admin.Id, tenant.Identifier, cancellationToken);
