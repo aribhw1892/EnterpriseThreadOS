@@ -1,8 +1,8 @@
 {
   "ai-agent-workflow.md": {
-    "mtime": 1781102950.0239289,
-    "ast_hash": "858033826f26d939b88dc9f2fe30ca1d",
-    "semantic_hash": "858033826f26d939b88dc9f2fe30ca1d"
+    "mtime": 1781372017.7679493,
+    "ast_hash": "ace163647fa68821948dbd798bd395bf",
+    "semantic_hash": "ace163647fa68821948dbd798bd395bf"
   },
   "architecture/adr/0002-artifact-lifecycle.md": {
     "mtime": 1781033703.8469539,
@@ -20,18 +20,18 @@
     "semantic_hash": "4c6f118fb15e2e724bc77a92d7834622"
   },
   "backend/architecture.md": {
-    "mtime": 1781202556.8254073,
-    "ast_hash": "3081a5762d9e87218ed8b5c0e223607e",
-    "semantic_hash": "3081a5762d9e87218ed8b5c0e223607e"
+    "mtime": 1781372008.418897,
+    "ast_hash": "88831433d6c6bf127b45e81bf64bf9bf",
+    "semantic_hash": "88831433d6c6bf127b45e81bf64bf9bf"
   },
   "frontend/architecture.md": {
-    "mtime": 1781202771.1898167,
-    "ast_hash": "33af68e41eccec14c59676c17802defa",
-    "semantic_hash": "33af68e41eccec14c59676c17802defa"
+    "mtime": 1781372016.9357574,
+    "ast_hash": "c86636a2fc504a85c6fa132582438891",
+    "semantic_hash": "c86636a2fc504a85c6fa132582438891"
   },
   "local-development.md": {
-    "mtime": 1781202901.8509946,
-    "ast_hash": "a7cff8dc75eab9d2cffba2ba4294c4a2",
-    "semantic_hash": "a7cff8dc75eab9d2cffba2ba4294c4a2"
+    "mtime": 1781372013.6743698,
+    "ast_hash": "20d749defe7bad48ac97a73e3d16b400",
+    "semantic_hash": "20d749defe7bad48ac97a73e3d16b400"
   }
 }

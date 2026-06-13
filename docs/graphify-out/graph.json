@@ -103,9 +103,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "ai_agent_workflow",
       "community": 1,
-      "norm_label": "ai agent workflow"
+      "norm_label": "ai agent workflow",
+      "id": "ai_agent_workflow"
     },
     {
       "label": "Local Development",
@@ -116,9 +116,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "local_development",
       "community": 1,
-      "norm_label": "local development"
+      "norm_label": "local development",
+      "id": "local_development"
     },
     {
       "label": "Backend Architecture",
@@ -129,9 +129,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "backend_architecture",
       "community": 1,
-      "norm_label": "backend architecture"
+      "norm_label": "backend architecture",
+      "id": "backend_architecture"
     },
     {
       "label": "Frontend Architecture",
@@ -142,9 +142,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "frontend_architecture",
       "community": 1,
-      "norm_label": "frontend architecture"
+      "norm_label": "frontend architecture",
+      "id": "frontend_architecture"
     }
   ],
   "links": [
@@ -340,5 +340,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "faa4217a28b7418bead2f98884edc057d78e6f6c"
+  "built_at_commit": "bd5ba5ba3c5f2f907d5cde4fe8df8640bc71f5d2"
 }
