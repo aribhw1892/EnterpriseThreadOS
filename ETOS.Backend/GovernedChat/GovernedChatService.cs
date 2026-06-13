@@ -6,6 +6,8 @@ using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Identity;
 using ETOS.Backend.GovernedChat.Llm;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.GraphMemory;
+using ETOS.Backend.Recommendations;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.GovernedChat;
@@ -254,6 +256,17 @@ public sealed class GovernedChatService(
         turn.AiTraceRecordId = traceId;
         await dbContext.SaveChangesAsync(cancellationToken);
 
+        if (request.DraftArtifactKind == ChatDraftArtifactKind.Recommendation && draftArtifact is not null)
+        {
+            await EnrichRecommendationDraftAfterTraceAsync(
+                context.TenantId,
+                draftArtifact.VersionId,
+                traceId,
+                turn.ContextPackageId,
+                turn.RetrievalRunId,
+                cancellationToken);
+        }
+
         if (request.DraftArtifactKind is not null)
         {
             await auditRecorder.RecordAsync(
@@ -312,6 +325,54 @@ public sealed class GovernedChatService(
         return BuildTurnResponse(turn, evidence, confidence, deniedCount, draft);
     }
 
+    private async Task EnrichRecommendationDraftAfterTraceAsync(
+        Guid tenantId,
+        Guid versionId,
+        Guid traceId,
+        Guid contextPackageId,
+        Guid retrievalRunId,
+        CancellationToken cancellationToken)
+    {
+        var version = await dbContext.ArtifactVersions
+            .SingleOrDefaultAsync(item => item.Id == versionId && item.TenantId == tenantId, cancellationToken);
+        if (version is null)
+        {
+            return;
+        }
+
+        var payload = RecommendationPayloadParser.Deserialize(version.PayloadJson ?? "{}");
+        payload.CreationSource = RecommendationCreationSource.Chat;
+        payload.Explainability = new RecommendationPayloadParser.RecommendationExplainabilityDocument(
+            traceId,
+            contextPackageId,
+            retrievalRunId);
+
+        if (!payload.EvidenceLinks.Any(link => link.EvidenceType == EvidenceLinkType.AiTrace))
+        {
+            payload.EvidenceLinks.Add(new RecommendationPayloadParser.RecommendationEvidenceLinkDocument(
+                Guid.NewGuid(),
+                EvidenceLinkType.AiTrace,
+                traceId,
+                "Governed chat turn AI trace evidence.",
+                TrustState.Provisional,
+                false));
+        }
+
+        if (!payload.EvidenceLinks.Any(link => link.EvidenceType == EvidenceLinkType.ContextPackage))
+        {
+            payload.EvidenceLinks.Add(new RecommendationPayloadParser.RecommendationEvidenceLinkDocument(
+                Guid.NewGuid(),
+                EvidenceLinkType.ContextPackage,
+                contextPackageId,
+                "Governed chat context package evidence.",
+                TrustState.Provisional,
+                false));
+        }
+
+        version.PayloadJson = RecommendationPayloadParser.Serialize(payload);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     private static PlatformArtifactVersion ResolveDraftSchema(GovernedChatPlatformArtifacts artifacts, ChatDraftArtifactKind draftKind)
     {
         return draftKind switch
@@ -319,6 +380,7 @@ public sealed class GovernedChatService(
             ChatDraftArtifactKind.QueryIntent => artifacts.DraftQueryIntentSchema,
             ChatDraftArtifactKind.Dashboard => artifacts.DraftDashboardSchema,
             ChatDraftArtifactKind.Report => artifacts.DraftReportSchema,
+            ChatDraftArtifactKind.Recommendation => artifacts.DraftRecommendationSchema,
             _ => throw new RequestValidationException("Unsupported draft artifact kind.")
         };
     }

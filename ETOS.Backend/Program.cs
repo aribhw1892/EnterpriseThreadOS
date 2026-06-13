@@ -14,6 +14,7 @@ using ETOS.Backend.Identity;
 using ETOS.Backend.Imports;
 using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Ontology;
+using ETOS.Backend.Recommendations;
 using ETOS.Backend.Platform;
 using Finbuckle.MultiTenant.AspNetCore.Extensions;
 
@@ -52,6 +53,7 @@ app.MapEnterpriseThreadAiTraceEndpoints();
 app.MapEnterpriseThreadGovernedChatEndpoints();
 app.MapEnterpriseThreadExplorerEndpoints();
 app.MapEnterpriseThreadDashboardReportEndpoints();
+app.MapEnterpriseThreadRecommendationEndpoints();
 
 app.Run();
 

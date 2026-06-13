@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-`ETOS.Frontend` is the current Next.js frontend shell for EnterpriseThreadOS. It proves the frontend can reach the ASP.NET Core backend and display safe local platform health, tenant admin lists, governance records, artifact registry data, classification/policy records, model artifact administration, import/staging administration, identity-resolution review data, data-quality hooks, and document memory records.
+`ETOS.Frontend` is the current Next.js frontend shell for EnterpriseThreadOS. It proves the frontend can reach the ASP.NET Core backend and display safe local platform health, tenant admin lists, governance records, artifact registry data, classification/policy records, model artifact administration, import/staging administration, identity-resolution review data, data-quality hooks, document memory records, governed chat, explorers, dashboard/report shells, and recommendation shells.
 
 ## Stack
 
@@ -18,6 +18,12 @@ Read `ETOS.Frontend/AGENTS.md` before frontend edits. This project uses a newer 
 - `src/app/model-artifacts/page.tsx`: server-rendered canonical model artifact admin page with seed publish action.
 - `src/app/imports/page.tsx`: server-rendered import admin page with demo import, mapping approval, validation, staging, identity candidate, and trust-score actions.
 - `src/app/documents/page.tsx`: server-rendered document memory admin page with demo document creation, version metadata, object links, vector hook records, and CAD placeholder status.
+- `src/app/chat/page.tsx`: governed chat shell with evidence/confidence responses and chat-to-artifact drafting.
+- `src/app/explorers/page.tsx`: explorer hub with links to artifact, graph, document, context-package, decision, 360° context, and governance flow routes.
+- `src/app/dashboards/page.tsx` and `src/app/dashboards/[artifactId]/page.tsx`: dashboard list and detail shells.
+- `src/app/reports/page.tsx` and `src/app/reports/[artifactId]/page.tsx`: report list and detail shells.
+- `src/app/recommendations/page.tsx` and `src/app/recommendations/[artifactId]/page.tsx`: recommendation list and detail shells with evidence, suggested actions, and lifecycle transitions.
+- `src/components/recommendations/RecommendationDetailView.tsx`: shared recommendation detail panel.
 - `src/app/layout.tsx`: app layout and metadata.
 - `src/app/globals.css`: global Tailwind CSS entry.
 - `src/lib/etos-api.ts`: typed backend fetch helpers and local admin header configuration.
@@ -130,6 +136,31 @@ POST /api/admin/documents/{documentId}/versions/{versionId}/extraction-issue
 
 The page renders document artifacts, immutable version metadata, object links, vector indexing metadata records, and disabled CAD parsing status. Demo actions intentionally use small local text content and metadata; raw document viewing and rich upload UX remain outside this slice.
 
+`src/app/recommendations/page.tsx` fetches:
+
+```text
+GET /api/admin/recommendations
+```
+
+`src/app/recommendations/[artifactId]/page.tsx` and `RecommendationDetailView` fetch:
+
+```text
+GET /api/admin/recommendations/{artifactId}/versions/{versionId}
+```
+
+They expose server actions for:
+
+```text
+POST /api/admin/recommendations
+POST /api/admin/recommendations/from-data-quality-issue/{issueId}
+POST /api/admin/recommendations/from-bom-comparison/{runId}
+POST /api/admin/recommendations/{artifactId}/versions/{versionId}/mark-reviewed
+POST /api/admin/recommendations/{artifactId}/versions/{versionId}/mark-ready
+PATCH /api/admin/recommendations/{artifactId}/versions/{versionId}/suggested-actions/{actionId}
+```
+
+The recommendation pages render summary metadata, evidence links with trust badges, suggested actions, lifecycle/readiness actions, and links to explorers, 360° context views, and AI traces where resolvable.
+
 The fetch uses `cache: "no-store"` and `dynamic = "force-dynamic"` so local health reflects current backend state.
 
 ## UI Guidance
@@ -185,6 +216,6 @@ Pop-Location
 
 ## Planned Frontend Areas
 
-The PRD calls for future explorers, 360-degree context views, AI Trace views, governance dashboards, report/dashboard builders, agent and workflow builders, and graph/workflow visualization.
+The PRD calls for future governance dashboard live KPI analytics, agent and workflow builders, and richer graph/workflow visualization.
 
-These are not present in the current frontend shell. Add them only under their owning issue and keep them connected to governed backend APIs rather than direct storage access.
+Explorers, 360° context views, AI Trace views, governed chat, dashboard/report shells, and recommendation shells are present as minimal Issue 14–18 slices. Add richer behavior only under their owning issue and keep them connected to governed backend APIs rather than direct storage access.

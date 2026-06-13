@@ -12,7 +12,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "ai agent workflow guide",
       "id": "ai_agent_workflow_guide"
     },
@@ -25,7 +25,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "local development guide",
       "id": "local_development_guide"
     },
@@ -90,9 +90,61 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "frontend architecture document",
       "id": "frontend_architecture_doc"
+    },
+    {
+      "label": "AI Agent Workflow",
+      "file_type": "document",
+      "source_file": "ai-agent-workflow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "ai_agent_workflow",
+      "community": 1,
+      "norm_label": "ai agent workflow"
+    },
+    {
+      "label": "Local Development",
+      "file_type": "document",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "local_development",
+      "community": 1,
+      "norm_label": "local development"
+    },
+    {
+      "label": "Backend Architecture",
+      "file_type": "document",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "backend_architecture",
+      "community": 1,
+      "norm_label": "backend architecture"
+    },
+    {
+      "label": "Frontend Architecture",
+      "file_type": "document",
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "frontend_architecture",
+      "community": 1,
+      "norm_label": "frontend architecture"
     }
   ],
   "links": [
@@ -235,8 +287,58 @@
       "weight": 1.0,
       "source": "frontend_architecture_doc",
       "target": "backend_architecture_doc"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ai-agent-workflow.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "ai_agent_workflow",
+      "target": "backend_architecture"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ai-agent-workflow.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "ai_agent_workflow",
+      "target": "local_development"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "local_development",
+      "target": "backend_architecture"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "local_development",
+      "target": "frontend_architecture"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "frontend_architecture",
+      "target": "backend_architecture"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "28feb1a1d1af4fcbcf2e00a8f75a374c090df6ab"
+  "built_at_commit": "faa4217a28b7418bead2f98884edc057d78e6f6c"
 }

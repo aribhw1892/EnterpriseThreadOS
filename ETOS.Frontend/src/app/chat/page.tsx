@@ -41,7 +41,7 @@ async function askTurnAction(formData: FormData) {
   }
 
   const draftArtifactKind =
-    draftKind === "QueryIntent" || draftKind === "Dashboard" || draftKind === "Report"
+    draftKind === "QueryIntent" || draftKind === "Dashboard" || draftKind === "Report" || draftKind === "Recommendation"
       ? draftKind
       : undefined;
 
@@ -266,6 +266,7 @@ export default async function ChatPage() {
                   <option value="QueryIntent">Draft query intent</option>
                   <option value="Dashboard">Draft dashboard</option>
                   <option value="Report">Draft report</option>
+                  <option value="Recommendation">Draft recommendation</option>
                 </select>
               </label>
               <button

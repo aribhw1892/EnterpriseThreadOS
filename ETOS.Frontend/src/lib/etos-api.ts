@@ -936,6 +936,64 @@ export type DashboardReportArtifactSummary = {
   updatedAt: string;
 };
 
+export type RecommendationArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  lifecycleStatus?: string | null;
+  recommendationType?: string | null;
+  updatedAt: string;
+};
+
+export type RecommendationEvidenceLink = {
+  linkId: string;
+  evidenceType: string;
+  sourceId: string;
+  safeSummary: string;
+  trustState: string;
+  permissionFiltered: boolean;
+};
+
+export type RecommendationSuggestedAction = {
+  actionId: string;
+  title: string;
+  kind: string;
+  riskScore: string;
+  requiredReviewPath?: string | null;
+  status: string;
+  description?: string | null;
+};
+
+export type RecommendationPayload = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  title: string;
+  summary: string;
+  recommendationType: string;
+  creationSource: string;
+  riskState: string;
+  capabilityState: string;
+  trustState: string;
+  conflictState: string;
+  lifecycleStatus: string;
+  evidenceLinks: RecommendationEvidenceLink[];
+  suggestedActions: RecommendationSuggestedAction[];
+  relatedObjects: { graphNodeId?: string | null; objectType?: string | null }[];
+  explainability: {
+    aiTraceId?: string | null;
+    contextPackageId?: string | null;
+    retrievalRunId?: string | null;
+  };
+  outcomeTrackingRequired: boolean;
+  uniqueSourceKey?: string | null;
+  artifactReadinessState: string;
+};
+
 export type DashboardReportTemplateBlock = {
   blockId: string;
   title: string;
@@ -1625,7 +1683,7 @@ export async function askGovernedChatTurn(
   sessionId: string,
   message: string,
   intentKey = "object-360-context",
-  draftArtifactKind?: "QueryIntent" | "Dashboard" | "Report",
+  draftArtifactKind?: "QueryIntent" | "Dashboard" | "Report" | "Recommendation",
 ): Promise<ApiResult<GovernedChatTurn>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -2746,7 +2804,92 @@ export function draftArtifactDetailHref(artifactType: string, artifactId: string
     return `/reports/${artifactId}`;
   }
 
+  if (artifactType === "RecommendationVersion") {
+    return `/recommendations/${artifactId}`;
+  }
+
   return null;
+}
+
+export async function getRecommendationArtifacts(): Promise<ApiResult<RecommendationArtifactSummary[]>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<RecommendationArtifactSummary[]>();
+  }
+
+  return await fetchApi<RecommendationArtifactSummary[]>("/api/admin/recommendations", tenantHeaders);
+}
+
+export async function getRecommendationPayload(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<RecommendationPayload>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<RecommendationPayload>();
+  }
+
+  return await fetchApi<RecommendationPayload>(
+    `/api/admin/recommendations/${artifactId}/versions/${versionId}`,
+    tenantHeaders,
+  );
+}
+
+export async function markRecommendationReviewed(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; lifecycleStatus: string; validationNotes: string[] }>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; lifecycleStatus: string; validationNotes: string[] }>();
+  }
+
+  return await postApi(`/api/admin/recommendations/${artifactId}/versions/${versionId}/mark-reviewed`, {}, tenantHeaders);
+}
+
+export async function markRecommendationReady(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; trustState: string; conflictState: string; validationNotes: string[] }>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; readinessState: string; trustState: string; conflictState: string; validationNotes: string[] }>();
+  }
+
+  return await postApi(`/api/admin/recommendations/${artifactId}/versions/${versionId}/mark-ready`, {}, tenantHeaders);
+}
+
+export async function updateRecommendationSuggestedActionStatus(
+  artifactId: string,
+  versionId: string,
+  actionId: string,
+  status: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; actionId: string; status: string }>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; actionId: string; status: string }>();
+  }
+
+  return await patchApi(
+    `/api/admin/recommendations/${artifactId}/versions/${versionId}/suggested-actions/${actionId}`,
+    { status },
+    tenantHeaders,
+  );
 }
 
 async function fetchApi<T>(
@@ -2803,6 +2946,20 @@ async function postApi<T>(
 ): Promise<ApiResult<T>> {
   return await fetchApi<T>(path, context, {
     method: "POST",
+    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+async function patchApi<T>(
+  path: string,
+  body: unknown,
+  context?: { userId?: string; tenantId?: string },
+): Promise<ApiResult<T>> {
+  return await fetchApi<T>(path, context, {
+    method: "PATCH",
     body: JSON.stringify(body),
     headers: {
       "Content-Type": "application/json",

@@ -28,6 +28,7 @@ flowchart TB
     platform --> governedchat["Governed Chat Module"]
     platform --> explorers["Explorers Module"]
     platform --> dashboards["Dashboard and Report Module"]
+    platform --> recommendations["Recommendation Module"]
     platform --> persistence["EnterpriseThreadDbContext"]
     platform --> extensions["Extension Point Catalog"]
 
@@ -61,6 +62,7 @@ flowchart TB
 - `ETOS.Backend/GovernedChat/` contains governed chat sessions/turns, platform-seeded `PromptTemplateVersion` and `OutputSchemaVersion` artifacts, deterministic default LLM completion with optional OpenAI provider behind config, output schema validation, chat-to-artifact draft creation via the artifact registry, enriched `GovernedChat` AI Trace records with pinned prompt/output labels, and minimal API endpoint mapping.
 - `ETOS.Backend/Explorers/` contains read-only explorer orchestration for tenant-filtered artifact/graph/document/context-package/decision lists, generic 360° context views, governance flow foundation projections, policy/trust-filtered graph browse, and minimal API endpoint mapping. Decision explorer and governance flow are foundation-only until Milestone 4.
 - `ETOS.Backend/Dashboards/` contains dashboard/report template parsing, governed-query preview orchestration, readiness validation and mark-ready workflow, JSON export builder with audit records, governance KPI placeholder catalog, and minimal API endpoint mapping. Live KPI analytics remain deferred to Issue 21.
+- `ETOS.Backend/Recommendations/` contains versioned `RecommendationVersion` artifacts with embedded evidence links and suggested actions, trust/conflict-aware readiness validation, evidence resolution for data-quality issues and BOM comparison runs, creation factories (manual, data quality, BOM comparison, governed chat draft, dashboard/report provenance), suggested-action status transitions with audit, and minimal API endpoint mapping. Agent/workflow auto-creation and review-task conversion from suggested actions remain deferred to Milestone 5 and Issue 19.
 - `ETOS.Backend/Tenancy/` contains tenant-scope conventions used by persisted tenant-owned records.
 - `ETOS.Backend/Platform/Extensions/` exposes deferred extension points for planned platform capabilities without pretending they are active.
 - `ETOS.Frontend/` is a Next.js 16 shell that renders local platform health from the backend.
@@ -88,16 +90,17 @@ Implemented or partially implemented:
 - Document memory foundation with document artifact metadata, immutable version storage metadata, document-to-graph/import links, extraction issue hooks, Qdrant-ready vector indexing records, disabled native CAD geometry parsing placeholder, and a minimal documents-page UI.
 - Governed query and context assembly foundation with fixed platform query intents (object-360-context, bom-impact-context, document-evidence-context), retrieval runs, context packages, policy-filtered LLM-safe context assembly, denied context separation, and trust/conflict filtering.
 - AI Trace foundation for governed-query runs with trace records, artifact links, tenant-scoped trace explorer APIs, separate view/export permissions, on-demand export packages with redaction metadata, export audit records, and a minimal `/ai-traces` UI.
-- Governed chat foundation with natural-language Q&A over governed retrieval context only, evidence/confidence responses, single enriched AI Trace per chat turn (no duplicate query-only trace), platform prompt/output schema pinning, chat-to-artifact drafting for query intents/dashboards/reports as draft artifact versions blocked by existing publish gates, deterministic default LLM provider for CI/local use, optional OpenAI provider behind `GovernedChat:LlmProvider`, and a minimal `/chat` UI.
+- Governed chat foundation with natural-language Q&A over governed retrieval context only, evidence/confidence responses, single enriched AI Trace per chat turn (no duplicate query-only trace), platform prompt/output schema pinning, chat-to-artifact drafting for query intents/dashboards/reports/recommendations as draft artifact versions blocked by existing publish gates, deterministic default LLM provider for CI/local use, optional OpenAI provider behind `GovernedChat:LlmProvider`, and a minimal `/chat` UI.
 - Explorers and 360° context view foundation (Issue 16) with governed explorer APIs, generic context views for artifacts/documents/graph nodes/context packages/AI traces, governance flow foundation with Milestone 4 review-chain placeholders, graph explorer with trust/policy filtering, context-package and decision explorer foundations, shared frontend panels, and `/explorers` hub routes.
 - Dashboard and Report module (Issue 17) with structured `DashboardVersion`/`ReportVersion` template parsing, governed-query-only preview rendering, readiness transition workflow, JSON export with audit/redaction metadata, governance KPI placeholder catalog, and `/dashboards` + `/reports` UI shells linked from chat drafts.
+- Recommendation module (Issue 18) with versioned `RecommendationVersion` artifacts, embedded evidence links and suggested actions, evidence-required `MarkReviewed` and trust/conflict-aware `MarkReady`, creation from data-quality issues, BOM comparison runs, governed chat drafts, and dashboard/report provenance, suggested-action status transitions with audit, governance-flow integration, and `/recommendations` UI shell.
 
 Planned by PRD and backlog, but not generally implemented unless future source code says otherwise:
 
 - Graph business flows beyond the current import staging and identity-review foundations: trusted graph promotion, snapshots, diffs, and governed traversals.
 - Full review task workflows for data quality issues, including assignment, blocking, escalation, completion, and decision creation.
 - Live Qdrant indexing/provider execution.
-- Dashboard/report preview rendering and export (Issue 17), full recommendation/review-task/decision/outcome/learning workflows beyond current explorer and chat draft foundations.
+- Full review-task/decision/outcome/learning workflows beyond current recommendation and explorer foundations. Recommendation suggested-action `CONVERTED_TO_REVIEW_TASK` is status-only until Issue 19; agent/workflow recommendation creation remains deferred (`AGENT_DEFERRED` contract only).
 - Issue 21 Governance Dashboard live KPI analytics and trend charts (Issue 17 provides KPI placeholder catalog only).
 - Tool registry, agent runtime, workflow runtime, multi-agent collaboration, and enterprise action framework.
 - Neo4j Agent Memory or any other persistent agent-memory provider. These remain deferred behind EnterpriseThreadOS-owned contracts and must not replace the platform graph memory abstraction.

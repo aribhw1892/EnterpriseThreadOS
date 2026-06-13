@@ -105,6 +105,14 @@ Useful endpoints:
 - `POST http://localhost:5000/api/admin/identity-resolution/candidates/{candidateId}/reject`
 - `POST http://localhost:5000/api/admin/identity-resolution/candidates/{candidateId}/mark-conflicted`
 - `GET http://localhost:5000/api/admin/identity-resolution/batches/{batchId}/trust-scores`
+- `GET http://localhost:5000/api/admin/recommendations`
+- `POST http://localhost:5000/api/admin/recommendations`
+- `GET http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}`
+- `POST http://localhost:5000/api/admin/recommendations/from-data-quality-issue/{issueId}`
+- `POST http://localhost:5000/api/admin/recommendations/from-bom-comparison/{runId}`
+- `POST http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/mark-reviewed`
+- `POST http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/mark-ready`
+- `PATCH http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/suggested-actions/{actionId}`
 
 Tenant-protected identity endpoints use local header authentication in the current implementation. Use these headers for local API testing when an endpoint requires authorization:
 
@@ -148,7 +156,15 @@ Open `http://localhost:3000/model-artifacts` to inspect and seed canonical ontol
 
 Open `http://localhost:3000/imports` to inspect import batches and run import/identity demo flows. The recommended `Run identity demo` button creates two CSV-backed source batches, approves their generated mapping drafts, validates records, stages unverified graph nodes for both batches, and generates identity candidates with trust score breakdowns. The manual tools on the page intentionally operate on the newest batch only and are meant for step-by-step debugging. Multipart upload is supported by the backend API at `/api/admin/imports/batches/{batchId}/files`; the UI intentionally keeps upload behavior small because Next.js server actions have body-size limits.
 
-The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, tenant-filtered audit/security event lists, artifact registry lists, classification/policy lists, model artifact admin screens, and import admin screens from the backend.
+Open `http://localhost:3000/chat` for governed chat with evidence/confidence responses and chat-to-artifact drafting.
+
+Open `http://localhost:3000/explorers` for explorer hubs, 360° context views, and governance flow foundation.
+
+Open `http://localhost:3000/dashboards` and `http://localhost:3000/reports` for dashboard/report list and detail shells linked from chat drafts.
+
+Open `http://localhost:3000/recommendations` to list recommendation drafts, create recommendations with evidence links and suggested actions, transition reviewed/ready states, and update suggested-action status.
+
+The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, tenant-filtered audit/security event lists, artifact registry lists, classification/policy lists, model artifact admin screens, import admin screens, governed chat, explorers, dashboards/reports, and recommendations from the backend.
 
 Expected `/imports` identity-demo result:
 

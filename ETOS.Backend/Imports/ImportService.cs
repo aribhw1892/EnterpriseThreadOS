@@ -7,6 +7,7 @@ using ETOS.Backend.Identity;
 using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Ontology;
+using ETOS.Backend.Recommendations;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,7 +40,8 @@ public sealed class ImportService(
     IOntologyService ontologyService,
     IImportFileStorage fileStorage,
     IImportFileParser fileParser,
-    IGraphMemoryService graphMemoryService) : IImportService
+    IGraphMemoryService graphMemoryService,
+    IRecommendationFactory recommendationFactory) : IImportService
 {
     private const string SuggestionProvider = "deterministic-heuristic-v1";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
@@ -529,6 +531,19 @@ public sealed class ImportService(
         };
         dbContext.BomComparisonRuns.Add(run);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        if (run.MissingInEbomCount + run.QuantityMismatchCount + run.UsageReferenceMismatchCount > 0)
+        {
+            try
+            {
+                await recommendationFactory.FromBomComparisonRunForImportAsync(run.Id, context, cancellationToken);
+            }
+            catch (RequestValidationException)
+            {
+                // Best-effort auto-recommendation; BOM comparison remains successful.
+            }
+        }
+
         return ToBomComparisonRunResponse(run);
     }
 

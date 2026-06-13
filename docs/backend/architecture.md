@@ -20,6 +20,12 @@
 - `IdentityResolution/`: tenant-scoped identity rules, deterministic candidate links, review decisions, learning evidence, trust scores, and identity-link graph relationships.
 - `DataQuality/`: tenant-scoped durable data-quality issues, source links, trust-impact metadata, security-event review hooks, inert monitoring placeholders, and issue endpoints.
 - `Documents/`: tenant-scoped document artifacts, immutable versions, document-object links, extraction issue hooks, vector indexing metadata records, disabled native CAD parsing placeholder, and document endpoints.
+- `GovernedQuery/`: query intent versions, retrieval strategy versions, retrieval runs, context packages, context access decisions, governed query service, and minimal API endpoint mapping.
+- `AiTrace/`: AI Trace records, artifact links, export audit metadata, trace explorer service, and minimal API endpoint mapping.
+- `GovernedChat/`: governed chat sessions/turns, platform-seeded prompt/output schema artifacts, deterministic default LLM completion, chat-to-artifact draft creation, and minimal API endpoint mapping.
+- `Explorers/`: read-only explorer orchestration for artifacts, graph, documents, context packages, decisions, 360° context views, and governance flow projections.
+- `Dashboards/`: dashboard/report template parsing, governed-query preview orchestration, readiness validation, JSON export builder, governance KPI placeholder catalog, and minimal API endpoint mapping.
+- `Recommendations/`: versioned `RecommendationVersion` artifacts with embedded evidence links and suggested actions, trust/conflict-aware readiness validation, creation factories, and minimal API endpoint mapping.
 - `Platform/Extensions/`: architecture-honest extension point catalog for deferred capabilities.
 
 ## Startup Flow
@@ -190,6 +196,78 @@ The document module currently includes:
 
 Document APIs expose metadata and safe summaries only. They do not expose raw document bytes, raw object storage access, raw vector search, or raw graph/database access.
 
+### Governed Query And Context Assembly
+
+The governed-query module currently includes:
+
+- tenant-scoped query intent versions, retrieval strategy versions, retrieval runs, context packages, and context access decisions.
+- fixed platform query intents (`object-360-context`, `bom-impact-context`, `document-evidence-context`).
+- graph-first, document-second retrieval with policy-filtered LLM-safe context assembly.
+- admin endpoints under `/api/admin/governed-query`.
+
+### AI Trace
+
+The AI Trace module currently includes:
+
+- tenant-scoped AI Trace records with artifact links and on-demand export audit metadata.
+- separate view/export permissions, redaction metadata, and export denial security events.
+- admin endpoints under `/api/admin/ai-traces`.
+
+### Governed Chat
+
+The governed-chat module currently includes:
+
+- tenant-scoped chat sessions and turns with platform-seeded `PromptTemplateVersion` and `OutputSchemaVersion` artifacts.
+- deterministic default LLM completion with optional OpenAI provider behind `GovernedChat:LlmProvider`.
+- output schema validation and chat-to-artifact draft creation for query intents, dashboards, reports, and recommendations.
+- enriched `GovernedChat` AI Trace records per turn.
+- admin endpoints under `/api/admin/governed-chat`.
+
+### Explorers
+
+The explorers module currently includes:
+
+- tenant-filtered read-only explorer APIs for artifacts, graph nodes, documents, context packages, and decision foundations.
+- generic 360° context views and governance flow projections with Milestone 4 review-chain placeholders for review tasks, decisions, outcomes, and learning signals.
+- policy/trust-filtered graph browse.
+- admin endpoints under `/api/admin/explorers`.
+
+### Dashboards And Reports
+
+The dashboard/report module currently includes:
+
+- structured `DashboardVersion` and `ReportVersion` template parsing in artifact payloads.
+- governed-query-only preview orchestration, readiness validation, and mark-ready workflow.
+- JSON export builder with audit/redaction metadata.
+- governance KPI placeholder catalog (live KPI analytics deferred to Issue 21).
+- admin endpoints under `/api/admin/dashboards` and `/api/admin/reports`.
+
+### Recommendations
+
+The recommendation module (Issue 18) currently includes:
+
+- tenant-scoped `RecommendationVersion` artifacts stored in existing artifact registry tables via `PayloadJson`.
+- embedded `evidenceLinks[]` and `suggestedActions[]` in the payload contract, validated by `RecommendationPayloadParser`.
+- evidence-required `MarkReviewed` and trust/conflict-aware `MarkReady` via `RecommendationReadinessValidator`.
+- `RecommendationEvidenceResolver` for linked data-quality issues, BOM comparison runs, AI traces, and graph node existence checks.
+- creation factories for manual create, data-quality issues, BOM comparison runs, governed chat drafts, and dashboard/report provenance (`RecommendationFactory`).
+- idempotent factory keys for data-quality and BOM comparison sources; optional post-comparison hook in `ImportService` when drift counts are non-zero.
+- suggested-action status transitions with audit records (`CONVERTED_TO_REVIEW_TASK` is status-only until Issue 19).
+- `creationSource: AGENT_DEFERRED` contract for deferred agent/workflow auto-creation (Milestone 5).
+- governance-flow integration: real recommendation artifact nodes replace the Issue 16 placeholder when anchored on a recommendation.
+- admin endpoints under `/api/admin/recommendations`:
+
+  - `GET /api/admin/recommendations`
+  - `GET /api/admin/recommendations/{artifactId}/versions/{versionId}`
+  - `POST /api/admin/recommendations`
+  - `POST /api/admin/recommendations/from-data-quality-issue/{issueId}`
+  - `POST /api/admin/recommendations/from-bom-comparison/{runId}`
+  - `POST /api/admin/recommendations/{artifactId}/versions/{versionId}/mark-reviewed`
+  - `POST /api/admin/recommendations/{artifactId}/versions/{versionId}/mark-ready`
+  - `PATCH /api/admin/recommendations/{artifactId}/versions/{versionId}/suggested-actions/{actionId}`
+
+Recommendation permissions: `recommendations.read`, `recommendations.create`, `recommendations.review`, `recommendations.readiness`, `recommendations.admin`.
+
 ### Tenancy
 
 Persisted tenant-owned records should implement the existing tenant-scoping convention. Cross-tenant access should fail closed and create a safe denial audit record when the flow is security-relevant.
@@ -278,8 +356,10 @@ Issue 10 data-quality tests cover import-validation issue generation, idempotenc
 
 Issue 12 document-memory tests cover document creation, version metadata, extraction failures, uncertain document links, vector index records, policy filtering, and the disabled CAD parsing placeholder.
 
+Issue 18 recommendation tests cover evidence gates, conflict blocking, suggested-action validation, creation from data-quality issues and BOM comparison runs, governed chat drafts, tenant isolation, audit/trace links, and governance-flow integration.
+
 ## Planned Backend Areas
 
-The PRD and issue backlog define later modules for governed query/context, AI Trace, recommendations, review tasks, decisions, tools, agents, workflows, and multi-agent collaboration.
+The PRD and issue backlog define later modules for review tasks, decisions, outcomes, governance analytics, tools, agents, workflows, and multi-agent collaboration.
 
 Do not document or code these as implemented until the source code exists.

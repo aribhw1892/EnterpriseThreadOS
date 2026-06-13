@@ -1,6 +1,6 @@
 # EnterpriseThreadOS
 
-EnterpriseThreadOS is being built as a developer-first, AI-native digital thread platform for manufacturing and engineering data. The current repository contains the local platform foundation: ASP.NET Core backend, Next.js frontend shell, Docker Compose infrastructure, EF Core persistence, health checks, extension-point guardrails, tenant identity/access, audit/security events, the BaseArtifact registry foundation, classification/policy enforcement, graph memory, canonical model governance, import/mapping/staging, identity-resolution review and trust scoring, and data-quality issue review hooks.
+EnterpriseThreadOS is being built as a developer-first, AI-native digital thread platform for manufacturing and engineering data. The current repository contains the local platform foundation through Issue 18: ASP.NET Core backend, Next.js frontend shell, Docker Compose infrastructure, EF Core persistence, health checks, extension-point guardrails, tenant identity/access, audit/security events, the BaseArtifact registry foundation, classification/policy enforcement, graph memory, canonical model governance, import/mapping/staging, identity-resolution review and trust scoring, data-quality issue review hooks, document memory, governed query/context assembly, AI Trace, governed chat, explorers/360° context views, dashboard/report artifacts, and recommendation artifacts with evidence rules.
 
 For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For ordered implementation scope, use `.docs/.prd/engineering-execution-issues.md`.
 
@@ -67,7 +67,7 @@ npm run dev
 Pop-Location
 ```
 
-Open `http://localhost:3000` to view the local platform health, identity, governance, artifact registry, classification/policy, and infrastructure admin shell. Open `http://localhost:3000/model-artifacts` to manage canonical ontology/model package versions. Open `http://localhost:3000/imports` and click `Run identity demo` to create two source imports, approve mappings, validate rows, stage unverified graph records, generate identity candidates, view trust score breakdowns, and generate durable data-quality issues from validation results.
+Open `http://localhost:3000` to view the local platform health, identity, governance, artifact registry, classification/policy, and infrastructure admin shell. Open `http://localhost:3000/model-artifacts` to manage canonical ontology/model package versions. Open `http://localhost:3000/imports` and click `Run identity demo` to create two source imports, approve mappings, validate rows, stage unverified graph records, generate identity candidates, view trust score breakdowns, and generate durable data-quality issues from validation results. Open `http://localhost:3000/chat` for governed chat, `http://localhost:3000/explorers` for explorer hubs, `http://localhost:3000/dashboards` and `http://localhost:3000/reports` for dashboard/report shells, and `http://localhost:3000/recommendations` to create, inspect, and transition recommendation drafts with evidence links and suggested actions.
 
 ## Useful Endpoints
 
@@ -120,6 +120,14 @@ Open `http://localhost:3000` to view the local platform health, identity, govern
 - `POST http://localhost:5000/api/admin/data-quality/imports/batches/{batchId}/issues/generate`
 - `POST http://localhost:5000/api/admin/data-quality/security-events/{securityEventId}/issues/create`
 - `GET http://localhost:5000/api/admin/data-quality/monitoring-placeholders`
+- `GET http://localhost:5000/api/admin/recommendations`
+- `POST http://localhost:5000/api/admin/recommendations`
+- `GET http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}`
+- `POST http://localhost:5000/api/admin/recommendations/from-data-quality-issue/{issueId}`
+- `POST http://localhost:5000/api/admin/recommendations/from-bom-comparison/{runId}`
+- `POST http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/mark-reviewed`
+- `POST http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/mark-ready`
+- `PATCH http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/suggested-actions/{actionId}`
 
 Some identity/admin endpoints require local header authentication:
 
@@ -174,27 +182,20 @@ docker compose -f infra/local/docker-compose.yml config
 
 ## Current Scope
 
-Implemented or partially implemented:
+Implemented or partially implemented through Issue 18:
 
-- Backend and frontend scaffolds.
-- Local infrastructure compose file.
-- EF Core PostgreSQL baseline and migrations.
-- App and infrastructure health endpoints.
-- Frontend environment, backend health display, minimal identity admin lists, audit/security event explorer lists, artifact registry explorer lists, classification/policy lists, model artifact admin page, and import/identity-review admin page.
-- Extension-point documentation and endpoint for deferred platform capabilities.
-- ASP.NET Identity users/roles, Finbuckle-backed tenant resolution, tenant roles, memberships, permissions, access grants, access requests, tenant context, and denial audit records.
-- First-class audit records, security events, retention placeholders, tenant-filtered governance explorer endpoints, and safe denial classification.
-- BaseArtifact registry foundation with tenant-scoped artifacts, immutable versions, generic relationships, dependency edges, readiness-aware publish checks, and artifact audit side effects.
-- Classification and policy enforcement with versioned schemes/policies, restricted context rules, safe denied summaries, policy impact, and artifact publish risk integration.
-- Graph memory abstraction with Neo4j backend, tenant-scoped BaseNode/BaseRelationship operations, health/bootstrap, and optional disabled Memgraph placeholder.
-- Canonical ontology/model package foundation with versioned ontology, semantic layer, lifecycle vocabulary, tenant attribute schema, BOM metadata, publish validation, and `/model-artifacts` UI.
-- Import mapping and staging graph foundation with tenant-scoped import batches, raw file evidence metadata, CSV/Excel parsing, deterministic mapping previews, immutable mapping approval, row validation, unverified staging graph creation, and `/imports` UI.
-- Identity resolution review and trust-scoring foundation with deterministic cross-source candidate generation, approval/rejection/conflict decisions, graph `IDENTITY_LINK` relationships, learning evidence, trust score breakdowns, and `/imports` UI.
-- Data quality issue foundation with durable issues generated from import validation, manual issue creation, security-event review hooks, severity/trust-impact metadata, inert monitoring placeholders, and `/imports` UI.
+- Local platform foundation: backend/frontend scaffolds, Docker Compose infrastructure, EF Core PostgreSQL, health endpoints, extension-point catalog.
+- Tenant identity/access, governance/audit, BaseArtifact registry, classification/policy, graph memory, ontology/model packages.
+- Import/mapping/staging, identity resolution, data quality, document memory.
+- Governed query/context assembly, AI Trace, governed chat with chat-to-artifact drafting.
+- Explorers and 360° context views with governance flow foundation.
+- Dashboard/report artifacts (Issue 17) and recommendation artifacts with evidence rules (Issue 18).
 
 Planned by the PRD but not generally implemented yet:
 
-- Trusted graph promotion, governed query/context assembly, AI Trace, chat-to-artifact generation, recommendations, full review task workflows, decisions, broader learning workflows, tools, agents, workflows, and enterprise action framework.
-- Production secrets, CI/CD, Kubernetes, Keycloak, Temporal, live enterprise connectors, or source-system write-back.
+- Trusted graph promotion, snapshots, diffs, and governed traversals beyond current staging foundations.
+- Full review task, decision, outcome, and learning workflows (Issue 19+). Recommendation suggested-action `CONVERTED_TO_REVIEW_TASK` is status-only until Issue 19.
+- Agent/workflow recommendation creation (`AGENT_DEFERRED` contract only), tools, agents, workflows, multi-agent collaboration, and enterprise action framework.
+- Live governance KPI analytics (Issue 21), production secrets, CI/CD, Kubernetes, Keycloak, Temporal, live enterprise connectors, or source-system write-back.
 
 See `ARCHITECTURE.md` and `docs/local-development.md` for details.

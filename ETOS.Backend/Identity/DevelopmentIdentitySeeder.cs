@@ -9,6 +9,7 @@ using ETOS.Backend.GovernedChat;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.IdentityResolution;
+using ETOS.Backend.Recommendations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -73,6 +74,11 @@ public sealed class DevelopmentIdentitySeeder(
         var dashboardReportExportPermission = await EnsurePermissionAsync(DashboardReportPermissions.Export, "Export tenant dashboards and reports.", cancellationToken);
         var dashboardReportReadinessPermission = await EnsurePermissionAsync(DashboardReportPermissions.Readiness, "Mark tenant dashboard and report versions ready.", cancellationToken);
         var dashboardReportAdminPermission = await EnsurePermissionAsync(DashboardReportPermissions.Admin, "Administer tenant dashboard and report records.", cancellationToken);
+        var recommendationReadPermission = await EnsurePermissionAsync(RecommendationPermissions.Read, "Read tenant recommendation artifacts.", cancellationToken);
+        var recommendationCreatePermission = await EnsurePermissionAsync(RecommendationPermissions.Create, "Create tenant recommendation artifacts.", cancellationToken);
+        var recommendationReviewPermission = await EnsurePermissionAsync(RecommendationPermissions.Review, "Review tenant recommendation artifacts.", cancellationToken);
+        var recommendationReadinessPermission = await EnsurePermissionAsync(RecommendationPermissions.Readiness, "Mark tenant recommendation versions ready.", cancellationToken);
+        var recommendationAdminPermission = await EnsurePermissionAsync(RecommendationPermissions.Admin, "Administer tenant recommendation records.", cancellationToken);
         var adminRole = await EnsureTenantRoleAsync(tenant.Id, cancellationToken);
         var chatRunnerRole = await EnsureChatRunnerRoleAsync(tenant.Id, cancellationToken);
         var chatRunner = await EnsureChatRunnerUserAsync(seedOptions, cancellationToken);
@@ -114,6 +120,11 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, dashboardReportExportPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, dashboardReportReadinessPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, dashboardReportAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, recommendationReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, recommendationCreatePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, recommendationReviewPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, recommendationReadinessPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, recommendationAdminPermission.Id, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, chatRunner.Id, chatRunnerRole.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, governedChatRunPermission.Id, cancellationToken);
@@ -122,6 +133,8 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, aiTraceReadPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, dashboardReportPreviewPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, dashboardReportReadinessPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, recommendationReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, recommendationCreatePermission.Id, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await EnsureBootstrapAuditAsync(tenant.Id, admin.Id, tenant.Identifier, cancellationToken);

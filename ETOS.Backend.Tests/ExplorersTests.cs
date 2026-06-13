@@ -149,7 +149,13 @@ public sealed class ExplorersTests
             CancellationToken.None);
 
         Assert.Equal(5, flow.FutureChainPlaceholders.Count);
-        Assert.All(flow.FutureChainPlaceholders, placeholder => Assert.Equal("not_implemented", placeholder.Status));
+        var recommendationPlaceholder = Assert.Single(
+            flow.FutureChainPlaceholders,
+            placeholder => placeholder.Kind == GovernanceFlowPlaceholderKind.Recommendation);
+        Assert.Equal("available", recommendationPlaceholder.Status);
+        Assert.All(
+            flow.FutureChainPlaceholders.Where(placeholder => placeholder.Kind != GovernanceFlowPlaceholderKind.Recommendation),
+            placeholder => Assert.Equal("not_implemented", placeholder.Status));
     }
 
     [Fact]

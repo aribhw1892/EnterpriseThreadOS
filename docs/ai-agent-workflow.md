@@ -59,6 +59,12 @@ Examples:
 - BaseArtifact lifecycle and dependency graph: Issue 4.
 - Classification/policy and pre-context filtering: Issue 5.
 - Graph memory abstraction and Neo4j business graph operations: Issue 6.
+- Governed query/context assembly: Issue 13.
+- AI Trace: Issue 14.
+- Governed chat and chat-to-artifact drafting: Issue 15.
+- Explorers and 360° context views: Issue 16.
+- Dashboard/report artifacts: Issue 17.
+- Recommendation artifacts and evidence rules: Issue 18.
 
 Do not jump ahead to later issues unless the user explicitly asks and the prerequisite boundaries are already present or intentionally scoped as documentation.
 

@@ -1,16 +1,16 @@
 # Graph Report - EnterpriseThreadOS  (2026-06-13)
 
 ## Corpus Check
-- 235 files · ~269,245 words
+- 263 files · ~294,070 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 5014 nodes · 9448 edges · 228 communities (193 shown, 35 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
+- 5589 nodes · 10827 edges · 253 communities (217 shown, 36 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0af01e97`
+- Built from commit: `faa4217a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -232,35 +232,60 @@
 - [[_COMMUNITY_Community 225|Community 225]]
 - [[_COMMUNITY_Community 226|Community 226]]
 - [[_COMMUNITY_Community 227|Community 227]]
+- [[_COMMUNITY_Community 228|Community 228]]
+- [[_COMMUNITY_Community 229|Community 229]]
+- [[_COMMUNITY_Community 230|Community 230]]
+- [[_COMMUNITY_Community 231|Community 231]]
+- [[_COMMUNITY_Community 232|Community 232]]
+- [[_COMMUNITY_Community 233|Community 233]]
+- [[_COMMUNITY_Community 234|Community 234]]
+- [[_COMMUNITY_Community 235|Community 235]]
+- [[_COMMUNITY_Community 236|Community 236]]
+- [[_COMMUNITY_Community 237|Community 237]]
+- [[_COMMUNITY_Community 238|Community 238]]
+- [[_COMMUNITY_Community 239|Community 239]]
+- [[_COMMUNITY_Community 240|Community 240]]
+- [[_COMMUNITY_Community 241|Community 241]]
+- [[_COMMUNITY_Community 242|Community 242]]
+- [[_COMMUNITY_Community 243|Community 243]]
+- [[_COMMUNITY_Community 244|Community 244]]
+- [[_COMMUNITY_Community 245|Community 245]]
+- [[_COMMUNITY_Community 246|Community 246]]
+- [[_COMMUNITY_Community 247|Community 247]]
+- [[_COMMUNITY_Community 248|Community 248]]
+- [[_COMMUNITY_Community 249|Community 249]]
+- [[_COMMUNITY_Community 250|Community 250]]
+- [[_COMMUNITY_Community 251|Community 251]]
+- [[_COMMUNITY_Community 252|Community 252]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `EnterpriseThreadOS Implementation Issues` - 115 edges
 2. `AI-Native Enterprise Digital Thread Agentic OS` - 110 edges
 3. `ImportService` - 64 edges
 4. `OntologyService` - 61 edges
-5. `ITenantScoped` - 58 edges
-6. `CancellationToken` - 54 edges
-7. `Task` - 54 edges
-8. `Task` - 51 edges
-9. `ClassificationPolicyService` - 44 edges
-10. `CancellationToken` - 40 edges
+5. `ITenantScoped` - 59 edges
+6. `missingContext()` - 55 edges
+7. `CancellationToken` - 54 edges
+8. `Task` - 54 edges
+9. `Task` - 51 edges
+10. `ClassificationPolicyService` - 44 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `StaticTenantContextResolver` --implements--> `ITenantContextResolver`  [EXTRACTED]
   ETOS.Backend.Tests/AiTraceTests.cs → ETOS.Backend/Identity/TenantContext.cs
 - `RecordingDenialRecorder` --implements--> `IAccessDenialRecorder`  [EXTRACTED]
   ETOS.Backend.Tests/AiTraceTests.cs → ETOS.Backend/Identity/TenantContext.cs
+- `StaticTenantContextResolver` --implements--> `ITenantContextResolver`  [EXTRACTED]
+  ETOS.Backend.Tests/DashboardReportTests.cs → ETOS.Backend/Identity/TenantContext.cs
+- `RecordingDenialRecorder` --implements--> `IAccessDenialRecorder`  [EXTRACTED]
+  ETOS.Backend.Tests/DashboardReportTests.cs → ETOS.Backend/Identity/TenantContext.cs
 - `RecordingAuditRecorder` --implements--> `IAuditRecorder`  [EXTRACTED]
   ETOS.Backend.Tests/DataQualityTests.cs → ETOS.Backend/Governance/AuditRecorder.cs
-- `StaticTenantContextResolver` --implements--> `ITenantContextResolver`  [EXTRACTED]
-  ETOS.Backend.Tests/DocumentMemoryTests.cs → ETOS.Backend/Identity/TenantContext.cs
-- `AllowAllPermissionService` --implements--> `IAccessPermissionService`  [EXTRACTED]
-  ETOS.Backend.Tests/DocumentMemoryTests.cs → ETOS.Backend/Identity/TenantContext.cs
 
 ## Import Cycles
 - None detected.
 
-## Communities (228 total, 35 thin omitted)
+## Communities (253 total, 36 thin omitted)
 
 ### Community 0 - "Schema Versioning and Validation"
 Cohesion: 0.07
@@ -280,7 +305,7 @@ Nodes (35): CreateIdentityResolutionRuleRequest, CreateIdentityResolutionRuleReq
 
 ### Community 4 - "Artifact Details and Dependencies"
 Cohesion: 0.09
-Nodes (36): Artifact, ArtifactDependencyResponse, ArtifactDetailResponse, ArtifactImpactResponse, ArtifactReadinessResponse, ArtifactRelationshipResponse, ArtifactRegistryService, CreateArtifactDependencyRequestValidator (+28 more)
+Nodes (36): ArtifactDependencyResponse, ArtifactDetailResponse, ArtifactImpactResponse, ArtifactReadinessResponse, ArtifactRelationshipResponse, ArtifactRegistryService, CreateArtifactDependencyRequestValidator, CreateArtifactRelationshipRequestValidator (+28 more)
 
 ### Community 5 - "Access and Permission Management"
 Cohesion: 0.08
@@ -288,7 +313,7 @@ Nodes (31): AccessGrantResponse, AccessRequestResponse, AssignRolePermissionRequ
 
 ### Community 6 - "Data Quality and Security"
 Cohesion: 0.07
-Nodes (37): ClaimsPrincipal, DataQualityIssueService, ActiveTenantContext, CancellationToken, DateTimeOffset, EtosTenantInfo, Guid, SecurityEventSeverity (+29 more)
+Nodes (38): ClaimsPrincipal, DataQualityIssueService, ActiveTenantContext, CancellationToken, DateTimeOffset, EtosTenantInfo, Guid, SecurityEventSeverity (+30 more)
 
 ### Community 7 - "Data Quality Issue Handling"
 Cohesion: 0.09
@@ -319,12 +344,12 @@ Cohesion: 0.08
 Nodes (27): BaseNode, BaseRelationship, CancellationToken, CreateGraphNodeRequest, CreateGraphRelationshipRequest, GraphHealthResponse, GraphPromotionCopyResult, GraphReadModel (+19 more)
 
 ### Community 14 - "UI Artifact and Classification Cards"
-Cohesion: 0.06
-Nodes (14): AccessGrant, Artifact, ArtifactDependency, ArtifactRelationship, ArtifactVersion, AuditRecord, ClassificationScheme, PolicyImpact (+6 more)
+Cohesion: 0.05
+Nodes (24): Home(), createSecurityEventDataQualityIssue(), AccessGrant, Artifact, ArtifactDependency, ArtifactRelationship, ArtifactVersion, AuditRecord (+16 more)
 
 ### Community 15 - "Graph Node Utilities"
-Cohesion: 0.10
-Nodes (23): AllowAllPermissionService, ArtifactPolicyRiskStatus, BaseNode, BaseRelationship, CancellationToken, ClassificationSchemeVersionResponse, CreateClassificationSchemeVersionRequest, CreateGraphNodeRequest (+15 more)
+Cohesion: 0.06
+Nodes (48): AllowAllPermissionService, AllowAllPolicyService, ActiveTenantContext, ArtifactPolicyRiskStatus, AuditRecordResponse, AuditRecordWriteRequest, BaseNode, BaseRelationship (+40 more)
 
 ### Community 16 - "Ontology and Versioning Tests"
 Cohesion: 0.19
@@ -339,8 +364,8 @@ Cohesion: 0.16
 Nodes (15): AuditRecord, ActiveTenantContext, AuditRecordResponse, AuditRecordWriteRequest, CancellationToken, int, IReadOnlyCollection, SecurityEventResponse (+7 more)
 
 ### Community 19 - "Home and Data Quality Overview"
-Cohesion: 0.14
-Nodes (11): AiTracesPage(), exportLatestTrace(), renderApiError(), runDemoGovernedQuery(), AiTraceDetail, AiTraceSummary, ApiResult, exportAiTrace() (+3 more)
+Cohesion: 0.12
+Nodes (13): AiTracesPage(), exportLatestTrace(), renderApiError(), runDemoGovernedQuery(), AiTraceDetail, AiTraceSummary, ApiResult, emptyObject() (+5 more)
 
 ### Community 20 - "Artifact Registry Testing"
 Cohesion: 0.24
@@ -415,7 +440,7 @@ Cohesion: 0.26
 Nodes (8): EnterpriseThreadDbContext, EtosUser, Fact, Task, DevelopmentIdentitySeederTests, UserStore, UserManager, UserStore<EtosUser, EtosIdentityRole, EnterpriseThreadDbContext, Guid>
 
 ### Community 38 - "Identity and Data Quality Configuration"
-Cohesion: 0.24
+Cohesion: 0.23
 Nodes (6): EtosUser, Guid, ModelBuilder, EtosIdentityRole, IdentityDbContext, EnterpriseThreadDbContext
 
 ### Community 39 - "EnterpriseThreadOS Architecture Overview"
@@ -475,8 +500,8 @@ Cohesion: 0.38
 Nodes (4): CancellationToken, Task, GraphBootstrapHostedService, IHostedService
 
 ### Community 53 - "Initial Operational Store Migration"
-Cohesion: 0.33
-Nodes (4): MigrationBuilder, Migration, ETOS.Backend.Infrastructure.Persistence.Migrations, InitialOperationalStore
+Cohesion: 0.40
+Nodes (3): MigrationBuilder, ETOS.Backend.Infrastructure.Persistence.Migrations, InitialOperationalStore
 
 ### Community 54 - "Graph Memory Options"
 Cohesion: 0.40
@@ -487,8 +512,8 @@ Cohesion: 0.33
 Nodes (4): CancellationToken, GraphHealthResponse, Task, IGraphHealthService
 
 ### Community 56 - "Tenant Identity Access Migration"
-Cohesion: 0.40
-Nodes (3): MigrationBuilder, ETOS.Backend.Infrastructure.Persistence.Migrations, Slice2TenantIdentityAccess
+Cohesion: 0.33
+Nodes (4): MigrationBuilder, Migration, ETOS.Backend.Infrastructure.Persistence.Migrations, Slice2TenantIdentityAccess
 
 ### Community 57 - "Audit and Security Events Migration"
 Cohesion: 0.40
@@ -775,8 +800,8 @@ Cohesion: 0.40
 Nodes (3): ModelBuilder, ETOS.Backend.Infrastructure.Persistence.Migrations, Issue11TrustedGraphPromotion
 
 ### Community 167 - "Community 167"
-Cohesion: 0.05
-Nodes (52): AllowAllPermissionService, AllowAllPolicyService, ActiveTenantContext, ArtifactPolicyRiskStatus, AuditRecordResponse, AuditRecordWriteRequest, BaseNode, BaseRelationship (+44 more)
+Cohesion: 0.09
+Nodes (30): AllowAllPermissionService, AllowAllPolicyService, ActiveTenantContext, ArtifactPolicyRiskStatus, CancellationToken, ClassificationSchemeResponse, ClassificationSchemeVersionResponse, CreateClassificationSchemeRequest (+22 more)
 
 ### Community 168 - "Community 168"
 Cohesion: 0.11
@@ -787,8 +812,8 @@ Cohesion: 0.09
 Nodes (15): createDemoDocument(), createExtractionIssue(), DocumentsPage(), requestVectorIndex(), CadParsingStatus, createDemoDocumentFlow(), createExtractionIssueForLatestDocument(), DataQualityIssue (+7 more)
 
 ### Community 170 - "Community 170"
-Cohesion: 0.12
-Nodes (18): DisabledCadParsingPlaceholder, DisabledDocumentVectorIndexingService, DocumentFileStorageOptions, ICadParsingPlaceholder, IDocumentFileStorage, IDocumentVectorIndexingService, LocalDocumentFileStorage, CadParsingPlaceholderResponse (+10 more)
+Cohesion: 0.17
+Nodes (14): DisabledDocumentVectorIndexingService, DocumentFileStorageOptions, IDocumentFileStorage, IDocumentVectorIndexingService, LocalDocumentFileStorage, CancellationToken, DocumentVectorIndexStatus, DocumentVersion (+6 more)
 
 ### Community 171 - "Community 171"
 Cohesion: 0.25
@@ -815,8 +840,8 @@ Cohesion: 0.15
 Nodes (12): 1. Add Data Quality Domain and Persistence, 2. Promote Import Validation Issues into Durable Quality Issues, 3. Add Manual and Security-Event Issue Creation, 4. Severity, Trust Impact, and Review Hooks, 5. Add Minimal Admin API and UI, 6. Tests and Verification, Context Anchors, Goal (+4 more)
 
 ### Community 178 - "Community 178"
-Cohesion: 0.05
-Nodes (41): AiTraceArtifactLink, AiTraceConfidenceImpact, AiTraceSourceSummary, ClassificationSchemeVersion, ComponentHealth, ContextAccessDecision, ContextItem, ContextPackage (+33 more)
+Cohesion: 0.04
+Nodes (53): DashboardsPage(), SectionVisibilityBadge(), AiTraceArtifactLink, AiTraceConfidenceImpact, AiTraceSourceSummary, ArtifactImpact, ClassificationSchemeVersion, ComponentHealth (+45 more)
 
 ### Community 179 - "Community 179"
 Cohesion: 0.25
@@ -895,15 +920,15 @@ Cohesion: 0.08
 Nodes (23): Acceptance criteria mapping, AiTrace extension, API endpoints, Architecture, Backend design, Docs touch (minimal), Draft + publish governance, End-to-end chat turn flow (+15 more)
 
 ### Community 200 - "Community 200"
-Cohesion: 0.16
-Nodes (12): askTurnAction(), ChatPage(), createSessionAction(), loadLatestTurn(), renderApiError(), askGovernedChatTurn(), createGovernedChatSession(), getGovernedChatLists() (+4 more)
+Cohesion: 0.15
+Nodes (14): askTurnAction(), ChatPage(), createSessionAction(), loadLatestTurn(), renderApiError(), TurnPanel(), askGovernedChatTurn(), createGovernedChatSession() (+6 more)
 
 ### Community 201 - "Community 201"
 Cohesion: 0.22
 Nodes (8): ActiveTenantContext, CancellationToken, GovernedChatPlatformArtifacts, JsonSerializerOptions, PlatformArtifactVersion, Task, GovernedChatArtifactSeeder, IGovernedChatArtifactSeeder
 
 ### Community 202 - "Community 202"
-Cohesion: 0.20
+Cohesion: 0.23
 Nodes (12): ArtifactDependency, ActiveTenantContext, CancellationToken, ChatDraftArtifactKind, GovernedChatDraftArtifactResponse, GovernedChatTurn, Guid, JsonSerializerOptions (+4 more)
 
 ### Community 203 - "Community 203"
@@ -923,7 +948,7 @@ Cohesion: 0.40
 Nodes (3): ModelBuilder, ETOS.Backend.Infrastructure.Persistence.Migrations, Slice15GovernedChatChatToArtifact
 
 ### Community 210 - "Community 210"
-Cohesion: 0.08
+Cohesion: 0.09
 Nodes (31): ArtifactDetailPage(), ArtifactsExplorerPage(), ContextPackagesExplorerPage(), DecisionsExplorerPage(), DocumentDetailPage(), ContextView360(), ExplorerErrorState(), ExplorerListShell() (+23 more)
 
 ### Community 211 - "Community 211"
@@ -931,8 +956,8 @@ Cohesion: 0.12
 Nodes (25): ArtifactExplorerSummaryResponse, ContextPackageExplorerDetailResponse, ContextPackageExplorerSummaryResponse, DecisionExplorerItemResponse, DecisionPayload, ActiveTenantContext, CancellationToken, GraphSpace (+17 more)
 
 ### Community 212 - "Community 212"
-Cohesion: 0.12
-Nodes (22): AllowAllPermissionService, BaseNode, BaseRelationship, CancellationToken, CreateGraphNodeRequest, CreateGraphRelationshipRequest, CreateRestrictedContextRuleRequest, GraphPromotionCopyResult (+14 more)
+Cohesion: 0.10
+Nodes (26): AllowAllPermissionService, AllowAllPolicyService, ArtifactPolicyRiskStatus, CancellationToken, ClassificationSchemeResponse, ClassificationSchemeVersionResponse, CreateClassificationSchemeRequest, CreateClassificationSchemeVersionRequest (+18 more)
 
 ### Community 213 - "Community 213"
 Cohesion: 0.16
@@ -951,24 +976,24 @@ Cohesion: 0.08
 Nodes (24): 360° Context View response shape, Anchor model, API summary, Architecture, Architecture doc updates, Artifact / Document explorers, Backend design, Context Package Explorer (+16 more)
 
 ### Community 217 - "Community 217"
-Cohesion: 0.11
-Nodes (12): AllowAllPolicyService, ArtifactPolicyRiskStatus, ClassificationSchemeResponse, ClassificationSchemeVersionResponse, CreateClassificationSchemeRequest, CreateClassificationSchemeVersionRequest, CreatePolicyVersionRequest, IClassificationPolicyService (+4 more)
+Cohesion: 0.15
+Nodes (18): CreateRecommendationRequest, ActiveTenantContext, Artifact, ArtifactVersion, CancellationToken, CreateRecommendationResponse, Guid, IReadOnlyCollection (+10 more)
 
 ### Community 218 - "Community 218"
-Cohesion: 0.11
-Nodes (12): ActiveTenantContext, DocumentVectorIndexStatus, DocumentVersion, EvaluatePolicyRequest, PolicyEvaluationResponse, StoredDocumentFile, Stream, FilteringPolicyService (+4 more)
+Cohesion: 0.12
+Nodes (11): ActiveTenantContext, DocumentVectorIndexStatus, DocumentVersion, EvaluatePolicyRequest, PolicyEvaluationResponse, StoredDocumentFile, Stream, FilteringPolicyService (+3 more)
 
 ### Community 219 - "Community 219"
-Cohesion: 0.15
-Nodes (10): AllowAllPolicyService, ActiveTenantContext, CreatePolicyVersionRequest, EvaluatePolicyRequest, IClassificationPolicyService, PolicyEvaluationResponse, PolicyVersionResponse, PublishPolicyVersionRequest (+2 more)
+Cohesion: 0.05
+Nodes (56): ArtifactId, DashboardReportService, AllowAllPermissionService, AllowAllPolicyService, ActiveTenantContext, ArtifactPolicyRiskStatus, ArtifactRegistryService, ArtifactVersion (+48 more)
 
 ### Community 220 - "Community 220"
-Cohesion: 0.26
-Nodes (13): Home(), createSecurityEventDataQualityIssue(), createDataQualityIssueFromLatestSecurityEvent(), emptyObject(), emptyResult(), fetchApi(), getArtifactRegistryLists(), getClassificationPolicyLists() (+5 more)
+Cohesion: 0.08
+Nodes (41): DashboardDetailPage(), RecommendationDetailPage(), ReportDetailPage(), DashboardReportDetailProps, DashboardReportDetailView(), DashboardReportKind, exportAction(), loadDashboardReportDetail() (+33 more)
 
 ### Community 221 - "Community 221"
-Cohesion: 0.44
-Nodes (5): EnterpriseThreadDbContext, Fact, GovernedQueryService, TestContext, GovernedQueryTests
+Cohesion: 0.14
+Nodes (19): DashboardReportArtifactSummaryResponse, DashboardReportPreviewRequest, DashboardReportService, IDashboardReportService, ActiveTenantContext, Artifact, ArtifactVersion, CancellationToken (+11 more)
 
 ### Community 222 - "Community 222"
 Cohesion: 0.23
@@ -979,33 +1004,129 @@ Cohesion: 0.25
 Nodes (6): Func, IEndpointRouteBuilder, IResult, Task, TResponse, ExplorerEndpointExtensions
 
 ### Community 224 - "Community 224"
-Cohesion: 0.25
-Nodes (6): AuditRecordResponse, AuditRecordWriteRequest, SecurityEventResponse, SecurityEventWriteRequest, RecordingAuditRecorder, IAuditRecorder
-
-### Community 225 - "Community 225"
-Cohesion: 0.25
-Nodes (5): ClassificationSchemeResponse, CreateClassificationSchemeRequest, GraphReadModel, GraphSpace, IReadOnlyCollection
-
-### Community 226 - "Community 226"
 Cohesion: 0.29
 Nodes (5): AuditRecordResponse, AuditRecordWriteRequest, SecurityEventResponse, SecurityEventWriteRequest, RecordingAuditRecorder
 
+### Community 225 - "Community 225"
+Cohesion: 0.09
+Nodes (21): API endpoints, Architecture, Backend module: `ETOS.Backend/Dashboards/`, Docs (minimal), Export, Frontend, Governance KPI placeholder catalog, Implementation order (+13 more)
+
+### Community 226 - "Community 226"
+Cohesion: 0.21
+Nodes (10): DashboardReportTemplateParser, TemplateAnchorPayload, TemplateBlockPayload, TemplatePayload, DashboardReportTemplateResponse, Guid, IReadOnlyCollection, JsonSerializerOptions (+2 more)
+
+### Community 228 - "Community 228"
+Cohesion: 0.27
+Nodes (7): DashboardReportEndpointExtensions, DashboardReportExportFileResult, Func, IEndpointRouteBuilder, IResult, Task, TResponse
+
+### Community 229 - "Community 229"
+Cohesion: 0.20
+Nodes (7): DashboardReportExportRedactionMetadataResponse, DashboardReportExportBuilder, DashboardReportExportFileResult, DashboardReportPreviewResponse, DashboardReportTemplateResponse, Guid, JsonSerializerOptions
+
+### Community 230 - "Community 230"
+Cohesion: 0.32
+Nodes (7): DashboardReportArtifactTypes, DashboardReportBlockKinds, DashboardReportPermissions, PlatformGovernanceKpiPlaceholders, IReadOnlyCollection, IReadOnlySet, string
+
+### Community 231 - "Community 231"
+Cohesion: 0.40
+Nodes (3): DashboardReportReadinessValidator, DashboardReportTemplateResponse, IReadOnlyCollection
+
+### Community 232 - "Community 232"
+Cohesion: 0.40
+Nodes (3): MigrationBuilder, ETOS.Backend.Infrastructure.Persistence.Migrations, Slice17DashboardReportExport
+
+### Community 233 - "Community 233"
+Cohesion: 0.40
+Nodes (3): ModelBuilder, ETOS.Backend.Infrastructure.Persistence.Migrations, Slice17DashboardReportExport
+
+### Community 234 - "Community 234"
+Cohesion: 0.11
+Nodes (19): AllowAllPermissionService, BaseNode, BaseRelationship, CancellationToken, ClassificationSchemeResponse, CreateClassificationSchemeRequest, CreateGraphNodeRequest, CreateGraphRelationshipRequest (+11 more)
+
+### Community 236 - "Community 236"
+Cohesion: 0.18
+Nodes (18): ActiveTenantContext, CancellationToken, CreateRecommendationResponse, DataQualitySeverity, Guid, IReadOnlyCollection, RecommendationCapabilityState, RecommendationCreationSource (+10 more)
+
+### Community 237 - "Community 237"
+Cohesion: 0.10
+Nodes (20): Guid, IReadOnlyCollection, JsonSerializerOptions, RecommendationCapabilityState, RecommendationCreationSource, RecommendationEvidenceLinkDocument, RecommendationEvidenceLinkResponse, RecommendationExplainabilityDocument (+12 more)
+
+### Community 238 - "Community 238"
+Cohesion: 0.26
+Nodes (8): CreateRecommendationEvidenceLinkRequest, ArtifactVersion, Fact, RecordingAuditRecorder, TrustState, RecommendationTests, RecommendationLifecycleStatus, RecommendationService
+
+### Community 239 - "Community 239"
+Cohesion: 0.27
+Nodes (8): DocumentArtifactDetailResponse, DocumentService, EnterpriseThreadDbContext, Fact, IFormFile, TestContext, DocumentMemoryTests, IDocumentService
+
+### Community 240 - "Community 240"
+Cohesion: 0.12
+Nodes (12): AllowAllPolicyService, ArtifactPolicyRiskStatus, ClassificationSchemeVersionResponse, CreateClassificationSchemeVersionRequest, CreatePolicyVersionRequest, EvaluatePolicyRequest, PolicyEvaluationResponse, PolicyImpactResponse (+4 more)
+
+### Community 241 - "Community 241"
+Cohesion: 0.16
+Nodes (9): BaseNode, BaseRelationship, CreateGraphNodeRequest, CreateGraphRelationshipRequest, GraphTraversalResult, TraverseGraphRequest, UpdateGraphNodeRequest, FilteringGraphMemoryService (+1 more)
+
+### Community 242 - "Community 242"
+Cohesion: 0.11
+Nodes (17): Architecture, Backend module: `ETOS.Backend/Recommendations/`, Dashboard/report creation path, Docs and verification, Endpoints (MVP), Frontend, Governed chat extension, Implementation order (+9 more)
+
+### Community 243 - "Community 243"
+Cohesion: 0.21
+Nodes (7): CreateRestrictedContextRuleRequest, EnterpriseThreadDbContext, GovernanceFlowService, GovernedChatService, Guid, RestrictedContextRuleResponse, TestContext
+
+### Community 244 - "Community 244"
+Cohesion: 0.42
+Nodes (7): CancellationToken, Guid, IReadOnlyCollection, RecommendationEvidenceLinkResponse, Task, IRecommendationEvidenceResolver, RecommendationEvidenceResolver
+
+### Community 245 - "Community 245"
+Cohesion: 0.18
+Nodes (8): BaseNode, BaseRelationship, CreateGraphNodeRequest, CreateGraphRelationshipRequest, GraphTraversalResult, TraverseGraphRequest, UpdateGraphNodeRequest, RecordingGraphMemoryService
+
+### Community 246 - "Community 246"
+Cohesion: 0.25
+Nodes (6): Func, IEndpointRouteBuilder, IResult, Task, TResponse, RecommendationEndpointExtensions
+
+### Community 247 - "Community 247"
+Cohesion: 0.29
+Nodes (5): DisabledCadParsingPlaceholder, ICadParsingPlaceholder, CadParsingPlaceholderResponse, CadParsingPlaceholderResponse, NoOpCadParsingPlaceholder
+
+### Community 248 - "Community 248"
+Cohesion: 0.43
+Nodes (4): IReadOnlyCollection, RecommendationPayloadResponse, RecommendationSuggestedActionResponse, RecommendationReadinessValidator
+
+### Community 249 - "Community 249"
+Cohesion: 0.29
+Nodes (5): AuditRecordResponse, AuditRecordWriteRequest, SecurityEventResponse, SecurityEventWriteRequest, RecordingAuditRecorder
+
+### Community 250 - "Community 250"
+Cohesion: 0.29
+Nodes (5): ActiveTenantContext, IAccessPermissionService, ITenantContextResolver, StaticTenantContextResolver, RecommendationFactory
+
+### Community 251 - "Community 251"
+Cohesion: 0.29
+Nodes (5): AuditRecordResponse, AuditRecordWriteRequest, SecurityEventResponse, SecurityEventWriteRequest, RecordingAuditRecorder
+
+### Community 252 - "Community 252"
+Cohesion: 0.67
+Nodes (3): string, RecommendationArtifactTypes, RecommendationPermissions
+
 ## Knowledge Gaps
-- **2401 isolated node(s):** `GovernedQueryService`, `AiTraceService`, `ActiveTenantContext`, `CreateGraphNodeRequest`, `UpdateGraphNodeRequest` (+2396 more)
+- **2567 isolated node(s):** `GovernedQueryService`, `AiTraceService`, `ActiveTenantContext`, `CreateGraphNodeRequest`, `UpdateGraphNodeRequest` (+2562 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **35 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **36 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `RecordingGraphMemoryService` connect `Community 167` to `Graph Node and Relationship`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
-- **Why does `IAccessDenialRecorder` connect `Data Quality and Security` to `Community 167`, `Graph Node Utilities`, `Data Quality and Identity Actions`, `Community 218`, `Community 187`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `RecordingGraphMemoryService` connect `Import Graph Testing` to `Graph Node and Relationship`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `RecordingGraphMemoryService` connect `Community 245` to `Graph Node and Relationship`, `Community 167`?**
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
+- **Why does `IAccessDenialRecorder` connect `Data Quality and Security` to `Community 167`, `Community 234`, `Community 219`, `Graph Node Utilities`, `Community 212`, `Data Quality and Identity Actions`, `Community 187`?**
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
+- **Why does `MemgraphGraphMemoryService` connect `Graph Node Management` to `Graph Node and Relationship`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **What connects `GovernedQueryService`, `AiTraceService`, `ActiveTenantContext` to the rest of the system?**
-  _2401 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _2567 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Schema Versioning and Validation` be split into smaller, more focused modules?**
   _Cohesion score 0.06708446090300527 - nodes in this community are weakly interconnected._
 - **Should `Import Batch and Mapping` be split into smaller, more focused modules?**

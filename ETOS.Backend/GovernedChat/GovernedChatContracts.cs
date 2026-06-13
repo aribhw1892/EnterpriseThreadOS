@@ -15,7 +15,8 @@ public enum ChatDraftArtifactKind
 {
     QueryIntent = 0,
     Dashboard = 1,
-    Report = 2
+    Report = 2,
+    Recommendation = 3
 }
 
 public sealed record CreateGovernedChatSessionRequest(

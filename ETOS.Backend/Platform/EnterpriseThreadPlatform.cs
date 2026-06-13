@@ -16,6 +16,7 @@ using ETOS.Backend.Imports;
 using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Infrastructure.Configuration;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.Recommendations;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Platform.Extensions;
 using ETOS.Backend.Tenancy;
@@ -146,6 +147,9 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IDecisionExplorerFoundationService, DecisionExplorerFoundationService>();
         services.AddScoped<IArtifactExplorerService, ArtifactExplorerService>();
         services.AddScoped<IDashboardReportService, DashboardReportService>();
+        services.AddScoped<IRecommendationService, RecommendationService>();
+        services.AddScoped<IRecommendationFactory, RecommendationFactory>();
+        services.AddScoped<IRecommendationEvidenceResolver, RecommendationEvidenceResolver>();
         services.AddScoped<DeterministicLlmCompletionService>();
         services.AddHttpClient<OpenAiLlmCompletionService>();
         services.AddScoped<ILlmCompletionService>(serviceProvider =>

@@ -10,6 +10,7 @@ const explorerCards = [
   { href: "/decisions", title: "Decisions", description: "Decision explorer foundation until Milestone 4 workflow lands." },
   { href: "/dashboards", title: "Dashboards", description: "Chat-generated dashboard templates with governed preview and export." },
   { href: "/reports", title: "Reports", description: "Chat-generated report templates with governed preview and export." },
+  { href: "/recommendations", title: "Recommendations", description: "Evidence-backed recommendations with suggested actions and readiness workflow." },
 ];
 
 export default function ExplorersHubPage() {

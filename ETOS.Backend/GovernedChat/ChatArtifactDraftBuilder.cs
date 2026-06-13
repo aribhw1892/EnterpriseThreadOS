@@ -39,6 +39,7 @@ public sealed class ChatArtifactDraftBuilder(EnterpriseThreadDbContext dbContext
             ChatDraftArtifactKind.QueryIntent => "QueryIntentVersion",
             ChatDraftArtifactKind.Dashboard => "DashboardVersion",
             ChatDraftArtifactKind.Report => "ReportVersion",
+            ChatDraftArtifactKind.Recommendation => "RecommendationVersion",
             _ => throw new RequestValidationException("Unsupported draft artifact kind.")
         };
 
@@ -59,6 +60,7 @@ public sealed class ChatArtifactDraftBuilder(EnterpriseThreadDbContext dbContext
 
         var payload = EnrichDraftPayload(
             draftOutputJson,
+            draftKind,
             turn,
             outputSchema.VersionLabel,
             promptTemplate.VersionLabel,
@@ -138,6 +140,7 @@ public sealed class ChatArtifactDraftBuilder(EnterpriseThreadDbContext dbContext
 
     private static string EnrichDraftPayload(
         string draftOutputJson,
+        ChatDraftArtifactKind draftKind,
         GovernedChatTurn turn,
         string outputSchemaVersionLabel,
         string promptTemplateVersionLabel,
@@ -157,6 +160,19 @@ public sealed class ChatArtifactDraftBuilder(EnterpriseThreadDbContext dbContext
             startGraphNodeId,
             documentArtifactId
         });
+
+        if (draftKind == ChatDraftArtifactKind.Recommendation || enriched.ContainsKey("recommendationType"))
+        {
+            enriched["explainability"] = JsonSerializer.SerializeToElement(new
+            {
+                aiTraceId = turn.AiTraceRecordId,
+                contextPackageId = turn.ContextPackageId,
+                retrievalRunId = turn.RetrievalRunId
+            });
+            enriched["creationSource"] = JsonSerializer.SerializeToElement("chat");
+            enriched["lifecycleStatus"] = JsonSerializer.SerializeToElement("draft");
+        }
+
         return JsonSerializer.Serialize(enriched, JsonOptions);
     }
 }

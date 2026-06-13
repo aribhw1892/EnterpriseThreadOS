@@ -24,7 +24,7 @@ The repository currently contains:
 - `infra/local/docker-compose.yml`: local PostgreSQL, Neo4j, Qdrant, MinIO, Redis, and RabbitMQ, with Memgraph available only through an optional evaluation profile.
 - `.docs/.prd/`: product intent and ordered implementation backlog.
 
-Issue 1 platform foundation is present. Issue 2 tenant identity and access work is partially present in the current codebase. Later PRD capabilities such as artifact registry, graph memory services, imports, governed context assembly, AI trace, recommendations, workflows, and agents are roadmap items unless source code proves otherwise.
+Issues 1–18 are implemented or partially implemented in the current codebase, including platform foundation, tenant identity/access, governance/audit, artifact registry, classification/policy, graph memory, ontology/model packages, import/mapping/staging, identity resolution, data quality, documents, governed query/context assembly, AI Trace, governed chat, explorers/360° context views, dashboard/report artifacts, and recommendation artifacts with evidence rules. Later PRD capabilities such as review tasks, decisions, outcomes, governance analytics, tools, agents, workflows, and enterprise action framework remain roadmap items unless source code proves otherwise.
 
 ## Architecture-Honest Rule
 

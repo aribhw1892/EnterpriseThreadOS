@@ -16,7 +16,8 @@ public sealed record GovernedChatPlatformArtifacts(
     PlatformArtifactVersion ChatAnswerSchema,
     PlatformArtifactVersion DraftQueryIntentSchema,
     PlatformArtifactVersion DraftDashboardSchema,
-    PlatformArtifactVersion DraftReportSchema);
+    PlatformArtifactVersion DraftReportSchema,
+    PlatformArtifactVersion DraftRecommendationSchema);
 
 public sealed record PlatformArtifactVersion(
     Guid ArtifactId,
@@ -71,8 +72,16 @@ public sealed class GovernedChatArtifactSeeder(EnterpriseThreadDbContext dbConte
             "Draft report output schema",
             BuildDraftReportSchemaPayload(),
             cancellationToken);
+        var draftRecommendation = await EnsureArtifactVersionAsync(
+            context,
+            "OutputSchemaVersion",
+            "draft-recommendation-schema",
+            "draft-recommendation-v1",
+            "Draft recommendation output schema",
+            BuildDraftRecommendationSchemaPayload(),
+            cancellationToken);
 
-        return new GovernedChatPlatformArtifacts(prompt, chatAnswer, draftQueryIntent, draftDashboard, draftReport);
+        return new GovernedChatPlatformArtifacts(prompt, chatAnswer, draftQueryIntent, draftDashboard, draftReport, draftRecommendation);
     }
 
     private async Task<PlatformArtifactVersion> EnsureArtifactVersionAsync(
@@ -244,6 +253,27 @@ public sealed class GovernedChatArtifactSeeder(EnterpriseThreadDbContext dbConte
                 summary = new { type = "string" },
                 defaultAnchor = new { type = "object" },
                 sections = new { type = "array" },
+                createdFromChat = new { type = "boolean" }
+            }
+        });
+    }
+
+    private static string BuildDraftRecommendationSchemaPayload()
+    {
+        return Serialize(new
+        {
+            type = "object",
+            required = new[] { "title", "summary", "recommendationType", "evidenceLinks", "suggestedActions", "createdFromChat" },
+            properties = new
+            {
+                title = new { type = "string" },
+                summary = new { type = "string" },
+                recommendationType = new { type = "string" },
+                riskState = new { type = "string" },
+                capabilityState = new { type = "string" },
+                evidenceLinks = new { type = "array" },
+                suggestedActions = new { type = "array" },
+                relatedObjects = new { type = "array" },
                 createdFromChat = new { type = "boolean" }
             }
         });

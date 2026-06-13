@@ -4,6 +4,7 @@ using ETOS.Backend.Documents;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.Recommendations;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.Explorers;
@@ -66,7 +67,7 @@ public sealed class GovernanceFlowService(
             await AddAiTraceFlowAsync(context, traceId, anchorNodeId, nodes, edges, cancellationToken);
         }
 
-        var placeholders = BuildReviewChainPlaceholders();
+        var placeholders = BuildReviewChainPlaceholders(nodes);
         return new GovernanceFlowResponse(nodes, edges, placeholders);
     }
 
@@ -92,13 +93,16 @@ public sealed class GovernanceFlowService(
         }
 
         var artifactNodeId = artifact.Id.ToString();
+        var artifactRoute = artifact.ArtifactType.Equals(RecommendationArtifactTypes.Recommendation, StringComparison.OrdinalIgnoreCase)
+            ? $"/recommendations/{artifact.Id}"
+            : $"/artifacts/{artifact.Id}";
         nodes.Add(new GovernanceFlowNodeResponse(
             artifactNodeId,
             GovernanceFlowNodeKind.Artifact,
             artifact.Name,
             $"Artifact '{artifact.Name}' ({artifact.ArtifactType}).",
             artifact.LifecycleState.ToString(),
-            $"/artifacts/{artifact.Id}"));
+            artifactRoute));
 
         edges.Add(new GovernanceFlowEdgeResponse(
             Guid.NewGuid().ToString(),
@@ -151,13 +155,23 @@ public sealed class GovernanceFlowService(
         if (latestVersion is not null)
         {
             var versionNodeId = latestVersion.Id.ToString();
+            var versionSummary = latestVersion.Summary ?? $"Version {latestVersion.VersionLabel}.";
+            if (artifact.ArtifactType.Equals(RecommendationArtifactTypes.Recommendation, StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(latestVersion.PayloadJson))
+            {
+                var payload = RecommendationPayloadParser.Deserialize(latestVersion.PayloadJson);
+                versionSummary = $"{payload.LifecycleStatus} · trust {payload.TrustState} · {payload.Summary}";
+            }
+
             nodes.Add(new GovernanceFlowNodeResponse(
                 versionNodeId,
                 GovernanceFlowNodeKind.ArtifactVersion,
                 latestVersion.VersionLabel,
-                latestVersion.Summary ?? $"Version {latestVersion.VersionLabel}.",
+                versionSummary,
                 latestVersion.ReadinessState.ToString(),
-                null));
+                artifact.ArtifactType.Equals(RecommendationArtifactTypes.Recommendation, StringComparison.OrdinalIgnoreCase)
+                    ? $"/recommendations/{artifact.Id}"
+                    : null));
 
             edges.Add(new GovernanceFlowEdgeResponse(
                 Guid.NewGuid().ToString(),
@@ -498,16 +512,26 @@ public sealed class GovernanceFlowService(
         }
     }
 
-    private static IReadOnlyCollection<GovernanceFlowPlaceholderResponse> BuildReviewChainPlaceholders()
+    private static IReadOnlyCollection<GovernanceFlowPlaceholderResponse> BuildReviewChainPlaceholders(
+        IReadOnlyCollection<GovernanceFlowNodeResponse> nodes)
     {
-        return
-        [
-            new GovernanceFlowPlaceholderResponse(
+        var hasRecommendationNode = nodes.Any(node =>
+            node.Title.Contains("Recommendation", StringComparison.OrdinalIgnoreCase)
+            || node.SafeSummary.Contains(RecommendationArtifactTypes.Recommendation, StringComparison.OrdinalIgnoreCase));
+
+        var placeholders = new List<GovernanceFlowPlaceholderResponse>();
+        if (!hasRecommendationNode)
+        {
+            placeholders.Add(new GovernanceFlowPlaceholderResponse(
                 GovernanceFlowPlaceholderKind.Recommendation,
                 "Recommendation",
-                "not_implemented",
+                "available",
                 "Milestone 4",
-                "Recommendation artifact workflow is planned for Milestone 4."),
+                "Create a recommendation artifact from evidence to begin the review chain."));
+        }
+
+        placeholders.AddRange(
+        [
             new GovernanceFlowPlaceholderResponse(
                 GovernanceFlowPlaceholderKind.ReviewTask,
                 "Review task",
@@ -532,7 +556,9 @@ public sealed class GovernanceFlowService(
                 "not_implemented",
                 "Milestone 4",
                 "Learning signal capture is planned for Milestone 4.")
-        ];
+        ]);
+
+        return placeholders;
     }
 
     private static GovernanceFlowNodeKind MapLinkKind(AiTraceArtifactLinkKind linkKind)

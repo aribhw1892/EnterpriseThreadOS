@@ -109,6 +109,57 @@ public sealed class DeterministicLlmCompletionService : ILlmCompletionService
             output["createdFromChat"] = true;
         }
 
+        if (required.Contains("title"))
+        {
+            output["title"] = $"Recommendation from chat {DateTimeOffset.UtcNow:yyyyMMdd-HHmmss}";
+        }
+
+        if (required.Contains("recommendationType"))
+        {
+            output["recommendationType"] = "bomSync";
+        }
+
+        if (required.Contains("riskState"))
+        {
+            output["riskState"] = "medium";
+        }
+
+        if (required.Contains("capabilityState"))
+        {
+            output["capabilityState"] = "readOnlyAnalysis";
+        }
+
+        if (required.Contains("evidenceLinks"))
+        {
+            output["evidenceLinks"] = new JsonArray(visibleItems.Select(item => new JsonObject
+            {
+                ["linkId"] = Guid.NewGuid().ToString(),
+                ["evidenceType"] = "manualNote",
+                ["sourceId"] = Guid.TryParse(item.ContextId, out var parsedId) ? parsedId.ToString() : Guid.NewGuid().ToString(),
+                ["safeSummary"] = item.SafeSummary,
+                ["trustState"] = "provisional",
+                ["permissionFiltered"] = false
+            }).ToArray());
+        }
+
+        if (required.Contains("suggestedActions"))
+        {
+            output["suggestedActions"] = new JsonArray(new JsonObject
+            {
+                ["actionId"] = Guid.NewGuid().ToString(),
+                ["title"] = "Review governed chat recommendation",
+                ["kind"] = "REVIEW_RECOMMENDATION",
+                ["riskScore"] = "medium",
+                ["requiredReviewPath"] = "ENGINEERING_REVIEW",
+                ["status"] = "proposed"
+            });
+        }
+
+        if (required.Contains("relatedObjects"))
+        {
+            output["relatedObjects"] = new JsonArray();
+        }
+
         return Task.FromResult(output.ToJsonString(JsonOptions));
     }
 
