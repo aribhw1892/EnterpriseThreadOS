@@ -1,3 +1,22 @@
+/**
+ * ETOS frontend API client.
+ *
+ * Wires Next.js admin pages to the ETOS backend. Layout:
+ *
+ * 1. **Types** — DTO shapes mirrored from backend contracts (Issues 1–18).
+ * 2. **Config** — `apiBaseUrl`, `adminUserId`, and `selectedTenantId` from env vars.
+ * 3. **Page loaders** — `get*Lists()` helpers that fan out to several endpoints per page.
+ * 4. **Actions** — POST/PATCH helpers for admin buttons, exports, and demo seed flows.
+ * 5. **Transport** — `fetchApi` / `postApi` / `patchApi` and `{ data, error }` normalization.
+ *
+ * Conventions:
+ * - Tenant-scoped calls send `X-ETOS-User-Id` and `X-ETOS-Tenant-Id` headers.
+ * - Functions return `ApiResult<T>` instead of throwing on HTTP failures.
+ * - Missing env config yields a friendly error via `missingContext()`.
+ */
+
+// --- Platform health (Issue 1) ---
+
 export type ComponentHealth = {
   name: string;
   status: string;
@@ -11,6 +30,8 @@ export type PlatformHealth = {
   checkedAt: string;
   components: ComponentHealth[];
 };
+
+// --- Tenant identity and access (Issue 2) ---
 
 export type Tenant = {
   id: string;
@@ -61,6 +82,8 @@ export type AccessGrant = {
   createdAt: string;
 };
 
+// --- Governance and audit (Issue 3) ---
+
 export type AuditRecord = {
   id: string;
   tenantId?: string | null;
@@ -96,6 +119,8 @@ export type SecurityEvent = {
   reviewTaskCreatedAt?: string | null;
   createdAt: string;
 };
+
+// --- Artifact registry (Issue 4) ---
 
 export type ArtifactVersion = {
   id: string;
@@ -150,6 +175,8 @@ export type ArtifactDependency = {
   dependencyKind: string;
   createdAt: string;
 };
+
+// --- Classification and policy (Issue 5) ---
 
 export type ClassificationSchemeVersion = {
   id: string;
@@ -227,6 +254,8 @@ export type PolicyImpact = {
   affectedArtifactCount: number;
   affectedArtifacts: PolicyAffectedArtifact[];
 };
+
+// --- Ontology and model packages (Issue 6) ---
 
 export type OntologyVersion = {
   id: string;
@@ -324,6 +353,8 @@ export type ModelPackagePreview = {
   lifecycleVocabularyVersionId: string;
   attributeSchemaVersionId: string;
 };
+
+// --- Import, mapping, and staging (Issue 8) ---
 
 export type ImportBatch = {
   id: string;
@@ -423,6 +454,21 @@ export type ImportStagingGraphRun = {
   completedAt?: string | null;
 };
 
+export type ImportPromotionRun = {
+  id: string;
+  tenantId: string;
+  importBatchId: string;
+  importStagingGraphRunId: string;
+  status: string;
+  promotedNodeCount: number;
+  promotedRelationshipCount: number;
+  sourceEvidenceIds: string[];
+  auditRecordId?: string | null;
+  failureSummary?: string | null;
+  createdAt: string;
+  completedAt?: string | null;
+};
+
 export type ImportBatchDetail = {
   batch: ImportBatch;
   evidence: ImportFileEvidence[];
@@ -430,6 +476,8 @@ export type ImportBatchDetail = {
   validationIssues: ImportValidationIssue[];
   stagingRuns: ImportStagingGraphRun[];
 };
+
+// --- Identity resolution (Issue 9) ---
 
 export type IdentityResolutionDecision = {
   id: string;
@@ -489,6 +537,8 @@ export type TrustScoreRecord = {
   breakdown: Record<string, number>;
   recalculatedAt: string;
 };
+
+// --- Data quality (Issue 10) ---
 
 export type DataQualityIssueSourceLink = {
   id: string;
@@ -568,6 +618,8 @@ export type MonitoringIssueTypeDefinition = {
   allowsLiveSourceScanning: boolean;
   createdAt: string;
 };
+
+// --- Document memory (Issue 12) ---
 
 export type DocumentVersion = {
   id: string;
@@ -656,6 +708,8 @@ export type CadParsingStatus = {
   providerName: string;
   safeSummary: string;
 };
+
+// --- Governed query and context assembly (Issue 13) ---
 
 export type QueryIntentVersion = {
   id: string;
@@ -782,6 +836,8 @@ export type RetrievalRunSummary = {
   completedAt?: string | null;
 };
 
+// --- AI Trace (Issue 14) ---
+
 export type AiTraceSummary = {
   id: string;
   tenantId: string;
@@ -855,6 +911,8 @@ export type AiTraceDetail = {
   createdAt: string;
 };
 
+// --- Governed chat (Issue 15) ---
+
 export type GovernedChatSessionSummary = {
   id: string;
   tenantId: string;
@@ -925,6 +983,8 @@ export type GovernedChatTurn = {
   draftArtifact?: GovernedChatDraftArtifact | null;
 };
 
+// --- Dashboard and report artifacts (Issue 16) ---
+
 export type DashboardReportArtifactSummary = {
   id: string;
   tenantId: string;
@@ -948,6 +1008,8 @@ export type RecommendationArtifactSummary = {
   recommendationType?: string | null;
   updatedAt: string;
 };
+
+// --- Recommendation artifacts (Issue 18) ---
 
 export type RecommendationEvidenceLink = {
   linkId: string;
@@ -1045,6 +1107,8 @@ export type DashboardReportPreview = {
   };
 };
 
+// --- Shared artifact lifecycle helpers ---
+
 export type ArtifactReadiness = {
   artifactId: string;
   versionId: string;
@@ -1077,6 +1141,8 @@ export type ArtifactImpact = {
     createdAt: string;
   }[];
 };
+
+// --- Import preview and validation (used by demo flows) ---
 
 export type ImportPreview = {
   batchId: string;
@@ -1112,6 +1178,8 @@ export type ImportValidation = {
   warningCount: number;
   issues: ImportValidationIssue[];
 };
+
+// --- Explorers: 360° context view, graph, packages, decisions (Issue 17) ---
 
 export type ContextViewSectionVisibility = "Visible" | "Denied" | "Empty";
 
@@ -1256,26 +1324,38 @@ export type ArtifactExplorerSummary = {
   updatedAt: string;
 };
 
+// --- Shared API result wrapper ---
+
 export type ApiResult<T> = {
   data: T | null;
   error: string | null;
 };
 
+// --- Local dev configuration ---
+
+/** Backend base URL. Defaults to local ASP.NET host. */
 export const apiBaseUrl =
   process.env.NEXT_PUBLIC_ETOS_API_BASE_URL ?? "http://localhost:5000";
 
+/** Acting user for admin API calls. Set via `NEXT_PUBLIC_ETOS_ADMIN_USER_ID`. */
 export const adminUserId =
   process.env.NEXT_PUBLIC_ETOS_ADMIN_USER_ID ??
   "11111111-1111-1111-1111-111111111111";
+
+/** Active tenant for scoped admin calls. Set via `NEXT_PUBLIC_ETOS_TENANT_ID`. */
 export const selectedTenantId =
   process.env.NEXT_PUBLIC_ETOS_TENANT_ID ??
   "22222222-2222-2222-2222-222222222222";
 
+// --- Page loaders (server components call these to hydrate admin pages) ---
+
+/** Unauthenticated health probe for the home page. */
 export async function getPlatformHealth(): Promise<PlatformHealth | null> {
   const result = await fetchApi<PlatformHealth>("/api/health");
   return result.data;
 }
 
+/** Identity page: global tenants/users, then tenant-scoped roles, memberships, grants. */
 export async function getIdentityLists() {
   const tenants = await fetchApi<Tenant[]>("/api/admin/identity/tenants", {
     userId: adminUserId,
@@ -1317,6 +1397,7 @@ export async function getIdentityLists() {
   };
 }
 
+/** Governance page: recent audit records and security events. */
 export async function getGovernanceLists() {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1339,6 +1420,7 @@ export async function getGovernanceLists() {
   };
 }
 
+/** Artifact registry page: artifacts plus first artifact's versions, relationships, dependencies. */
 export async function getArtifactRegistryLists() {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1383,6 +1465,7 @@ export async function getArtifactRegistryLists() {
   };
 }
 
+/** Classification page: schemes, policies, rules, and impact for first published policy. */
 export async function getClassificationPolicyLists() {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1417,6 +1500,7 @@ export async function getClassificationPolicyLists() {
   };
 }
 
+/** Model-artifacts page: ontology layers, model packages, and active published package. */
 export async function getOntologyLists() {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1452,6 +1536,7 @@ export async function getOntologyLists() {
   };
 }
 
+/** Imports page: batches, first batch detail, identity candidates, trust scores, data quality. */
 export async function getImportLists() {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1474,6 +1559,10 @@ export async function getImportLists() {
     tenantHeaders && firstBatch
       ? await fetchApi<TrustScoreRecord[]>(`/api/admin/identity-resolution/batches/${firstBatch.id}/trust-scores`, tenantHeaders)
       : emptyObject<TrustScoreRecord[]>();
+  const firstBatchPromotionRuns =
+    tenantHeaders && firstBatch
+      ? await fetchApi<ImportPromotionRun[]>(`/api/admin/imports/batches/${firstBatch.id}/promotion-runs`, tenantHeaders)
+      : emptyObject<ImportPromotionRun[]>();
   const dataQualityIssues = tenantHeaders
     ? await fetchApi<DataQualityIssue[]>("/api/admin/data-quality/issues", tenantHeaders)
     : missingContext<DataQualityIssue[]>();
@@ -1490,12 +1579,14 @@ export async function getImportLists() {
     firstBatchDetail,
     firstBatchIdentityCandidates,
     firstBatchTrustScores,
+    firstBatchPromotionRuns,
     dataQualityIssues,
     firstBatchDataQualityIssues,
     monitoringPlaceholders,
   };
 }
 
+/** Documents page: document list, first document detail, CAD parsing status, data quality issues. */
 export async function getDocumentLists() {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1529,6 +1620,7 @@ export async function getDocumentLists() {
   };
 }
 
+/** Governed query page: retrieval run summaries and latest run detail with context package. */
 export async function getGovernedQueryLists() {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1549,6 +1641,7 @@ export async function getGovernedQueryLists() {
   };
 }
 
+/** AI Trace page: trace list and latest trace detail. */
 export async function getAiTraceLists() {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1569,6 +1662,9 @@ export async function getAiTraceLists() {
   };
 }
 
+// --- Governed query, AI Trace export, and chat actions ---
+
+/** POST export; returns filename and byte size (not the file body). */
 export async function exportAiTrace(traceId: string): Promise<ApiResult<{ fileName: string; sizeBytes: number }>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1614,6 +1710,7 @@ export async function exportAiTrace(traceId: string): Promise<ApiResult<{ fileNa
   }
 }
 
+/** Run governed retrieval from a graph node; used by graph explorer and chat context preview. */
 export async function runGovernedQueryForGraphNode(
   startGraphNodeId: string,
   intentKey = "object-360-context",
@@ -1641,6 +1738,67 @@ export async function runGovernedQueryForGraphNode(
   );
 }
 
+/** Run governed retrieval from a document artifact when no trusted graph anchor exists yet. */
+export async function runGovernedQueryForDocument(
+  documentArtifactId: string,
+  intentKey = "document-evidence-context",
+): Promise<ApiResult<RetrievalRun>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<RetrievalRun>();
+  }
+
+  return await postApi<RetrievalRun>(
+    "/api/admin/governed-query/run",
+    {
+      intentKey,
+      startGraphNodeId: null,
+      documentArtifactId,
+      policyKey: "published-policy",
+      queryText: "Frontend governed document evidence preview.",
+      maxDepth: 2,
+      createAiTrace: true,
+    },
+    tenantHeaders,
+  );
+}
+
+/**
+ * AI Trace demo action: prefer a trusted graph node, otherwise fall back to the latest document.
+ * The hard-coded placeholder graph node id is not seeded and will fail traversal.
+ */
+export async function runDemoGovernedQueryFlow(): Promise<ApiResult<RetrievalRun>> {
+  const graphNodes = await getGraphExplorerNodes();
+  if (graphNodes.error) {
+    return { data: null, error: graphNodes.error };
+  }
+
+  const trustedNode = graphNodes.data?.[0];
+  if (trustedNode) {
+    return await runGovernedQueryForGraphNode(trustedNode.nodeId);
+  }
+
+  const documents = await getDocumentLists();
+  if (documents.documents.error) {
+    return { data: null, error: documents.documents.error };
+  }
+
+  const document = documents.documents.data?.[0];
+  if (!document) {
+    return {
+      data: null,
+      error:
+        "No trusted graph nodes or documents found. Create a demo document on /documents, or stage and promote an import on /imports, then try again.",
+    };
+  }
+
+  return await runGovernedQueryForDocument(document.id);
+}
+
+/** Governed chat page: session list only (detail loaded on demand). */
 export async function getGovernedChatLists(): Promise<{
   sessions: ApiResult<GovernedChatSessionSummary[]>;
 }> {
@@ -1656,9 +1814,57 @@ export async function getGovernedChatLists(): Promise<{
   return { sessions };
 }
 
+export type GovernedChatAnchor = {
+  startGraphNodeId: string | null;
+  documentArtifactId: string | null;
+  defaultIntentKey: "object-360-context" | "document-evidence-context";
+};
+
+const governedChatPrerequisiteError =
+  "No trusted graph nodes or documents found. Create a demo document on /documents, or stage and promote an import on /imports, then try again.";
+
+/** Resolve a real retrieval anchor for governed chat; graph node preferred, otherwise latest document. */
+export async function resolveGovernedChatAnchor(): Promise<ApiResult<GovernedChatAnchor>> {
+  const graphNodes = await getGraphExplorerNodes();
+  if (graphNodes.error) {
+    return { data: null, error: graphNodes.error };
+  }
+
+  const trustedNode = graphNodes.data?.[0];
+  if (trustedNode) {
+    return {
+      data: {
+        startGraphNodeId: trustedNode.nodeId,
+        documentArtifactId: null,
+        defaultIntentKey: "object-360-context",
+      },
+      error: null,
+    };
+  }
+
+  const documents = await getDocumentLists();
+  if (documents.documents.error) {
+    return { data: null, error: documents.documents.error };
+  }
+
+  const document = documents.documents.data?.[0];
+  if (!document) {
+    return { data: null, error: governedChatPrerequisiteError };
+  }
+
+  return {
+    data: {
+      startGraphNodeId: null,
+      documentArtifactId: document.id,
+      defaultIntentKey: "document-evidence-context",
+    },
+    error: null,
+  };
+}
+
 export async function createGovernedChatSession(
   title?: string,
-  startGraphNodeId?: string,
+  anchor?: GovernedChatAnchor,
 ): Promise<ApiResult<GovernedChatSessionSummary>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1668,12 +1874,17 @@ export async function createGovernedChatSession(
     return missingContext<GovernedChatSessionSummary>();
   }
 
+  const resolvedAnchor = anchor ?? (await resolveGovernedChatAnchor()).data;
+  if (!resolvedAnchor) {
+    return { data: null, error: governedChatPrerequisiteError };
+  }
+
   return await postApi<GovernedChatSessionSummary>(
     "/api/admin/governed-chat/sessions",
     {
       title: title ?? "Governed chat session",
-      startGraphNodeId: startGraphNodeId ?? "33333333-3333-3333-3333-333333333333",
-      documentArtifactId: null,
+      startGraphNodeId: resolvedAnchor.startGraphNodeId,
+      documentArtifactId: resolvedAnchor.documentArtifactId,
     },
     tenantHeaders,
   );
@@ -1684,6 +1895,7 @@ export async function askGovernedChatTurn(
   message: string,
   intentKey = "object-360-context",
   draftArtifactKind?: "QueryIntent" | "Dashboard" | "Report" | "Recommendation",
+  anchor?: GovernedChatAnchor,
 ): Promise<ApiResult<GovernedChatTurn>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1693,13 +1905,36 @@ export async function askGovernedChatTurn(
     return missingContext<GovernedChatTurn>();
   }
 
+  const resolvedAnchor = anchor ?? (await resolveGovernedChatAnchor()).data;
+  if (!resolvedAnchor) {
+    return { data: null, error: governedChatPrerequisiteError };
+  }
+
+  if (
+    (intentKey === "object-360-context" || intentKey === "bom-impact-context") &&
+    !resolvedAnchor.startGraphNodeId
+  ) {
+    return {
+      data: null,
+      error:
+        "This intent needs a trusted graph node. Stage and promote an import on /imports, or switch intent to document-evidence-context.",
+    };
+  }
+
+  if (intentKey === "document-evidence-context" && !resolvedAnchor.documentArtifactId) {
+    return {
+      data: null,
+      error: "Document evidence context needs a document. Create one on /documents, then try again.",
+    };
+  }
+
   return await postApi<GovernedChatTurn>(
     `/api/admin/governed-chat/sessions/${sessionId}/turns`,
     {
       message,
       intentKey,
-      startGraphNodeId: null,
-      documentArtifactId: null,
+      startGraphNodeId: resolvedAnchor.startGraphNodeId,
+      documentArtifactId: resolvedAnchor.documentArtifactId,
       policyKey: "published-policy",
       draftArtifactKind,
     },
@@ -1736,6 +1971,35 @@ export async function getGovernedChatTurn(turnId: string): Promise<ApiResult<Gov
   return await fetchApi<GovernedChatTurn>(`/api/admin/governed-chat/turns/${turnId}`, tenantHeaders);
 }
 
+export type CleanDevelopmentDemoDataResult = {
+  tenantId: string;
+  deletedCounts: Record<string, number>;
+  graphMemoryCleared: boolean;
+  importFilesCleared: boolean;
+  documentFilesCleared: boolean;
+  summary: string;
+};
+
+/** Development-only reset for tenant demo data created through UI seed buttons. Preserves identity foundation. */
+export async function cleanDevelopmentDemoData(): Promise<ApiResult<CleanDevelopmentDemoDataResult>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<CleanDevelopmentDemoDataResult>();
+  }
+
+  return await postApi<CleanDevelopmentDemoDataResult>(
+    "/api/admin/development/clean-demo-data",
+    {},
+    tenantHeaders,
+  );
+}
+
+// --- Demo and seed flows (multi-step orchestration for local QA) ---
+
+/** Model artifacts page seed button. Publishes ontology through model package in dependency order. */
 export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackageVersion>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -1746,6 +2010,8 @@ export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackage
   }
 
   const versionLabel = `seed-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`;
+
+  // Ontology must exist first because semantic layers and attribute schemas reference it.
   const ontology = await postApi<OntologyVersion>(
     "/api/admin/ontology/versions",
     {
@@ -1811,6 +2077,7 @@ export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackage
     tenantHeaders,
   );
 
+  // Semantic layer binds graph naming to the published ontology shape.
   const semanticLayer = await postApi<SemanticLayerVersion>(
     "/api/admin/ontology/semantic-layers",
     {
@@ -1832,6 +2099,7 @@ export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackage
     tenantHeaders,
   );
 
+  // Lifecycle vocabulary normalizes allowed object states and transitions.
   const lifecycle = await postApi<LifecycleVocabularyVersion>(
     "/api/admin/ontology/lifecycle-vocabularies",
     {
@@ -1861,6 +2129,7 @@ export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackage
     tenantHeaders,
   );
 
+  // Attribute schema defines tenant-safe canonical fields used by imports and queries.
   const attributeSchema = await postApi<AttributeSchemaVersion>(
     "/api/admin/ontology/attribute-schemas",
     {
@@ -1910,6 +2179,7 @@ export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackage
     tenantHeaders,
   );
 
+  // Preview asks backend to verify all four pieces form a valid package before create/publish.
   const preview = await postApi<ModelPackagePreview>(
     "/api/admin/ontology/model-packages/preview",
     {
@@ -1927,6 +2197,7 @@ export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackage
     };
   }
 
+  // Final package is the artifact imports and other flows consume by key.
   const modelPackage = await postApi<ModelPackageVersion>(
     "/api/admin/ontology/model-packages",
     {
@@ -1952,10 +2223,12 @@ export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackage
   );
 }
 
+/** Imports page: CAD/PDM demo CSV batch with mapping suggestions saved as draft. */
 export async function createDemoImportFlow(): Promise<ApiResult<ImportMappingVersion>> {
   return await createDemoImportForSource("demo-cad-pdm", "Demo CSV import batch for Issue 8.");
 }
 
+/** Documents page: create spec artifact, upload version, link to latest import batch. */
 export async function createDemoDocumentFlow(): Promise<ApiResult<DocumentArtifactDetail>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -2025,6 +2298,7 @@ export async function createDemoDocumentFlow(): Promise<ApiResult<DocumentArtifa
   return await fetchApi<DocumentArtifactDetail>(`/api/admin/documents/${document.data.id}`, tenantHeaders);
 }
 
+/** Request vector indexing for the newest document version (placeholder provider). */
 export async function requestLatestDocumentVectorIndex(): Promise<ApiResult<DocumentVectorIndexRecord>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -2051,6 +2325,7 @@ export async function requestLatestDocumentVectorIndex(): Promise<ApiResult<Docu
   );
 }
 
+/** Create a manual data-quality issue tied to the latest document extraction. */
 export async function createExtractionIssueForLatestDocument(): Promise<ApiResult<DataQualityIssue>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -2079,10 +2354,12 @@ export async function createExtractionIssueForLatestDocument(): Promise<ApiResul
   );
 }
 
+/** ERP comparison import for identity-resolution demos. */
 export async function createDemoComparisonImportFlow(): Promise<ApiResult<ImportMappingVersion>> {
   return await createDemoImportForSource("demo-erp", "Comparison CSV import batch for identity resolution.");
 }
 
+/** Full identity demo: two staged imports then candidate generation on the ERP batch. */
 export async function runIdentityResolutionDemoFlow(): Promise<ApiResult<IdentityCandidateGeneration>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -2109,6 +2386,8 @@ export async function runIdentityResolutionDemoFlow(): Promise<ApiResult<Identit
   );
 }
 
+// Minimal demo import flow.
+// Creates batch -> uploads CSV evidence -> asks backend for mapping suggestions -> saves mapping version.
 async function createDemoImportForSource(
   sourceSystem: string,
   description: string,
@@ -2133,7 +2412,7 @@ async function createDemoImportForSource(
   if (!batch.data) {
     return { data: null, error: batch.error };
   }
-
+  /** Create a demo import batch with CSV evidence and mapping suggestions. */
   const csv = [
     "partNumber,lifecycle,cost",
     "P-100,released,12.50",
@@ -2153,6 +2432,7 @@ async function createDemoImportForSource(
     return { data: null, error: upload.error };
   }
 
+  /** Ask backend to generate mapping suggestions from the uploaded CSV. */
   const preview = await postApi<ImportPreview>(
     `/api/admin/imports/batches/${batch.data.id}/mapping-preview`,
     { evidenceId: upload.data.evidence.id, sampleRowLimit: 10 },
@@ -2162,6 +2442,7 @@ async function createDemoImportForSource(
     return { data: null, error: preview.error };
   }
 
+  /** Save the mapping suggestions as a draft mapping version. */
   return await postApi<ImportMappingVersion>(
     "/api/admin/imports/mappings",
     {
@@ -2186,6 +2467,8 @@ async function createDemoImportForSource(
   );
 }
 
+// Full prepared import flow used by later demos.
+// Extends basic import flow by approving mapping, validating batch, and staging graph records.
 async function createPreparedDemoImportForSource(
   sourceSystem: string,
   description: string,
@@ -2280,6 +2563,8 @@ async function createPreparedDemoImportForSource(
   return { data: { batch: batch.data, mapping: approved.data, stagingRun: stagingRun.data }, error: null };
 }
 
+// --- Import pipeline admin actions (operate on "latest" batch from getImportLists) ---
+
 export async function approveLatestImportMapping(): Promise<ApiResult<ImportMappingVersion>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -2338,6 +2623,94 @@ export async function stageLatestImportBatch(): Promise<ApiResult<ImportStagingG
   return await postApi<ImportStagingGraphRun>(`/api/admin/imports/batches/${batch.id}/stage`, {}, tenantHeaders);
 }
 
+function hasUnresolvedIdentityCandidates(candidates: IdentityCandidateLink[]): boolean {
+  return candidates.some(
+    (item) => item.state === "Conflicted" || item.state === "Provisional" || item.state === "Unverified",
+  );
+}
+
+/** Promote the newest staged batch that passes identity and validation gates. */
+export async function promoteReadyStagedImportBatch(): Promise<ApiResult<ImportPromotionRun>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<ImportPromotionRun>();
+  }
+
+  const lists = await getImportLists();
+  const stagedBatches = lists.batches.data?.filter((item) => item.status === "Staged") ?? [];
+  if (stagedBatches.length === 0) {
+    return {
+      data: null,
+      error: "No staged import batch is available to promote. Stage a batch first.",
+    };
+  }
+
+  for (const batch of stagedBatches) {
+    if (batch.validationIssueCount > 0) {
+      continue;
+    }
+
+    const candidates = await fetchApi<IdentityCandidateLink[]>(
+      `/api/admin/identity-resolution/batches/${batch.id}/candidates`,
+      tenantHeaders,
+    );
+    if (candidates.error) {
+      return { data: null, error: candidates.error };
+    }
+
+    if (hasUnresolvedIdentityCandidates(candidates.data ?? [])) {
+      continue;
+    }
+
+    const result = await postApi<ImportPromotionRun>(`/api/admin/imports/batches/${batch.id}/promote`, {}, tenantHeaders);
+    if (result.data) {
+      return result;
+    }
+
+    if (
+      result.error &&
+      !result.error.includes("unresolved identity candidates") &&
+      !result.error.includes("validation errors") &&
+      !result.error.includes("blocking data-quality issues")
+    ) {
+      return result;
+    }
+  }
+
+  return {
+    data: null,
+    error:
+      "No staged batch is ready to promote. Approve or resolve identity candidates on the ERP batch, or stage a source batch without blocking validation issues.",
+  };
+}
+
+/** Reject the newest staged batch and record a decision summary. */
+export async function rejectLatestStagedImportBatch(): Promise<ApiResult<{ id: string; importBatchId: string }>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<{ id: string; importBatchId: string }>();
+  }
+
+  const lists = await getImportLists();
+  const batch = lists.batches.data?.find((item) => item.status === "Staged");
+  if (!batch) {
+    return { data: null, error: "No staged import batch is available to reject." };
+  }
+
+  return await postApi<{ id: string; importBatchId: string }>(
+    `/api/admin/imports/batches/${batch.id}/reject-staging`,
+    {},
+    tenantHeaders,
+  );
+}
+
+/** Generate identity candidates for the latest import batch. */
 export async function generateLatestIdentityCandidates(): Promise<ApiResult<IdentityCandidateGeneration>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -2492,13 +2865,7 @@ export async function createManualDataQualityIssueForLatestBatch(): Promise<ApiR
   );
 }
 
-function tenantHeadersOrNull(): { userId: string; tenantId: string } | null {
-  if (!adminUserId || !selectedTenantId) {
-    return null;
-  }
-
-  return { userId: adminUserId, tenantId: selectedTenantId };
-}
+// --- Explorer APIs (360° view, graph, context packages, decisions) ---
 
 export async function getContextView360(
   anchorKind: string,
@@ -2590,6 +2957,8 @@ export async function getDecisionExplorerList(): Promise<ApiResult<DecisionExplo
   return await fetchApi<DecisionExplorerItem[]>("/api/admin/explorers/decisions", tenantHeaders);
 }
 
+// --- Dashboard and report artifact APIs ---
+
 export async function getDashboardArtifacts(): Promise<ApiResult<DashboardReportArtifactSummary[]>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -2674,6 +3043,7 @@ export async function markDashboardReportReady(
   return await postApi(`${base}/${artifactId}/versions/${versionId}/mark-ready`, {}, tenantHeaders);
 }
 
+/** Shared artifact lifecycle endpoints used by multiple artifact detail pages. */
 export async function getArtifactVersions(artifactId: string): Promise<ApiResult<ArtifactVersion[]>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -2795,6 +3165,7 @@ export async function exportDashboardReport(
   }
 }
 
+/** Map governed-chat draft artifact types to frontend detail routes. */
 export function draftArtifactDetailHref(artifactType: string, artifactId: string): string | null {
   if (artifactType === "DashboardVersion") {
     return `/dashboards/${artifactId}`;
@@ -2810,6 +3181,8 @@ export function draftArtifactDetailHref(artifactType: string, artifactId: string
 
   return null;
 }
+
+// --- Recommendation artifact APIs ---
 
 export async function getRecommendationArtifacts(): Promise<ApiResult<RecommendationArtifactSummary[]>> {
   const tenantHeaders =
@@ -2892,6 +3265,18 @@ export async function updateRecommendationSuggestedActionStatus(
   );
 }
 
+// --- HTTP transport layer ---
+
+/** Returns tenant headers when env vars are set; otherwise null. */
+function tenantHeadersOrNull(): { userId: string; tenantId: string } | null {
+  if (!adminUserId || !selectedTenantId) {
+    return null;
+  }
+
+  return { userId: adminUserId, tenantId: selectedTenantId };
+}
+
+/** Shared fetch wrapper: ETOS headers, no-store cache, uniform `{ data, error }` results. */
 async function fetchApi<T>(
   path: string,
   context?: { userId?: string; tenantId?: string },
@@ -2939,6 +3324,7 @@ async function fetchApi<T>(
   }
 }
 
+// JSON POST convenience wrapper used by most admin actions.
 async function postApi<T>(
   path: string,
   body: unknown,
@@ -2953,6 +3339,7 @@ async function postApi<T>(
   });
 }
 
+// JSON PATCH convenience wrapper for small update endpoints.
 async function patchApi<T>(
   path: string,
   body: unknown,
@@ -2967,6 +3354,8 @@ async function patchApi<T>(
   });
 }
 
+// Backend errors usually come back as problem-style JSON.
+// This keeps page code from caring about exact `title/detail/error` field shape.
 async function readProblem(response: Response): Promise<string | null> {
   try {
     const contentType = response.headers.get("content-type") ?? "";
@@ -2981,6 +3370,7 @@ async function readProblem(response: Response): Promise<string | null> {
   }
 }
 
+// Standard missing-context response when frontend env vars do not provide admin user + tenant.
 function missingContext<T>(): ApiResult<T> {
   return {
     data: null,
@@ -2988,6 +3378,7 @@ function missingContext<T>(): ApiResult<T> {
   };
 }
 
+// Helpers for pages that want "no rows yet" instead of "request not attempted".
 function emptyResult<T extends unknown[]>(): ApiResult<T> {
   return {
     data: [] as unknown as T,

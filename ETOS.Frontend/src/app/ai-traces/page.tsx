@@ -5,11 +5,12 @@ import {
   adminUserId,
   exportAiTrace,
   getAiTraceLists,
-  runGovernedQueryForGraphNode,
+  runDemoGovernedQueryFlow,
   selectedTenantId,
 } from "@/lib/etos-api";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
@@ -29,9 +30,13 @@ async function exportLatestTrace(formData: FormData) {
 async function runDemoGovernedQuery() {
   "use server";
 
-  const graphNodeId = "33333333-3333-3333-3333-333333333333";
-  await runGovernedQueryForGraphNode(graphNodeId);
+  const result = await runDemoGovernedQueryFlow();
+  if (result.error) {
+    redirect(`/ai-traces?error=${encodeURIComponent(result.error)}`);
+  }
+
   revalidatePath("/ai-traces");
+  redirect("/ai-traces");
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -204,7 +209,12 @@ function renderApiError(result: ApiResult<unknown>) {
   return result.error ? <ErrorState error={result.error} /> : null;
 }
 
-export default async function AiTracesPage() {
+type PageProps = {
+  searchParams: Promise<{ error?: string }>;
+};
+
+export default async function AiTracesPage({ searchParams }: PageProps) {
+  const { error: actionError } = await searchParams;
   const { traces, latestTrace } = await getAiTraceLists();
 
   return (
@@ -235,6 +245,7 @@ export default async function AiTracesPage() {
           </div>
         </section>
 
+        {actionError ? <ErrorState error={actionError} /> : null}
         {renderApiError(traces)}
         {renderApiError(latestTrace)}
 

@@ -27,6 +27,11 @@ The MVP must be architecture-honest. Future capabilities such as live ERP/PDM co
 - Agents and workflows may analyze, recommend, create reviewable tasks, and learn from explicit decisions in MVP. They must not execute enterprise write actions.
 - Tenant isolation is enforced at every layer: storage, graph memory, documents, artifacts, audit, tools, agents, workflows, retrieval, exports, and learning.
 - Placeholder modules should compile where practical so future extension points remain real contracts, not only documentation.
+- The platform core must remain industry-neutral. Domain concepts such as Part, Assembly, BOM, Field, Batch, or Supplier belong in tenant-published ontology and model packages, not in hardcoded platform modules.
+- Ontology, semantic layer, and model packages are the semantic brain of the platform. They define what exists, how objects relate, which attributes and lifecycle states are valid, and how physical graph records are interpreted for imports, retrieval, agents, and dashboards.
+- Business capabilities, business policy constraints, optimization objectives, and agent templates are separate versioned artifacts that agents and workflows consume alongside pinned ontology versions. They must not be embedded inside ontology definitions.
+- Agents create recommendations only. Humans create decisions. The system records learning evidence from explicit human outcomes and approved or rejected governed artifacts. Agents must not create decision artifacts.
+- LLM reasoning explains and synthesizes; optimization engines compute best valid options under policy constraints. Do not use LLMs as the primary optimization solver.
 
 ## Architecture Diagrams
 
@@ -68,7 +73,9 @@ flowchart TB
 
     subgraph runtimes["AI and Workflow Runtime"]
         agentrt["Python FastAPI Agent Runtime"]
-        langgraph["LangGraph Agent Orchestration"]
+        pydanticai["PydanticAI Single-Step Agents"]
+        hermes["Hermes Runtime Adapter (Future)"]
+        langgraph["LangGraph Multi-Agent Orchestration"]
         dapr["Dapr Workflow Runtime"]
         llm["LLM Provider Abstraction"]
     end
@@ -101,6 +108,8 @@ flowchart TB
     policy --> context
     context --> monolith
     monolith --> agentrt
+    agentrt --> pydanticai
+    agentrt --> hermes
     agentrt --> langgraph
     agentrt --> llm
     monolith --> dapr
@@ -131,7 +140,7 @@ flowchart TB
 | Vector Memory         | Qdrant                                                                        | Additional vector stores if customer deployment requires them                       |
 | Object Storage        | MinIO                                                                         | S3, Azure Blob, or enterprise object storage                                        |
 | Cache / Messaging     | Redis, RabbitMQ                                                               | Managed cache/message services                                                      |
-| Agent Runtime         | Python FastAPI, LangGraph, LLM provider abstraction                           | Additional agent runtimes, private/local model execution, and optional agent-memory providers behind platform contracts |
+| Agent Runtime         | Python FastAPI, PydanticAI for single-step governed agents, `IAgentRuntimeAdapter`, LLM provider abstraction | Hermes runtime adapter for future skill-rich or session-persistent execution, LangGraph for multi-agent teams and long-running orchestration (Issue 25), additional runtimes, private/local model execution, and optional agent-memory providers behind platform contracts |
 | Workflow Runtime      | Dapr Workflow                                                                 | Temporal                                                                            |
 | Local Infrastructure  | Docker Compose for PostgreSQL, Neo4j, Qdrant, MinIO, Redis, RabbitMQ          | Kubernetes, optional Memgraph evaluation profile                                    |
 | Connectors            | CSV, Excel, document import, mock ERP/PDM, disabled write connector contracts | Live ERP, PDM, PLM, MES, QMS, CRM, CAD automation                                   |
@@ -164,7 +173,7 @@ The platform should prefer proven open-source libraries for commodity infrastruc
 | Testing | xUnit, Testcontainers for .NET, Respawn, FluentAssertions, NSubstitute or Moq | Domain, API, persistence, graph, infra, and governance tests | Prefer Testcontainers for PostgreSQL, Neo4j, Redis, RabbitMQ, MinIO, and Qdrant behavior that cannot be proven with in-memory fakes. Add optional Memgraph contract tests only if that backend is enabled. |
 | Frontend data and forms | TanStack Query, React Hook Form, Zod, TanStack Table | Admin CRUD, explorers, mapping UI, policy screens, dashboards | Zod schemas should align with backend DTOs; generated or shared contracts may be introduced later if duplication becomes risky. |
 | Frontend visualization | React Flow, shadcn/ui, Tailwind CSS, Lucide React | Graph explorer, workflow builder, governance flow, dashboard/report shell | Use configuration-driven UI components and accessible primitives; avoid bespoke visualization frameworks until product needs exceed React Flow. |
-| Python agent runtime | FastAPI, Pydantic, LangGraph, httpx, tenacity, qdrant-client | Agent runtime, model/tool adapters, retrieval adapters | LangChain may be used selectively for integrations, but governed context assembly and tool authorization must remain platform-owned. Neo4j Agent Memory may be evaluated later behind internal agent-memory contracts, not exposed directly to product APIs. |
+| Python agent runtime | FastAPI, PydanticAI, Pydantic, httpx, tenacity, qdrant-client; Hermes and LangGraph behind `IAgentRuntimeAdapter` | Mapping, data-quality, recommendation, search, and future skill-oriented agents; runtime adapters remain swappable | Use PydanticAI first for input → reasoning → structured-output agents. Evaluate a Hermes runtime adapter for governed tool-rich or session-persistent execution after the adapter contract and tool registry are stable. Introduce LangGraph for coordinator teams, delegation, and consensus in Issue 25. Governed context assembly and tool authorization must remain platform-owned. Neo4j Agent Memory may be evaluated later behind internal agent-memory contracts, not exposed directly to product APIs. |
 
 
 ### End-to-End MVP Customer Flow
@@ -391,7 +400,7 @@ flowchart LR
 
 - Frontend: Next.js, React, TypeScript, Tailwind CSS, shadcn/ui, and React Flow for explorers, builders, trace views, dashboards, and graph/workflow visualization.
 - Backend: ASP.NET Core .NET 10 modular monolith with explicit module boundaries, dependency injection, EF Core, PostgreSQL by default, and future SQL Server support through EF Core abstraction.
-- Agent runtime: Python FastAPI and LangGraph-style orchestration for agent internals, integrated through governed contracts rather than direct database access.
+- Agent runtime: Python FastAPI behind `IAgentRuntimeAdapter`, with PydanticAI as the first governed execution adapter, optional future Hermes adapter for skill-rich or session-persistent runs, and LangGraph reserved for multi-agent orchestration. Agent reasoning stays outside the .NET host and uses approved platform context/tool APIs rather than direct database access.
 - Workflow runtime: Dapr Workflow for MVP; Temporal remains a future placeholder.
 - Graph memory: Neo4j as the first-class MVP graph backend; Memgraph remains an optional pluggable backend for memory-first analytics or future evaluation.
 - Vector memory: Qdrant for embedding-backed document/vector retrieval.
@@ -402,16 +411,162 @@ flowchart LR
 - Deployment: local developer-first deployment with Docker Compose for infrastructure; Kubernetes remains a future placeholder.
 - Enterprise data posture: read-only imported source data in MVP; platform overlays are editable and governed.
 
+### Industry-Neutral Platform Layers
+
+EnterpriseThreadOS separates platform core behavior from tenant/domain semantics through versioned artifacts. The platform core understands only generic concepts such as artifacts, relationships, documents, recommendations, review tasks, decisions, learning evidence, agents, workflows, tools, and AI trace. Domain object types such as Part, Field, Drug, or Batch are defined only in published ontology and model packages.
+
+```mermaid
+flowchart TB
+    subgraph L1["Layer 1 — Platform Core"]
+        core["Artifacts, Relationships, Documents, Recommendations, Review Tasks, Decisions, Agents, Workflows, Tools, AI Trace"]
+    end
+
+    subgraph L2["Layer 2 — Ontology Brain"]
+        ontology["OntologyVersion, SemanticLayerVersion, AttributeSchemaVersion, LifecycleVocabularyVersion, ModelPackageVersion"]
+    end
+
+    subgraph L3["Layer 3 — Business Capability"]
+        capability["CapabilityDefinitionVersion"]
+    end
+
+    subgraph L4["Layer 4 — Business Policy"]
+        policy["BusinessPolicyDefinitionVersion"]
+    end
+
+    subgraph L5["Layer 5 — Optimization"]
+        optimization["OptimizationModelVersion"]
+    end
+
+    subgraph L6["Layer 6 — Agent Template"]
+        agentTemplate["AgentTemplateVersion"]
+    end
+
+    subgraph L7["Layer 7 — Workflow"]
+        workflow["WorkflowVersion"]
+    end
+
+    L2 --> L1
+    L3 --> L6
+    L4 --> L6
+    L4 --> L7
+    L5 --> L7
+    L6 --> L7
+    L2 --> L6
+    L2 --> L7
+```
+
+Layer responsibilities:
+
+| Layer | Answers | Examples |
+| ----- | ------- | -------- |
+| Platform Core | How are governed objects stored, versioned, audited, and executed? | Artifact registry, graph memory, governed query, AI trace |
+| Ontology Brain | What exists, how is it related, what attributes and lifecycle states apply? | Manufacturing: Part, Assembly; Sugar: Field, Mill |
+| Business Capability | What outcome are we trying to achieve? | Rework analysis, harvest scheduling, supplier risk assessment |
+| Business Policy | What is allowed? | Minimum maturity 85%, max distance 50 km, rain risk below 20% |
+| Optimization Model | What is the best valid option? | Minimize transport distance, maximize mill utilization |
+| Agent Template | What reusable agent pattern applies? | Analyzer, planner, investigator, optimization, recommendation |
+| Workflow | How are data retrieval, policy checks, optimization, agents, and review tasks orchestrated? | Get data → apply policy → optimize → recommend → create review task |
+
+Ontology remains the semantic brain: imports, staging graph writes, retrieval, explorers, dashboards, agents, and workflows must pin and consume published ontology/model package versions. Business capabilities, business policies, and optimization models orbit the brain; they do not replace it.
+
+Classification and access-control `PolicyVersion` artifacts remain governance policies for permissions, restricted context, and ABAC filtering. They are not business constraint policies.
+
+### Governed Decision and Agent Flow
+
+EnterpriseThreadOS follows a strict separation between machine recommendations and human decisions:
+
+```mermaid
+flowchart LR
+    agentRun["AgentRun / WorkflowRun"]
+    recommendation["RecommendationArtifact"]
+    reviewTask["ReviewTaskArtifact"]
+    decision["DecisionArtifact"]
+    learning["LearningEvidence / LearningSignalArtifact"]
+
+    agentRun --> recommendation
+    recommendation --> reviewTask
+    reviewTask --> decision
+    decision --> learning
+```
+
+Rules:
+
+- Agents and workflows may create `RecommendationArtifact` records with linked evidence and suggested actions.
+- Agents and workflows must not create `DecisionArtifact` records.
+- Humans complete review tasks and produce decisions, including rejection and no-action outcomes.
+- Learning evidence comes from explicit decisions, approved or rejected mappings, corrected mappings, and repeated governed patterns. MVP does not perform autonomous model retraining.
+
+### Mapping Assistant Model
+
+Import mapping assistance is not a governed agent in MVP. The flow is:
+
+`ImportBatch` → column analysis → mapping suggestions → tenant admin approval → immutable `ImportMappingVersion`
+
+Implement suggestions through `IMappingSuggestionProvider` with at least:
+
+- `RuleBasedMappingProvider` for deterministic ontology-aware suggestions
+- `PydanticAiMappingProvider` for governed structured mapping suggestions
+- `HermesMappingProvider` as a future optional provider behind the same contract when Hermes-backed mapping assistance is needed
+
+Do not require `AgentRun`, `WorkflowRun`, LangGraph, or Hermes for the default import mapping path.
+
+### Runtime-Neutral Agent Strategy
+
+EnterpriseThreadOS must remain runtime-neutral. The .NET platform governs configuration, permissions, artifacts, tools, context assembly, audit, and `AgentRun` records. Python runtimes execute reasoning only through `IAgentRuntimeAdapter`.
+
+```mermaid
+flowchart TB
+    dotnet["ASP.NET Core Platform"]
+    adapter["IAgentRuntimeAdapter"]
+    pydantic["PydanticAiRuntimeAdapter"]
+    hermes["HermesRuntimeAdapter"]
+    langgraph["LangGraphRuntimeAdapter"]
+
+    dotnet --> adapter
+    adapter --> pydantic
+    adapter --> hermes
+    adapter --> langgraph
+```
+
+Adapter sequence:
+
+| Phase | Adapter | Use when |
+| ----- | ------- | -------- |
+| Now | `PydanticAiRuntimeAdapter` | Mapping, data-quality, recommendation, and search agents that follow input → reasoning → structured output |
+| Next | `HermesRuntimeAdapter` | Tool-rich, session-persistent, or skill-oriented agent execution after tool registry and runtime contracts are stable |
+| Issue 25 | `LangGraphRuntimeAdapter` | Coordinator teams, delegation, consensus, and long-running multi-agent orchestration |
+
+Rules:
+
+- Agents depend only on `IAgentRuntimeAdapter`, never directly on PydanticAI, Hermes, or LangGraph platform code in the .NET monolith.
+- `AgentVersion` and `AgentTemplateVersion` are governed configuration artifacts before any runtime is required to execute them in production paths.
+- Hermes is a future execution option, not the MVP default. If adopted, Hermes runs under ETOS governance: approved tools only, governed context packages only, tenant/policy filtering before LLM exposure, and auditable `AgentRun` plus `ToolRun` records.
+- Hermes-native autonomous skill creation, persistent memory promotion, or self-modifying behavior must not bypass ETOS review, decision, and learning boundaries. Any future Hermes skills or memory writes must map to governed artifacts or explicit learning evidence flows.
+- LangGraph remains reserved for multi-agent collaboration in Issue 25 rather than replacing PydanticAI for simple governed agents.
+
+### Document Memory Layers
+
+Document memory spans four layers with distinct ownership:
+
+| Layer | Role | Source of truth? |
+| ----- | ---- | ---------------- |
+| Object storage (MinIO) | Original files, drawings, exports, reports | Yes for file bytes |
+| PostgreSQL | Metadata, extraction status, audit, import evidence, governance records | Yes for governed metadata |
+| Qdrant | Chunks, embeddings, semantic vectors | No; retrieval index only |
+| Graph memory (Neo4j) | Document-to-enterprise relationships such as describes, evidence-for, and supports links | Yes for connected document context |
+
+Restricted and tenant/policy-filtered context must be applied before document or vector content reaches an LLM.
+
 ### Core Domain Model
 
 - Use a common BaseNode / BaseRelationship concept for graph memory.
 - Use a common BaseArtifact concept for governed, versioned platform artifacts.
 - Separate enterprise graph objects from meta/governance artifacts logically in MVP, with placeholders for stronger physical separation later.
-- Model master objects and version objects separately. Versioned objects carry lifecycle, relationships, BOM structures, approvals, attributes, and audit links.
-- Model BOM structure through relationship records that carry quantity, usage, BOM type, source system, effective dates, approval state, import batch, and audit metadata.
+- Model master objects and version objects separately. Versioned enterprise objects carry lifecycle, relationships, structural relationship metadata, approvals, attributes, and audit links as defined by the active ontology and model package.
+- Model industry-specific structures such as BOM, composition, routing, or hierarchy through ontology-defined relationship types and graph relationship records. The platform core must not hardcode manufacturing-only object types or relationship names.
 - Treat lifecycle state as read-only imported information in MVP. EnterpriseThreadOS can normalize and reason over lifecycle but must not mutate source lifecycle.
-- Use global canonical core object types with tenant-specific attribute schema extensions.
-- Version ontology, semantic layer, model packages, import mappings, policies, prompts, output schemas, tools, connectors, query intents, retrieval strategies, recommendations, review tasks, decisions, learning policies, and relevant taxonomies.
+- Use tenant-published model packages as the canonical language for imports, graph records, retrieval, dashboards, agents, and workflows. Tenant-specific attribute schema extensions remain versioned and governed within those packages.
+- Version ontology, semantic layer, model packages, business capabilities, business policies, optimization models, agent templates, import mappings, governance policies, prompts, output schemas, tools, connectors, query intents, retrieval strategies, recommendations, review tasks, decisions, learning policies, and relevant taxonomies.
 
 ### First-Class Artifact Types
 
@@ -420,6 +575,10 @@ MVP and near-MVP architecture should include platform-defined artifact types for
 - OntologyVersion
 - SemanticLayerVersion
 - ModelPackageVersion
+- CapabilityDefinitionVersion
+- BusinessPolicyDefinitionVersion
+- OptimizationModelVersion
+- AgentTemplateVersion
 - ImportMappingVersion
 - QueryIntentVersion
 - RetrievalStrategyVersion
@@ -429,7 +588,7 @@ MVP and near-MVP architecture should include platform-defined artifact types for
 - ConnectorDefinitionVersion
 - SkillDefinitionVersion
 - ClassificationSchemeVersion
-- PolicyVersion
+- PolicyVersion (governance and access-control policy; not business constraint policy)
 - DashboardVersion
 - ReportVersion
 - ExplorerViewVersion
@@ -470,7 +629,11 @@ Execution objects such as ToolRun, SkillRun, AgentRun, WorkflowRun, AgentTeamRun
 - Audit and Security Module: audit records, security events, denied access records, export events, trace/export permissions, retention placeholders.
 - Classification and Policy Module: classification schemes, permission rules, ABAC-style filtering, policy versioning, temporary access, restricted context handling.
 - Graph Memory Module: graph abstraction, graph health, Neo4j implementation, optional Memgraph adapter placeholder, graph bootstrap conventions, graph snapshots, graph diff.
-- Ontology and Semantic Layer Module: canonical model, tenant attribute schemas, ontology versions, semantic metadata, AI descriptions, examples, synonyms, model package publishing.
+- Ontology and Semantic Layer Module: canonical model, tenant attribute schemas, ontology versions, semantic metadata, AI descriptions, examples, synonyms, model package publishing. Ontology answers what exists and how it is related; it does not own business outcomes, business constraints, or optimization objectives.
+- Capability Definition Module: versioned business capability artifacts that describe outcomes such as rework analysis, harvest scheduling, or supplier risk assessment.
+- Business Policy Definition Module: versioned tenant business constraint artifacts such as maturity thresholds, distance limits, or weather-risk rules. Distinct from classification and access-control policies.
+- Optimization Model Module: versioned optimization objective artifacts and solver configuration metadata. Optimization engines compute best valid options; LLMs explain and recommend but do not replace the solver.
+- Agent Template Module: reusable governed agent patterns composed from pinned ontology, capability, policy, tool, prompt, and output-schema references.
 - Ingestion and Mapping Module: raw import batches, staging graph, import mappings, lifecycle mapping, attribute mapping, import validation, import file evidence.
 - Identity Resolution Module: identity rules, identity candidates, identity decisions, approved/provisional/conflicted links, trust effects, learning evidence.
 - Data Quality Module: data quality rules, issue artifacts, severity, trust effects, review task creation, import-time validation, future continuous monitoring placeholder.
@@ -485,8 +648,8 @@ Execution objects such as ToolRun, SkillRun, AgentRun, WorkflowRun, AgentTeamRun
 - Decision Module: decision artifacts, participants, votes, conflict status, escalation task creation, decision memory.
 - Outcome and Learning Module: outcome taxonomy, manual outcome tracking, learning evidence, learning signal rollup, learning policy/model placeholders.
 - Governance Analytics Module: Decision Explorer, Governance Dashboard, platform-defined KPIs, trend analytics, custom KPI placeholder.
-- Tool Registry Module: tool definitions, skill/connector registry, tenant-aware secret access, scoped credentials, tool gateway, capability model, schema compatibility, tool execution, tool traces, dry-run metadata.
-- Agent Module: tenant-defined agents, seeded agent types, agent versions, prompt/model/tool/retrieval composition, draft testing, publish approval, runtime records.
+- Tool Registry Module: tool definitions, skill/connector registry, tenant-aware secret access, scoped credentials, tool gateway, tool capability/risk metadata, schema compatibility, tool execution, tool traces, dry-run metadata.
+- Agent Module: tenant-defined agents, agent templates, agent versions, prompt/model/tool/retrieval/capability/policy composition, draft testing, publish approval, runtime-neutral execution through `IAgentRuntimeAdapter`, and runtime records.
 - Workflow Module: workflow versions, Dapr workflow execution, safe mode, partial execution, reviewable outputs only, schedule/event placeholders.
 - Multi-Agent Collaboration Module: agent teams, coordinator agent, collaboration patterns, delegation rules, team runs, team confidence, consensus definitions.
 - Enterprise Action Module: disabled write-capable connector/action contracts, action plan placeholder, compensation placeholder, enterprise write-back future scope.
@@ -606,14 +769,37 @@ Acceptance criteria:
 - Manual outcomes can be recorded and linked to decisions/recommendations.
 - Governance dashboard displays open reviews, pending decisions, blocked decisions, escalations, decision throughput, outcome verification rate, learning signal generation rate, and high-risk recommendations.
 
+#### Milestone 4.5: Architectural Abstraction Sprint
+
+Refine the platform into an industry-neutral core with explicit domain packages before starting the tool and agent registry work in Milestone 5.
+
+Deliverables:
+
+- Industry-neutral platform core cleanup for imports, staging graph writes, governed query intents, and recommendation factories.
+- `CapabilityDefinitionVersion`, `BusinessPolicyDefinitionVersion`, `OptimizationModelVersion`, and `AgentTemplateVersion` artifact contracts.
+- `IMappingSuggestionProvider` with `RuleBasedMappingProvider`, `PydanticAiMappingProvider`, and a deferred `HermesMappingProvider` contract.
+- `IAgentRuntimeAdapter` with PydanticAI as the first execution adapter, a deferred Hermes adapter contract, and LangGraph reserved for multi-agent orchestration.
+- Extracted manufacturing reference package containing ontology, capabilities, business policies, demo fixtures, and manufacturing-specific import/query behavior.
+- Package architecture documentation describing core versus domain package boundaries.
+
+Acceptance criteria:
+
+- Platform core modules do not hardcode manufacturing object types or relationship names.
+- Import staging and graph writes use only the active published model package and ontology metadata.
+- Mapping suggestions are produced through `IMappingSuggestionProvider` rather than inline service heuristics.
+- Approved, rejected, and corrected import mappings can emit learning-signal inputs without autonomous model retraining.
+- Manufacturing demo flows run through a published model package rather than baked-in platform assumptions.
+- Issue 22 cannot start until this milestone is complete.
+
 #### Milestone 5: Agentic Platform
 
 Build tenant-defined agents, tool registry, workflow orchestration, safe read-only execution, multi-agent collaboration, delegation, team runs, and consensus foundations.
 
 Deliverables:
 
-- ToolDefinitionVersion and Tool Registry with capability, permissions, input/output schemas, compatibility checks, dry-run metadata, and ToolRun records.
-- AgentVersion with tenant-defined custom agents, seeded agent types, prompt/model/tool/retrieval composition, fallback policies, capability/risk profiles, safe mode, preview mode, and publish governance.
+- ToolDefinitionVersion and Tool Registry with tool capability/risk metadata, permissions, input/output schemas, compatibility checks, dry-run metadata, and ToolRun records.
+- `IAgentRuntimeAdapter` with a PydanticAI runtime adapter for governed single-step agents and a deferred Hermes runtime adapter contract for future skill-rich execution.
+- `AgentTemplateVersion`, `AgentVersion`, tenant-defined custom agents, prompt/model/tool/retrieval/capability/policy composition, fallback policies, agent capability/risk profiles, safe mode, preview mode, and publish governance.
 - PromptTemplateVersion and OutputSchemaVersion integration with agents.
 - Global shared skills and per-agent skills.
 - AgentRun runtime records with trace and audit links.
@@ -621,7 +807,7 @@ Deliverables:
 - WorkflowRun runtime records, partial safe mode, skipped-step events, and reviewable outputs only.
 - Manual trigger execution for MVP with schedule/event placeholders.
 - Monitoring agents for existing issue types after import, not live source scanning.
-- AgentTeamVersion, coordinator agent, CollaborationPatternDefinition, AgentDelegationRule, AgentTeamRun, team confidence rules, and ConsensusDefinition.
+- AgentTeamVersion, coordinator agent, CollaborationPatternDefinition, AgentDelegationRule, AgentTeamRun, team confidence rules, ConsensusDefinition, and LangGraph-backed multi-agent orchestration behind `IAgentRuntimeAdapter`. Hermes remains optional for non-team, skill-rich agent execution and is not a substitute for LangGraph team orchestration.
 
 Acceptance criteria:
 
@@ -772,6 +958,9 @@ Prior art expected in the codebase once implementation begins:
 - Identity resolution mistakes can corrupt user trust. MVP must prioritize reviewable candidates and relationship-based links over automatic merges.
 - Placeholder modules can create maintenance drag if they contain fake implementation. Keep placeholders as contracts, disabled features, DTOs, and extension points.
 - Agent/workflow scope can expand into write-back actions too early. Keep Milestone 5 read-only and recommendation/task focused.
+- Manufacturing-specific assumptions can become hidden platform dependencies if ontology abstraction is skipped. Complete Milestone 4.5 before tool and agent registry work.
+- `PolicyVersion`, `CapabilityDefinitionVersion`, `AgentCapabilityProfileVersion`, and business policy artifacts must keep distinct names and module boundaries to avoid governance/policy/capability confusion.
+- Runtime adapter sprawl can recreate tight coupling to PydanticAI, Hermes, or LangGraph. Keep all agent execution behind `IAgentRuntimeAdapter` and document adapter selection rules explicitly.
 - Governance UX can overwhelm business users. Use focused explorers and 360-degree context views to make traceability navigable.
 
 ## Further Notes

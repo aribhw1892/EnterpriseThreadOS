@@ -4,6 +4,8 @@ Source PRD: `engineering-execution-prd.md`
 
 This backlog breaks the PRD into independently grabbable vertical slices. Each issue is intended to deliver a narrow, verifiable path across the necessary domain model, persistence, API, UI, tests, and governance boundaries. Issues are ordered in dependency order so blockers can be created first in an issue tracker.
 
+Recommended execution note: complete Issue 18, then run Issues 19-21 and the Architectural Abstraction Sprint (Issues 18.1-18.5) in parallel where team capacity allows. Do not start Issue 22 until both Issue 21 and Issue 18.5 are complete.
+
 Label for all issues: `needs-triage`
 
 ## Open-Source Library Guidance by Issue Area
@@ -22,8 +24,9 @@ Use open-source libraries to accelerate commodity implementation work while keep
 | Issues 13-15: Governed Query, Retrieval, Trace, Chat | Qdrant.Client, Semantic Kernel or direct LLM provider SDKs behind an abstraction, Pydantic/FastAPI contracts for Python runtime, OpenTelemetry | Graph-first/document-second retrieval, LLM-safe context packages, provider abstraction, AI trace correlation, and governed chat execution. Neo4j Agent Memory is deferred; only add platform-owned placeholders if needed. |
 | Issues 16-17: Explorers, Dashboards, Reports | TanStack Query, TanStack Table, React Hook Form, Zod, React Flow, shadcn/ui, Tailwind CSS, Lucide React | Admin and explorer data loading, filtered tables, form validation, graph/governance visualization, and consistent UI primitives. |
 | Issues 18-21: Recommendations, Tasks, Decisions, Governance Analytics | EF Core, FluentValidation, TanStack Table, Recharts or Tremor if charting is needed | Evidence rules, review/decision workflows, KPI calculations, governed dashboard views, and trend visualization. |
+| Issues 18.1-18.5: Architectural Abstraction Sprint | FluentValidation, Mapperly or Mapster, existing ontology/import/graph modules, package seed fixtures | Industry-neutral core cleanup, capability/policy/optimization/agent-template artifacts, mapping provider contracts, runtime adapter contracts, and manufacturing package extraction. |
 | Issue 22: Tool, Skill, and Connector Registry | FluentValidation, JSON Schema libraries such as JsonSchema.Net or NJsonSchema, MassTransit, tenant-aware secret provider abstraction | Tool schema compatibility, input/output validation, tool run records, async execution, dry-run metadata, and scoped credential boundaries. |
-| Issues 23-25: Agents, Workflows, Multi-Agent Teams | FastAPI, Pydantic, LangGraph, httpx, tenacity, Dapr Workflow, MassTransit where event-driven execution is useful | Agent runtime contracts, retries, model/tool adapters, governed workflow orchestration, safe mode events, delegation traces, and team run records. Neo4j Agent Memory may be evaluated later behind an internal agent-memory provider contract, not used as a replacement for the platform graph. |
+| Issues 23-25: Agents, Workflows, Multi-Agent Teams | FastAPI, PydanticAI, Pydantic, httpx, tenacity, Dapr Workflow, deferred Hermes adapter, LangGraph for Issue 25 multi-agent orchestration, MassTransit where event-driven execution is useful | `IAgentRuntimeAdapter`, PydanticAI for single-step governed agents, optional future Hermes adapter for skill-rich execution, governed workflow orchestration, safe mode events, delegation traces, and team run records. Neo4j Agent Memory may be evaluated later behind an internal agent-memory provider contract, not used as a replacement for the platform graph. |
 | Issue 26: End-to-End MVP Demo | Playwright, Testcontainers for .NET, seeded fixtures, NSwag-generated clients if useful | Scripted happy path, denied/restricted-context path, browser-verifiable flow, and stable integration smoke tests. |
 | Issues 27-28: ADRs and Future Contracts | ADR templates, Mermaid, OpenAPI/JSON Schema contracts | Architecture decision capture, disabled write-action contracts, connector boundaries, deployment placeholders, and reviewable diagrams. |
 
@@ -175,7 +178,7 @@ Implementation status: Implemented in the current source as Slice 7. See `ETOS.B
 
 ## What to build
 
-Implement OntologyVersion, SemanticLayerVersion, ModelPackageVersion, tenant-specific attribute schemas, lifecycle vocabulary, object/version modeling, and BOM relationship metadata. The slice should let a tenant admin publish the initial canonical model and safe tenant extensions.
+Implement OntologyVersion, SemanticLayerVersion, ModelPackageVersion, tenant-specific attribute schemas, lifecycle vocabulary, object/version modeling, and structural relationship metadata such as BOM or composition hierarchies defined inside published ontology content. The slice should let a tenant admin publish the initial canonical model and safe tenant extensions for a domain package such as manufacturing.
 
 ## Acceptance criteria
 
@@ -449,6 +452,121 @@ Implement RecommendationArtifact with linked evidence, suggested actions, risk/c
 
 Issue 17.
 
+## Architectural Abstraction Sprint (Pre-Issue 22)
+
+These issues refine the platform into an industry-neutral core with explicit domain packages. They may run in parallel with Issues 19-21 after Issue 18 is complete. Issue 22 is blocked until Issue 18.5 is complete.
+
+## Issue 18.1: Industry-Neutral Ontology and Import Cleanup
+
+Type: AFK
+Blocked by: Issue 18
+User stories covered: 2, 3, 6, 7, 8, 10, 11, 12, 13, 26
+
+## What to build
+
+Remove manufacturing-specific assumptions from platform core modules and make imports, staging graph writes, governed query intents, and recommendation factories consume only published ontology and model package metadata. Refactor inline mapping heuristics behind `IMappingSuggestionProvider` with `RuleBasedMappingProvider`, `PydanticAiMappingProvider`, and a deferred `HermesMappingProvider` contract.
+
+## Acceptance criteria
+
+- Platform core modules do not hardcode domain object types such as `part` or relationship names such as `BOM_CONTAINS`.
+- Import staging creates graph nodes and relationships using ontology-defined object and relationship types from the active model package.
+- Fixed platform query intents remain industry-neutral or are moved behind domain package configuration.
+- `IMappingSuggestionProvider` produces column and lifecycle suggestions from ontology metadata rather than inline service logic.
+- Provider contracts exist for rule-based, PydanticAI, and deferred Hermes mapping implementations.
+- Approved, rejected, and corrected import mappings emit governed learning-signal inputs without autonomous retraining.
+- Tests cover ontology-driven staging, provider-based mapping suggestions, and regression coverage for the manufacturing demo package after extraction.
+
+## Blocked by
+
+Issue 18.
+
+## Issue 18.2: Capability Definition Artifacts
+
+Type: AFK
+Blocked by: Issue 18.1
+User stories covered: 62, 87, 96
+
+## What to build
+
+Implement `CapabilityDefinitionVersion` as a governed artifact describing business outcomes such as rework analysis, BOM impact analysis, harvest scheduling, or supplier risk assessment. Capabilities must reference compatible ontology/model package versions and remain distinct from `AgentCapabilityProfileVersion` runtime risk metadata.
+
+## Acceptance criteria
+
+- Tenant admins can create draft and publish capability definition versions with summary, outcome metadata, and dependency references.
+- Capability versions declare compatible ontology or model package versions.
+- Capability artifacts are versioned, immutable after publish, and auditable like other BaseArtifact implementations.
+- UI or API supports list, inspect, and publish flows for capability definitions.
+- Tests cover validation, publish immutability, dependency references, and separation from agent runtime capability profiles.
+
+## Blocked by
+
+Issue 18.1.
+
+## Issue 18.3: Business Policy Definition Artifacts
+
+Type: AFK
+Blocked by: Issue 18.2
+User stories covered: 34, 35, 38, 40, 96
+
+## What to build
+
+Implement `BusinessPolicyDefinitionVersion` for tenant business constraints such as minimum maturity thresholds, maximum distance rules, weather-risk limits, or approval gates. Keep these artifacts separate from classification/access-control `PolicyVersion` records in the Classification module.
+
+## Acceptance criteria
+
+- Business policy definitions are versioned artifacts with draft, review, and publish workflow.
+- Policy definitions can reference capability definitions and ontology/model package versions.
+- Classification `PolicyVersion` and business `BusinessPolicyDefinitionVersion` remain separate APIs, persistence models, and UI surfaces.
+- Tests cover naming separation, publish immutability, dependency references, and tenant isolation.
+
+## Blocked by
+
+Issue 18.2.
+
+## Issue 18.4: Optimization Model and Agent Template Artifacts
+
+Type: AFK
+Blocked by: Issue 18.3
+User stories covered: 87, 88, 96, 98
+
+## What to build
+
+Implement `OptimizationModelVersion` for governed optimization objective metadata and `AgentTemplateVersion` for reusable agent patterns. Define `IAgentRuntimeAdapter` with `PydanticAiRuntimeAdapter` as the first implementation and deferred `HermesRuntimeAdapter` and `LangGraphRuntimeAdapter` contracts. Optimization engines compute best valid options; LLM agents consume optimization results but do not replace the solver.
+
+## Acceptance criteria
+
+- Optimization model versions capture objective metadata, input requirements, and compatible capability/policy references.
+- Agent template versions compose pinned ontology, capability, business policy, tool, prompt, and output-schema references.
+- `IAgentRuntimeAdapter` exists as a compiled platform contract with a PydanticAI adapter or stub for local tests.
+- Deferred `HermesRuntimeAdapter` and `LangGraphRuntimeAdapter` contracts are documented without fake production integrations.
+- PydanticAI is the first concrete adapter for single-step governed agents.
+- Tests cover artifact validation, publish immutability, dependency references, and runtime adapter contract compilation.
+
+## Blocked by
+
+Issue 18.3.
+
+## Issue 18.5: Manufacturing Reference Package Extraction
+
+Type: AFK
+Blocked by: Issue 18.4
+User stories covered: 1, 3, 12, 13, 26, 28, 31
+
+## What to build
+
+Extract the current manufacturing demo assumptions into a published reference model package with manufacturing ontology content, capabilities, business policies, demo import fixtures, and manufacturing-specific query/import behaviors. Add package architecture documentation describing core versus domain package boundaries.
+
+## Acceptance criteria
+
+- Manufacturing object types, BOM relationship metadata, CAD/EBOM comparison behavior, and demo seeds live in the manufacturing package rather than platform core code.
+- The existing manufacturing demo flow still works end to end using the extracted package.
+- Package architecture documentation explains ontology-as-brain versus capability, business policy, optimization, and agent-template siblings.
+- Tests cover package publish, demo import, BOM comparison, and staging graph behavior through the extracted package only.
+
+## Blocked by
+
+Issue 18.4.
+
 ## Issue 19: Review Tasks, Task Chains, and Escalation Placeholders
 
 Type: AFK
@@ -520,16 +638,17 @@ Issue 20.
 ## Issue 22: Tool, Skill, and Connector Registry
 
 Type: AFK
-Blocked by: Issue 21
+Blocked by: Issue 21, Issue 18.5
 User stories covered: 62, 63, 64, 65, 96, 105
 
 ## What to build
 
-Implement ToolDefinitionVersion, SkillDefinitionVersion, ConnectorDefinitionVersion, capability metadata, permission requirements, input/output schemas, compatibility checks, tenant-aware secret provider abstraction, scoped credential contracts, dry-run metadata, ToolRun records, and disabled write-capable connector contracts.
+Implement ToolDefinitionVersion, SkillDefinitionVersion, ConnectorDefinitionVersion, tool capability/risk metadata, permission requirements, input/output schemas, compatibility checks with ontology/capability/policy artifacts, tenant-aware secret provider abstraction, scoped credential contracts, dry-run metadata, ToolRun records, and disabled write-capable connector contracts.
 
 ## Acceptance criteria
 
-- Admins can register versioned tools, skills, and connectors with schemas, permissions, capability/risk metadata, and dry-run behavior.
+- Admins can register versioned tools, skills, and connectors with schemas, permissions, tool capability/risk metadata, and dry-run behavior.
+- Tool publishing checks compatibility with referenced ontology, capability, business policy, and output-schema artifacts where applicable.
 - Tool schema compatibility is checked during publishing and execution.
 - Tool runs record inputs, safe output summaries, validation results, errors, traces, and audit links.
 - Tools receive scoped short-lived credentials through an abstraction, never raw long-lived secrets.
@@ -538,7 +657,7 @@ Implement ToolDefinitionVersion, SkillDefinitionVersion, ConnectorDefinitionVers
 
 ## Blocked by
 
-Issue 21.
+Issue 21, Issue 18.5.
 
 ## Issue 23: Tenant-Defined Agents and Agent Runs
 
@@ -548,17 +667,20 @@ User stories covered: 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97
 
 ## What to build
 
-Implement AgentTypeDefinition, AgentVersion, prompt-based agent creation, advanced configuration, seeded agent types, prompt/model/tool/retrieval composition, model fallback policy, global and per-agent skills, capability/risk profiles, safe mode, preview mode, publish governance, and AgentRun records. Agents consume context through approved QueryIntentVersion and RetrievalStrategyVersion APIs rather than direct Neo4j, NAMS, or raw storage access. Define any persistent agent-memory capability through EnterpriseThreadOS-owned contracts first; Neo4j Agent Memory is an optional future provider, not a direct product dependency.
+Implement `IAgentRuntimeAdapter`, a `PydanticAiRuntimeAdapter` for governed single-step agents, a deferred `HermesRuntimeAdapter` contract for future skill-rich or session-persistent execution, `AgentTemplateVersion`, `AgentTypeDefinition`, `AgentVersion`, prompt-based agent creation, advanced configuration, prompt/model/tool/retrieval/capability/business-policy composition, model fallback policy, global and per-agent skills, agent capability/risk profiles, safe mode, preview mode, publish governance, and AgentRun records. Agents consume context through approved QueryIntentVersion and RetrievalStrategyVersion APIs rather than direct Neo4j, NAMS, or raw storage access. Agents create recommendations only; they must not create decision artifacts. Define any persistent agent-memory capability through EnterpriseThreadOS-owned contracts first; Neo4j Agent Memory is an optional future provider, not a direct product dependency.
 
 ## Acceptance criteria
 
-- Tenant users can create draft agents from prompts and admins can configure advanced settings.
+- Tenant users can create draft agents from templates or prompts and admins can configure advanced settings.
 - Draft agents are testable only by creators and admins until published.
-- Agent versions pin prompt templates, model definitions, retrieval strategies, tools, output schemas, fallback rules, safe mode, preview mode, and compatibility tests.
-- Capability and risk derive from actual tools, data access, retrieval strategies, output schemas, and creation permissions.
+- Agent versions pin ontology/model package, capability, business policy, prompt template, model definition, retrieval strategy, tools, output schemas, fallback rules, safe mode, preview mode, and compatibility tests.
+- Agent runtime execution flows through `IAgentRuntimeAdapter`; PydanticAI is the first supported adapter for input → reasoning → structured-output agents.
+- `HermesRuntimeAdapter` remains a deferred contract in this issue unless a clearly bounded pilot is approved; it must not bypass governed tools, context packages, audit, or recommendation-only output rules.
+- Runtime capability and risk derive from actual tools, data access, retrieval strategies, output schemas, and creation permissions.
 - Agent execution creates traceable AgentRun and ToolRun records linked to AI Trace and audit records.
+- Agent execution may create recommendations but cannot create decision artifacts.
 - Any future persistent memory provider records conversation, fact/preference, or reasoning memory only after policy filtering and through approved agent-runtime contracts.
-- Tests cover draft permissions, publish governance, capability/risk derivation, fallback behavior, prompt pinning, and runtime trace creation.
+- Tests cover draft permissions, publish governance, capability/risk derivation, fallback behavior, prompt pinning, runtime adapter boundaries, and runtime trace creation.
 
 ## Blocked by
 
@@ -572,15 +694,16 @@ User stories covered: 98, 99, 100, 101, 102, 103, 114
 
 ## What to build
 
-Implement WorkflowVersion using Dapr Workflow, inherited risk/trust from agents and tools, workflow capability/trust profiles, manual trigger execution, WorkflowRun records, partial safe mode, skipped-step events, reviewable recommendation/task outputs only, and scheduled/event-driven placeholders.
+Implement WorkflowVersion using Dapr Workflow, inherited risk/trust from agents and tools, workflow capability/trust profiles, manual trigger execution, WorkflowRun records, partial safe mode, skipped-step events, reviewable recommendation/task outputs only, optimization-step hooks that call governed optimization engines rather than LLM solvers, and scheduled/event-driven placeholders.
 
 ## Acceptance criteria
 
 - Workflow versions can orchestrate approved agents and tools through Dapr Workflow contracts.
+- Workflow steps can apply business policy definitions and consume optimization model outputs before recommendation creation.
 - Workflow publishing calculates inherited risk/trust and enforces workflow-level permissions and approval rules.
 - Manual trigger execution is supported in MVP.
 - Safe mode can stop or partially execute workflows, storing skipped/blocked behavior as SafeModeEvent execution records.
-- Workflows can create reviewable recommendations and tasks but cannot write to enterprise source systems.
+- Workflows can create reviewable recommendations and tasks but cannot write to enterprise source systems or create decision artifacts directly.
 - Tests cover workflow publish checks, inherited risk/trust, manual runs, partial safe mode, safe mode events, and read-only output constraints.
 
 ## Blocked by
@@ -595,17 +718,18 @@ User stories covered: 106, 107, 108, 109, 110, 111, 112, 113
 
 ## What to build
 
-Implement AgentTeamVersion, coordinator agents, CollaborationPatternDefinition, AgentDelegationRuleVersion, AgentTeamRun, member runs, parent/child delegation trace links, platform-defined team confidence rules, and ConsensusDefinitionVersion.
+Implement AgentTeamVersion, coordinator agents, CollaborationPatternDefinition, AgentDelegationRuleVersion, AgentTeamRun, member runs, parent/child delegation trace links, platform-defined team confidence rules, ConsensusDefinitionVersion, and LangGraph-backed multi-agent orchestration behind `IAgentRuntimeAdapter`.
 
 ## Acceptance criteria
 
 - Admins can define agent teams with coordinator agents, members, collaboration patterns, delegation rules, and consensus requirements.
 - Coordinator agents are versioned and governed like any other agent.
+- Multi-agent orchestration uses LangGraph through `IAgentRuntimeAdapter`; single-step governed agents remain on PydanticAI. Hermes, if adopted later, is for skill-rich non-team execution and does not replace LangGraph for coordinator/delegation flows.
 - Delegation is allowed only through explicit delegation rules.
 - Every delegation creates its own AgentRun linked to the parent AgentTeamRun or AgentRun.
 - Team runs show member outputs, coordinator synthesis, confidence, consensus status, failures, and trace links.
 - Shared team memory, if introduced later, must be permission-filtered and provider-agnostic behind the agent-memory contract.
-- Tests cover delegation authorization, team confidence rules, consensus requirements, coordinator versioning, and run trace topology.
+- Tests cover delegation authorization, team confidence rules, consensus requirements, coordinator versioning, runtime adapter selection, and run trace topology.
 
 ## Blocked by
 
@@ -642,7 +766,7 @@ User stories covered: 34, 35, 38, 40, 56, 57, 96, 102, 115, 116
 
 ## What to build
 
-Create architecture decision records for the major boundaries that must stay stable during implementation: graph/SQL ownership, artifact lifecycle state machine, tenant isolation strategy, governed context assembly, agent/runtime integration, workflow runtime limits, and disabled enterprise write actions.
+Create architecture decision records for the major boundaries that must stay stable during implementation: graph/SQL ownership, artifact lifecycle state machine, tenant isolation strategy, governed context assembly, industry-neutral core versus domain packages, ontology versus business capability/policy/optimization separation, agent/runtime integration through `IAgentRuntimeAdapter`, workflow runtime limits, and disabled enterprise write actions.
 
 ## Acceptance criteria
 
@@ -651,7 +775,8 @@ Create architecture decision records for the major boundaries that must stay sta
 - Artifact lifecycle ADR defines version immutability, readiness, publish governance, compatibility checks, and dependency impact.
 - Tenant isolation ADR defines shared and isolated deployment profiles, request routing, storage boundaries, and test expectations.
 - Governed context ADR defines graph-first retrieval, document fallback, denied context handling, LLM-safe packages, and trace/export rules.
-- Agent/workflow ADR defines read-only MVP execution, approved tool/context APIs, safe mode, and future action framework boundaries.
+- Ontology/package ADR defines ontology-as-brain responsibilities and the separation between ontology, business capability, business policy, optimization, and agent-template artifacts.
+- Agent/workflow ADR defines `IAgentRuntimeAdapter`, PydanticAI for single-step governed agents, deferred Hermes adapter rules for skill-rich execution, LangGraph for multi-agent orchestration, read-only MVP execution, approved tool/context APIs, safe mode, and future action framework boundaries.
 
 ## Blocked by
 

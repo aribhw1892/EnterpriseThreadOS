@@ -17,6 +17,7 @@ import {
   TenantRole,
   adminUserId,
   apiBaseUrl,
+  cleanDevelopmentDemoData,
   getArtifactRegistryLists,
   getClassificationPolicyLists,
   getGovernanceLists,
@@ -25,9 +26,27 @@ import {
   selectedTenantId,
 } from "@/lib/etos-api";
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
+
+async function cleanDemoDatasetAction() {
+  "use server";
+
+  await cleanDevelopmentDemoData();
+  revalidatePath("/");
+  revalidatePath("/model-artifacts");
+  revalidatePath("/imports");
+  revalidatePath("/documents");
+  revalidatePath("/ai-traces");
+  revalidatePath("/chat");
+  revalidatePath("/dashboards");
+  revalidatePath("/reports");
+  revalidatePath("/recommendations");
+  revalidatePath("/explorers");
+  revalidatePath("/artifacts");
+}
 
 function StatusBadge({ status }: { status: string }) {
   const isHealthy = status.toLowerCase() === "healthy";
@@ -396,6 +415,16 @@ export default async function Home() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
+              {frontendEnvironment === "development" ? (
+                <form action={cleanDemoDatasetAction}>
+                  <button
+                    type="submit"
+                    className="rounded-full border border-rose-400/70 px-4 py-2 text-sm font-semibold text-rose-100 transition hover:bg-rose-500 hover:text-slate-950"
+                  >
+                    Clean demo dataset
+                  </button>
+                </form>
+              ) : null}
               <Link
                 href="/explorers"
                 className="rounded-full border border-cyan-300 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"

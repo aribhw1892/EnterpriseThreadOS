@@ -18,6 +18,7 @@ using ETOS.Backend.Infrastructure.Configuration;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Recommendations;
 using ETOS.Backend.Ontology;
+using ETOS.Backend.Platform.Development;
 using ETOS.Backend.Platform.Extensions;
 using ETOS.Backend.Tenancy;
 using Finbuckle.MultiTenant.AspNetCore.Extensions;
@@ -164,6 +165,7 @@ public static class EnterpriseThreadPlatform
             return serviceProvider.GetRequiredService<DeterministicLlmCompletionService>();
         });
         services.AddScoped<IDevelopmentIdentitySeeder, DevelopmentIdentitySeeder>();
+        services.AddScoped<IDevelopmentDemoDataCleaner, DevelopmentDemoDataCleaner>();
 
         return services;
     }

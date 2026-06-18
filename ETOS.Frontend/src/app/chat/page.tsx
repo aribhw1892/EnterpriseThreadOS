@@ -1,5 +1,6 @@
 import {
   ApiResult,
+  GovernedChatAnchor,
   GovernedChatSessionSummary,
   GovernedChatTurn,
   adminUserId,
@@ -8,11 +9,13 @@ import {
   getGovernedChatLists,
   getGovernedChatSession,
   getGovernedChatTurn,
+  resolveGovernedChatAnchor,
   selectedTenantId,
 } from "@/lib/etos-api";
 import Link from "next/link";
 import { draftArtifactDetailHref } from "@/lib/etos-api";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
@@ -20,8 +23,18 @@ export const dynamic = "force-dynamic";
 async function createSessionAction() {
   "use server";
 
-  await createGovernedChatSession("Frontend governed chat", "33333333-3333-3333-3333-333333333333");
+  const anchor = await resolveGovernedChatAnchor();
+  if (anchor.error || !anchor.data) {
+    redirect(`/chat?error=${encodeURIComponent(anchor.error ?? "Could not resolve a governed chat anchor.")}`);
+  }
+
+  const result = await createGovernedChatSession("Frontend governed chat", anchor.data);
+  if (result.error) {
+    redirect(`/chat?error=${encodeURIComponent(result.error)}`);
+  }
+
   revalidatePath("/chat");
+  redirect("/chat");
 }
 
 async function askTurnAction(formData: FormData) {
@@ -33,11 +46,11 @@ async function askTurnAction(formData: FormData) {
   const draftKind = formData.get("draftArtifactKind");
 
   if (typeof sessionId !== "string" || sessionId.length === 0) {
-    return;
+    redirect("/chat?error=Active%20session%20was%20not%20found.");
   }
 
   if (typeof message !== "string" || message.trim().length === 0) {
-    return;
+    redirect("/chat?error=Chat%20message%20is%20required.");
   }
 
   const draftArtifactKind =
@@ -45,13 +58,24 @@ async function askTurnAction(formData: FormData) {
       ? draftKind
       : undefined;
 
-  await askGovernedChatTurn(
+  const anchor = await resolveGovernedChatAnchor();
+  if (anchor.error || !anchor.data) {
+    redirect(`/chat?error=${encodeURIComponent(anchor.error ?? "Could not resolve a governed chat anchor.")}`);
+  }
+
+  const result = await askGovernedChatTurn(
     sessionId,
     message.trim(),
-    typeof intentKey === "string" && intentKey.length > 0 ? intentKey : "object-360-context",
+    typeof intentKey === "string" && intentKey.length > 0 ? intentKey : anchor.data.defaultIntentKey,
     draftArtifactKind,
+    anchor.data,
   );
+  if (result.error) {
+    redirect(`/chat?error=${encodeURIComponent(result.error)}`);
+  }
+
   revalidatePath("/chat");
+  redirect("/chat");
 }
 
 function ErrorState({ error }: { error: string }) {
@@ -79,6 +103,9 @@ function SessionCard(session: GovernedChatSessionSummary) {
       </p>
       {session.startGraphNodeId ? (
         <p className="mt-2 font-mono text-xs text-slate-500">Anchor node: {session.startGraphNodeId}</p>
+      ) : null}
+      {session.documentArtifactId ? (
+        <p className="mt-2 font-mono text-xs text-slate-500">Anchor document: {session.documentArtifactId}</p>
       ) : null}
     </article>
   );
@@ -165,6 +192,18 @@ function renderApiError(result: ApiResult<unknown>) {
   return result.error ? <ErrorState error={result.error} /> : null;
 }
 
+function anchorHint(anchor: GovernedChatAnchor | null): string {
+  if (!anchor) {
+    return "No trusted graph node or document anchor is available yet.";
+  }
+
+  if (anchor.startGraphNodeId) {
+    return `Using trusted graph node ${anchor.startGraphNodeId}. Default intent: ${anchor.defaultIntentKey}.`;
+  }
+
+  return `No trusted graph nodes yet. Using document ${anchor.documentArtifactId}. Choose document-evidence-context or promote an import on /imports for object-360-context.`;
+}
+
 async function loadLatestTurn(session: GovernedChatSessionSummary): Promise<ApiResult<GovernedChatTurn>> {
   if (session.turnCount === 0) {
     return { data: null, error: null };
@@ -178,10 +217,17 @@ async function loadLatestTurn(session: GovernedChatSessionSummary): Promise<ApiR
   return await getGovernedChatTurn(detail.data.turns[0].id);
 }
 
-export default async function ChatPage() {
+type PageProps = {
+  searchParams: Promise<{ error?: string }>;
+};
+
+export default async function ChatPage({ searchParams }: PageProps) {
+  const { error: actionError } = await searchParams;
   const { sessions } = await getGovernedChatLists();
+  const anchor = await resolveGovernedChatAnchor();
   const activeSession = sessions.data?.[0] ?? null;
   const latestTurn = activeSession ? await loadLatestTurn(activeSession) : { data: null, error: null };
+  const defaultIntent = anchor.data?.defaultIntentKey ?? "object-360-context";
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -211,7 +257,9 @@ export default async function ChatPage() {
           </div>
         </section>
 
+        {actionError ? <ErrorState error={actionError} /> : null}
         {renderApiError(sessions)}
+        {renderApiError(anchor)}
 
         <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
           <div className="mb-5">
@@ -230,6 +278,7 @@ export default async function ChatPage() {
             <div className="mb-5">
               <h2 className="text-2xl font-semibold">Ask</h2>
               <p className="mt-1 text-sm text-slate-400">Active session: {activeSession.title}</p>
+              <p className="mt-2 text-xs text-slate-500">{anchorHint(anchor.data)}</p>
             </div>
             <form action={askTurnAction} className="grid gap-4">
               <input type="hidden" name="sessionId" value={activeSession.id} />
@@ -247,7 +296,7 @@ export default async function ChatPage() {
                 <span className="text-slate-400">Intent</span>
                 <select
                   name="intentKey"
-                  defaultValue="object-360-context"
+                  defaultValue={defaultIntent}
                   className="rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-100"
                 >
                   <option value="object-360-context">object-360-context</option>

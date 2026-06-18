@@ -150,7 +150,8 @@ public sealed class GovernedChatService(
         }
 
         var intentKey = string.IsNullOrWhiteSpace(request.IntentKey) ? "object-360-context" : request.IntentKey.Trim();
-        var startGraphNodeId = request.StartGraphNodeId ?? session.StartGraphNodeId;
+        var startGraphNodeId = request.StartGraphNodeId
+            ?? (request.DocumentArtifactId is null ? session.StartGraphNodeId : null);
         var documentArtifactId = request.DocumentArtifactId ?? session.DocumentArtifactId;
         var platformArtifacts = await artifactSeeder.EnsurePlatformArtifactsAsync(context, cancellationToken);
 

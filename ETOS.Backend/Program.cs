@@ -16,7 +16,9 @@ using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Recommendations;
 using ETOS.Backend.Platform;
+using ETOS.Backend.Platform.Development;
 using Finbuckle.MultiTenant.AspNetCore.Extensions;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
+    app.MapEnterpriseThreadDevelopmentEndpoints();
     await SeedDevelopmentIdentityAsync(app);
 }
 

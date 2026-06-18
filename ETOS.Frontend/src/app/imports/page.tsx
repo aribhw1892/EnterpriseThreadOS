@@ -20,14 +20,18 @@ import {
   generateDataQualityIssuesForLatestImport,
   generateLatestIdentityCandidates,
   getImportLists,
+  ImportPromotionRun,
   MonitoringIssueTypeDefinition,
   markLatestIdentityCandidateConflicted,
+  promoteReadyStagedImportBatch,
+  rejectLatestStagedImportBatch,
   runIdentityResolutionDemoFlow,
   selectedTenantId,
   stageLatestImportBatch,
   validateLatestImportBatch,
 } from "@/lib/etos-api";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
@@ -116,6 +120,30 @@ async function createSecurityEventDataQualityIssue() {
   revalidatePath("/imports");
 }
 
+async function promoteStagedBatch() {
+  "use server";
+
+  const result = await promoteReadyStagedImportBatch();
+  if (result.error) {
+    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
+  }
+
+  revalidatePath("/imports");
+  redirect("/imports");
+}
+
+async function rejectStagedBatch() {
+  "use server";
+
+  const result = await rejectLatestStagedImportBatch();
+  if (result.error) {
+    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
+  }
+
+  revalidatePath("/imports");
+  redirect("/imports");
+}
+
 function formatStatus(status: string | number) {
   if (typeof status === "number") {
     return (
@@ -135,7 +163,7 @@ function StatusBadge({ status }: { status: string | number }) {
   const displayStatus = formatStatus(status);
   const normalized = displayStatus.toLowerCase();
   const className =
-    normalized === "staged" || normalized === "completed" || normalized === "approved" || normalized === "trusted"
+    normalized === "staged" || normalized === "completed" || normalized === "approved" || normalized === "trusted" || normalized === "promoted"
       ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
       : normalized === "failed" || normalized === "error" || normalized === "conflicted" || normalized === "critical"
         ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200"
@@ -322,6 +350,22 @@ function StagingRunCard(run: ImportStagingGraphRun) {
   );
 }
 
+function PromotionRunCard(run: ImportPromotionRun) {
+  return (
+    <article key={run.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="font-semibold">Promotion {run.id.slice(0, 8)}</h3>
+        <StatusBadge status={run.status} />
+      </div>
+      <div className="mt-3 grid gap-1 text-xs text-slate-500">
+        <p>Trusted nodes: {run.promotedNodeCount}</p>
+        <p>Trusted relationships: {run.promotedRelationshipCount}</p>
+        <p>Failure: {run.failureSummary ?? "none"}</p>
+      </div>
+    </article>
+  );
+}
+
 function IdentityCandidateCard(candidate: IdentityCandidateLink) {
   return (
     <article key={candidate.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
@@ -460,7 +504,13 @@ function DataQualityPanel({
   );
 }
 
-function FirstBatchDetail({ result }: { result: ApiResult<ImportBatchDetail> }) {
+function FirstBatchDetail({
+  result,
+  promotionRuns,
+}: {
+  result: ApiResult<ImportBatchDetail>;
+  promotionRuns: ApiResult<ImportPromotionRun[]>;
+}) {
   if (result.error) {
     return <ErrorState error={result.error} />;
   }
@@ -499,6 +549,17 @@ function FirstBatchDetail({ result }: { result: ApiResult<ImportBatchDetail> }) 
         emptyMessage="No staging graph run has been created."
         renderItem={StagingRunCard}
       />
+      {promotionRuns.error ? (
+        <ErrorState error={promotionRuns.error} />
+      ) : (
+        <ListSection
+          title="Promotion Runs"
+          description="Trusted graph copies created after staged records pass review gates."
+          items={promotionRuns.data ?? []}
+          emptyMessage="No promotion run has been created for the latest batch."
+          renderItem={PromotionRunCard}
+        />
+      )}
     </div>
   );
 }
@@ -538,9 +599,16 @@ function IdentityResolutionPanel({
   );
 }
 
-export default async function ImportsPage() {
+type PageProps = {
+  searchParams: Promise<{ error?: string }>;
+};
+
+export default async function ImportsPage({ searchParams }: PageProps) {
+  const { error: actionError } = await searchParams;
   const lists = await getImportLists();
   const batches = lists.batches.data ?? [];
+  const stagedBatchCount = batches.filter((batch) => batch.status === "Staged").length;
+  const promotedBatchCount = batches.filter((batch) => batch.status === "Promoted").length;
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
@@ -565,11 +633,13 @@ export default async function ImportsPage() {
           <div className="mt-6 grid gap-4 xl:grid-cols-2">
             <ButtonGroup
               title="Recommended Demo"
-              description="Creates source batches, approves mappings, validates rows, stages them, generates identity candidates, and can promote validation issues."
+              description="Creates source batches, stages them, resolves identity links, then copies ready staged records into the trusted graph for governed chat and explorers."
             >
               <ActionButton action={runIdentityDemo}>Run identity demo</ActionButton>
               <ActionButton action={approveIdentityCandidate}>Approve first reviewable candidate</ActionButton>
               <ActionButton action={markIdentityCandidateConflicted}>Mark first candidate conflicted</ActionButton>
+              <ActionButton action={promoteStagedBatch}>Promote ready staged batch to trusted graph</ActionButton>
+              <ActionButton action={rejectStagedBatch}>Reject latest staged batch</ActionButton>
               <ActionButton action={generateDataQualityIssues}>Generate quality issues</ActionButton>
             </ButtonGroup>
             <ButtonGroup
@@ -587,6 +657,25 @@ export default async function ImportsPage() {
             </ButtonGroup>
           </div>
         </header>
+
+        {actionError ? <ErrorState error={actionError} /> : null}
+
+        <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
+          <h2 className="text-2xl font-semibold">Trusted Graph Promotion</h2>
+          <p className="mt-2 text-sm text-slate-300">
+            Staging creates unverified graph records. Promotion copies a ready staged batch into the trusted graph space
+            used by governed chat, explorers, and object-360-context retrieval.
+          </p>
+          <div className="mt-4 grid gap-2 text-xs text-slate-400 md:grid-cols-3">
+            <p>Staged batches: {stagedBatchCount}</p>
+            <p>Promoted batches: {promotedBatchCount}</p>
+            <p>Latest promotion runs: {lists.firstBatchPromotionRuns.data?.length ?? 0}</p>
+          </div>
+          <p className="mt-3 text-xs text-slate-500">
+            After identity demo, promote the ready source batch first. ERP comparison batches stay blocked until all
+            identity candidates are approved or rejected.
+          </p>
+        </section>
 
         <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
           <h2 className="text-2xl font-semibold">API Upload Support</h2>
@@ -608,7 +697,7 @@ export default async function ImportsPage() {
           />
         )}
 
-        <FirstBatchDetail result={lists.firstBatchDetail} />
+        <FirstBatchDetail result={lists.firstBatchDetail} promotionRuns={lists.firstBatchPromotionRuns} />
         <IdentityResolutionPanel
           candidates={lists.firstBatchIdentityCandidates}
           trustScores={lists.firstBatchTrustScores}

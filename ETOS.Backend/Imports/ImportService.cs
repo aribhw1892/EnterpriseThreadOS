@@ -829,6 +829,7 @@ public sealed class ImportService(
         return await fileParser.ParseAsync(evidence.OriginalFileName, stream, maxRows, cancellationToken);
     }
 
+    /** Generate mapping suggestions from the import file headers and model context. */
     private static IEnumerable<ImportColumnMappingSuggestionResponse> BuildColumnSuggestions(
         IReadOnlyCollection<string> headers,
         ImportModelContext modelContext)
