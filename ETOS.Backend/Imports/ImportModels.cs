@@ -173,8 +173,8 @@ public sealed class BomComparisonRun : ITenantScoped
     public string? SourceContext { get; set; }
     public required string CadSummaryJson { get; set; }
     public required string EbomSummaryJson { get; set; }
-    public int MissingInCadCount { get; set; }
-    public int MissingInEbomCount { get; set; }
+    public int MissingInPrimarySideCount { get; set; }
+    public int MissingInSecondarySideCount { get; set; }
     public int QuantityMismatchCount { get; set; }
     public int UsageReferenceMismatchCount { get; set; }
     public int UnresolvedIdentityCount { get; set; }
@@ -228,8 +228,11 @@ public enum ImportPromotionRunStatus
     Failed = 2
 }
 
-internal sealed record ImportModelContext(
-    ModelPackageVersion ModelPackage,
-    OntologyVersion Ontology,
-    LifecycleVocabularyVersion LifecycleVocabulary,
-    AttributeSchemaVersion AttributeSchema);
+internal sealed record ImportModelContext(ResolvedModelPackageContext Resolved)
+{
+    public ModelPackageVersion ModelPackage => Resolved.ModelPackage;
+    public OntologyVersion Ontology => Resolved.Ontology;
+    public LifecycleVocabularyVersion LifecycleVocabulary => Resolved.LifecycleVocabulary;
+    public AttributeSchemaVersion AttributeSchema => Resolved.AttributeSchema;
+    public ModelPackageImportProfile ImportProfile => Resolved.ImportProfile;
+}

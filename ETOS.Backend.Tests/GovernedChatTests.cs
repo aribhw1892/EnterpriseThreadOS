@@ -9,6 +9,7 @@ using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.Tests;
@@ -283,7 +284,8 @@ public sealed class GovernedChatTests
             new RecordingAuditRecorder(),
             graphMemoryService,
             policyService ?? new AllowAllPolicyService(),
-            new AiTraceRecorder(dbContext));
+            new AiTraceRecorder(dbContext),
+            new StubModelPackageContextResolver());
 
         return new GovernedChatService(
             dbContext,

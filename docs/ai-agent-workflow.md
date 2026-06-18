@@ -65,8 +65,13 @@ Examples:
 - Explorers and 360° context views: Issue 16.
 - Dashboard/report artifacts: Issue 17.
 - Recommendation artifacts and evidence rules: Issue 18.
+- Industry-neutral ontology/import/query cleanup, mapping providers, learning-signal inputs: Issue 18.1.
+- Capability definition artifacts: Issue 18.2.
+- Business policy definition artifacts: Issue 18.3.
+- Optimization model and agent template artifacts, agent runtime adapter contracts: Issue 18.4.
+- Manufacturing reference package extraction and installer: Issue 18.5.
 
-Do not jump ahead to later issues unless the user explicitly asks and the prerequisite boundaries are already present or intentionally scoped as documentation.
+Do not jump ahead to later issues unless the user explicitly asks and the prerequisite boundaries are already present or intentionally scoped as documentation. Issue 22 requires Issue 18.5 complete; adapter contracts exist but agent execution does not.
 
 ## Editing Workflow
 
@@ -136,6 +141,7 @@ Keep these docs current as the platform grows:
 - `docs/local-development.md`: local workflow.
 - `docs/backend/architecture.md`: backend conventions.
 - `docs/frontend/architecture.md`: frontend conventions.
+- `docs/architecture/domain-packages.md`: core vs domain package boundary and install lifecycle.
 - `docs/architecture/extension-points.md`: deferred capability guardrails.
 - `docs/architecture/adr/README.md`: ADR index and template.
 

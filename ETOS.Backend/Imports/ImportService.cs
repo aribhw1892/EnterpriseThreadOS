@@ -6,6 +6,7 @@ using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.Imports.MappingSuggestions;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Recommendations;
 using FluentValidation;
@@ -22,6 +23,7 @@ public interface IImportService
     Task<ImportPreviewResponse> PreviewMappingAsync(Guid batchId, ImportPreviewRequest request, CancellationToken cancellationToken);
     Task<ImportMappingVersionResponse> CreateMappingVersionAsync(CreateImportMappingVersionRequest request, CancellationToken cancellationToken);
     Task<ImportMappingVersionResponse> ApproveMappingVersionAsync(Guid mappingVersionId, ApproveImportMappingRequest request, CancellationToken cancellationToken);
+    Task<ImportMappingVersionResponse> RejectMappingVersionAsync(Guid mappingVersionId, RejectImportMappingRequest request, CancellationToken cancellationToken);
     Task<ImportValidationResponse> ValidateBatchAsync(Guid batchId, CancellationToken cancellationToken);
     Task<ImportStagingGraphRunResponse> StageBatchAsync(Guid batchId, CancellationToken cancellationToken);
     Task<ImportPromotionRunResponse> PromoteBatchAsync(Guid batchId, CancellationToken cancellationToken);
@@ -38,12 +40,14 @@ public sealed class ImportService(
     IAccessDenialRecorder denialRecorder,
     IAuditRecorder auditRecorder,
     IOntologyService ontologyService,
+    IModelPackageContextResolver modelPackageContextResolver,
+    IMappingSuggestionProviderSelector mappingSuggestionProviderSelector,
+    IImportMappingLearningSignalEmitter learningSignalEmitter,
     IImportFileStorage fileStorage,
     IImportFileParser fileParser,
     IGraphMemoryService graphMemoryService,
     IRecommendationFactory recommendationFactory) : IImportService
 {
-    private const string SuggestionProvider = "deterministic-heuristic-v1";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private static readonly CreateImportBatchRequestValidator BatchValidator = new();
     private static readonly CreateImportMappingVersionRequestValidator MappingValidator = new();
@@ -150,8 +154,14 @@ public sealed class ImportService(
         var evidence = ResolveEvidence(batch, request.EvidenceId);
         var parsed = await ParseEvidenceAsync(evidence, request.SampleRowLimit is <= 0 ? 25 : request.SampleRowLimit, cancellationToken);
         var modelContext = await LoadModelContextAsync(batch.ActiveModelPackageVersionId, context, "imports.mapping.preview", cancellationToken);
-        var columnSuggestions = BuildColumnSuggestions(parsed.Headers, modelContext).ToList();
-        var lifecycleSuggestions = BuildLifecycleSuggestions(parsed, modelContext, columnSuggestions).ToList();
+        var sampleRowLimit = request.SampleRowLimit is <= 0 ? 25 : request.SampleRowLimit;
+        var suggestions = await mappingSuggestionProviderSelector.SuggestAsync(
+            new ImportMappingSuggestionRequest(
+                parsed.Headers,
+                parsed.Rows.Take(sampleRowLimit).ToList(),
+                modelContext.Resolved,
+                request.SuggestionProviderKey),
+            cancellationToken);
 
         return new ImportPreviewResponse(
             batch.Id,
@@ -159,11 +169,11 @@ public sealed class ImportService(
             modelContext.ModelPackage.Id,
             modelContext.ModelPackage.Key,
             modelContext.ModelPackage.VersionLabel,
-            SuggestionProvider,
+            suggestions.ProviderKey,
             parsed.Headers,
-            parsed.Rows.Take(request.SampleRowLimit is <= 0 ? 25 : request.SampleRowLimit).ToList(),
-            columnSuggestions,
-            lifecycleSuggestions);
+            parsed.Rows.Take(sampleRowLimit).ToList(),
+            suggestions.ColumnSuggestions,
+            suggestions.LifecycleSuggestions);
     }
 
     public async Task<ImportMappingVersionResponse> CreateMappingVersionAsync(CreateImportMappingVersionRequest request, CancellationToken cancellationToken)
@@ -177,6 +187,13 @@ public sealed class ImportService(
             throw new RequestValidationException("Import mapping version label already exists for this batch.");
         }
 
+        var modelContext = await LoadModelContextAsync(batch.ActiveModelPackageVersionId, context, "imports.mappings.create", cancellationToken);
+        var evidence = ResolveEvidence(batch, null);
+        var parsed = await ParseEvidenceAsync(evidence, 25, cancellationToken);
+        var previewSuggestions = await mappingSuggestionProviderSelector.SuggestAsync(
+            new ImportMappingSuggestionRequest(parsed.Headers, parsed.Rows.ToList(), modelContext.Resolved),
+            cancellationToken);
+
         var mapping = new ImportMappingVersion
         {
             Id = Guid.NewGuid(),
@@ -187,7 +204,7 @@ public sealed class ImportService(
             NormalizedVersionLabel = normalizedVersionLabel,
             Summary = TrimOptional(request.Summary),
             State = ImportMappingState.Draft,
-            SuggestionProvider = SuggestionProvider,
+            SuggestionProvider = previewSuggestions.ProviderKey,
             CreatedByUserId = context.UserId,
             CreatedAt = DateTimeOffset.UtcNow,
             ColumnMappings = request.ColumnMappings.Select(item => new ImportColumnMapping
@@ -222,7 +239,8 @@ public sealed class ImportService(
             batch.MappingVersions.Add(mapping);
         }
 
-        await RecordAuditAsync(context, "imports.mappings.create", $"Import mapping '{mapping.VersionLabel}' was created as a draft.", nameof(ImportMappingVersion), mapping.Id, cancellationToken);
+        var audit = await RecordAuditAsync(context, "imports.mappings.create", $"Import mapping '{mapping.VersionLabel}' was created as a draft.", nameof(ImportMappingVersion), mapping.Id, cancellationToken);
+        await learningSignalEmitter.EmitCorrectedAsync(context, mapping, previewSuggestions, audit.Id, cancellationToken);
         return ToMappingResponse(mapping);
     }
 
@@ -252,7 +270,36 @@ public sealed class ImportService(
 
         mapping.ImportBatch!.Status = ImportBatchStatus.MappingApproved;
         await dbContext.SaveChangesAsync(cancellationToken);
-        await RecordAuditAsync(context, "imports.mappings.approve", $"Import mapping '{mapping.VersionLabel}' was approved.", nameof(ImportMappingVersion), mapping.Id, cancellationToken);
+        var audit = await RecordAuditAsync(context, "imports.mappings.approve", $"Import mapping '{mapping.VersionLabel}' was approved.", nameof(ImportMappingVersion), mapping.Id, cancellationToken);
+        await learningSignalEmitter.EmitApprovedAsync(context, mapping, null, audit.Id, cancellationToken);
+        return ToMappingResponse(mapping);
+    }
+
+    public async Task<ImportMappingVersionResponse> RejectMappingVersionAsync(Guid mappingVersionId, RejectImportMappingRequest request, CancellationToken cancellationToken)
+    {
+        var context = await RequireImportPermissionAsync("imports.mappings.reject", ImportPermissions.Approve, cancellationToken);
+        var mapping = await RequireMappingAsync(mappingVersionId, context, "imports.mappings.reject", cancellationToken);
+        if (mapping.State == ImportMappingState.Rejected)
+        {
+            return ToMappingResponse(mapping);
+        }
+
+        if (mapping.State != ImportMappingState.Draft)
+        {
+            throw new RequestValidationException("Only draft import mappings can be rejected.");
+        }
+
+        mapping.State = ImportMappingState.Rejected;
+        mapping.RejectedByUserId = context.UserId;
+        mapping.RejectedAt = DateTimeOffset.UtcNow;
+        if (!string.IsNullOrWhiteSpace(request.Summary))
+        {
+            mapping.Summary = request.Summary.Trim();
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+        var audit = await RecordAuditAsync(context, "imports.mappings.reject", $"Import mapping '{mapping.VersionLabel}' was rejected.", nameof(ImportMappingVersion), mapping.Id, cancellationToken);
+        await learningSignalEmitter.EmitRejectedAsync(context, mapping, request.Reason, audit.Id, cancellationToken);
         return ToMappingResponse(mapping);
     }
 
@@ -322,13 +369,17 @@ public sealed class ImportService(
             var nodeIds = new List<Guid>();
             var relationshipIds = new List<Guid>();
             var identityMappings = mapping.ColumnMappings.Where(item => item.IsIdentityField).ToList();
-            var bomHeaders = TryResolveBomHeaders(parsed.Headers);
-            if (bomHeaders is not null)
+            var structuralHeaders = ImportStructuralImportHelper.TryResolveStructuralHeaders(parsed.Headers, modelContext.ImportProfile);
+            if (structuralHeaders is not null)
             {
+                var bomRelationship = modelContext.Resolved.RequireDefaultBomRelationship();
+                var parentGraphType = modelContext.Resolved.ResolveGraphObjectType(bomRelationship.ParentObjectType);
+                var childGraphType = modelContext.Resolved.ResolveGraphObjectType(bomRelationship.ChildObjectType);
+                var relationshipGraphType = modelContext.Resolved.ResolveGraphRelationshipType(bomRelationship.RelationshipType);
                 foreach (var row in parsed.Rows)
                 {
-                    var parentId = GetRowValue(row, bomHeaders.ParentHeader);
-                    var childId = GetRowValue(row, bomHeaders.ChildHeader);
+                    var parentId = ImportStructuralImportHelper.GetRowValue(row, structuralHeaders.ParentHeader);
+                    var childId = ImportStructuralImportHelper.GetRowValue(row, structuralHeaders.ChildHeader);
                     if (string.IsNullOrWhiteSpace(parentId) || string.IsNullOrWhiteSpace(childId))
                     {
                         continue;
@@ -338,18 +389,18 @@ public sealed class ImportService(
                         new CreateGraphNodeRequest(
                             context.TenantId,
                             GraphSpace.Staging,
-                            "part",
+                            parentGraphType,
                             TrustState.Unverified,
-                            new Dictionary<string, string?> { ["partNumber"] = parentId },
+                            ImportStructuralImportHelper.BuildIdentityAttributes(parentId, bomRelationship, modelContext.Resolved, isParent: true),
                             new GraphSourceReference(batch.SourceSystem, parentId, batch.Id.ToString())),
                         cancellationToken);
                     var child = await graphMemoryService.CreateNodeAsync(
                         new CreateGraphNodeRequest(
                             context.TenantId,
                             GraphSpace.Staging,
-                            "part",
+                            childGraphType,
                             TrustState.Unverified,
-                            new Dictionary<string, string?> { ["partNumber"] = childId },
+                            ImportStructuralImportHelper.BuildIdentityAttributes(childId, bomRelationship, modelContext.Resolved, isParent: false),
                             new GraphSourceReference(batch.SourceSystem, childId, batch.Id.ToString())),
                         cancellationToken);
                     var relationship = await graphMemoryService.CreateRelationshipAsync(
@@ -357,9 +408,9 @@ public sealed class ImportService(
                             context.TenantId,
                             parent.NodeId,
                             child.NodeId,
-                            "BOM_CONTAINS",
+                            relationshipGraphType,
                             TrustState.Unverified,
-                            BuildBomRelationshipAttributes(row, bomHeaders),
+                            ImportStructuralImportHelper.BuildRelationshipAttributes(row, structuralHeaders, bomRelationship),
                             new GraphSourceReference(batch.SourceSystem, $"{parentId}|{childId}", batch.Id.ToString())),
                         cancellationToken);
                     nodeIds.Add(parent.NodeId);
@@ -508,20 +559,23 @@ public sealed class ImportService(
     {
         var context = await RequireImportPermissionAsync("imports.batches.bom_comparison", ImportPermissions.Read, cancellationToken);
         var batch = await RequireBatchAsync(batchId, context, "imports.batches.bom_comparison", cancellationToken);
+        var modelContext = await LoadModelContextAsync(batch.ActiveModelPackageVersionId, context, "imports.batches.bom_comparison", cancellationToken);
         var evidence = ResolveEvidence(batch, null);
         var parsed = await ParseEvidenceAsync(evidence, null, cancellationToken);
-        var result = BuildBomComparison(parsed);
-        var audit = await RecordAuditAsync(context, "imports.batches.bom_comparison", "CAD BOM and EBOM metadata were compared.", nameof(ImportBatch), batch.Id, cancellationToken);
+        var result = BuildBomComparison(parsed, modelContext);
+        var auditSummary = modelContext.ImportProfile.RecommendationTemplates?.StructuralComparisonAuditSummary
+            ?? "Structural comparison completed using the active model package.";
+        var audit = await RecordAuditAsync(context, "imports.batches.bom_comparison", auditSummary, nameof(ImportBatch), batch.Id, cancellationToken);
         var run = new BomComparisonRun
         {
             Id = Guid.NewGuid(),
             TenantId = context.TenantId,
             ImportBatchId = batch.Id,
             SourceContext = batch.SourceSystem,
-            CadSummaryJson = JsonSerializer.Serialize(result.CadSummary, JsonOptions),
-            EbomSummaryJson = JsonSerializer.Serialize(result.EbomSummary, JsonOptions),
-            MissingInCadCount = result.MissingInCad.Count,
-            MissingInEbomCount = result.MissingInEbom.Count,
+            CadSummaryJson = JsonSerializer.Serialize(result.PrimarySideSummary, JsonOptions),
+            EbomSummaryJson = JsonSerializer.Serialize(result.SecondarySideSummary, JsonOptions),
+            MissingInPrimarySideCount = result.MissingInPrimary.Count,
+            MissingInSecondarySideCount = result.MissingInSecondary.Count,
             QuantityMismatchCount = result.QuantityMismatches.Count,
             UsageReferenceMismatchCount = result.UsageReferenceMismatches.Count,
             UnresolvedIdentityCount = result.UnresolvedIdentity.Count,
@@ -532,7 +586,7 @@ public sealed class ImportService(
         dbContext.BomComparisonRuns.Add(run);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        if (run.MissingInEbomCount + run.QuantityMismatchCount + run.UsageReferenceMismatchCount > 0)
+        if (run.MissingInSecondarySideCount + run.QuantityMismatchCount + run.UsageReferenceMismatchCount > 0)
         {
             try
             {
@@ -620,112 +674,35 @@ public sealed class ImportService(
             ?? throw new RequestValidationException("A completed staging graph run is required.");
     }
 
-    private static BomComparisonResult BuildBomComparison(ParsedImportFile parsed)
+    private static BomComparisonResult BuildBomComparison(ParsedImportFile parsed, ImportModelContext modelContext)
     {
-        var sideHeader = FindHeader(parsed.Headers, "bomSide", "bom_side", "side", "sourceBom", "source_bom")
-            ?? throw new RequestValidationException("BOM comparison requires a CAD/EBOM side column.");
-        var parentHeader = FindHeader(parsed.Headers, "parent", "parentPart", "parent_part", "assembly", "assemblyNumber")
-            ?? throw new RequestValidationException("BOM comparison requires a parent item column.");
-        var childHeader = FindHeader(parsed.Headers, "child", "childPart", "child_part", "component", "componentNumber", "item")
-            ?? throw new RequestValidationException("BOM comparison requires a child item column.");
-        var quantityHeader = FindHeader(parsed.Headers, "quantity", "qty");
-        var unitHeader = FindHeader(parsed.Headers, "unit", "uom");
-        var usageHeader = FindHeader(parsed.Headers, "usage", "findNumber", "find_number", "reference", "referenceDesignator", "reference_designator");
-
-        var lines = parsed.Rows.Select((row, index) => ToBomLine(row, index + 2, sideHeader, parentHeader, childHeader, quantityHeader, unitHeader, usageHeader)).ToList();
-        var cad = lines.Where(line => line.Side == "CAD").ToDictionary(line => line.Key, StringComparer.OrdinalIgnoreCase);
-        var ebom = lines.Where(line => line.Side == "EBOM").ToDictionary(line => line.Key, StringComparer.OrdinalIgnoreCase);
-        var missingInCad = ebom.Keys.Except(cad.Keys, StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
-        var missingInEbom = cad.Keys.Except(ebom.Keys, StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase).ToList();
-        var quantityMismatches = cad.Keys.Intersect(ebom.Keys, StringComparer.OrdinalIgnoreCase)
-            .Where(key => !string.Equals(cad[key].Quantity, ebom[key].Quantity, StringComparison.OrdinalIgnoreCase)
-                || !string.Equals(cad[key].Unit, ebom[key].Unit, StringComparison.OrdinalIgnoreCase))
-            .Order(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-        var usageReferenceMismatches = cad.Keys.Intersect(ebom.Keys, StringComparer.OrdinalIgnoreCase)
-            .Where(key => !string.Equals(cad[key].UsageReference, ebom[key].UsageReference, StringComparison.OrdinalIgnoreCase))
-            .Order(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-        var unresolved = lines
-            .Where(line => string.IsNullOrWhiteSpace(line.ParentIdentity) || string.IsNullOrWhiteSpace(line.ChildIdentity))
-            .Select(line => $"row:{line.RowNumber}")
-            .Order(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
+        var comparison = ImportStructuralImportHelper.BuildStructuralComparison(parsed, modelContext.ImportProfile);
         return new BomComparisonResult(
-            new BomSideSummary(cad.Count),
-            new BomSideSummary(ebom.Count),
-            missingInCad,
-            missingInEbom,
-            quantityMismatches,
-            usageReferenceMismatches,
-            unresolved);
+            new BomSideSummary(comparison.PrimarySide.LineCount),
+            new BomSideSummary(comparison.SecondarySide.LineCount),
+            comparison.MissingInPrimary,
+            comparison.MissingInSecondary,
+            comparison.QuantityMismatches,
+            comparison.UsageReferenceMismatches,
+            comparison.UnresolvedIdentities);
     }
 
-    private static BomLine ToBomLine(
-        IReadOnlyDictionary<string, string?> row,
-        int rowNumber,
-        string sideHeader,
-        string parentHeader,
-        string childHeader,
-        string? quantityHeader,
-        string? unitHeader,
-        string? usageHeader)
+    private async Task<ImportModelContext> LoadModelContextAsync(Guid modelPackageVersionId, ActiveTenantContext context, string action, CancellationToken cancellationToken)
     {
-        var side = GetRowValue(row, sideHeader);
-        var normalizedSide = NormalizeLoose(side);
-        var canonicalSide = normalizedSide.Contains("cad", StringComparison.Ordinal) ? "CAD"
-            : normalizedSide.Contains("ebom", StringComparison.Ordinal) || normalizedSide.Contains("engineering", StringComparison.Ordinal) ? "EBOM"
-            : throw new RequestValidationException("BOM side values must identify CAD or EBOM.");
-        var parent = GetRowValue(row, parentHeader);
-        var child = GetRowValue(row, childHeader);
-        return new BomLine(
-            canonicalSide,
-            parent,
-            child,
-            $"{parent}|{child}",
-            quantityHeader is null ? null : GetRowValue(row, quantityHeader),
-            unitHeader is null ? null : GetRowValue(row, unitHeader),
-            usageHeader is null ? null : GetRowValue(row, usageHeader),
-            rowNumber);
+        var resolved = await modelPackageContextResolver.ResolvePublishedAsync(modelPackageVersionId, context, action, cancellationToken);
+        return new ImportModelContext(resolved);
     }
 
-    private static string? FindHeader(IReadOnlyCollection<string> headers, params string[] candidates)
+    private static ImportFileEvidence ResolveEvidence(ImportBatch batch, Guid? evidenceId)
     {
-        var normalizedCandidates = candidates.Select(NormalizeLoose).ToHashSet();
-        return headers.FirstOrDefault(header => normalizedCandidates.Contains(NormalizeLoose(header)));
-    }
-
-    private static BomHeaders? TryResolveBomHeaders(IReadOnlyCollection<string> headers)
-    {
-        var parentHeader = FindHeader(headers, "parent", "parentPart", "parent_part", "assembly", "assemblyNumber");
-        var childHeader = FindHeader(headers, "child", "childPart", "child_part", "component", "componentNumber", "item");
-        if (parentHeader is null || childHeader is null)
+        if (evidenceId is not null)
         {
-            return null;
+            return batch.FileEvidence.SingleOrDefault(evidence => evidence.Id == evidenceId.Value)
+                ?? throw new RequestValidationException("Import file evidence was not found for this batch.");
         }
 
-        return new BomHeaders(
-            parentHeader,
-            childHeader,
-            FindHeader(headers, "quantity", "qty"),
-            FindHeader(headers, "unit", "uom"),
-            FindHeader(headers, "usage", "findNumber", "find_number", "reference", "referenceDesignator", "reference_designator"));
-    }
-
-    private static Dictionary<string, string?> BuildBomRelationshipAttributes(IReadOnlyDictionary<string, string?> row, BomHeaders headers)
-    {
-        return new Dictionary<string, string?>
-        {
-            ["quantity"] = headers.QuantityHeader is null ? null : GetRowValue(row, headers.QuantityHeader),
-            ["unit"] = headers.UnitHeader is null ? null : GetRowValue(row, headers.UnitHeader),
-            ["usageReference"] = headers.UsageHeader is null ? null : GetRowValue(row, headers.UsageHeader)
-        };
-    }
-
-    private static string GetRowValue(IReadOnlyDictionary<string, string?> row, string header)
-    {
-        return row.TryGetValue(header, out var value) ? value?.Trim() ?? string.Empty : string.Empty;
+        return batch.FileEvidence.OrderByDescending(evidence => evidence.CreatedAt).FirstOrDefault()
+            ?? throw new RequestValidationException("Import batch does not have file evidence yet.");
     }
 
     private async Task<ActiveTenantContext> RequireImportPermissionAsync(string action, string permissionKey, CancellationToken cancellationToken)
@@ -788,105 +765,10 @@ public sealed class ImportService(
         throw new TenantAccessDeniedException("Import resource is not available in the active tenant.");
     }
 
-    private async Task<ImportModelContext> LoadModelContextAsync(Guid modelPackageVersionId, ActiveTenantContext context, string action, CancellationToken cancellationToken)
-    {
-        var modelPackage = await dbContext.ModelPackageVersions
-            .Include(item => item.OntologyVersion)
-            .ThenInclude(item => item!.ObjectTypes)
-            .Include(item => item.LifecycleVocabularyVersion)
-            .ThenInclude(item => item!.States)
-            .Include(item => item.AttributeSchemaVersion)
-            .ThenInclude(item => item!.Attributes)
-            .SingleOrDefaultAsync(item => item.Id == modelPackageVersionId, cancellationToken)
-            ?? throw new RequestValidationException("Referenced model package version was not found.");
-        await EnsureSameTenantAsync(modelPackage.TenantId, context, action, "model_package_tenant_mismatch", "The referenced model package belongs to a different tenant.", cancellationToken);
-        if (modelPackage.State != OntologyPublicationState.Published
-            || modelPackage.OntologyVersion?.State != OntologyPublicationState.Published
-            || modelPackage.LifecycleVocabularyVersion?.State != OntologyPublicationState.Published
-            || modelPackage.AttributeSchemaVersion?.State != OntologyPublicationState.Published)
-        {
-            throw new RequestValidationException("Import mappings require a published model package and published model package parts.");
-        }
-
-        return new ImportModelContext(modelPackage, modelPackage.OntologyVersion!, modelPackage.LifecycleVocabularyVersion!, modelPackage.AttributeSchemaVersion!);
-    }
-
-    private static ImportFileEvidence ResolveEvidence(ImportBatch batch, Guid? evidenceId)
-    {
-        if (evidenceId is not null)
-        {
-            return batch.FileEvidence.SingleOrDefault(evidence => evidence.Id == evidenceId.Value)
-                ?? throw new RequestValidationException("Import file evidence was not found for this batch.");
-        }
-
-        return batch.FileEvidence.OrderByDescending(evidence => evidence.CreatedAt).FirstOrDefault()
-            ?? throw new RequestValidationException("Import batch does not have file evidence yet.");
-    }
-
     private async Task<ParsedImportFile> ParseEvidenceAsync(ImportFileEvidence evidence, int? maxRows, CancellationToken cancellationToken)
     {
         await using var stream = await fileStorage.OpenReadAsync(evidence.StorageKey, cancellationToken);
         return await fileParser.ParseAsync(evidence.OriginalFileName, stream, maxRows, cancellationToken);
-    }
-
-    /** Generate mapping suggestions from the import file headers and model context. */
-    private static IEnumerable<ImportColumnMappingSuggestionResponse> BuildColumnSuggestions(
-        IReadOnlyCollection<string> headers,
-        ImportModelContext modelContext)
-    {
-        var attributes = modelContext.AttributeSchema.Attributes.ToList();
-        var firstObjectType = modelContext.Ontology.ObjectTypes.OrderBy(item => item.Key).First();
-        foreach (var header in headers)
-        {
-            var normalizedHeader = NormalizeLoose(header);
-            var attribute = attributes.FirstOrDefault(item => NormalizeLoose(item.AttributeKey) == normalizedHeader)
-                ?? attributes.FirstOrDefault(item => NormalizeLoose(item.DisplayName ?? item.AttributeKey) == normalizedHeader)
-                ?? attributes.FirstOrDefault(item => normalizedHeader.Contains(NormalizeLoose(item.AttributeKey), StringComparison.Ordinal));
-            var objectType = attribute?.AppliesToObjectType ?? firstObjectType.Key;
-            var isIdentity = normalizedHeader.Contains("id", StringComparison.Ordinal)
-                || normalizedHeader.Contains("number", StringComparison.Ordinal)
-                || normalizedHeader.EndsWith("no", StringComparison.Ordinal);
-            yield return new ImportColumnMappingSuggestionResponse(
-                header,
-                objectType,
-                attribute?.AttributeKey,
-                isIdentity,
-                attribute?.IsRequired ?? isIdentity,
-                attribute is null ? 0.45m : 0.85m,
-                attribute is null ? "Column matched to the first canonical object type by heuristic fallback." : "Column matched by canonical attribute name.");
-        }
-    }
-
-    private static IEnumerable<ImportLifecycleMappingSuggestionResponse> BuildLifecycleSuggestions(
-        ParsedImportFile parsed,
-        ImportModelContext modelContext,
-        IReadOnlyCollection<ImportColumnMappingSuggestionResponse> columnSuggestions)
-    {
-        var lifecycleColumn = parsed.Headers.FirstOrDefault(header => NormalizeLoose(header).Contains("lifecycle", StringComparison.Ordinal))
-            ?? parsed.Headers.FirstOrDefault(header => NormalizeLoose(header).Contains("status", StringComparison.Ordinal))
-            ?? parsed.Headers.FirstOrDefault(header => NormalizeLoose(header).Contains("state", StringComparison.Ordinal));
-        if (lifecycleColumn is null)
-        {
-            yield break;
-        }
-
-        var states = modelContext.LifecycleVocabulary.States.ToList();
-        var sourceValues = parsed.Rows
-            .Select(row => row.TryGetValue(lifecycleColumn, out var value) ? value : null)
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .Select(value => value!)
-            .Distinct(StringComparer.OrdinalIgnoreCase);
-        foreach (var sourceValue in sourceValues)
-        {
-            var normalizedSource = NormalizeLoose(sourceValue);
-            var state = states.FirstOrDefault(item => NormalizeLoose(item.Key) == normalizedSource)
-                ?? states.FirstOrDefault(item => NormalizeLoose(item.DisplayName) == normalizedSource)
-                ?? states.FirstOrDefault(item => normalizedSource.Contains(NormalizeLoose(item.Key), StringComparison.Ordinal));
-            if (state is not null)
-            {
-                yield return new ImportLifecycleMappingSuggestionResponse(sourceValue, state.Key, 0.85m, "Lifecycle value matched by canonical state key or display name.");
-            }
-        }
     }
 
     private static void ValidateMappingAgainstModel(ImportMappingVersion mapping, ImportModelContext modelContext)
@@ -1242,8 +1124,8 @@ public sealed class ImportService(
             run.SourceContext,
             run.CadSummaryJson,
             run.EbomSummaryJson,
-            run.MissingInCadCount,
-            run.MissingInEbomCount,
+            run.MissingInPrimarySideCount,
+            run.MissingInSecondarySideCount,
             run.QuantityMismatchCount,
             run.UsageReferenceMismatchCount,
             run.UnresolvedIdentityCount,
@@ -1273,30 +1155,13 @@ public sealed class ImportService(
     private static string NormalizeLoose(string value) => new(value.Where(char.IsLetterOrDigit).Select(char.ToLowerInvariant).ToArray());
     private static string? TrimOptional(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
-    private sealed record BomHeaders(
-        string ParentHeader,
-        string ChildHeader,
-        string? QuantityHeader,
-        string? UnitHeader,
-        string? UsageHeader);
-
-    private sealed record BomLine(
-        string Side,
-        string ParentIdentity,
-        string ChildIdentity,
-        string Key,
-        string? Quantity,
-        string? Unit,
-        string? UsageReference,
-        int RowNumber);
-
     private sealed record BomSideSummary(int LineCount);
 
     private sealed record BomComparisonResult(
-        BomSideSummary CadSummary,
-        BomSideSummary EbomSummary,
-        IReadOnlyCollection<string> MissingInCad,
-        IReadOnlyCollection<string> MissingInEbom,
+        BomSideSummary PrimarySideSummary,
+        BomSideSummary SecondarySideSummary,
+        IReadOnlyCollection<string> MissingInPrimary,
+        IReadOnlyCollection<string> MissingInSecondary,
         IReadOnlyCollection<string> QuantityMismatches,
         IReadOnlyCollection<string> UsageReferenceMismatches,
         IReadOnlyCollection<string> UnresolvedIdentity);

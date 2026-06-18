@@ -16,7 +16,14 @@ using ETOS.Backend.Imports;
 using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Infrastructure.Configuration;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.AgentRuntime;
+using ETOS.Backend.AgentTemplates;
+using ETOS.Backend.BusinessPolicies;
+using ETOS.Backend.Capabilities;
+using ETOS.Backend.OptimizationModels;
+using ETOS.Backend.Packages;
 using ETOS.Backend.Recommendations;
+using ETOS.Backend.Imports.MappingSuggestions;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Platform.Development;
 using ETOS.Backend.Platform.Extensions;
@@ -124,6 +131,14 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IClassificationPolicyService, ClassificationPolicyService>();
         services.AddScoped<IArtifactRegistryService, ArtifactRegistryService>();
         services.AddScoped<IOntologyService, OntologyService>();
+        services.AddScoped<IModelPackageContextResolver, ModelPackageContextResolver>();
+        services.AddScoped<RuleBasedMappingProvider>();
+        services.AddScoped<PydanticAiMappingProvider>();
+        services.AddScoped<IMappingSuggestionProvider, RuleBasedMappingProvider>(sp => sp.GetRequiredService<RuleBasedMappingProvider>());
+        services.AddScoped<IMappingSuggestionProvider, PydanticAiMappingProvider>(sp => sp.GetRequiredService<PydanticAiMappingProvider>());
+        services.AddScoped<IMappingSuggestionProviderSelector, MappingSuggestionProviderSelector>();
+        services.AddScoped<IImportMappingLearningSignalEmitter, ImportMappingLearningSignalEmitter>();
+        services.Configure<MappingSuggestionOptions>(configuration.GetSection(MappingSuggestionOptions.SectionName));
         services.AddScoped<IImportFileStorage, LocalImportFileStorage>();
         services.AddScoped<IImportFileParser, CsvImportFileParser>();
         services.AddScoped<IImportService, ImportService>();
@@ -148,6 +163,17 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IDecisionExplorerFoundationService, DecisionExplorerFoundationService>();
         services.AddScoped<IArtifactExplorerService, ArtifactExplorerService>();
         services.AddScoped<IDashboardReportService, DashboardReportService>();
+        services.AddScoped<ICapabilityDefinitionService, CapabilityDefinitionService>();
+        services.AddScoped<IBusinessPolicyDefinitionService, BusinessPolicyDefinitionService>();
+        services.AddScoped<IOptimizationModelDefinitionService, OptimizationModelDefinitionService>();
+        services.AddScoped<IAgentTemplateDefinitionService, AgentTemplateDefinitionService>();
+        services.AddScoped<PydanticAiRuntimeAdapter>();
+        services.AddScoped<HermesRuntimeAdapter>();
+        services.AddScoped<LangGraphRuntimeAdapter>();
+        services.AddScoped<IAgentRuntimeAdapter, PydanticAiRuntimeAdapter>(sp => sp.GetRequiredService<PydanticAiRuntimeAdapter>());
+        services.AddScoped<IAgentRuntimeAdapter, HermesRuntimeAdapter>(sp => sp.GetRequiredService<HermesRuntimeAdapter>());
+        services.AddScoped<IAgentRuntimeAdapter, LangGraphRuntimeAdapter>(sp => sp.GetRequiredService<LangGraphRuntimeAdapter>());
+        services.AddScoped<IAgentRuntimeAdapterSelector, AgentRuntimeAdapterSelector>();
         services.AddScoped<IRecommendationService, RecommendationService>();
         services.AddScoped<IRecommendationFactory, RecommendationFactory>();
         services.AddScoped<IRecommendationEvidenceResolver, RecommendationEvidenceResolver>();
@@ -166,6 +192,10 @@ public static class EnterpriseThreadPlatform
         });
         services.AddScoped<IDevelopmentIdentitySeeder, DevelopmentIdentitySeeder>();
         services.AddScoped<IDevelopmentDemoDataCleaner, DevelopmentDemoDataCleaner>();
+        services.Configure<ReferencePackageOptions>(configuration.GetSection(ReferencePackageOptions.SectionName));
+        services.AddSingleton<IReferencePackageManifestLoader, ReferencePackageManifestLoader>();
+        services.AddScoped<IReferencePackageInstaller, ManufacturingReferencePackageInstaller>();
+        services.AddScoped<IDevelopmentPackageSeeder, DevelopmentPackageSeeder>();
 
         return services;
     }

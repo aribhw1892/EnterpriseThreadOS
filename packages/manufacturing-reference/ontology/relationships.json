@@ -1,0 +1,9 @@
+[
+  {
+    "relationshipType": "references",
+    "fromObjectType": "part",
+    "toObjectType": "document",
+    "description": "Part references document evidence.",
+    "isVersionRelationship": true
+  }
+]

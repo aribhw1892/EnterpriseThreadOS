@@ -1,0 +1,14 @@
+[
+  {
+    "relationshipType": "contains",
+    "parentObjectType": "part",
+    "childObjectType": "part",
+    "quantityAttributeKey": "quantity",
+    "unitAttributeKey": "unit",
+    "findNumberAttributeKey": "findNumber",
+    "referenceDesignatorAttributeKey": "referenceDesignator",
+    "lifecycleConstraintJson": "{\"allowedParentStates\":[\"released\",\"in-review\"]}",
+    "requiresApproval": true,
+    "auditReferenceAttributeKey": "approvalRecordId"
+  }
+]

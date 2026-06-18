@@ -5,6 +5,7 @@ using ETOS.Backend.GovernedChat;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Imports;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.Ontology;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.Recommendations;
@@ -33,7 +34,8 @@ public sealed class RecommendationFactory(
     EnterpriseThreadDbContext dbContext,
     ITenantContextResolver tenantContextResolver,
     IAccessPermissionService permissionService,
-    IAccessDenialRecorder denialRecorder) : IRecommendationFactory
+    IAccessDenialRecorder denialRecorder,
+    IModelPackageContextResolver modelPackageContextResolver) : IRecommendationFactory
 {
     public async Task<CreateRecommendationResponse> FromDataQualityIssueAsync(Guid issueId, CancellationToken cancellationToken)
     {
@@ -124,8 +126,8 @@ public sealed class RecommendationFactory(
             .SingleOrDefaultAsync(item => item.Id == runId && item.TenantId == context.TenantId, cancellationToken)
             ?? throw new RequestValidationException("BOM comparison run was not found.");
 
-        var driftCount = run.MissingInEbomCount + run.QuantityMismatchCount + run.UsageReferenceMismatchCount;
-        if (driftCount == 0 && run.MissingInCadCount == 0)
+        var driftCount = run.MissingInSecondarySideCount + run.QuantityMismatchCount + run.UsageReferenceMismatchCount;
+        if (driftCount == 0 && run.MissingInPrimarySideCount == 0)
         {
             throw new RequestValidationException("BOM comparison run has no drift requiring a recommendation.");
         }
@@ -137,8 +139,17 @@ public sealed class RecommendationFactory(
             return existing;
         }
 
-        var summary =
-            $"CAD/EBOM drift detected. Missing in EBOM {run.MissingInEbomCount}, missing in CAD {run.MissingInCadCount}, quantity mismatches {run.QuantityMismatchCount}.";
+        var templates = await LoadRecommendationTemplatesAsync(context, run.ImportBatchId, cancellationToken);
+
+        var summary = FormatTemplate(
+            templates?.StructuralDriftSummary,
+            "Structural drift detected. Missing in secondary {missingInSecondary}, missing in primary {missingInPrimary}, quantity mismatches {quantityMismatches}.",
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["missingInSecondary"] = run.MissingInSecondarySideCount.ToString(),
+                ["missingInPrimary"] = run.MissingInPrimarySideCount.ToString(),
+                ["quantityMismatches"] = run.QuantityMismatchCount.ToString()
+            });
 
         var evidence = new List<RecommendationPayloadParser.RecommendationEvidenceLinkDocument>
         {
@@ -184,25 +195,25 @@ public sealed class RecommendationFactory(
         {
             new RecommendationPayloadParser.RecommendationSuggestedActionDocument(
                 Guid.NewGuid(),
-                "Review EBOM synchronization",
-                "REVIEW_EBOM",
+                templates?.ReviewPrimarySideActionTitle ?? "Review secondary side synchronization",
+                templates?.ReviewPrimarySideActionCode ?? "REVIEW_STRUCTURAL_SECONDARY",
                 run.UnresolvedIdentityCount > 0 ? RecommendationRiskState.High : RecommendationRiskState.Medium,
                 "ENGINEERING_REVIEW",
                 SuggestedActionStatus.Proposed,
-                "Validate whether EBOM should be updated to match CAD BOM."),
+                templates?.ReviewPrimarySideActionRationale ?? "Validate whether the secondary structural side should be updated."),
             new RecommendationPayloadParser.RecommendationSuggestedActionDocument(
                 Guid.NewGuid(),
-                "Review manufacturing impact",
-                "REVIEW_MANUFACTURING_IMPACT",
+                templates?.ReviewImpactActionTitle ?? "Review downstream impact",
+                templates?.ReviewImpactActionCode ?? "REVIEW_STRUCTURAL_IMPACT",
                 RecommendationRiskState.High,
-                "MANUFACTURING_REVIEW",
+                "DOMAIN_REVIEW",
                 SuggestedActionStatus.Proposed,
-                "Assess downstream manufacturing impact from BOM drift.")
+                templates?.ReviewImpactActionRationale ?? "Assess downstream impact from structural drift.")
         };
 
         var response = await CreateArtifactAsync(
             context,
-            "Review CAD/EBOM synchronization",
+            templates?.StructuralDriftTitle ?? "Review structural synchronization",
             summary,
             RecommendationType.BomSync,
             dashboardArtifactId is not null
@@ -432,6 +443,38 @@ public sealed class RecommendationFactory(
             $"The user lacks the {RecommendationPermissions.Create} permission.",
             cancellationToken);
         throw new TenantAccessDeniedException("User lacks recommendation create permission.");
+    }
+
+    private async Task<ModelPackageRecommendationTemplates?> LoadRecommendationTemplatesAsync(
+        ActiveTenantContext context,
+        Guid importBatchId,
+        CancellationToken cancellationToken)
+    {
+        var batch = await dbContext.ImportBatches
+            .AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Id == importBatchId && item.TenantId == context.TenantId, cancellationToken);
+        if (batch is null)
+        {
+            return null;
+        }
+
+        var packageContext = await modelPackageContextResolver.ResolvePublishedAsync(
+            batch.ActiveModelPackageVersionId,
+            context,
+            "recommendations.bom_comparison",
+            cancellationToken);
+        return packageContext.ImportProfile.RecommendationTemplates;
+    }
+
+    private static string FormatTemplate(string? template, string fallback, IReadOnlyDictionary<string, string> values)
+    {
+        var resolved = string.IsNullOrWhiteSpace(template) ? fallback : template;
+        foreach (var (key, value) in values)
+        {
+            resolved = resolved.Replace($"{{{key}}}", value, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return resolved;
     }
 
     private static RecommendationRiskState MapSeverityToRisk(DataQualitySeverity severity)

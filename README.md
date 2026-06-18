@@ -1,6 +1,6 @@
 # EnterpriseThreadOS
 
-EnterpriseThreadOS is being built as a developer-first, AI-native digital thread platform for manufacturing and engineering data. The current repository contains the local platform foundation through Issue 18: ASP.NET Core backend, Next.js frontend shell, Docker Compose infrastructure, EF Core persistence, health checks, extension-point guardrails, tenant identity/access, audit/security events, the BaseArtifact registry foundation, classification/policy enforcement, graph memory, canonical model governance, import/mapping/staging, identity-resolution review and trust scoring, data-quality issue review hooks, document memory, governed query/context assembly, AI Trace, governed chat, explorers/360° context views, dashboard/report artifacts, and recommendation artifacts with evidence rules.
+EnterpriseThreadOS is being built as a developer-first, AI-native digital thread platform for manufacturing and engineering data. The current repository contains the local platform foundation through Issue 18 and the Architectural Abstraction Sprint (Issues 18.1–18.5): ASP.NET Core backend, Next.js frontend shell, Docker Compose infrastructure, EF Core persistence, health checks, extension-point guardrails, tenant identity/access, audit/security events, the BaseArtifact registry foundation, classification/policy enforcement, graph memory, canonical model governance, package-driven import/mapping/staging, identity-resolution review and trust scoring, data-quality issue review hooks, document memory, governed query/context assembly, AI Trace, governed chat, explorers/360° context views, dashboard/report artifacts, recommendation artifacts with evidence rules, capability/business-policy/optimization-model/agent-template governed artifacts, mapping provider contracts, agent runtime adapter contracts, and the manufacturing reference package under `packages/manufacturing-reference/`.
 
 For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For ordered implementation scope, use `.docs/.prd/engineering-execution-issues.md`.
 
@@ -16,8 +16,10 @@ For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For or
 - `docs/local-development.md`: full local development workflow.
 - `docs/backend/architecture.md`: backend module conventions.
 - `docs/frontend/architecture.md`: frontend conventions.
+- `docs/architecture/domain-packages.md`: core vs domain package boundary and install lifecycle.
 - `docs/architecture/extension-points.md`: deferred architecture contracts and guardrails.
 - `docs/architecture/adr/README.md`: ADR index and template.
+- `packages/manufacturing-reference/`: versioned manufacturing demo ontology, profiles, CSV fixtures, and governed artifact seeds.
 - `docs/ai-agent-workflow.md`: practical AI-agent workflow for this repo.
 
 ## Prerequisites
@@ -67,7 +69,7 @@ npm run dev
 Pop-Location
 ```
 
-Open `http://localhost:3000` to view the local platform health, identity, governance, artifact registry, classification/policy, and infrastructure admin shell. Open `http://localhost:3000/model-artifacts` to manage canonical ontology/model package versions. Open `http://localhost:3000/imports` and click `Run identity demo` to create two source imports, approve mappings, validate rows, stage unverified graph records, generate identity candidates, view trust score breakdowns, and generate durable data-quality issues from validation results. Open `http://localhost:3000/chat` for governed chat, `http://localhost:3000/explorers` for explorer hubs, `http://localhost:3000/dashboards` and `http://localhost:3000/reports` for dashboard/report shells, and `http://localhost:3000/recommendations` to create, inspect, and transition recommendation drafts with evidence links and suggested actions.
+Open `http://localhost:3000` to view the local platform health, identity, governance, artifact registry, classification/policy, and infrastructure admin shell. Open `http://localhost:3000/model-artifacts` and click **Create seed model package** to install the manufacturing reference package (`etos-manufacturing-reference`) from `packages/manufacturing-reference/`. Open `http://localhost:3000/imports` and click `Run identity demo` to create two source imports, approve mappings, validate rows, stage unverified graph records, generate identity candidates, view trust score breakdowns, and generate durable data-quality issues from validation results. Open `http://localhost:3000/chat` for governed chat, `http://localhost:3000/explorers` for explorer hubs (including capabilities, business policies, optimization models, and agent templates), `http://localhost:3000/dashboards` and `http://localhost:3000/reports` for dashboard/report shells, and `http://localhost:3000/recommendations` to create, inspect, and transition recommendation drafts with evidence links and suggested actions.
 
 ## Useful Endpoints
 
@@ -104,6 +106,7 @@ Open `http://localhost:3000` to view the local platform health, identity, govern
 - `POST http://localhost:5000/api/admin/imports/batches/{batchId}/mapping-preview`
 - `POST http://localhost:5000/api/admin/imports/mappings`
 - `POST http://localhost:5000/api/admin/imports/mappings/{mappingVersionId}/approve`
+- `POST http://localhost:5000/api/admin/imports/mappings/{mappingVersionId}/reject`
 - `POST http://localhost:5000/api/admin/imports/batches/{batchId}/validate`
 - `POST http://localhost:5000/api/admin/imports/batches/{batchId}/stage`
 - `GET http://localhost:5000/api/admin/identity-resolution/rules`
@@ -128,6 +131,11 @@ Open `http://localhost:3000` to view the local platform health, identity, govern
 - `POST http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/mark-reviewed`
 - `POST http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/mark-ready`
 - `PATCH http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/suggested-actions/{actionId}`
+- `POST http://localhost:5000/api/admin/development/install-reference-package`
+- `GET http://localhost:5000/api/admin/capabilities`
+- `GET http://localhost:5000/api/admin/business-policies`
+- `GET http://localhost:5000/api/admin/optimization-models`
+- `GET http://localhost:5000/api/admin/agent-templates`
 
 Some identity/admin endpoints require local header authentication:
 
@@ -142,7 +150,7 @@ Development startup seeds a local admin identity after migrations are applied:
 - tenant id: `22222222-2222-2222-2222-222222222222`
 - tenant identifier: `local`
 
-The seed runs only in `Development` when `SeedIdentity:Enabled` is `true`. Override `SeedIdentity:AdminPassword` with environment-specific local config if needed.
+The seed runs only in `Development` when `SeedIdentity:Enabled` is `true`. When `SeedIdentity:InstallReferencePackage` is `true` (default), the backend also installs `etos-manufacturing-reference` for the development tenant. Override `SeedIdentity:AdminPassword` with environment-specific local config if needed.
 
 Bootstrap flow for local testing:
 
@@ -182,20 +190,23 @@ docker compose -f infra/local/docker-compose.yml config
 
 ## Current Scope
 
-Implemented or partially implemented through Issue 18:
+Implemented or partially implemented through Issues 18 and 18.1–18.5:
 
 - Local platform foundation: backend/frontend scaffolds, Docker Compose infrastructure, EF Core PostgreSQL, health endpoints, extension-point catalog.
 - Tenant identity/access, governance/audit, BaseArtifact registry, classification/policy, graph memory, ontology/model packages.
-- Import/mapping/staging, identity resolution, data quality, document memory.
+- Package-driven import/mapping/staging, mapping provider contracts, mapping learning-signal inputs, identity resolution, data quality, document memory.
 - Governed query/context assembly, AI Trace, governed chat with chat-to-artifact drafting.
 - Explorers and 360° context views with governance flow foundation.
 - Dashboard/report artifacts (Issue 17) and recommendation artifacts with evidence rules (Issue 18).
+- Industry-neutral core cleanup with `ImportProfileJson` / `QueryIntentExtensionsJson` on published model packages (Issue 18.1).
+- Capability, business policy, optimization model, and agent template governed artifacts (Issues 18.2–18.4).
+- `IAgentRuntimeAdapter` contracts with PydanticAI stub and deferred Hermes/LangGraph adapters (Issue 18.4).
+- Manufacturing reference package extraction and installer (Issue 18.5).
 
 Planned by the PRD but not generally implemented yet:
 
-- Trusted graph promotion, snapshots, diffs, and governed traversals beyond current staging foundations.
 - Full review task, decision, outcome, and learning workflows (Issue 19+). Recommendation suggested-action `CONVERTED_TO_REVIEW_TASK` is status-only until Issue 19.
-- Agent/workflow recommendation creation (`AGENT_DEFERRED` contract only), tools, agents, workflows, multi-agent collaboration, and enterprise action framework.
+- Agent execution, tool registry, workflow runtime, and multi-agent collaboration (Issues 22–25). `AGENT_DEFERRED` recommendation creation and runtime adapter stubs exist; no `AgentVersion` or execute API yet.
 - Live governance KPI analytics (Issue 21), production secrets, CI/CD, Kubernetes, Keycloak, Temporal, live enterprise connectors, or source-system write-back.
 
 See `ARCHITECTURE.md` and `docs/local-development.md` for details.

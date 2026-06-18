@@ -54,6 +54,13 @@ public static class ImportEndpointExtensions
             CancellationToken cancellationToken) =>
             await ExecuteAsync(() => service.ApproveMappingVersionAsync(mappingVersionId, request, cancellationToken)));
 
+        group.MapPost("/mappings/{mappingVersionId:guid}/reject", async (
+            Guid mappingVersionId,
+            RejectImportMappingRequest request,
+            IImportService service,
+            CancellationToken cancellationToken) =>
+            await ExecuteAsync(() => service.RejectMappingVersionAsync(mappingVersionId, request, cancellationToken)));
+
         group.MapPost("/batches/{batchId:guid}/validate", async (
             Guid batchId,
             IImportService service,

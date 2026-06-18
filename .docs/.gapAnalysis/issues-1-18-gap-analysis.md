@@ -1,8 +1,8 @@
-# Gap Analysis: Issues 1–18 vs Current Codebase
+# Gap Analysis: Issues 1–18.5 vs Current Codebase
 
-**Scope:** `.docs/.prd/engineering-execution-issues.md` issues 1–18 only.  
-**Evidence base:** backend modules, EF migrations, `ETOS.Backend.Tests` (118 tests, all passing), frontend pages, `ARCHITECTURE.md`, `docs/backend/architecture.md`.  
-**Generated:** 2026-06-13 (updated through Issue 18)
+**Scope:** `.docs/.prd/engineering-execution-issues.md` issues 1–18 and Architectural Abstraction Sprint 18.1–18.5.  
+**Evidence base:** backend modules, EF migrations, `ETOS.Backend.Tests` (165 tests, all passing), frontend pages, `ARCHITECTURE.md`, `docs/backend/architecture.md`, `packages/manufacturing-reference/`.  
+**Generated:** 2026-06-13 (updated through Issues 18.1–18.5, 2026-06-19)
 
 ---
 
@@ -28,8 +28,13 @@
 | 16 | Explorers & 360° Views | **Mostly complete** | Strong | `/explorers` hub + routes | Yes |
 | 17 | Dashboard & Reports | **Mostly complete** | Strong | `/dashboards` + `/reports` | Yes |
 | 18 | Recommendations | **Mostly complete** | Strong | `/recommendations` | Yes |
+| 18.1 | Industry-neutral import/query cleanup | **Mostly complete** | Strong | — | Yes |
+| 18.2 | Capability definitions | **Mostly complete** | Strong | `/capabilities` | Yes |
+| 18.3 | Business policy definitions | **Mostly complete** | Strong | `/business-policies` | Yes |
+| 18.4 | Optimization + agent templates | **Mostly complete** | Strong | `/optimization-models`, `/agent-templates` | Yes |
+| 18.5 | Manufacturing reference package | **Mostly complete** | Strong | Install via `/model-artifacts` | Yes |
 
-**Bottom line:** Issues 1–6 foundation solid. 7–12 vertical data path wired backend-to-graph. Issues 13–18 AI/governance UX path landed backend + minimal but real UI shells. Biggest remaining cross-cutting gaps: real auth/OIDC, MinIO/Qdrant live integrations, first-class `ObjectVersion` modeling, review-task/decision workflows (Issues 19–20), live governance KPI analytics (Issue 21), agents/tools/workflows (Issues 22–25). Issue 18 closes the Milestone 3 recommendation slice; Milestone 4 starts at Issue 19.
+**Bottom line:** Issues 1–6 foundation solid. 7–12 vertical data path wired backend-to-graph with package-driven import/query behavior from 18.1/18.5. Issues 13–18 AI/governance UX path landed backend + minimal but real UI shells. Issues 18.1–18.5 complete the Architectural Abstraction Sprint: industry-neutral core, Layer 3–6 governed artifacts, mapping/runtime contracts, and extracted manufacturing reference package. Biggest remaining cross-cutting gaps: real auth/OIDC, MinIO/Qdrant live integrations, first-class `ObjectVersion` modeling, review-task/decision workflows (Issues 19–20), live governance KPI analytics (Issue 21), agent execution and tool registry (Issue 22+). Issue 22 is unblocked by 18.5 but not started.
 
 ---
 
@@ -168,7 +173,7 @@
 - Ontology, semantic layer, model package, lifecycle vocabulary, attribute schema versions
 - Publish immutability, active model package, BOM relationship metadata in schemas
 - Attribute validation: type, visibility, permissions, searchability, AI metadata
-- UI: `model-artifacts/page.tsx`
+- UI: `model-artifacts/page.tsx` installs reference package via dev install endpoint (`etos-manufacturing-reference`)
 - Tests: publish gates, BOM metadata validation, immutability (`OntologyTests.cs`)
 
 **Gaps**
@@ -197,9 +202,9 @@
 
 | Acceptance criterion | Gap |
 |---------------------|-----|
-| **AI-assisted mapping suggestions** | `deterministic-heuristic-v1` only — preview-only, not LLM |
+| **AI-assisted mapping suggestions** | `rule-based-v1` default via `IMappingSuggestionProvider`; PydanticAI/Hermes contracts deferred | Live LLM-assisted preview |
 | Raw files in MinIO | `LocalImportFileStorage` — local disk, not MinIO SDK |
-| CAD/PDM-specific semantics | Generic CSV/Excel; no CAD-specific parsers |
+| CAD/PDM-specific semantics | Generic CSV/Excel with package-driven structural profiles in reference package | CAD-specific parsers |
 
 ---
 
@@ -260,7 +265,7 @@
 | Acceptance criterion | Gap |
 |---------------------|-----|
 | Snapshots capture **document** state | Payload: nodes, relationships, identity links, DQ issues — **no document artifacts** |
-| **On-demand** CAD/EBOM comparison query | Batch-scoped compare + `bom-impact-context` intent; no standalone trusted-graph BOM compare endpoint |
+| **On-demand** CAD/EBOM comparison query | Package-driven batch compare + package-driven `bom-impact-context` intent | Standalone trusted-graph BOM compare endpoint |
 | Promotion/snapshot UI | Demo actions on imports page; no snapshot/diff viewer |
 | Service naming "Deferred" | Implemented but class names suggest interim architecture |
 
@@ -428,6 +433,102 @@
 
 ---
 
+### Issue 18.1: Industry-Neutral Ontology and Import Cleanup — **~95%**
+
+**Implemented**
+
+- `ImportProfileJson` and `QueryIntentExtensionsJson` on `ModelPackageVersion` with EF migration
+- `IModelPackageContextResolver` and package-driven import staging/BOM comparison
+- `IMappingSuggestionProvider` with `rule-based-v1` default; PydanticAI/Hermes deferred contracts
+- Mapping reject endpoint and `ImportMappingLearningSignalInput` emitter (approve/reject/correct)
+- Package-driven `bom-impact-context` relationship resolution in `GovernedQueryService`
+- Neutral recommendation copy via import profile templates
+- Shared `ManufacturingModelPackageFixture` and tests
+
+**Gaps**
+
+| Acceptance criterion | Gap |
+|---------------------|-----|
+| Live PydanticAI/Hermes mapping runtime | Contract-only; Issue 22+ |
+| Full `LearningSignalArtifact` lifecycle | Lightweight input records only; Issues 19–21 |
+
+---
+
+### Issue 18.2: Capability Definition Artifacts — **~95%**
+
+**Implemented**
+
+- `CapabilityDefinitionVersion` module, service, readiness validator, `/api/admin/capabilities`
+- Frontend list/detail/publish shells at `/capabilities`
+- Tests: `CapabilityDefinitionTests.cs`
+- Reference package seeds `bom-impact-analysis` capability
+
+**Gaps**
+
+| Acceptance criterion | Gap |
+|---------------------|-----|
+| Workflow/chat wiring to capabilities | Artifact CRUD/publish only |
+| `ArtifactDependency` rows for model packages | Payload refs only; optional future enhancement |
+
+---
+
+### Issue 18.3: Business Policy Definition Artifacts — **~95%**
+
+**Implemented**
+
+- `BusinessPolicyDefinitionVersion` module separate from classification `PolicyVersion`
+- `/api/admin/business-policies`, frontend shells, `BusinessPolicyDefinitionTests.cs`
+- Reference package seeds `min-maturity-85` policy
+
+**Gaps**
+
+| Acceptance criterion | Gap |
+|---------------------|-----|
+| Runtime policy enforcement in workflows/agents | Governed definitions only; Milestone 5+ |
+| Constraint DSL beyond string dictionary | MVP key-value rules only |
+
+---
+
+### Issue 18.4: Optimization Model and Agent Template Artifacts — **~95%**
+
+**Implemented**
+
+- `OptimizationModelVersion` and `AgentTemplateVersion` modules with CRUD/publish/readiness
+- `IAgentRuntimeAdapter` contracts, PydanticAI stub, deferred Hermes/LangGraph adapters
+- Frontend shells for `/optimization-models` and `/agent-templates`
+- Tests: `OptimizationModelDefinitionTests`, `AgentTemplateDefinitionTests`, `AgentRuntimeAdapterTests`
+- Reference package seeds optimization model + agent template chain
+
+**Gaps**
+
+| Acceptance criterion | Gap |
+|---------------------|-----|
+| Optimization solver execution | Metadata only; Issue 24 |
+| `AgentVersion`, `AgentRun`, execute API | Template artifacts + adapter contracts only; Issue 22 |
+| `ToolDefinitionVersion` module | Optional refs validated when present; Issue 22 |
+
+---
+
+### Issue 18.5: Manufacturing Reference Package Extraction — **~95%**
+
+**Implemented**
+
+- `packages/manufacturing-reference/` manifest, ontology, profiles, demo CSVs, artifact seeds
+- `ManufacturingReferencePackageInstaller`, dev install endpoint, optional startup auto-seed
+- Frontend `createCanonicalModelSeed()` delegates to install endpoint; package key `etos-manufacturing-reference`
+- Removed `ManufacturingReferencePackageProfiles` from core; neutral BOM comparison side counts
+- `docs/architecture/domain-packages.md`; `ManufacturingReferencePackageTests.cs`
+
+**Gaps**
+
+| Acceptance criterion | Gap |
+|---------------------|-----|
+| Cross-tenant package marketplace | Out of scope |
+| Generalized multi-industry installer routing | Manufacturing reference only; extend per new package |
+| Full Issue 27 ADR set | Implementation doc only; formal ADRs deferred |
+
+---
+
 ## Cross-Cutting Gaps (Issues 1–18)
 
 ```mermaid
@@ -445,6 +546,9 @@ flowchart LR
     I16[Explorers]
     I17[Dashboards Reports]
     I18[Recommendations]
+    I181[18.1 Package-driven core]
+    I182[18.2-18.4 Layer artifacts]
+    I185[18.5 Reference package]
   end
   subgraph partial [Partial / Thin UI]
     I7[Ontology schemas]
@@ -471,11 +575,13 @@ flowchart LR
 | **Auth** | Header-based dev identity | Login, tokens, OIDC |
 | **Object storage** | Local disk + evidence metadata | MinIO SDK for imports/documents |
 | **Vector retrieval** | Health probe + disabled contracts | Live Qdrant indexing in retrieval |
-| **AI mapping** | Heuristic suggestions | LLM-assisted preview |
-| **Domain modeling** | Schema + graph instances | First-class `ObjectVersion` / BOM instances |
-| **Frontend coverage** | Home, explorers hub, artifacts, graph, documents, context-packages, ai-traces, chat, dashboards, reports, recommendations, decisions foundation, model-artifacts, imports | Write forms for policy/classification; DQ/identity explorers; graph canvas; governance KPI charts |
+| **AI mapping** | `rule-based-v1` provider + deferred PydanticAI/Hermes contracts | Live LLM-assisted preview |
+| **Domain modeling** | Schema + graph instances + reference package under `packages/` | First-class `ObjectVersion` / BOM instances |
+| **Domain artifacts** | Capability, business policy, optimization model, agent template CRUD + publish | Runtime enforcement, agent execution (Issue 22+) |
+| **Frontend coverage** | Home, explorers hub, artifacts, graph, documents, context-packages, ai-traces, chat, dashboards, reports, recommendations, capabilities, business-policies, optimization-models, agent-templates, decisions foundation, model-artifacts, imports | Write forms for policy/classification; DQ/identity explorers; graph canvas; governance KPI charts |
 | **Observability** | Basic health | Serilog, OpenTelemetry |
-| **BOM compare** | Per import batch + `bom-impact-context` intent | On-demand trusted-graph BOM compare endpoint |
+| **BOM compare** | Package-driven per import batch + package-driven `bom-impact-context` intent | On-demand trusted-graph BOM compare endpoint |
+| **Manufacturing semantics** | Extracted to `packages/manufacturing-reference/` | Additional industry packages beyond reference demo |
 | **Review workflow** | Recommendation readiness + placeholders | Review tasks, decisions, outcomes (Issues 19–20) |
 | **Agent automation** | `AgentDeferred` contract | Agent/workflow recommendation creation (Issues 22–24) |
 
@@ -505,17 +611,18 @@ flowchart LR
 ## Verification Snapshot
 
 ```text
-dotnet test EnterpriseThreadOS.sln → 118 passed, 0 failed
+dotnet test EnterpriseThreadOS.sln → 165 passed, 0 failed
 ```
 
 | Area | Count / notes |
 |------|----------------|
-| Test files | 18 files (incl. `AiTraceTests`, `GovernedChatTests`, `ExplorersTests`, `DashboardReportTests`, `RecommendationTests`) |
-| EF migrations (slices 13–17) | `Slice13GovernedQueryContextAssembly`, `Slice14AiTraceTraceExport`, `Slice15GovernedChatChatToArtifact`, `Slice17DashboardReportExport` (Issue 16/18 use existing artifact tables) |
-| Frontend routes | 21 `page.tsx` routes: `/`, `/explorers`, `/artifacts`, `/artifacts/[artifactId]`, `/graph`, `/graph/[nodeId]`, `/documents`, `/documents/[documentId]`, `/context-packages`, `/context-packages/[packageId]`, `/ai-traces`, `/chat`, `/dashboards`, `/dashboards/[artifactId]`, `/reports`, `/reports/[artifactId]`, `/recommendations`, `/recommendations/[artifactId]`, `/decisions`, `/model-artifacts`, `/imports` |
+| Test files | 25+ files (incl. `MappingSuggestionProviderTests`, `ImportMappingLearningSignalTests`, `CapabilityDefinitionTests`, `BusinessPolicyDefinitionTests`, `OptimizationModelDefinitionTests`, `AgentTemplateDefinitionTests`, `AgentRuntimeAdapterTests`, `ManufacturingReferencePackageTests`) |
+| EF migrations (18.1/18.5) | `Issue181IndustryNeutralPackageProfiles`, `Issue185NeutralBomComparisonSideCounts` |
+| Frontend routes | 29 `page.tsx` routes including `/capabilities`, `/business-policies`, `/optimization-models`, `/agent-templates` (+ detail routes) |
+| Reference package | `packages/manufacturing-reference/` with key `etos-manufacturing-reference` |
 | Home nav links | explorers, artifacts, model-artifacts, imports, documents, ai-traces, chat, dashboards, reports, recommendations |
 
-Backend endpoint modules registered for slices 1–18. Milestone 3 (Issues 13–18) is implemented at foundation depth; Milestone 4 starts with Issue 19.
+Backend endpoint modules registered for slices 1–18 and 18.1–18.5. Milestone 3 (Issues 13–18) and the Architectural Abstraction Sprint (18.1–18.5) are implemented at foundation depth; Milestone 4 starts with Issue 19; Issue 22 is unblocked by 18.5.
 
 ---
 
@@ -526,4 +633,5 @@ Backend endpoint modules registered for slices 1–18. Milestone 3 (Issues 13–
 - Backend registration: `ETOS.Backend/Platform/EnterpriseThreadPlatform.cs`, `ETOS.Backend/Program.cs`
 - Test suite: `ETOS.Backend.Tests/`
 - Frontend shell: `ETOS.Frontend/src/app/`
-- Implementation plans: `.cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md`, `.cursor/plans/issue_16_explorers_context_views.plan.md`, `.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md`, `.cursor/plans/issue_18_recommendations_f30d3826.plan.md`
+- Implementation plans: `.cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md`, `.cursor/plans/issue_16_explorers_context_views.plan.md`, `.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md`, `.cursor/plans/issue_18_recommendations_f30d3826.plan.md`, `.cursor/plans/issue_18.1_cleanup_e7dbd526.plan.md`, `.cursor/plans/issue_18.2_capabilities_3556da49.plan.md`, `.cursor/plans/issue_18.3_business_policies_05e07e22.plan.md`, `.cursor/plans/issue_18.4_optimization_agents_0c306932.plan.md`, `.cursor/plans/issue_18.5_package_1d585402.plan.md`
+- Domain packages: `docs/architecture/domain-packages.md`, `packages/manufacturing-reference/`

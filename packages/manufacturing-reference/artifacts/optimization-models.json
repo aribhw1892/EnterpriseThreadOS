@@ -1,0 +1,15 @@
+[
+  {
+    "optimizationKey": "minimize-transport-distance",
+    "name": "Minimize Transport Distance",
+    "description": "Manufacturing optimization model for transport distance minimization.",
+    "objectiveCategory": "minimize_distance",
+    "objectiveSummary": "Minimize transport distance across candidate locations.",
+    "objectiveMetadata": { "unit": "kilometers" },
+    "solverConfiguration": { "engine": "metadata-only" },
+    "inputRequirements": ["candidateLocations[]"],
+    "referencedCapabilityKeys": ["bom-impact-analysis"],
+    "referencedBusinessPolicyKeys": ["min-maturity-85"],
+    "futureExtensionPlaceholders": []
+  }
+]

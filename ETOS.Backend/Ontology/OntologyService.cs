@@ -439,6 +439,9 @@ public sealed class OntologyService(
             throw new RequestValidationException(string.Join("; ", preview.BlockingReasons));
         }
 
+        EnsureValidJsonOrNull(request.ImportProfileJson, "Import profile must be valid JSON.");
+        EnsureValidJsonOrNull(request.QueryIntentExtensionsJson, "Query intent extensions must be valid JSON.");
+
         var version = new ModelPackageVersion
         {
             Id = Guid.NewGuid(),
@@ -453,6 +456,8 @@ public sealed class OntologyService(
             SemanticLayerVersionId = request.SemanticLayerVersionId,
             LifecycleVocabularyVersionId = request.LifecycleVocabularyVersionId,
             AttributeSchemaVersionId = request.AttributeSchemaVersionId,
+            ImportProfileJson = TrimOptional(request.ImportProfileJson),
+            QueryIntentExtensionsJson = TrimOptional(request.QueryIntentExtensionsJson),
             State = OntologyPublicationState.Draft,
             CreatedByUserId = context.UserId,
             CreatedAt = DateTimeOffset.UtcNow
@@ -954,6 +959,8 @@ public sealed class OntologyService(
             version.AttributeSchemaVersion?.VersionLabel,
             version.ArtifactId,
             version.ArtifactVersionId,
+            version.ImportProfileJson,
+            version.QueryIntentExtensionsJson,
             version.State,
             version.CreatedByUserId,
             version.CreatedAt,
@@ -1094,6 +1101,8 @@ public sealed class OntologyService(
             RuleFor(request => request.SemanticLayerVersionId).NotEmpty();
             RuleFor(request => request.LifecycleVocabularyVersionId).NotEmpty();
             RuleFor(request => request.AttributeSchemaVersionId).NotEmpty();
+            RuleFor(request => request.ImportProfileJson).MaximumLength(16000);
+            RuleFor(request => request.QueryIntentExtensionsJson).MaximumLength(8000);
         }
     }
 }

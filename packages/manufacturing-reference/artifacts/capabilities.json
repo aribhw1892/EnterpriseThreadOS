@@ -1,0 +1,12 @@
+[
+  {
+    "capabilityKey": "bom-impact-analysis",
+    "name": "BOM Impact Analysis",
+    "description": "Analyze BOM change impact across released assemblies.",
+    "outcomeCategory": "structural_analysis",
+    "outcomeSummary": "Analyze BOM change impact across released assemblies.",
+    "outcomeMetadata": { "domain": "manufacturing" },
+    "suggestedQueryIntentRefs": ["bom-impact-context"],
+    "futureExtensionPlaceholders": []
+  }
+]

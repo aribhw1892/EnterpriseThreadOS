@@ -1,0 +1,8 @@
+{
+  "intents": {
+    "bom-impact-context": {
+      "relationshipTypes": ["BOM_CHILD", "BOM_PARENT", "USES", "PART_OF", "HAS_COMPONENT"],
+      "summary": "Assembles trusted BOM relationship context with linked document evidence."
+    }
+  }
+}

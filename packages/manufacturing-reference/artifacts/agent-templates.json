@@ -1,0 +1,16 @@
+[
+  {
+    "templateKey": "manufacturing-investigator",
+    "name": "Manufacturing Investigator",
+    "description": "Investigate manufacturing context with governed retrieval.",
+    "patternCategory": "investigator",
+    "patternSummary": "Investigate manufacturing context with governed retrieval.",
+    "preferredRuntimeAdapterKey": "pydantic-ai-v1",
+    "referencedCapabilityKeys": ["bom-impact-analysis"],
+    "referencedOptimizationModelKeys": ["minimize-transport-distance"],
+    "queryIntentKey": "object-360-context",
+    "retrievalStrategyKey": "trusted-graph-first",
+    "compositionMetadata": { "mode": "analysis" },
+    "futureExtensionPlaceholders": []
+  }
+]

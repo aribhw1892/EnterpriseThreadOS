@@ -111,7 +111,7 @@ public sealed class RecommendationEvidenceResolver(EnterpriseThreadDbContext dbC
                 if (string.IsNullOrWhiteSpace(summary))
                 {
                     summary =
-                        $"Missing in EBOM {run.MissingInEbomCount}, quantity mismatches {run.QuantityMismatchCount}, unresolved identity {run.UnresolvedIdentityCount}.";
+                        $"Missing in secondary side {run.MissingInSecondarySideCount}, missing in primary side {run.MissingInPrimarySideCount}, quantity mismatches {run.QuantityMismatchCount}, unresolved identity {run.UnresolvedIdentityCount}.";
                 }
 
                 return link with

@@ -5,6 +5,7 @@ using ETOS.Backend.Documents;
 using ETOS.Backend.Explorers;
 using ETOS.Backend.Governance;
 using ETOS.Backend.GovernedQuery;
+using ETOS.Backend.Tests.Fixtures;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
@@ -529,7 +530,8 @@ public sealed class ExplorersTests
             new RecordingAuditRecorder(),
             graphMemoryService,
             new AllowAllPolicyService(),
-            new NoOpAiTraceRecorder());
+            new NoOpAiTraceRecorder(),
+            new StubModelPackageContextResolver());
     }
 
     private static ArtifactRegistryService CreateArtifactRegistryService(

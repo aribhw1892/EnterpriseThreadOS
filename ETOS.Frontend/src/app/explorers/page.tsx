@@ -11,6 +11,10 @@ const explorerCards = [
   { href: "/dashboards", title: "Dashboards", description: "Chat-generated dashboard templates with governed preview and export." },
   { href: "/reports", title: "Reports", description: "Chat-generated report templates with governed preview and export." },
   { href: "/recommendations", title: "Recommendations", description: "Evidence-backed recommendations with suggested actions and readiness workflow." },
+  { href: "/capabilities", title: "Capabilities", description: "Business outcome definitions pinned to published ontology and model packages." },
+  { href: "/business-policies", title: "Business policies", description: "Layer 4 business constraint policies referencing published capabilities and packages." },
+  { href: "/optimization-models", title: "Optimization models", description: "Layer 5 optimization objective metadata pinned to capabilities, policies, and packages." },
+  { href: "/agent-templates", title: "Agent templates", description: "Layer 6 reusable agent patterns composing ontology, capability, policy, and retrieval references." },
 ];
 
 export default function ExplorersHubPage() {

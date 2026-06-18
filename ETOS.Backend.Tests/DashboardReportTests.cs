@@ -11,6 +11,7 @@ using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.Tests;
@@ -384,7 +385,8 @@ public sealed class DashboardReportTests
             audit,
             new RecordingGraphMemoryService(context.GraphNodeId),
             policyService ?? new AllowAllPolicyService(),
-            new AiTraceRecorder(dbContext));
+            new AiTraceRecorder(dbContext),
+            new StubModelPackageContextResolver());
 
         return new DashboardReportService(
             dbContext,
@@ -415,7 +417,8 @@ public sealed class DashboardReportTests
                 new RecordingAuditRecorder(),
                 graphMemoryService,
                 new AllowAllPolicyService(),
-                new AiTraceRecorder(dbContext)),
+                new AiTraceRecorder(dbContext),
+                new StubModelPackageContextResolver()),
             new GovernedChatArtifactSeeder(dbContext),
             new DeterministicLlmCompletionService(),
             new OutputSchemaValidator(),

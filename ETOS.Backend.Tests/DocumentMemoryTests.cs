@@ -3,6 +3,7 @@ using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
+using ETOS.Backend.Packages;
 using ETOS.Backend.Governance;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
@@ -191,7 +192,7 @@ public sealed class DocumentMemoryTests
             Description = "Demo import.",
             Status = ImportBatchStatus.Promoted,
             ActiveModelPackageVersionId = Guid.NewGuid(),
-            ActiveModelPackageKey = "canonical-manufacturing-package",
+            ActiveModelPackageKey = ManufacturingReferencePackageKeys.PackageKey,
             ActiveModelPackageVersionLabel = "v1",
             CreatedByUserId = context.UserId,
             CreatedAt = DateTimeOffset.UtcNow

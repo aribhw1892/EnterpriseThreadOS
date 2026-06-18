@@ -1,0 +1,37 @@
+{
+  "ai-agent-workflow.md": {
+    "mtime": 1781372017.7679493,
+    "ast_hash": "ace163647fa68821948dbd798bd395bf",
+    "semantic_hash": "ace163647fa68821948dbd798bd395bf"
+  },
+  "architecture/adr/0002-artifact-lifecycle.md": {
+    "mtime": 1781033703.8469539,
+    "ast_hash": "511af76372d1c1d370ffd13911ad4bd3",
+    "semantic_hash": "511af76372d1c1d370ffd13911ad4bd3"
+  },
+  "architecture/adr/README.md": {
+    "mtime": 1781029485.3241456,
+    "ast_hash": "0b42a848c4e2a87dfd14ede403ff3d3d",
+    "semantic_hash": "0b42a848c4e2a87dfd14ede403ff3d3d"
+  },
+  "architecture/extension-points.md": {
+    "mtime": 1781102946.9281342,
+    "ast_hash": "4c6f118fb15e2e724bc77a92d7834622",
+    "semantic_hash": "4c6f118fb15e2e724bc77a92d7834622"
+  },
+  "backend/architecture.md": {
+    "mtime": 1781372008.418897,
+    "ast_hash": "88831433d6c6bf127b45e81bf64bf9bf",
+    "semantic_hash": "88831433d6c6bf127b45e81bf64bf9bf"
+  },
+  "frontend/architecture.md": {
+    "mtime": 1781372016.9357574,
+    "ast_hash": "c86636a2fc504a85c6fa132582438891",
+    "semantic_hash": "c86636a2fc504a85c6fa132582438891"
+  },
+  "local-development.md": {
+    "mtime": 1781372013.6743698,
+    "ast_hash": "20d749defe7bad48ac97a73e3d16b400",
+    "semantic_hash": "20d749defe7bad48ac97a73e3d16b400"
+  }
+}

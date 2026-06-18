@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-`ETOS.Frontend` is the current Next.js frontend shell for EnterpriseThreadOS. It proves the frontend can reach the ASP.NET Core backend and display safe local platform health, tenant admin lists, governance records, artifact registry data, classification/policy records, model artifact administration, import/staging administration, identity-resolution review data, data-quality hooks, document memory records, governed chat, explorers, dashboard/report shells, and recommendation shells.
+`ETOS.Frontend` is the current Next.js frontend shell for EnterpriseThreadOS. It proves the frontend can reach the ASP.NET Core backend and display safe local platform health, tenant admin lists, governance records, artifact registry data, classification/policy records, model artifact administration, import/staging administration, identity-resolution review data, data-quality hooks, document memory records, governed chat, explorers, dashboard/report shells, recommendation shells, and Layer 3–6 governed artifact shells (capabilities, business policies, optimization models, agent templates).
 
 ## Stack
 
@@ -24,6 +24,14 @@ Read `ETOS.Frontend/AGENTS.md` before frontend edits. This project uses a newer 
 - `src/app/reports/page.tsx` and `src/app/reports/[artifactId]/page.tsx`: report list and detail shells.
 - `src/app/recommendations/page.tsx` and `src/app/recommendations/[artifactId]/page.tsx`: recommendation list and detail shells with evidence, suggested actions, and lifecycle transitions.
 - `src/components/recommendations/RecommendationDetailView.tsx`: shared recommendation detail panel.
+- `src/app/capabilities/page.tsx` and `src/app/capabilities/[artifactId]/page.tsx`: capability definition list and detail shells.
+- `src/components/capabilities/CapabilityDefinitionDetailView.tsx`: shared capability detail panel.
+- `src/app/business-policies/page.tsx` and `src/app/business-policies/[artifactId]/page.tsx`: business policy definition list and detail shells.
+- `src/components/business-policies/BusinessPolicyDefinitionDetailView.tsx`: shared business policy detail panel.
+- `src/app/optimization-models/page.tsx` and `src/app/optimization-models/[artifactId]/page.tsx`: optimization model list and detail shells.
+- `src/components/optimization-models/OptimizationModelDefinitionDetailView.tsx`: shared optimization model detail panel.
+- `src/app/agent-templates/page.tsx` and `src/app/agent-templates/[artifactId]/page.tsx`: agent template list and detail shells.
+- `src/components/agent-templates/AgentTemplateDefinitionDetailView.tsx`: shared agent template detail panel.
 - `src/app/layout.tsx`: app layout and metadata.
 - `src/app/globals.css`: global Tailwind CSS entry.
 - `src/lib/etos-api.ts`: typed backend fetch helpers and local admin header configuration.
@@ -88,7 +96,7 @@ GET /api/admin/ontology/model-packages
 GET /api/admin/ontology/model-packages/active
 ```
 
-It also exposes a server action for `Create seed model package`, which calls the ontology admin APIs to create draft model artifacts, publish them, and activate the latest model package.
+It also exposes a server action for **Create seed model package**, which calls `POST /api/admin/development/install-reference-package` with package key `etos-manufacturing-reference` to publish ontology layers, import/query profiles, and governed capability/policy/optimization/agent-template seeds from `packages/manufacturing-reference/`. Re-running the action is idempotent for the same tenant.
 
 `src/app/imports/page.tsx` fetches:
 
@@ -161,6 +169,8 @@ PATCH /api/admin/recommendations/{artifactId}/versions/{versionId}/suggested-act
 
 The recommendation pages render summary metadata, evidence links with trust badges, suggested actions, lifecycle/readiness actions, and links to explorers, 360° context views, and AI traces where resolvable.
 
+`src/app/capabilities/page.tsx`, `src/app/business-policies/page.tsx`, `src/app/optimization-models/page.tsx`, and `src/app/agent-templates/page.tsx` fetch list endpoints and link to detail pages with mark-ready/publish actions for admins. These routes are also linked from `/explorers`.
+
 The fetch uses `cache: "no-store"` and `dynamic = "force-dynamic"` so local health reflects current backend state.
 
 ## UI Guidance
@@ -218,4 +228,4 @@ Pop-Location
 
 The PRD calls for future governance dashboard live KPI analytics, agent and workflow builders, and richer graph/workflow visualization.
 
-Explorers, 360° context views, AI Trace views, governed chat, dashboard/report shells, and recommendation shells are present as minimal Issue 14–18 slices. Add richer behavior only under their owning issue and keep them connected to governed backend APIs rather than direct storage access.
+Explorers, 360° context views, AI Trace views, governed chat, dashboard/report shells, recommendation shells, and Layer 3–6 artifact shells are present as minimal Issue 14–18 and 18.2–18.4 slices. Add richer behavior only under their owning issue and keep them connected to governed backend APIs rather than direct storage access.

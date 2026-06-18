@@ -25,7 +25,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 3,
       "norm_label": "local development guide",
       "id": "local_development_guide"
     },
@@ -103,7 +103,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 2,
       "norm_label": "ai agent workflow",
       "id": "ai_agent_workflow"
     },
@@ -116,7 +116,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 2,
       "norm_label": "local development",
       "id": "local_development"
     },
@@ -129,7 +129,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 2,
       "norm_label": "backend architecture",
       "id": "backend_architecture"
     },
@@ -142,9 +142,165 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 2,
       "norm_label": "frontend architecture",
       "id": "frontend_architecture"
+    },
+    {
+      "label": "Domain Packages Document",
+      "file_type": "document",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 3,
+      "norm_label": "domain packages document",
+      "id": "domain_packages_document"
+    },
+    {
+      "label": "Backend Architecture Document",
+      "file_type": "document",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "backend_architecture_document",
+      "community": 3,
+      "norm_label": "backend architecture document"
+    },
+    {
+      "label": "Frontend Architecture Document",
+      "file_type": "document",
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "frontend_architecture_document",
+      "community": 3,
+      "norm_label": "frontend architecture document"
+    },
+    {
+      "label": "EnterpriseThreadOS",
+      "file_type": "concept",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "domainpackages_enterprisethreados",
+      "community": 4,
+      "norm_label": "enterprisethreados"
+    },
+    {
+      "label": "ETOS.Backend (Platform Core)",
+      "file_type": "concept",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "domainpackages_etos_backend",
+      "community": 4,
+      "norm_label": "etos.backend (platform core)"
+    },
+    {
+      "label": "Manufacturing Reference Domain Package",
+      "file_type": "concept",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "domainpackages_packages_manufacturing_reference",
+      "community": 4,
+      "norm_label": "manufacturing reference domain package"
+    },
+    {
+      "label": "ModelPackageVersion",
+      "file_type": "concept",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "domainpackages_modelpackageversion",
+      "community": 1,
+      "norm_label": "modelpackageversion"
+    },
+    {
+      "label": "CapabilityDefinitionVersion",
+      "file_type": "concept",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "domainpackages_capabilitydefinitionversion",
+      "community": 1,
+      "norm_label": "capabilitydefinitionversion"
+    },
+    {
+      "label": "BusinessPolicyDefinitionVersion",
+      "file_type": "concept",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "domainpackages_businesspolicydefinitionversion",
+      "community": 1,
+      "norm_label": "businesspolicydefinitionversion"
+    },
+    {
+      "label": "OptimizationModelVersion",
+      "file_type": "concept",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "domainpackages_optimizationmodelversion",
+      "community": 1,
+      "norm_label": "optimizationmodelversion"
+    },
+    {
+      "label": "AgentTemplateVersion",
+      "file_type": "concept",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "domainpackages_agenttemplateversion",
+      "community": 1,
+      "norm_label": "agenttemplateversion"
+    },
+    {
+      "label": "ReferencePackageManifestLoader",
+      "file_type": "concept",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "domainpackages_referencepackagemanifestloader",
+      "community": 4,
+      "norm_label": "referencepackagemanifestloader"
     }
   ],
   "links": [
@@ -216,7 +372,37 @@
       "source_location": null,
       "weight": 1.0,
       "source": "local_development_guide",
+      "target": "backend_architecture_document"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "local_development_guide",
+      "target": "domain_packages_document"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "local_development_guide",
       "target": "frontend_architecture_doc"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "local_development_guide",
+      "target": "frontend_architecture_document"
     },
     {
       "relation": "references",
@@ -282,11 +468,31 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backend_architecture_doc",
+      "target": "domain_packages_document"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
       "source_file": "frontend/architecture.md",
       "source_location": null,
       "weight": 1.0,
       "source": "frontend_architecture_doc",
       "target": "backend_architecture_doc"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "frontend_architecture_doc",
+      "target": "domain_packages_document"
     },
     {
       "relation": "references",
@@ -337,8 +543,128 @@
       "weight": 1.0,
       "source": "frontend_architecture",
       "target": "backend_architecture"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backend_architecture_document",
+      "target": "domain_packages_document"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "frontend_architecture_document",
+      "target": "domain_packages_document"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "frontend_architecture_document",
+      "target": "backend_architecture_document"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "domainpackages_enterprisethreados",
+      "target": "domainpackages_etos_backend"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "domainpackages_enterprisethreados",
+      "target": "domainpackages_packages_manufacturing_reference"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "domainpackages_referencepackagemanifestloader",
+      "target": "domainpackages_packages_manufacturing_reference"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "domainpackages_modelpackageversion",
+      "target": "domainpackages_capabilitydefinitionversion"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "domainpackages_capabilitydefinitionversion",
+      "target": "domainpackages_agenttemplateversion"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "domainpackages_capabilitydefinitionversion",
+      "target": "domainpackages_businesspolicydefinitionversion"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "domainpackages_capabilitydefinitionversion",
+      "target": "domainpackages_optimizationmodelversion"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "domainpackages_businesspolicydefinitionversion",
+      "target": "domainpackages_optimizationmodelversion"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "domainpackages_optimizationmodelversion",
+      "target": "domainpackages_agenttemplateversion"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "bd5ba5ba3c5f2f907d5cde4fe8df8640bc71f5d2"
+  "built_at_commit": "f3747c6136c9c2b9d1883273e9054b16aaf7f081"
 }

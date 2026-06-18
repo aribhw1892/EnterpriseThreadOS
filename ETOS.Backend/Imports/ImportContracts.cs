@@ -58,7 +58,8 @@ public sealed record ImportFileEvidenceResponse(
 
 public sealed record ImportPreviewRequest(
     Guid? EvidenceId,
-    int SampleRowLimit);
+    int SampleRowLimit,
+    string? SuggestionProviderKey = null);
 
 public sealed record ImportPreviewResponse(
     Guid BatchId,
@@ -106,6 +107,8 @@ public sealed record CreateImportLifecycleMappingRequest(
     string CanonicalLifecycleKey);
 
 public sealed record ApproveImportMappingRequest(string? Summary);
+
+public sealed record RejectImportMappingRequest(string? Summary, string? Reason);
 
 public sealed record ImportMappingVersionResponse(
     Guid Id,
@@ -209,8 +212,8 @@ public sealed record BomComparisonRunResponse(
     string? SourceContext,
     string CadSummaryJson,
     string EbomSummaryJson,
-    int MissingInCadCount,
-    int MissingInEbomCount,
+    int MissingInPrimarySideCount,
+    int MissingInSecondarySideCount,
     int QuantityMismatchCount,
     int UsageReferenceMismatchCount,
     int UnresolvedIdentityCount,

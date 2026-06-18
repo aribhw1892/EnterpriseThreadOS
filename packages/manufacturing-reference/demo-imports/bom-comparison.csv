@@ -1,0 +1,5 @@
+bomSide,partNumber,lifecycle,cost,parent,child,quantity,unit,usage
+CAD,A,released,1,A,B,2,ea,R1
+EBOM,A,released,1,A,B,3,ea,R2
+CAD,A,released,1,A,C,1,ea,R3
+EBOM,A,released,1,A,D,1,ea,R4

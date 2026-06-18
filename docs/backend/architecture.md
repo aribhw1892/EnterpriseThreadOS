@@ -15,8 +15,8 @@
 - `Artifacts/`: BaseArtifact registry, immutable versions, generic relationships, dependency edges, readiness checks, and publish endpoints.
 - `Classification/`: versioned classification schemes, policy versions, restricted context rules, policy evaluation, and artifact policy-risk integration.
 - `GraphMemory/`: internal graph memory contracts, Neo4j implementation, graph health/bootstrap, and disabled Memgraph placeholder.
-- `Ontology/`: versioned ontology, semantic layer, lifecycle vocabulary, tenant attribute schema, BOM metadata, and model package publishing.
-- `Imports/`: tenant-scoped import batches, raw file evidence metadata, CSV/Excel parsing, mapping preview/approval, validation, and staging graph creation.
+- `Ontology/`: versioned ontology, semantic layer, lifecycle vocabulary, tenant attribute schema, BOM metadata, model package publishing, import/query profile JSON, and `IModelPackageContextResolver`.
+- `Imports/`: tenant-scoped import batches, raw file evidence metadata, CSV/Excel parsing, `IMappingSuggestionProvider` mapping preview, mapping approve/reject learning-signal inputs, package-driven validation/staging/BOM comparison, and staging graph creation.
 - `IdentityResolution/`: tenant-scoped identity rules, deterministic candidate links, review decisions, learning evidence, trust scores, and identity-link graph relationships.
 - `DataQuality/`: tenant-scoped durable data-quality issues, source links, trust-impact metadata, security-event review hooks, inert monitoring placeholders, and issue endpoints.
 - `Documents/`: tenant-scoped document artifacts, immutable versions, document-object links, extraction issue hooks, vector indexing metadata records, disabled native CAD parsing placeholder, and document endpoints.
@@ -25,7 +25,14 @@
 - `GovernedChat/`: governed chat sessions/turns, platform-seeded prompt/output schema artifacts, deterministic default LLM completion, chat-to-artifact draft creation, and minimal API endpoint mapping.
 - `Explorers/`: read-only explorer orchestration for artifacts, graph, documents, context packages, decisions, 360° context views, and governance flow projections.
 - `Dashboards/`: dashboard/report template parsing, governed-query preview orchestration, readiness validation, JSON export builder, governance KPI placeholder catalog, and minimal API endpoint mapping.
-- `Recommendations/`: versioned `RecommendationVersion` artifacts with embedded evidence links and suggested actions, trust/conflict-aware readiness validation, creation factories, and minimal API endpoint mapping.
+- `Recommendations/`: versioned `RecommendationVersion` artifacts with embedded evidence links and suggested actions, trust/conflict-aware readiness validation, package-neutral creation factories, and minimal API endpoint mapping.
+- `Capabilities/`: governed `CapabilityDefinitionVersion` artifacts (Layer 3 business outcomes), readiness/publish workflow, model-package compatibility validation, and minimal API endpoint mapping.
+- `BusinessPolicies/`: governed `BusinessPolicyDefinitionVersion` artifacts (Layer 4 business constraints), separate from classification `PolicyVersion`, and minimal API endpoint mapping.
+- `OptimizationModels/`: governed `OptimizationModelVersion` artifacts (Layer 5 optimization objective metadata; no solver execution) and minimal API endpoint mapping.
+- `AgentTemplates/`: governed `AgentTemplateVersion` artifacts (Layer 6 reusable agent patterns) and minimal API endpoint mapping.
+- `AgentRuntime/`: compiled `IAgentRuntimeAdapter` contracts with PydanticAI stub and deferred Hermes/LangGraph adapters. No public execute endpoint.
+- `Packages/`: reference package manifest loading, manufacturing reference package installer, and development install endpoint.
+- `Platform/Development/`: development-only endpoints including reference package install.
 - `Platform/Extensions/`: architecture-honest extension point catalog for deferred capabilities.
 
 ## Startup Flow
@@ -124,11 +131,13 @@ Raw graph query execution must not be exposed through public or admin endpoints.
 The ontology module currently includes:
 
 - `OntologyVersion`, `SemanticLayerVersion`, `LifecycleVocabularyVersion`, `AttributeSchemaVersion`, and `ModelPackageVersion` records.
+- optional `ImportProfileJson` and `QueryIntentExtensionsJson` on published model packages for domain-specific import detection, BOM comparison sides, recommendation templates, and query intent relationship lists.
+- `IModelPackageContextResolver` for loading published package parts and parsed profiles used by import, governed query, and recommendation modules.
 - object type, semantic relationship, BOM relationship, lifecycle state/transition, and attribute definitions.
 - draft/publish/retire behavior and dependency validation for model packages.
 - admin endpoints under `/api/admin/ontology`.
 
-Issue 7 stores schema governance records in PostgreSQL. It does not import source records or promote trusted graph state. Source import and untrusted staging graph creation are handled by the import module.
+Domain-specific reference content lives under `packages/` and is installed through the reference package installer. See [Domain packages](../architecture/domain-packages.md). The core does not hardcode manufacturing semantics in import staging, BOM comparison, governed query, or recommendation copy.
 
 ### Import Mapping And Staging
 
@@ -138,10 +147,14 @@ The import module currently includes:
 - raw file evidence metadata with storage key, checksum, content type, size, original filename, tenant, batch, and audit linkage.
 - `IImportFileStorage` as the raw payload storage boundary. The current local implementation is file-backed for developer/test workflows; production MinIO-compatible storage can be added behind the same interface.
 - CSV and Excel import parsing through `IImportFileParser`.
-- deterministic/heuristic mapping preview suggestions labeled with the provider name `deterministic-heuristic-v1`.
+- `IMappingSuggestionProvider` pluggable mapping preview suggestions. Default provider key: `rule-based-v1`. Deferred contracts: `pydantic-ai-v1`, `hermes-v1` (throw disabled/deferred messages unless configured).
 - draft/approved/rejected mapping versions, with approved mappings immutable by service invariant and no update endpoint.
+- `POST /api/admin/imports/mappings/{mappingVersionId}/reject` for mapping rejection.
+- `ImportMappingLearningSignalInput` records emitted on mapping approve, reject, and corrected drafts via `IImportMappingLearningSignalEmitter`.
+- package-driven structural import staging and two-side BOM comparison using active model package `ImportProfileJson` and ontology BOM relationship definitions (no hardcoded manufacturing literals in platform core).
 - row-level validation issues for missing required values, invalid value types, invalid lifecycle values, and model/package consistency failures.
 - staging graph creation through `IGraphMemoryService` using `GraphSpace.Staging`, `TrustState.Unverified`, and `GraphSourceReference`.
+- neutral comparison counters (`MissingInPrimarySideCount`, `MissingInSecondarySideCount`) driven by package comparison side order.
 - admin endpoints under `/api/admin/imports`.
 
 Parser/library choices:
@@ -202,6 +215,7 @@ The governed-query module currently includes:
 
 - tenant-scoped query intent versions, retrieval strategy versions, retrieval runs, context packages, and context access decisions.
 - fixed platform query intents (`object-360-context`, `bom-impact-context`, `document-evidence-context`).
+- package-driven relationship type resolution for `bom-impact-context` via active model package `QueryIntentExtensionsJson`.
 - graph-first, document-second retrieval with policy-filtered LLM-safe context assembly.
 - admin endpoints under `/api/admin/governed-query`.
 
@@ -249,8 +263,8 @@ The recommendation module (Issue 18) currently includes:
 - tenant-scoped `RecommendationVersion` artifacts stored in existing artifact registry tables via `PayloadJson`.
 - embedded `evidenceLinks[]` and `suggestedActions[]` in the payload contract, validated by `RecommendationPayloadParser`.
 - evidence-required `MarkReviewed` and trust/conflict-aware `MarkReady` via `RecommendationReadinessValidator`.
-- `RecommendationEvidenceResolver` for linked data-quality issues, BOM comparison runs, AI traces, and graph node existence checks.
-- creation factories for manual create, data-quality issues, BOM comparison runs, governed chat drafts, and dashboard/report provenance (`RecommendationFactory`).
+- `RecommendationEvidenceResolver` for linked data-quality issues, BOM comparison runs, AI traces, and graph node existence checks (neutral secondary-side comparison summaries).
+- creation factories for manual create, data-quality issues, BOM comparison runs, governed chat drafts, and dashboard/report provenance (`RecommendationFactory`), using package import-profile templates where available.
 - idempotent factory keys for data-quality and BOM comparison sources; optional post-comparison hook in `ImportService` when drift counts are non-zero.
 - suggested-action status transitions with audit records (`CONVERTED_TO_REVIEW_TASK` is status-only until Issue 19).
 - `creationSource: AGENT_DEFERRED` contract for deferred agent/workflow auto-creation (Milestone 5).
@@ -267,6 +281,73 @@ The recommendation module (Issue 18) currently includes:
   - `PATCH /api/admin/recommendations/{artifactId}/versions/{versionId}/suggested-actions/{actionId}`
 
 Recommendation permissions: `recommendations.read`, `recommendations.create`, `recommendations.review`, `recommendations.readiness`, `recommendations.admin`.
+
+### Capability Definitions (Issue 18.2)
+
+The capabilities module currently includes:
+
+- tenant-scoped `CapabilityDefinitionVersion` artifacts stored in existing artifact registry tables via `PayloadJson`.
+- payload contract: capability key, outcome category/summary, compatible model package and ontology version refs, optional query intent refs.
+- readiness validation against published ontology/model package dependencies.
+- admin endpoints under `/api/admin/capabilities` (list, create, get, create-version, mark-ready, publish, dependencies).
+
+Permissions: `capabilities.read`, `capabilities.create`, `capabilities.readiness`, `capabilities.admin`. Publish uses existing `artifacts.publish`.
+
+This module is separate from future `AgentCapabilityProfileVersion` runtime risk metadata (Milestone 5).
+
+### Business Policy Definitions (Issue 18.3)
+
+The business-policies module currently includes:
+
+- tenant-scoped `BusinessPolicyDefinitionVersion` artifacts (Layer 4 business constraints).
+- payload contract: policy key, constraint category/summary/rules, referenced capability version IDs, compatible package/ontology refs.
+- readiness validation against published capability, model package, and ontology dependencies.
+- compile-time and payload guards separating business policies from classification `PolicyVersion` (governance/ABAC).
+- admin endpoints under `/api/admin/business-policies`.
+
+Permissions: `business-policies.read`, `business-policies.create`, `business-policies.readiness`, `business-policies.admin`.
+
+### Optimization Model Definitions (Issue 18.4)
+
+The optimization-models module currently includes:
+
+- tenant-scoped `OptimizationModelVersion` artifacts (Layer 5 objective metadata only; no solver invocation).
+- payload contract: optimization key, objective category/summary/metadata, solver configuration metadata, input requirements, referenced capability/business-policy version IDs, compatible package/ontology refs.
+- payload guards rejecting agent/LLM-only keys to preserve layer separation.
+- admin endpoints under `/api/admin/optimization-models`.
+
+Permissions: `optimization-models.read`, `optimization-models.create`, `optimization-models.readiness`, `optimization-models.admin`.
+
+### Agent Template Definitions (Issue 18.4)
+
+The agent-templates module currently includes:
+
+- tenant-scoped `AgentTemplateVersion` artifacts (Layer 6 reusable agent patterns; not tenant `AgentVersion` runtime instances).
+- payload contract composing capability, business policy, optional optimization model, prompt/output schema artifact version IDs, query intent/retrieval strategy IDs, optional tool version IDs, and preferred runtime adapter key.
+- readiness validation across published artifact versions and enabled query intent/retrieval strategy records.
+- admin endpoints under `/api/admin/agent-templates`.
+
+Permissions: `agent-templates.read`, `agent-templates.create`, `agent-templates.readiness`, `agent-templates.admin`.
+
+### Agent Runtime Adapter Contracts (Issue 18.4)
+
+The agent-runtime module currently includes:
+
+- `IAgentRuntimeAdapter` and `IAgentRuntimeAdapterSelector` contracts.
+- `PydanticAiRuntimeAdapter` stub that throws a disabled-not-configured message.
+- deferred `HermesRuntimeAdapter` and `LangGraphRuntimeAdapter` stubs.
+- DI registration only; no public HTTP execute endpoint (Issue 22).
+
+### Reference Package Installer (Issue 18.5)
+
+The packages module currently includes:
+
+- `ReferencePackageManifestLoader` for JSON manifest and fragment loading from `packages/<package>/`.
+- `ManufacturingReferencePackageInstaller` orchestrating publish order: ontology layers → model package with profiles → capability → business policy → optimization model → agent template chain.
+- idempotent development install endpoint: `POST /api/admin/development/install-reference-package` with body `{ "packageKey": "etos-manufacturing-reference" }`.
+- optional `DevelopmentPackageSeeder` / `SeedIdentity:InstallReferencePackage` auto-install on development startup.
+
+See [Domain packages](../architecture/domain-packages.md) for package layout and boundaries.
 
 ### Tenancy
 
@@ -289,7 +370,7 @@ Do not turn extension metadata into fake implementations. Future providers need 
 - artifact registry tables for artifacts, artifact versions, relationships, and dependency edges.
 - classification and policy tables for schemes, policies, restricted rules, and evaluations.
 - ontology/model package tables for canonical object/schema/version governance.
-- import tables for batches, file evidence, immutable mapping versions, column/lifecycle mappings, validation issues, and staging graph runs.
+- import tables for batches, file evidence, immutable mapping versions, column/lifecycle mappings, import mapping learning-signal inputs, validation issues, and staging graph runs.
 - identity-resolution tables for rules, candidate links, review decisions, learning evidence, and trust score records.
 - data-quality tables for durable issues, issue source links, trust-impact records, and monitoring issue type placeholders.
 - document tables for document artifacts, document versions, document-object links, and vector index records.
@@ -358,8 +439,14 @@ Issue 12 document-memory tests cover document creation, version metadata, extrac
 
 Issue 18 recommendation tests cover evidence gates, conflict blocking, suggested-action validation, creation from data-quality issues and BOM comparison runs, governed chat drafts, tenant isolation, audit/trace links, and governance-flow integration.
 
+Issue 18.1 tests cover mapping suggestion providers, package-driven staging/BOM comparison, governed query package extensions, mapping learning-signal emit on approve/reject/correct, and recommendation template neutralization (`MappingSuggestionProviderTests`, `ImportMappingLearningSignalTests`, extended `ImportTests`, `GovernedQueryTests`).
+
+Issue 18.2–18.4 tests cover capability, business policy, optimization model, and agent template artifact CRUD/publish/readiness, layer separation guards, dependency resolution, and agent runtime adapter registration/stub behavior (`CapabilityDefinitionTests`, `BusinessPolicyDefinitionTests`, `OptimizationModelDefinitionTests`, `AgentTemplateDefinitionTests`, `AgentRuntimeAdapterTests`).
+
+Issue 18.5 tests cover reference package install idempotency, demo import/BOM comparison through installed package only, and published artifact seed chain (`ManufacturingReferencePackageTests`).
+
 ## Planned Backend Areas
 
-The PRD and issue backlog define later modules for review tasks, decisions, outcomes, governance analytics, tools, agents, workflows, and multi-agent collaboration.
+The PRD and issue backlog define later modules for review tasks, decisions, outcomes, governance analytics, tool registry, agent execution, workflows, and multi-agent collaboration.
 
-Do not document or code these as implemented until the source code exists.
+Do not document or code these as implemented until the source code exists. Issue 22 (tool registry and agent runtime execution) is unblocked by Issue 18.5 but not started.

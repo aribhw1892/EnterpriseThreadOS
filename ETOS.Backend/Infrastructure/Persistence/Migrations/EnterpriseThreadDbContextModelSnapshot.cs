@@ -2771,10 +2771,10 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("ImportBatchId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("MissingInCadCount")
+                    b.Property<int>("MissingInPrimarySideCount")
                         .HasColumnType("integer");
 
-                    b.Property<int>("MissingInEbomCount")
+                    b.Property<int>("MissingInSecondarySideCount")
                         .HasColumnType("integer");
 
                     b.Property<int>("QuantityMismatchCount")
@@ -3016,6 +3016,51 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("import_lifecycle_mappings", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Imports.ImportMappingLearningSignalInput", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("AutonomousRetraining")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DiffJson")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<Guid>("ImportMappingVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ProviderKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportMappingVersionId");
+
+                    b.HasIndex("TenantId", "ImportMappingVersionId", "CreatedAt");
+
+                    b.ToTable("import_mapping_learning_signal_inputs", (string)null);
                 });
 
             modelBuilder.Entity("ETOS.Backend.Imports.ImportMappingVersion", b =>
@@ -3720,6 +3765,10 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("CreatedByUserId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ImportProfileJson")
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(120)
@@ -3751,6 +3800,10 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid?>("PublishedByUserId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("QueryIntentExtensionsJson")
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
 
                     b.Property<Guid>("SemanticLayerVersionId")
                         .HasColumnType("uuid");
@@ -4747,6 +4800,17 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .WithMany("LifecycleMappings")
                         .HasForeignKey("ImportMappingVersionId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ImportMappingVersion");
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Imports.ImportMappingLearningSignalInput", b =>
+                {
+                    b.HasOne("ETOS.Backend.Imports.ImportMappingVersion", "ImportMappingVersion")
+                        .WithMany()
+                        .HasForeignKey("ImportMappingVersionId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ImportMappingVersion");

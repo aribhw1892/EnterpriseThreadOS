@@ -1,0 +1,23 @@
+[
+  {
+    "key": "part",
+    "displayName": "Part",
+    "description": "A source-owned engineering or manufacturing part.",
+    "versionIdentityFieldsJson": "[\"partNumber\",\"revision\"]",
+    "safeSummary": "Part identity and lifecycle metadata."
+  },
+  {
+    "key": "document",
+    "displayName": "Document",
+    "description": "A governed document or drawing reference.",
+    "versionIdentityFieldsJson": "[\"documentNumber\",\"revision\"]",
+    "safeSummary": "Document identity metadata."
+  },
+  {
+    "key": "change",
+    "displayName": "Change",
+    "description": "An engineering or manufacturing change package.",
+    "versionIdentityFieldsJson": "[\"changeNumber\"]",
+    "safeSummary": "Change control metadata."
+  }
+]

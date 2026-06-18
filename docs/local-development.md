@@ -95,6 +95,7 @@ Useful endpoints:
 - `POST http://localhost:5000/api/admin/imports/batches/{batchId}/mapping-preview`
 - `POST http://localhost:5000/api/admin/imports/mappings`
 - `POST http://localhost:5000/api/admin/imports/mappings/{mappingVersionId}/approve`
+- `POST http://localhost:5000/api/admin/imports/mappings/{mappingVersionId}/reject`
 - `POST http://localhost:5000/api/admin/imports/batches/{batchId}/validate`
 - `POST http://localhost:5000/api/admin/imports/batches/{batchId}/stage`
 - `GET http://localhost:5000/api/admin/identity-resolution/rules`
@@ -113,6 +114,11 @@ Useful endpoints:
 - `POST http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/mark-reviewed`
 - `POST http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/mark-ready`
 - `PATCH http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}/suggested-actions/{actionId}`
+- `POST http://localhost:5000/api/admin/development/install-reference-package`
+- `GET http://localhost:5000/api/admin/capabilities`
+- `GET http://localhost:5000/api/admin/business-policies`
+- `GET http://localhost:5000/api/admin/optimization-models`
+- `GET http://localhost:5000/api/admin/agent-templates`
 
 Tenant-protected identity endpoints use local header authentication in the current implementation. Use these headers for local API testing when an endpoint requires authorization:
 
@@ -127,7 +133,7 @@ Development startup seeds a local tenant admin after EF migrations are applied:
 - tenant id: `22222222-2222-2222-2222-222222222222`
 - tenant identifier: `local`
 
-The seed runs only in `Development` when `SeedIdentity:Enabled` is `true`. If startup logs say the seed did not complete, confirm PostgreSQL is running and the EF migrations have been applied, then restart the backend.
+The seed runs only in `Development` when `SeedIdentity:Enabled` is `true`. When `SeedIdentity:InstallReferencePackage` is `true` (default), the backend also installs the manufacturing reference package (`etos-manufacturing-reference`) for the development tenant. If startup logs say the seed did not complete, confirm PostgreSQL is running and the EF migrations have been applied, then restart the backend.
 
 ## Frontend
 
@@ -152,7 +158,7 @@ Pop-Location
 
 Open `http://localhost:3000`.
 
-Open `http://localhost:3000/model-artifacts` to inspect and seed canonical ontology/model package versions. The `Create seed model package` action creates draft ontology, semantic layer, lifecycle vocabulary, attribute schema, and model package versions, publishes them, and makes the latest model package active. Repeated clicks create new versions and retire previous published versions for the same keys.
+Open `http://localhost:3000/model-artifacts` to inspect and seed the manufacturing reference model package. The `Create seed model package` action calls `POST /api/admin/development/install-reference-package` with package key `etos-manufacturing-reference`, publishing ontology layers, import/query profiles, and governed capability/policy/optimization/agent-template seeds from [`packages/manufacturing-reference/`](../packages/manufacturing-reference/). Re-running the action is idempotent for the same tenant.
 
 Open `http://localhost:3000/imports` to inspect import batches and run import/identity demo flows. The recommended `Run identity demo` button creates two CSV-backed source batches, approves their generated mapping drafts, validates records, stages unverified graph nodes for both batches, and generates identity candidates with trust score breakdowns. The manual tools on the page intentionally operate on the newest batch only and are meant for step-by-step debugging. Multipart upload is supported by the backend API at `/api/admin/imports/batches/{batchId}/files`; the UI intentionally keeps upload behavior small because Next.js server actions have body-size limits.
 
@@ -164,7 +170,9 @@ Open `http://localhost:3000/dashboards` and `http://localhost:3000/reports` for 
 
 Open `http://localhost:3000/recommendations` to list recommendation drafts, create recommendations with evidence links and suggested actions, transition reviewed/ready states, and update suggested-action status.
 
-The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, tenant-filtered audit/security event lists, artifact registry lists, classification/policy lists, model artifact admin screens, import admin screens, governed chat, explorers, dashboards/reports, and recommendations from the backend.
+Open `http://localhost:3000/capabilities`, `/business-policies`, `/optimization-models`, and `/agent-templates` to list and inspect Layer 3–6 governed artifact definitions installed from the reference package or created through admin APIs.
+
+The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, tenant-filtered audit/security event lists, artifact registry lists, classification/policy lists, model artifact admin screens, import admin screens, governed chat, explorers, dashboards/reports, recommendations, and Layer 3–6 artifact shells from the backend.
 
 Expected `/imports` identity-demo result:
 
@@ -228,6 +236,7 @@ If EF migrations fail:
 
 - `README.md`: quick start.
 - `ARCHITECTURE.md`: repo-level architecture.
+- `docs/architecture/domain-packages.md`: core vs domain package boundary.
 - `docs/backend/architecture.md`: backend module guidance.
 - `docs/frontend/architecture.md`: frontend guidance.
 - `docs/ai-agent-workflow.md`: AI agent workflow.

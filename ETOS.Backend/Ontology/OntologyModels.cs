@@ -223,6 +223,8 @@ public sealed class ModelPackageVersion : IMutablePublishedVersion
     public AttributeSchemaVersion? AttributeSchemaVersion { get; set; }
     public Guid? ArtifactId { get; set; }
     public Guid? ArtifactVersionId { get; set; }
+    public string? ImportProfileJson { get; set; }
+    public string? QueryIntentExtensionsJson { get; set; }
     public OntologyPublicationState State { get; set; } = OntologyPublicationState.Draft;
     public Guid CreatedByUserId { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;

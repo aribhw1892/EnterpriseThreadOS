@@ -257,6 +257,8 @@ export type PolicyImpact = {
 
 // --- Ontology and model packages (Issue 6) ---
 
+export const MANUFACTURING_REFERENCE_PACKAGE_KEY = "etos-manufacturing-reference";
+
 export type OntologyVersion = {
   id: string;
   tenantId: string;
@@ -1999,7 +2001,7 @@ export async function cleanDevelopmentDemoData(): Promise<ApiResult<CleanDevelop
 
 // --- Demo and seed flows (multi-step orchestration for local QA) ---
 
-/** Model artifacts page seed button. Publishes ontology through model package in dependency order. */
+/** Model artifacts page seed button. Installs the manufacturing reference package from repo content. */
 export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackageVersion>> {
   const tenantHeaders =
     adminUserId && selectedTenantId
@@ -2009,218 +2011,56 @@ export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackage
     return missingContext<ModelPackageVersion>();
   }
 
-  const versionLabel = `seed-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`;
-
-  // Ontology must exist first because semantic layers and attribute schemas reference it.
-  const ontology = await postApi<OntologyVersion>(
-    "/api/admin/ontology/versions",
-    {
-      key: "canonical-manufacturing",
-      versionLabel,
-      summary: "Initial canonical manufacturing ontology.",
-      objectTypes: [
-        {
-          key: "part",
-          displayName: "Part",
-          description: "A source-owned engineering or manufacturing part.",
-          versionIdentityFieldsJson: `["partNumber","revision"]`,
-          safeSummary: "Part identity and lifecycle metadata.",
-        },
-        {
-          key: "document",
-          displayName: "Document",
-          description: "A governed document or drawing reference.",
-          versionIdentityFieldsJson: `["documentNumber","revision"]`,
-          safeSummary: "Document identity metadata.",
-        },
-        {
-          key: "change",
-          displayName: "Change",
-          description: "An engineering or manufacturing change package.",
-          versionIdentityFieldsJson: `["changeNumber"]`,
-          safeSummary: "Change control metadata.",
-        },
-      ],
-      relationshipTypes: [
-        {
-          relationshipType: "references",
-          fromObjectType: "part",
-          toObjectType: "document",
-          description: "Part references document evidence.",
-          isVersionRelationship: true,
-        },
-      ],
-      bomRelationships: [
-        {
-          relationshipType: "contains",
-          parentObjectType: "part",
-          childObjectType: "part",
-          quantityAttributeKey: "quantity",
-          unitAttributeKey: "unitOfMeasure",
-          findNumberAttributeKey: "findNumber",
-          referenceDesignatorAttributeKey: "referenceDesignator",
-          lifecycleConstraintJson: `{"allowedParentStates":["released","in-review"]}`,
-          requiresApproval: true,
-          auditReferenceAttributeKey: "approvalRecordId",
-        },
-      ],
-    },
+  const installed = await postApi<InstallReferencePackageResponse>(
+    "/api/admin/development/install-reference-package",
+    { packageKey: MANUFACTURING_REFERENCE_PACKAGE_KEY },
     tenantHeaders,
   );
-  if (!ontology.data) {
-    return { data: null, error: ontology.error };
+  if (!installed.data) {
+    return { data: null, error: installed.error };
   }
 
-  await postApi<OntologyVersion>(
-    `/api/admin/ontology/versions/${ontology.data.id}/publish`,
-    { summary: "Publish initial canonical ontology." },
-    tenantHeaders,
-  );
+  return { data: installed.data.modelPackage, error: null };
+}
 
-  // Semantic layer binds graph naming to the published ontology shape.
-  const semanticLayer = await postApi<SemanticLayerVersion>(
-    "/api/admin/ontology/semantic-layers",
-    {
-      key: "canonical-manufacturing-semantic",
-      versionLabel,
-      summary: "Graph memory naming for canonical manufacturing objects.",
-      ontologyVersionId: ontology.data.id,
-      graphNodeTypeMappingsJson: `{"part":"Part","document":"Document","change":"Change"}`,
-      graphRelationshipTypeMappingsJson: `{"contains":"contains","references":"references"}`,
-    },
-    tenantHeaders,
-  );
-  if (!semanticLayer.data) {
-    return { data: null, error: semanticLayer.error };
-  }
-  await postApi<SemanticLayerVersion>(
-    `/api/admin/ontology/semantic-layers/${semanticLayer.data.id}/publish`,
-    { summary: "Publish initial semantic layer." },
-    tenantHeaders,
-  );
+type InstallReferencePackageResponse = {
+  packageKey: string;
+  alreadyInstalled: boolean;
+  modelPackage: ModelPackageVersion;
+  artifacts: Array<{ artifactKind: string; key: string; artifactId: string; versionId: string }>;
+  summary: string;
+};
 
-  // Lifecycle vocabulary normalizes allowed object states and transitions.
-  const lifecycle = await postApi<LifecycleVocabularyVersion>(
-    "/api/admin/ontology/lifecycle-vocabularies",
-    {
-      key: "canonical-lifecycle",
-      versionLabel,
-      summary: "Initial lifecycle normalization vocabulary.",
-      states: [
-        { key: "draft", displayName: "Draft", category: "working", sortOrder: 10, isTerminal: false },
-        { key: "in-review", displayName: "In Review", category: "review", sortOrder: 20, isTerminal: false },
-        { key: "released", displayName: "Released", category: "released", sortOrder: 30, isTerminal: false },
-        { key: "obsolete", displayName: "Obsolete", category: "terminal", sortOrder: 40, isTerminal: true },
-      ],
-      transitions: [
-        { fromStateKey: "draft", toStateKey: "in-review", requiresApproval: false, safeSummary: "Draft submitted for review." },
-        { fromStateKey: "in-review", toStateKey: "released", requiresApproval: true, safeSummary: "Review approved for release." },
-        { fromStateKey: "released", toStateKey: "obsolete", requiresApproval: true, safeSummary: "Released item obsoleted." },
-      ],
-    },
-    tenantHeaders,
-  );
-  if (!lifecycle.data) {
-    return { data: null, error: lifecycle.error };
-  }
-  await postApi<LifecycleVocabularyVersion>(
-    `/api/admin/ontology/lifecycle-vocabularies/${lifecycle.data.id}/publish`,
-    { summary: "Publish initial lifecycle vocabulary." },
-    tenantHeaders,
-  );
-
-  // Attribute schema defines tenant-safe canonical fields used by imports and queries.
-  const attributeSchema = await postApi<AttributeSchemaVersion>(
-    "/api/admin/ontology/attribute-schemas",
-    {
-      key: "canonical-attributes",
-      versionLabel,
-      summary: "Initial tenant-safe canonical attributes.",
-      ontologyVersionId: ontology.data.id,
-      attributes: [
-        {
-          attributeKey: "partNumber",
-          appliesToObjectType: "part",
-          valueType: "Text",
-          isRequired: true,
-          validationRulesJson: `{"maxLength":80}`,
-          visibility: "Internal",
-          requiredPermissionKey: null,
-          isSearchable: true,
-          isAiFacing: true,
-          classificationKey: "internal",
-          displayName: "Part Number",
-          safeSummary: "Part number identifier.",
-        },
-        {
-          attributeKey: "cost",
-          appliesToObjectType: "part",
-          valueType: "Number",
-          isRequired: false,
-          validationRulesJson: `{"minimum":0}`,
-          visibility: "Restricted",
-          requiredPermissionKey: "restricted.cost.read",
-          isSearchable: false,
-          isAiFacing: false,
-          classificationKey: "secret",
-          displayName: "Cost",
-          safeSummary: "Restricted part cost value.",
-        },
-      ],
-    },
-    tenantHeaders,
-  );
-  if (!attributeSchema.data) {
-    return { data: null, error: attributeSchema.error };
-  }
-  await postApi<AttributeSchemaVersion>(
-    `/api/admin/ontology/attribute-schemas/${attributeSchema.data.id}/publish`,
-    { summary: "Publish initial attribute schema." },
-    tenantHeaders,
-  );
-
-  // Preview asks backend to verify all four pieces form a valid package before create/publish.
-  const preview = await postApi<ModelPackagePreview>(
-    "/api/admin/ontology/model-packages/preview",
-    {
-      ontologyVersionId: ontology.data.id,
-      semanticLayerVersionId: semanticLayer.data.id,
-      lifecycleVocabularyVersionId: lifecycle.data.id,
-      attributeSchemaVersionId: attributeSchema.data.id,
-    },
-    tenantHeaders,
-  );
-  if (!preview.data?.isValid) {
-    return {
-      data: null,
-      error: preview.data?.blockingReasons.join("; ") ?? preview.error ?? "Model package preview failed.",
-    };
+async function fetchReferencePackageDemoCsv(importName: "flat-part-import" | "bom-comparison"): Promise<string> {
+  const fallback = [
+    "partNumber,lifecycle,cost",
+    "P-100,released,12.50",
+    "P-200,in-review,-21.00",
+  ].join("\n");
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return fallback;
   }
 
-  // Final package is the artifact imports and other flows consume by key.
-  const modelPackage = await postApi<ModelPackageVersion>(
-    "/api/admin/ontology/model-packages",
-    {
-      key: "canonical-manufacturing-package",
-      name: "Canonical Manufacturing Model Package",
-      versionLabel,
-      summary: "Published model package tying ontology, semantic layer, lifecycle, and attributes together.",
-      ontologyVersionId: ontology.data.id,
-      semanticLayerVersionId: semanticLayer.data.id,
-      lifecycleVocabularyVersionId: lifecycle.data.id,
-      attributeSchemaVersionId: attributeSchema.data.id,
-    },
-    tenantHeaders,
-  );
-  if (!modelPackage.data) {
-    return { data: null, error: modelPackage.error };
-  }
+  try {
+    const headers = new Headers();
+    headers.set("X-ETOS-User-Id", tenantHeaders.userId);
+    headers.set("X-ETOS-Tenant-Id", tenantHeaders.tenantId);
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/development/reference-packages/${MANUFACTURING_REFERENCE_PACKAGE_KEY}/demo-imports/${importName}`,
+      { cache: "no-store", headers, next: { revalidate: 0 } },
+    );
+    if (!response.ok) {
+      return fallback;
+    }
 
-  return await postApi<ModelPackageVersion>(
-    `/api/admin/ontology/model-packages/${modelPackage.data.id}/publish`,
-    { summary: "Publish initial model package." },
-    tenantHeaders,
-  );
+    return await response.text();
+  } catch {
+    return fallback;
+  }
 }
 
 /** Imports page: CAD/PDM demo CSV batch with mapping suggestions saved as draft. */
@@ -2405,7 +2245,7 @@ async function createDemoImportForSource(
     {
       sourceSystem,
       description,
-      modelPackageKey: "canonical-manufacturing-package",
+      modelPackageKey: MANUFACTURING_REFERENCE_PACKAGE_KEY,
     },
     tenantHeaders,
   );
@@ -2413,11 +2253,7 @@ async function createDemoImportForSource(
     return { data: null, error: batch.error };
   }
   /** Create a demo import batch with CSV evidence and mapping suggestions. */
-  const csv = [
-    "partNumber,lifecycle,cost",
-    "P-100,released,12.50",
-    "P-200,in-review,-21.00",
-  ].join("\n");
+  const csv = await fetchReferencePackageDemoCsv("flat-part-import");
   const formData = new FormData();
   formData.set("file", new Blob([csv], { type: "text/csv" }), "demo-import.csv");
   const upload = await fetchApi<{ evidence: ImportFileEvidence }>(
@@ -2479,7 +2315,7 @@ async function createPreparedDemoImportForSource(
     {
       sourceSystem,
       description,
-      modelPackageKey: "canonical-manufacturing-package",
+      modelPackageKey: MANUFACTURING_REFERENCE_PACKAGE_KEY,
     },
     tenantHeaders,
   );
@@ -2487,11 +2323,7 @@ async function createPreparedDemoImportForSource(
     return { data: null, error: batch.error };
   }
 
-  const csv = [
-    "partNumber,lifecycle,cost",
-    "P-100,released,12.50",
-    "P-200,in-review,-21.00",
-  ].join("\n");
+  const csv = await fetchReferencePackageDemoCsv("flat-part-import");
   const formData = new FormData();
   formData.set("file", new Blob([csv], { type: "text/csv" }), "demo-import.csv");
   const upload = await fetchApi<{ evidence: ImportFileEvidence }>(
@@ -3179,6 +3011,22 @@ export function draftArtifactDetailHref(artifactType: string, artifactId: string
     return `/recommendations/${artifactId}`;
   }
 
+  if (artifactType === "CapabilityDefinitionVersion") {
+    return `/capabilities/${artifactId}`;
+  }
+
+  if (artifactType === "BusinessPolicyDefinitionVersion") {
+    return `/business-policies/${artifactId}`;
+  }
+
+  if (artifactType === "OptimizationModelVersion") {
+    return `/optimization-models/${artifactId}`;
+  }
+
+  if (artifactType === "AgentTemplateVersion") {
+    return `/agent-templates/${artifactId}`;
+  }
+
   return null;
 }
 
@@ -3261,6 +3109,495 @@ export async function updateRecommendationSuggestedActionStatus(
   return await patchApi(
     `/api/admin/recommendations/${artifactId}/versions/${versionId}/suggested-actions/${actionId}`,
     { status },
+    tenantHeaders,
+  );
+}
+
+// --- Capability definition artifacts (Issue 18.2) ---
+
+export type CapabilityDefinitionArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  capabilityKey?: string | null;
+  outcomeCategory?: string | null;
+  updatedAt: string;
+};
+
+export type CapabilityModelPackageReference = {
+  modelPackageVersionId: string;
+  key: string;
+  name: string;
+  versionLabel: string;
+  state: string;
+};
+
+export type CapabilityOntologyReference = {
+  ontologyVersionId: string;
+  key: string;
+  versionLabel: string;
+  state: string;
+};
+
+export type CapabilityDefinitionDetail = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  name: string;
+  description?: string | null;
+  artifactReadinessState: string;
+  capabilityKey: string;
+  outcomeCategory: string;
+  outcomeSummary: string;
+  outcomeMetadata: Record<string, string>;
+  compatibleModelPackages: CapabilityModelPackageReference[];
+  compatibleOntologies: CapabilityOntologyReference[];
+  suggestedQueryIntentRefs: string[];
+  futureExtensionPlaceholders: string[];
+};
+
+export async function getCapabilityDefinitionArtifacts(): Promise<ApiResult<CapabilityDefinitionArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<CapabilityDefinitionArtifactSummary[]>();
+  }
+
+  return await fetchApi<CapabilityDefinitionArtifactSummary[]>("/api/admin/capabilities", tenantHeaders);
+}
+
+export async function getCapabilityDefinitionDetail(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<CapabilityDefinitionDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<CapabilityDefinitionDetail>();
+  }
+
+  return await fetchApi<CapabilityDefinitionDetail>(
+    `/api/admin/capabilities/${artifactId}/versions/${versionId}`,
+    tenantHeaders,
+  );
+}
+
+export async function markCapabilityDefinitionReady(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>();
+  }
+
+  return await postApi(
+    `/api/admin/capabilities/${artifactId}/versions/${versionId}/mark-ready`,
+    {},
+    tenantHeaders,
+  );
+}
+
+export async function publishCapabilityDefinition(
+  artifactId: string,
+  versionId: string,
+  summary?: string,
+): Promise<ApiResult<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>();
+  }
+
+  return await postApi(
+    `/api/admin/capabilities/${artifactId}/versions/${versionId}/publish`,
+    { summary: summary ?? null },
+    tenantHeaders,
+  );
+}
+
+// --- Business policy definition artifacts (Issue 18.3) ---
+
+export type BusinessPolicyDefinitionArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  policyKey?: string | null;
+  constraintCategory?: string | null;
+  updatedAt: string;
+};
+
+export type BusinessPolicyCapabilityReference = {
+  capabilityDefinitionVersionId: string;
+  capabilityArtifactId: string;
+  capabilityArtifactName: string;
+  capabilityKey: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type BusinessPolicyModelPackageReference = {
+  modelPackageVersionId: string;
+  key: string;
+  name: string;
+  versionLabel: string;
+  state: string;
+};
+
+export type BusinessPolicyOntologyReference = {
+  ontologyVersionId: string;
+  key: string;
+  versionLabel: string;
+  state: string;
+};
+
+export type BusinessPolicyDefinitionDetail = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  name: string;
+  description?: string | null;
+  artifactReadinessState: string;
+  policyKey: string;
+  constraintCategory: string;
+  constraintSummary: string;
+  constraintRules: Record<string, string>;
+  referencedCapabilities: BusinessPolicyCapabilityReference[];
+  compatibleModelPackages: BusinessPolicyModelPackageReference[];
+  compatibleOntologies: BusinessPolicyOntologyReference[];
+  futureExtensionPlaceholders: string[];
+};
+
+export async function getBusinessPolicyDefinitionArtifacts(): Promise<ApiResult<BusinessPolicyDefinitionArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<BusinessPolicyDefinitionArtifactSummary[]>();
+  }
+
+  return await fetchApi<BusinessPolicyDefinitionArtifactSummary[]>("/api/admin/business-policies", tenantHeaders);
+}
+
+export async function getBusinessPolicyDefinitionDetail(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<BusinessPolicyDefinitionDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<BusinessPolicyDefinitionDetail>();
+  }
+
+  return await fetchApi<BusinessPolicyDefinitionDetail>(
+    `/api/admin/business-policies/${artifactId}/versions/${versionId}`,
+    tenantHeaders,
+  );
+}
+
+export async function markBusinessPolicyDefinitionReady(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>();
+  }
+
+  return await postApi(
+    `/api/admin/business-policies/${artifactId}/versions/${versionId}/mark-ready`,
+    {},
+    tenantHeaders,
+  );
+}
+
+export async function publishBusinessPolicyDefinition(
+  artifactId: string,
+  versionId: string,
+  summary?: string,
+): Promise<ApiResult<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>();
+  }
+
+  return await postApi(
+    `/api/admin/business-policies/${artifactId}/versions/${versionId}/publish`,
+    { summary: summary ?? null },
+    tenantHeaders,
+  );
+}
+
+// --- Optimization model definition artifacts (Issue 18.4) ---
+
+export type OptimizationModelDefinitionArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  optimizationKey?: string | null;
+  objectiveCategory?: string | null;
+  updatedAt: string;
+};
+
+export type OptimizationModelCapabilityReference = {
+  capabilityDefinitionVersionId: string;
+  capabilityArtifactId: string;
+  capabilityArtifactName: string;
+  capabilityKey: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type OptimizationModelBusinessPolicyReference = {
+  businessPolicyDefinitionVersionId: string;
+  businessPolicyArtifactId: string;
+  businessPolicyArtifactName: string;
+  policyKey: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type OptimizationModelPackageReference = {
+  modelPackageVersionId: string;
+  key: string;
+  name: string;
+  versionLabel: string;
+  state: string;
+};
+
+export type OptimizationModelOntologyReference = {
+  ontologyVersionId: string;
+  key: string;
+  versionLabel: string;
+  state: string;
+};
+
+export type OptimizationModelDefinitionDetail = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  name: string;
+  description?: string | null;
+  artifactReadinessState: string;
+  optimizationKey: string;
+  objectiveCategory: string;
+  objectiveSummary: string;
+  objectiveMetadata: Record<string, string>;
+  solverConfiguration: Record<string, string>;
+  inputRequirements: string[];
+  referencedCapabilities: OptimizationModelCapabilityReference[];
+  referencedBusinessPolicies: OptimizationModelBusinessPolicyReference[];
+  compatibleModelPackages: OptimizationModelPackageReference[];
+  compatibleOntologies: OptimizationModelOntologyReference[];
+  futureExtensionPlaceholders: string[];
+};
+
+export async function getOptimizationModelDefinitionArtifacts(): Promise<ApiResult<OptimizationModelDefinitionArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<OptimizationModelDefinitionArtifactSummary[]>();
+  }
+
+  return await fetchApi<OptimizationModelDefinitionArtifactSummary[]>("/api/admin/optimization-models", tenantHeaders);
+}
+
+export async function getOptimizationModelDefinitionDetail(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<OptimizationModelDefinitionDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<OptimizationModelDefinitionDetail>();
+  }
+
+  return await fetchApi<OptimizationModelDefinitionDetail>(
+    `/api/admin/optimization-models/${artifactId}/versions/${versionId}`,
+    tenantHeaders,
+  );
+}
+
+export async function markOptimizationModelDefinitionReady(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>();
+  }
+
+  return await postApi(
+    `/api/admin/optimization-models/${artifactId}/versions/${versionId}/mark-ready`,
+    {},
+    tenantHeaders,
+  );
+}
+
+export async function publishOptimizationModelDefinition(
+  artifactId: string,
+  versionId: string,
+  summary?: string,
+): Promise<ApiResult<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>();
+  }
+
+  return await postApi(
+    `/api/admin/optimization-models/${artifactId}/versions/${versionId}/publish`,
+    { summary: summary ?? null },
+    tenantHeaders,
+  );
+}
+
+// --- Agent template definition artifacts (Issue 18.4) ---
+
+export type AgentTemplateDefinitionArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  templateKey?: string | null;
+  patternCategory?: string | null;
+  updatedAt: string;
+};
+
+export type AgentTemplateCapabilityReference = {
+  capabilityDefinitionVersionId: string;
+  capabilityArtifactId: string;
+  capabilityArtifactName: string;
+  capabilityKey: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type AgentTemplateBusinessPolicyReference = {
+  businessPolicyDefinitionVersionId: string;
+  businessPolicyArtifactId: string;
+  businessPolicyArtifactName: string;
+  policyKey: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type AgentTemplateOptimizationModelReference = {
+  optimizationModelVersionId: string;
+  optimizationModelArtifactId: string;
+  optimizationModelArtifactName: string;
+  optimizationKey: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type AgentTemplateArtifactVersionReference = {
+  versionId: string;
+  artifactId: string;
+  artifactType: string;
+  artifactName: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type AgentTemplateQueryIntentReference = {
+  queryIntentVersionId: string;
+  intentKey: string;
+  versionLabel: string;
+  isEnabled: boolean;
+};
+
+export type AgentTemplateRetrievalStrategyReference = {
+  retrievalStrategyVersionId: string;
+  strategyKey: string;
+  versionLabel: string;
+  isEnabled: boolean;
+};
+
+export type AgentTemplateDefinitionDetail = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  name: string;
+  description?: string | null;
+  artifactReadinessState: string;
+  templateKey: string;
+  patternCategory: string;
+  patternSummary: string;
+  preferredRuntimeAdapterKey: string;
+  compatibleModelPackages: OptimizationModelPackageReference[];
+  compatibleOntologies: OptimizationModelOntologyReference[];
+  referencedCapabilities: AgentTemplateCapabilityReference[];
+  referencedBusinessPolicies: AgentTemplateBusinessPolicyReference[];
+  referencedOptimizationModels: AgentTemplateOptimizationModelReference[];
+  promptTemplate?: AgentTemplateArtifactVersionReference | null;
+  outputSchema?: AgentTemplateArtifactVersionReference | null;
+  queryIntent?: AgentTemplateQueryIntentReference | null;
+  retrievalStrategy?: AgentTemplateRetrievalStrategyReference | null;
+  referencedTools: { toolDefinitionVersionId: string; toolArtifactId: string; toolArtifactName: string; versionLabel: string; readinessState: string }[];
+  compositionMetadata: Record<string, string>;
+  futureExtensionPlaceholders: string[];
+};
+
+export async function getAgentTemplateDefinitionArtifacts(): Promise<ApiResult<AgentTemplateDefinitionArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<AgentTemplateDefinitionArtifactSummary[]>();
+  }
+
+  return await fetchApi<AgentTemplateDefinitionArtifactSummary[]>("/api/admin/agent-templates", tenantHeaders);
+}
+
+export async function getAgentTemplateDefinitionDetail(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<AgentTemplateDefinitionDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<AgentTemplateDefinitionDetail>();
+  }
+
+  return await fetchApi<AgentTemplateDefinitionDetail>(
+    `/api/admin/agent-templates/${artifactId}/versions/${versionId}`,
+    tenantHeaders,
+  );
+}
+
+export async function markAgentTemplateDefinitionReady(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>();
+  }
+
+  return await postApi(
+    `/api/admin/agent-templates/${artifactId}/versions/${versionId}/mark-ready`,
+    {},
+    tenantHeaders,
+  );
+}
+
+export async function publishAgentTemplateDefinition(
+  artifactId: string,
+  versionId: string,
+  summary?: string,
+): Promise<ApiResult<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>();
+  }
+
+  return await postApi(
+    `/api/admin/agent-templates/${artifactId}/versions/${versionId}/publish`,
+    { summary: summary ?? null },
     tenantHeaders,
   );
 }

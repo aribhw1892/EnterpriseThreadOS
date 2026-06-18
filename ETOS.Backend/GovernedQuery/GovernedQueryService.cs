@@ -6,6 +6,7 @@ using ETOS.Backend.Governance;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.Ontology;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.GovernedQuery;
@@ -26,7 +27,8 @@ public sealed class GovernedQueryService(
     IAuditRecorder auditRecorder,
     IGraphMemoryService graphMemoryService,
     IClassificationPolicyService classificationPolicyService,
-    IAiTraceRecorder aiTraceRecorder) : IGovernedQueryService
+    IAiTraceRecorder aiTraceRecorder,
+    IModelPackageContextResolver modelPackageContextResolver) : IGovernedQueryService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -218,6 +220,7 @@ public sealed class GovernedQueryService(
     {
         var definition = FixedIntentDefinitions.SingleOrDefault(item => item.NormalizedIntentKey == normalizedIntentKey)
             ?? throw new RequestValidationException("Fixed query intent was not found.");
+        var relationshipTypes = await ResolveRelationshipTypesAsync(context, definition, cancellationToken);
         var intent = await dbContext.QueryIntentVersions.SingleOrDefaultAsync(
             item => item.TenantId == context.TenantId && item.NormalizedIntentKey == definition.NormalizedIntentKey && item.Source == QueryIntentSource.PlatformFixed,
             cancellationToken);
@@ -227,6 +230,12 @@ public sealed class GovernedQueryService(
 
         if (intent is not null && strategy is not null)
         {
+            if (definition.RequiresPackageRelationshipTypes)
+            {
+                strategy.RelationshipTypesJson = Serialize(relationshipTypes);
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+
             await EnsureTenantPlaceholderAsync(context, cancellationToken);
             return (intent, strategy);
         }
@@ -259,7 +268,7 @@ public sealed class GovernedQueryService(
             Summary = "Trusted graph first, linked document metadata second. Semantic/vector fallback deferred.",
             GraphSpace = GraphSpace.Trusted,
             RequiredTrustState = TrustState.Trusted,
-            RelationshipTypesJson = Serialize(definition.RelationshipTypes),
+            RelationshipTypesJson = Serialize(relationshipTypes),
             AllowsSemanticFallback = false,
             AllowsVectorFallback = false,
             Source = QueryIntentSource.PlatformFixed,
@@ -281,6 +290,27 @@ public sealed class GovernedQueryService(
         await dbContext.SaveChangesAsync(cancellationToken);
         await EnsureTenantPlaceholderAsync(context, cancellationToken);
         return (intent, strategy);
+    }
+
+    private async Task<IReadOnlyCollection<string>> ResolveRelationshipTypesAsync(
+        ActiveTenantContext context,
+        FixedIntentDefinition definition,
+        CancellationToken cancellationToken)
+    {
+        if (!definition.RequiresPackageRelationshipTypes)
+        {
+            return definition.RelationshipTypes;
+        }
+
+        var packageContext = await modelPackageContextResolver.ResolveActivePublishedAsync(context, null, cancellationToken)
+            ?? throw new RequestValidationException("A published model package is required for package-configured query intents.");
+        if (!packageContext.QueryIntentExtensions.Intents.TryGetValue(definition.IntentKey, out var extension)
+            || extension.RelationshipTypes.Count == 0)
+        {
+            throw new RequestValidationException($"Model package query intent extensions must define relationship types for '{definition.IntentKey}'.");
+        }
+
+        return extension.RelationshipTypes;
     }
 
     private async Task EnsureTenantPlaceholderAsync(ActiveTenantContext context, CancellationToken cancellationToken)
@@ -653,7 +683,8 @@ public sealed class GovernedQueryService(
         string Name,
         string Summary,
         QueryIntentKind Kind,
-        IReadOnlyCollection<string> RelationshipTypes);
+        IReadOnlyCollection<string> RelationshipTypes,
+        bool RequiresPackageRelationshipTypes);
 
     private static readonly IReadOnlyCollection<FixedIntentDefinition> FixedIntentDefinitions =
     [
@@ -665,16 +696,18 @@ public sealed class GovernedQueryService(
             "Object 360 context",
             "Assembles trusted object neighborhood context with linked document evidence.",
             QueryIntentKind.Object360Context,
-            ["RELATED_TO", "IDENTITY_LINK", "DOCUMENT_LINK", "HAS_VERSION", "PART_OF"]),
+            ["RELATED_TO", "IDENTITY_LINK", "DOCUMENT_LINK", "HAS_VERSION", "PART_OF"],
+            false),
         new(
             "bom-impact-context",
             "BOM-IMPACT-CONTEXT",
             "bom-impact-trusted-graph-documents",
             "BOM-IMPACT-TRUSTED-GRAPH-DOCUMENTS",
             "BOM impact context",
-            "Assembles trusted BOM relationship context with linked document evidence.",
+            "Assembles trusted structural relationship context with linked document evidence.",
             QueryIntentKind.BomImpactContext,
-            ["BOM_CHILD", "BOM_PARENT", "USES", "PART_OF", "HAS_COMPONENT"]),
+            [],
+            true),
         new(
             "document-evidence-context",
             "DOCUMENT-EVIDENCE-CONTEXT",
@@ -683,6 +716,7 @@ public sealed class GovernedQueryService(
             "Document evidence context",
             "Assembles trusted graph-linked document metadata evidence.",
             QueryIntentKind.DocumentEvidenceContext,
-            ["DOCUMENT_LINK", "RELATED_TO", "PART_OF"])
+            ["DOCUMENT_LINK", "RELATED_TO", "PART_OF"],
+            false)
     ];
 }

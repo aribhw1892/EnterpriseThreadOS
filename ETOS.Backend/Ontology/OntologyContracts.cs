@@ -99,7 +99,9 @@ public sealed record CreateModelPackageVersionRequest(
     Guid OntologyVersionId,
     Guid SemanticLayerVersionId,
     Guid LifecycleVocabularyVersionId,
-    Guid AttributeSchemaVersionId);
+    Guid AttributeSchemaVersionId,
+    string? ImportProfileJson = null,
+    string? QueryIntentExtensionsJson = null);
 
 public sealed record PublishOntologyVersionRequest(string? Summary);
 
@@ -260,6 +262,8 @@ public sealed record ModelPackageVersionResponse(
     string? AttributeSchemaVersionLabel,
     Guid? ArtifactId,
     Guid? ArtifactVersionId,
+    string? ImportProfileJson,
+    string? QueryIntentExtensionsJson,
     OntologyPublicationState State,
     Guid CreatedByUserId,
     DateTimeOffset CreatedAt,

@@ -13,6 +13,7 @@ using ETOS.Backend.Identity;
 using ETOS.Backend.Imports;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Recommendations;
+using ETOS.Backend.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.Tests;
@@ -330,7 +331,8 @@ public sealed class RecommendationTests
             dbContext,
             tenantContextResolver ?? new StaticTenantContextResolver(context),
             permissionService ?? new AllowAllPermissionService(),
-            new RecordingDenialRecorder());
+            new RecordingDenialRecorder(),
+            new StubModelPackageContextResolver());
     }
 
     private static GovernedChatService CreateChatService(EnterpriseThreadDbContext dbContext, TestContext context)
@@ -344,7 +346,8 @@ public sealed class RecommendationTests
             new RecordingAuditRecorder(),
             graphMemory,
             new AllowAllPolicyService(),
-            new AiTraceRecorder(dbContext));
+            new AiTraceRecorder(dbContext),
+            new StubModelPackageContextResolver());
 
         return new GovernedChatService(
             dbContext,
@@ -510,8 +513,8 @@ public sealed class RecommendationTests
             SourceContext = "demo-plm",
             CadSummaryJson = "{}",
             EbomSummaryJson = "{}",
-            MissingInCadCount = 0,
-            MissingInEbomCount = missingInEbom,
+            MissingInPrimarySideCount = 0,
+            MissingInSecondarySideCount = missingInEbom,
             QuantityMismatchCount = 1,
             UsageReferenceMismatchCount = 0,
             UnresolvedIdentityCount = 0,

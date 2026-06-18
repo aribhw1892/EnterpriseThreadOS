@@ -1,0 +1,24 @@
+{
+  "defaultBomRelationshipType": "contains",
+  "parentColumnSynonyms": ["parent", "parentPart", "parent_part", "assembly", "assemblyNumber"],
+  "childColumnSynonyms": ["child", "childPart", "child_part", "component", "componentNumber", "item"],
+  "quantityColumnSynonyms": ["quantity", "qty"],
+  "unitColumnSynonyms": ["unit", "uom"],
+  "usageColumnSynonyms": ["usage", "findNumber", "find_number", "reference", "referenceDesignator", "reference_designator"],
+  "comparisonSideColumnSynonyms": ["bomSide", "bom_side", "side", "sourceBom", "source_bom"],
+  "comparisonSides": [
+    { "label": "CAD", "aliases": ["cad"] },
+    { "label": "EBOM", "aliases": ["ebom", "engineering"] }
+  ],
+  "recommendationTemplates": {
+    "structuralDriftTitle": "Review CAD/EBOM synchronization",
+    "structuralDriftSummary": "CAD/EBOM drift detected. Missing in EBOM {missingInSecondary}, missing in CAD {missingInPrimary}, quantity mismatches {quantityMismatches}.",
+    "structuralComparisonAuditSummary": "Structural BOM sides were compared using the active model package.",
+    "reviewPrimarySideActionTitle": "Review EBOM synchronization",
+    "reviewPrimarySideActionCode": "REVIEW_EBOM",
+    "reviewPrimarySideActionRationale": "Validate whether EBOM should be updated to match CAD BOM.",
+    "reviewImpactActionTitle": "Review manufacturing impact",
+    "reviewImpactActionCode": "REVIEW_MFG",
+    "reviewImpactActionRationale": "Assess downstream manufacturing impact from BOM drift."
+  }
+}

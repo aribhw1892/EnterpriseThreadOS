@@ -4,6 +4,7 @@ using ETOS.Backend.Classification;
 using ETOS.Backend.Documents;
 using ETOS.Backend.Governance;
 using ETOS.Backend.GovernedQuery;
+using ETOS.Backend.Tests.Fixtures;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
@@ -195,7 +196,8 @@ public sealed class GovernedQueryTests
             new RecordingAuditRecorder(),
             graphMemoryService,
             policyService ?? new AllowAllPolicyService(),
-            new NoOpAiTraceRecorder());
+            new NoOpAiTraceRecorder(),
+            new StubModelPackageContextResolver());
     }
 
     private sealed record TestContext(Guid TenantId, Guid UserId, Guid GraphNodeId, Guid ArtifactId, Guid DocumentArtifactId);

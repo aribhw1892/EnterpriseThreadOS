@@ -1,6 +1,6 @@
-# End-to-End QA Flow: Issues 1–18 Through Recommendations
+# End-to-End QA Flow: Issues 1–18.5 Through Recommendations
 
-Manual walkthrough for validating the platform from local startup through Issue 18 (Recommendation artifacts). UI-first; API steps only where the frontend shell is thin.
+Manual walkthrough for validating the platform from local startup through Issue 18 (Recommendation artifacts) and the Architectural Abstraction Sprint (Issues 18.1–18.5). UI-first; API steps only where the frontend shell is thin.
 
 ## Prerequisites (One-Time Startup)
 
@@ -68,15 +68,30 @@ Optional API sanity check:
 
 ---
 
-## 2. Ontology / Model Package (Issues 6–7) — Required Before Imports
+## 2. Ontology / Model Package (Issues 6–7, 18.5) — Required Before Imports
 
 **Page:** `/model-artifacts`
 
 Action: click **Create seed model package**.
 
-This publishes canonical ontology, semantic layer, lifecycle vocabulary, attribute schema, and an active model package. Import batches bind to this package at creation time.
+This calls `POST /api/admin/development/install-reference-package` with package key `etos-manufacturing-reference`, publishing ontology, semantic layer, lifecycle vocabulary, attribute schema, active model package, import/query profiles, and governed capability/policy/optimization/agent-template seeds from `packages/manufacturing-reference/`. Import batches bind to the active published package at creation time. Re-running is idempotent for the same tenant.
+
+When `SeedIdentity:InstallReferencePackage` is true (Development default), the backend may already have installed the reference package on startup.
 
 ---
+
+## 2b. Layer 3–6 Artifacts (Issues 18.2–18.4, Optional Inspect)
+
+After reference package install, verify seeded artifacts:
+
+| Page | Expected seed (reference package) |
+|------|-----------------------------------|
+| `/capabilities` | `bom-impact-analysis` |
+| `/business-policies` | `min-maturity-85` |
+| `/optimization-models` | `minimize-transport-distance` |
+| `/agent-templates` | Agent template composing capability + policy + optimization refs |
+
+Each detail page should show published/readiness state and resolved dependency labels.
 
 ## 3. Import → Mapping → Staging → Identity (Issues 8–10)
 
@@ -194,7 +209,7 @@ $batch = Invoke-RestMethod -Method POST `
   -Uri "http://localhost:5000/api/admin/imports/batches" `
   -Headers $headers `
   -ContentType "application/json" `
-  -Body '{"sourceSystem":"demo-bom","description":"BOM drift demo","modelPackageKey":"canonical-manufacturing-package"}'
+  -Body '{"sourceSystem":"demo-bom","description":"BOM drift demo","modelPackageKey":"etos-manufacturing-reference"}'
 
 # 2. Upload CSV (multipart), then mapping-preview → mappings → approve → validate → stage
 #    (same sequence as the identity demo helpers)
@@ -274,19 +289,25 @@ This validates Issue 18 story **18**: conflicted or unverified evidence blocks t
 | 16 | Explorers / 360° context |
 | 17 | Dashboard/report drafts from chat (optional) |
 | 18 | Recommendation artifact + evidence gates + suggested actions |
+| 18.1 | Package-driven import/query/recommendation behavior |
+| 18.2–18.4 | Capability, business policy, optimization model, agent template artifacts |
+| 18.5 | Reference package install from `packages/manufacturing-reference/` |
 
 ---
 
 ## Known Gaps
 
 - No UI yet for **create recommendation from data-quality issue** or **BOM comparison** — use API steps above
-- Identity demo CSV is part/lifecycle/cost, not BOM-shaped — BOM path needs a separate batch
+- Identity demo CSV is part/lifecycle/cost, not BOM-shaped — BOM path needs a separate batch (demo CSV also in `packages/manufacturing-reference/demo-imports/bom-comparison.csv`)
 - Graph explorer may look empty until staging is promoted; chat uses placeholder anchor `33333333-3333-3333-3333-333333333333`
+- Agent runtime adapters are contract-only; no execute API until Issue 22
 
 ---
 
 ## Related Docs
 
 - `docs/local-development.md` — full local workflow and endpoint list
-- `.docs/.prd/engineering-execution-issues.md` — issue backlog through Issue 18
+- `docs/architecture/domain-packages.md` — core vs package boundary and install lifecycle
+- `.docs/.prd/engineering-execution-issues.md` — issue backlog through Issue 18.5
 - `.cursor/plans/issue_18_recommendations_f30d3826.plan.md` — Issue 18 implementation plan
+- `.cursor/plans/issue_18.1_cleanup_e7dbd526.plan.md` through `issue_18.5_package_1d585402.plan.md` — Abstraction Sprint plans

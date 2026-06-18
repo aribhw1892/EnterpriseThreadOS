@@ -1,0 +1,30 @@
+[
+  {
+    "attributeKey": "partNumber",
+    "appliesToObjectType": "part",
+    "valueType": "Text",
+    "isRequired": true,
+    "validationRulesJson": "{\"maxLength\":80}",
+    "visibility": "Internal",
+    "requiredPermissionKey": null,
+    "isSearchable": true,
+    "isAiFacing": true,
+    "classificationKey": "internal",
+    "displayName": "Part Number",
+    "safeSummary": "Part number identifier."
+  },
+  {
+    "attributeKey": "cost",
+    "appliesToObjectType": "part",
+    "valueType": "Number",
+    "isRequired": false,
+    "validationRulesJson": "{\"minimum\":0}",
+    "visibility": "Restricted",
+    "requiredPermissionKey": "restricted.cost.read",
+    "isSearchable": false,
+    "isAiFacing": false,
+    "classificationKey": "secret",
+    "displayName": "Cost",
+    "safeSummary": "Restricted part cost value."
+  }
+]

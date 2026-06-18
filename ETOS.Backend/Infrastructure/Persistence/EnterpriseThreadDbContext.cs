@@ -90,6 +90,8 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
 
     public DbSet<ImportMappingVersion> ImportMappingVersions => Set<ImportMappingVersion>();
 
+    public DbSet<ImportMappingLearningSignalInput> ImportMappingLearningSignalInputs => Set<ImportMappingLearningSignalInput>();
+
     public DbSet<ImportColumnMapping> ImportColumnMappings => Set<ImportColumnMapping>();
 
     public DbSet<ImportLifecycleMapping> ImportLifecycleMappings => Set<ImportLifecycleMapping>();
@@ -1169,6 +1171,22 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
+        modelBuilder.Entity<ImportMappingLearningSignalInput>(entity =>
+        {
+            entity.ToTable("import_mapping_learning_signal_inputs");
+            entity.HasKey(signal => signal.Id);
+            entity.Property(signal => signal.TenantId).IsRequired();
+            entity.Property(signal => signal.ProviderKey).HasMaxLength(120).IsRequired();
+            entity.Property(signal => signal.DiffJson).HasMaxLength(16000).IsRequired();
+            entity.Property(signal => signal.EventType).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(signal => signal.CreatedAt).IsRequired();
+            entity.HasIndex(signal => new { signal.TenantId, signal.ImportMappingVersionId, signal.CreatedAt });
+            entity.HasOne(signal => signal.ImportMappingVersion)
+                .WithMany()
+                .HasForeignKey(signal => signal.ImportMappingVersionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         modelBuilder.Entity<ImportColumnMapping>(entity =>
         {
             entity.ToTable("import_column_mappings");
@@ -1514,6 +1532,8 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.Property(version => version.VersionLabel).HasMaxLength(80).IsRequired();
             entity.Property(version => version.NormalizedVersionLabel).HasMaxLength(80).IsRequired();
             entity.Property(version => version.Summary).HasMaxLength(1000);
+            entity.Property(version => version.ImportProfileJson).HasMaxLength(16000);
+            entity.Property(version => version.QueryIntentExtensionsJson).HasMaxLength(8000);
             entity.Property(version => version.State).HasConversion<string>().HasMaxLength(32).IsRequired();
             entity.Property(version => version.CreatedAt).IsRequired();
             entity.HasIndex(version => new { version.TenantId, version.NormalizedKey, version.NormalizedVersionLabel }).IsUnique();

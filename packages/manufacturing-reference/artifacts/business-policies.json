@@ -1,0 +1,12 @@
+[
+  {
+    "policyKey": "min-maturity-85",
+    "name": "Minimum Maturity 85",
+    "description": "Require at least 85% design maturity before release approval.",
+    "constraintCategory": "maturity_threshold",
+    "constraintSummary": "Require at least 85% design maturity before release approval.",
+    "constraintRules": { "minMaturityPercent": "85" },
+    "referencedCapabilityKeys": ["bom-impact-analysis"],
+    "futureExtensionPlaceholders": []
+  }
+]

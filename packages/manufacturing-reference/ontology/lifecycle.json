@@ -1,0 +1,13 @@
+{
+  "states": [
+    { "key": "draft", "displayName": "Draft", "category": "working", "sortOrder": 10, "isTerminal": false },
+    { "key": "in-review", "displayName": "In Review", "category": "review", "sortOrder": 20, "isTerminal": false },
+    { "key": "released", "displayName": "Released", "category": "released", "sortOrder": 30, "isTerminal": false },
+    { "key": "obsolete", "displayName": "Obsolete", "category": "terminal", "sortOrder": 40, "isTerminal": true }
+  ],
+  "transitions": [
+    { "fromStateKey": "draft", "toStateKey": "in-review", "requiresApproval": false, "safeSummary": "Draft submitted for review." },
+    { "fromStateKey": "in-review", "toStateKey": "released", "requiresApproval": true, "safeSummary": "Review approved for release." },
+    { "fromStateKey": "released", "toStateKey": "obsolete", "requiresApproval": true, "safeSummary": "Released item obsoleted." }
+  ]
+}

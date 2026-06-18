@@ -9,6 +9,7 @@ using ETOS.Backend.Identity;
 using ETOS.Backend.Imports;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Ontology;
+using ETOS.Backend.Tests.Fixtures;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -274,8 +275,8 @@ public sealed class ImportTests
         var comparison = await CreateBomComparisonAsync(client, context, batch.Id);
 
         Assert.Equal(4, staging.RelationshipCount);
-        Assert.Equal(1, comparison.MissingInCadCount);
-        Assert.Equal(1, comparison.MissingInEbomCount);
+        Assert.Equal(1, comparison.MissingInPrimarySideCount);
+        Assert.Equal(1, comparison.MissingInSecondarySideCount);
         Assert.Equal(1, comparison.QuantityMismatchCount);
         Assert.Equal(1, comparison.UsageReferenceMismatchCount);
     }
@@ -348,23 +349,8 @@ public sealed class ImportTests
         string tenantIdentifier = "tenant-a",
         string email = "admin@example.test")
     {
-        var userId = Guid.NewGuid();
-        await CreateUserAsync(client, userId, userId, email);
-        var tenant = await CreateTenantAsync(client, userId, tenantIdentifier);
-        var suffix = Guid.NewGuid().ToString("N")[..8];
-        var ontology = await CreateOntologyAsync(client, tenant.Id, userId, suffix);
-        var semanticLayer = await CreateSemanticLayerAsync(client, tenant.Id, userId, ontology.Id, suffix);
-        var lifecycle = await CreateLifecycleAsync(client, tenant.Id, userId, suffix);
-        var attributeSchema = await CreateAttributeSchemaAsync(client, tenant.Id, userId, ontology.Id, suffix);
-
-        await PublishAsync<OntologyVersionResponse>(client, tenant.Id, userId, $"/api/admin/ontology/versions/{ontology.Id}/publish");
-        await PublishAsync<SemanticLayerVersionResponse>(client, tenant.Id, userId, $"/api/admin/ontology/semantic-layers/{semanticLayer.Id}/publish");
-        await PublishAsync<LifecycleVocabularyVersionResponse>(client, tenant.Id, userId, $"/api/admin/ontology/lifecycle-vocabularies/{lifecycle.Id}/publish");
-        await PublishAsync<AttributeSchemaVersionResponse>(client, tenant.Id, userId, $"/api/admin/ontology/attribute-schemas/{attributeSchema.Id}/publish");
-        var modelPackage = await CreateModelPackageAsync(client, tenant.Id, userId, ontology.Id, semanticLayer.Id, lifecycle.Id, attributeSchema.Id, suffix);
-        await PublishAsync<ModelPackageVersionResponse>(client, tenant.Id, userId, $"/api/admin/ontology/model-packages/{modelPackage.Id}/publish");
-
-        return new TestContext(tenant.Id, userId);
+        var packageContext = await ManufacturingModelPackageFixture.CreatePublishedPackageAsync(client, tenantIdentifier, email);
+        return new TestContext(packageContext.TenantId, packageContext.UserId);
     }
 
     private static async Task CreateUserAsync(HttpClient client, Guid actorUserId, Guid userId, string email)

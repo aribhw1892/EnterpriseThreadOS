@@ -1,6 +1,6 @@
 # EnterpriseThreadOS Architecture
 
-EnterpriseThreadOS is intended to become an AI-native Enterprise Digital Thread Operating System. The current repository is the local-first platform foundation for that product: a .NET modular monolith backend, a Next.js frontend shell, local infrastructure services, persistence, health checks, tenant identity/access, audit/security events, the BaseArtifact registry foundation, graph memory, canonical model governance, import/mapping/staging, identity-resolution review and trust scoring, data-quality issue review hooks, and document memory/object linking.
+EnterpriseThreadOS is intended to become an AI-native Enterprise Digital Thread Operating System. The current repository is the local-first platform foundation for that product: a .NET modular monolith backend, a Next.js frontend shell, local infrastructure services, persistence, health checks, tenant identity/access, audit/security events, the BaseArtifact registry foundation, graph memory, canonical model governance, package-driven import/mapping/staging, identity-resolution review and trust scoring, data-quality issue review hooks, document memory/object linking, governed query/context assembly, AI Trace, governed chat, explorers/360° context views, dashboard/report artifacts, recommendation artifacts, Layer 3–6 governed artifact definitions (capabilities, business policies, optimization models, agent templates), agent runtime adapter contracts, and the manufacturing reference domain package.
 
 For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For implementation order, use `.docs/.prd/engineering-execution-issues.md`.
 
@@ -29,6 +29,12 @@ flowchart TB
     platform --> explorers["Explorers Module"]
     platform --> dashboards["Dashboard and Report Module"]
     platform --> recommendations["Recommendation Module"]
+    platform --> capabilities["Capability Definitions Module"]
+    platform --> businesspolicies["Business Policy Definitions Module"]
+    platform --> optimization["Optimization Model Definitions Module"]
+    platform --> agenttemplates["Agent Template Definitions Module"]
+    platform --> agentruntime["Agent Runtime Adapter Contracts"]
+    platform --> packages["Reference Package Installer"]
     platform --> persistence["EnterpriseThreadDbContext"]
     platform --> extensions["Extension Point Catalog"]
 
@@ -52,17 +58,24 @@ flowchart TB
 - `ETOS.Backend/Artifacts/` contains tenant-scoped artifacts, immutable versions, generic relationships, dependency edges, readiness/publish services, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/Classification/` contains versioned classification schemes, policy versions, restricted context rules, policy evaluation, policy impact, artifact publish risk integration, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/GraphMemory/` contains the internal graph memory abstraction, Neo4j driver implementation, graph health/bootstrap services, and optional disabled Memgraph adapter placeholder.
-- `ETOS.Backend/Ontology/` contains versioned ontology, semantic layer, lifecycle vocabulary, attribute schema, model package records, publish validation, DTOs, and minimal API endpoint mapping.
-- `ETOS.Backend/Imports/` contains import batches, raw file evidence metadata, CSV/Excel parsing, deterministic mapping preview/approval, validation, staging graph creation, DTOs, and minimal API endpoint mapping.
+- `ETOS.Backend/Ontology/` contains versioned ontology, semantic layer, lifecycle vocabulary, attribute schema, model package records with optional `ImportProfileJson` and `QueryIntentExtensionsJson`, publish validation, `IModelPackageContextResolver`, DTOs, and minimal API endpoint mapping.
+- `ETOS.Backend/Imports/` contains import batches, raw file evidence metadata, CSV/Excel parsing, `IMappingSuggestionProvider` mapping preview (default `rule-based-v1`), mapping approve/reject/correct learning-signal inputs, package-driven validation/staging/BOM comparison, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/IdentityResolution/` contains identity resolution rules, deterministic candidate generation from staged import identity fields, human review decisions, identity-link graph relationship creation, learning evidence, trust score records, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/DataQuality/` contains durable data-quality issues, source links, trust-impact metadata, security-event review hooks, inert monitoring placeholders, DTOs, and minimal API endpoint mapping.
 - `ETOS.Backend/Documents/` contains document artifacts, immutable document versions, document-object links, extraction issue hooks, vector indexing metadata records, disabled CAD parsing placeholder contracts, DTOs, and minimal API endpoint mapping.
-- `ETOS.Backend/GovernedQuery/` contains query intent versions, retrieval strategy versions, fixed platform query intents, retrieval runs, context packages, context access decisions, governed query service with graph-first document-second retrieval, policy-filtered context assembly, and minimal API endpoint mapping.
+- `ETOS.Backend/GovernedQuery/` contains query intent versions, retrieval strategy versions, fixed platform query intents with package-driven relationship resolution for `bom-impact-context`, retrieval runs, context packages, context access decisions, governed query service with graph-first document-second retrieval, policy-filtered context assembly, and minimal API endpoint mapping.
 - `ETOS.Backend/AiTrace/` contains AI Trace records, artifact links, on-demand export audit metadata, trace explorer service with separate view/export permissions, redaction metadata, export denial security events, and minimal API endpoint mapping.
 - `ETOS.Backend/GovernedChat/` contains governed chat sessions/turns, platform-seeded `PromptTemplateVersion` and `OutputSchemaVersion` artifacts, deterministic default LLM completion with optional OpenAI provider behind config, output schema validation, chat-to-artifact draft creation via the artifact registry, enriched `GovernedChat` AI Trace records with pinned prompt/output labels, and minimal API endpoint mapping.
 - `ETOS.Backend/Explorers/` contains read-only explorer orchestration for tenant-filtered artifact/graph/document/context-package/decision lists, generic 360° context views, governance flow foundation projections, policy/trust-filtered graph browse, and minimal API endpoint mapping. Decision explorer and governance flow are foundation-only until Milestone 4.
 - `ETOS.Backend/Dashboards/` contains dashboard/report template parsing, governed-query preview orchestration, readiness validation and mark-ready workflow, JSON export builder with audit records, governance KPI placeholder catalog, and minimal API endpoint mapping. Live KPI analytics remain deferred to Issue 21.
-- `ETOS.Backend/Recommendations/` contains versioned `RecommendationVersion` artifacts with embedded evidence links and suggested actions, trust/conflict-aware readiness validation, evidence resolution for data-quality issues and BOM comparison runs, creation factories (manual, data quality, BOM comparison, governed chat draft, dashboard/report provenance), suggested-action status transitions with audit, and minimal API endpoint mapping. Agent/workflow auto-creation and review-task conversion from suggested actions remain deferred to Milestone 5 and Issue 19.
+- `ETOS.Backend/Recommendations/` contains versioned `RecommendationVersion` artifacts with embedded evidence links and suggested actions, trust/conflict-aware readiness validation, package-neutral evidence resolution for data-quality issues and BOM comparison runs, creation factories (manual, data quality, BOM comparison, governed chat draft, dashboard/report provenance), suggested-action status transitions with audit, and minimal API endpoint mapping. Agent/workflow auto-creation and review-task conversion from suggested actions remain deferred to Milestone 5 and Issue 19.
+- `ETOS.Backend/Capabilities/` contains governed `CapabilityDefinitionVersion` artifacts (Layer 3 business outcomes), readiness/publish workflow, model-package compatibility validation, DTOs, and minimal API endpoint mapping under `/api/admin/capabilities`.
+- `ETOS.Backend/BusinessPolicies/` contains governed `BusinessPolicyDefinitionVersion` artifacts (Layer 4 business constraints), separate from classification `PolicyVersion`, capability/package dependency validation, DTOs, and minimal API endpoint mapping under `/api/admin/business-policies`.
+- `ETOS.Backend/OptimizationModels/` contains governed `OptimizationModelVersion` artifacts (Layer 5 optimization objective metadata only; no solver execution), capability/policy/package dependency validation, DTOs, and minimal API endpoint mapping under `/api/admin/optimization-models`.
+- `ETOS.Backend/AgentTemplates/` contains governed `AgentTemplateVersion` artifacts (Layer 6 reusable agent patterns), cross-layer composition validation, DTOs, and minimal API endpoint mapping under `/api/admin/agent-templates`.
+- `ETOS.Backend/AgentRuntime/` contains compiled `IAgentRuntimeAdapter` contracts, PydanticAI stub adapter, deferred Hermes/LangGraph adapters, and adapter selector. No public execute endpoint in this slice.
+- `ETOS.Backend/Packages/` contains reference package manifest loading, manufacturing reference package installer, development install endpoint, and optional development auto-seed hook.
+- `packages/manufacturing-reference/` contains the versioned manufacturing demo ontology, import/query profiles, demo CSV fixtures, and governed artifact seed definitions installed by the reference package installer.
 - `ETOS.Backend/Tenancy/` contains tenant-scope conventions used by persisted tenant-owned records.
 - `ETOS.Backend/Platform/Extensions/` exposes deferred extension points for planned platform capabilities without pretending they are active.
 - `ETOS.Frontend/` is a Next.js 16 shell that renders local platform health from the backend.
@@ -83,17 +96,18 @@ Implemented or partially implemented:
 - BaseArtifact registry foundation with immutable versions, generic relationships, dependency edges, readiness-aware publish checks, and a minimal artifact explorer.
 - Graph memory abstraction and Neo4j backend foundation for tenant-scoped BaseNode/BaseRelationship records.
 - Classification and policy enforcement foundation with pre-context filtering contracts and artifact publish risk checks.
-- Canonical ontology and tenant schema foundation with model packages, lifecycle vocabularies, attribute schemas, BOM metadata, and a minimal model-artifacts UI.
-- Import mapping and staging graph foundation with raw evidence metadata, CSV/Excel import parsing, deterministic mapping suggestions, approved immutable mapping versions, row validation, and staging/unverified graph writes.
+- Canonical ontology and tenant schema foundation with model packages, lifecycle vocabularies, attribute schemas, BOM metadata, import/query profile JSON on published packages, and a minimal model-artifacts UI that installs the manufacturing reference package.
+- Package-driven import mapping and staging graph foundation with raw evidence metadata, CSV/Excel import parsing, pluggable mapping suggestion providers (`rule-based-v1` default; PydanticAI/Hermes contracts deferred), mapping approve/reject learning-signal inputs, approved immutable mapping versions, row validation, package-driven structural staging/BOM comparison, and staging/unverified graph writes.
 - Identity resolution and trust-scoring foundation with deterministic cross-source candidate links, approval/rejection/conflict review decisions, graph `IDENTITY_LINK` relationships instead of destructive merges, learning evidence, trust score breakdowns, and a minimal imports-page review UI.
 - Data quality issue foundation with durable issue records generated from import validation, manual issue creation, security-event review hooks, severity-to-trust-impact metadata, review-priority metadata, inert monitoring placeholders, and a minimal imports-page UI.
 - Document memory foundation with document artifact metadata, immutable version storage metadata, document-to-graph/import links, extraction issue hooks, Qdrant-ready vector indexing records, disabled native CAD geometry parsing placeholder, and a minimal documents-page UI.
-- Governed query and context assembly foundation with fixed platform query intents (object-360-context, bom-impact-context, document-evidence-context), retrieval runs, context packages, policy-filtered LLM-safe context assembly, denied context separation, and trust/conflict filtering.
+- Governed query and context assembly foundation with fixed platform query intents (`object-360-context`, `bom-impact-context`, `document-evidence-context`), package-driven relationship resolution for structural/BOM impact intents, retrieval runs, context packages, policy-filtered LLM-safe context assembly, denied context separation, and trust/conflict filtering.
 - AI Trace foundation for governed-query runs with trace records, artifact links, tenant-scoped trace explorer APIs, separate view/export permissions, on-demand export packages with redaction metadata, export audit records, and a minimal `/ai-traces` UI.
 - Governed chat foundation with natural-language Q&A over governed retrieval context only, evidence/confidence responses, single enriched AI Trace per chat turn (no duplicate query-only trace), platform prompt/output schema pinning, chat-to-artifact drafting for query intents/dashboards/reports/recommendations as draft artifact versions blocked by existing publish gates, deterministic default LLM provider for CI/local use, optional OpenAI provider behind `GovernedChat:LlmProvider`, and a minimal `/chat` UI.
 - Explorers and 360° context view foundation (Issue 16) with governed explorer APIs, generic context views for artifacts/documents/graph nodes/context packages/AI traces, governance flow foundation with Milestone 4 review-chain placeholders, graph explorer with trust/policy filtering, context-package and decision explorer foundations, shared frontend panels, and `/explorers` hub routes.
 - Dashboard and Report module (Issue 17) with structured `DashboardVersion`/`ReportVersion` template parsing, governed-query-only preview rendering, readiness transition workflow, JSON export with audit/redaction metadata, governance KPI placeholder catalog, and `/dashboards` + `/reports` UI shells linked from chat drafts.
 - Recommendation module (Issue 18) with versioned `RecommendationVersion` artifacts, embedded evidence links and suggested actions, evidence-required `MarkReviewed` and trust/conflict-aware `MarkReady`, creation from data-quality issues, BOM comparison runs, governed chat drafts, and dashboard/report provenance, suggested-action status transitions with audit, governance-flow integration, and `/recommendations` UI shell.
+- Architectural Abstraction Sprint (Issues 18.1–18.5): industry-neutral core cleanup; capability, business policy, optimization model, and agent template governed artifacts; mapping provider and agent runtime adapter contracts; manufacturing reference package extraction under `packages/manufacturing-reference/` with backend installer and frontend seed delegation.
 
 Planned by PRD and backlog, but not generally implemented unless future source code says otherwise:
 
@@ -102,7 +116,7 @@ Planned by PRD and backlog, but not generally implemented unless future source c
 - Live Qdrant indexing/provider execution.
 - Full review-task/decision/outcome/learning workflows beyond current recommendation and explorer foundations. Recommendation suggested-action `CONVERTED_TO_REVIEW_TASK` is status-only until Issue 19; agent/workflow recommendation creation remains deferred (`AGENT_DEFERRED` contract only).
 - Issue 21 Governance Dashboard live KPI analytics and trend charts (Issue 17 provides KPI placeholder catalog only).
-- Tool registry, agent runtime, workflow runtime, multi-agent collaboration, and enterprise action framework.
+- Tool registry, agent execution (`AgentVersion`, `AgentRun`), workflow runtime, multi-agent collaboration, and enterprise action framework. Agent template artifacts and runtime adapter contracts exist; execution APIs do not.
 - Neo4j Agent Memory or any other persistent agent-memory provider. These remain deferred behind EnterpriseThreadOS-owned contracts and must not replace the platform graph memory abstraction.
 - Live enterprise connectors, source-system write actions, external collaboration portal, Keycloak, Temporal, Kubernetes, and production multi-tenant deployment hardening.
 
@@ -120,7 +134,7 @@ Planned by PRD and backlog, but not generally implemented unless future source c
 Current SQL ownership:
 
 - ASP.NET Identity users and roles.
-- Tenants, memberships, tenant roles, permissions, role-permission assignments, access grants, access requests, access-denial audit records, audit records, security events, artifacts, artifact versions, artifact relationships, artifact dependency edges, classification/policy records, ontology versions, semantic layer versions, lifecycle vocabularies, attribute schemas, model package versions, import batches, file evidence metadata, mapping versions, validation issues, staging run summaries, identity resolution rules, identity candidate links, review decisions, learning evidence, trust score records, data-quality issues, issue source links, trust-impact records, monitoring issue type placeholders, document artifacts, document versions, document-object links, document vector index records, query intent versions, retrieval strategy versions, retrieval runs, context packages, context access decisions, AI trace records, AI trace artifact links, and AI trace export audit records.
+- Tenants, memberships, tenant roles, permissions, role-permission assignments, access grants, access requests, access-denial audit records, audit records, security events, artifacts, artifact versions, artifact relationships, artifact dependency edges, classification/policy records, ontology versions, semantic layer versions, lifecycle vocabularies, attribute schemas, model package versions (including import/query profile JSON), import batches, file evidence metadata, mapping versions, import mapping learning-signal inputs, validation issues, staging run summaries, identity resolution rules, identity candidate links, review decisions, learning evidence, trust score records, data-quality issues, issue source links, trust-impact records, monitoring issue type placeholders, document artifacts, document versions, document-object links, document vector index records, query intent versions, retrieval strategy versions, retrieval runs, context packages, context access decisions, AI trace records, AI trace artifact links, and AI trace export audit records. Layer 3–6 capability, business policy, optimization model, and agent template artifacts reuse artifact registry tables via `PayloadJson`.
 - Early tenant-scoped persistence conventions.
 
 Current local infrastructure availability:
@@ -153,6 +167,7 @@ Future PRD ownership model:
 - `docs/local-development.md`
 - `docs/backend/architecture.md`
 - `docs/frontend/architecture.md`
+- `docs/architecture/domain-packages.md`
 - `docs/architecture/extension-points.md`
 - `docs/architecture/adr/README.md`
 - `docs/ai-agent-workflow.md`

@@ -1,0 +1,43 @@
+{
+  "packageKey": "etos-manufacturing-reference",
+  "name": "ETOS Manufacturing Reference Package",
+  "versionLabel": "1.0.0",
+  "summary": "Reference manufacturing ontology, import/query profiles, and governed artifact seeds for local demo flows.",
+  "ontology": {
+    "key": "etos-manufacturing-ontology",
+    "versionLabel": "1.0.0",
+    "summary": "Manufacturing parts, documents, changes, and BOM relationships.",
+    "objectTypesFile": "ontology/object-types.json",
+    "relationshipTypesFile": "ontology/relationships.json",
+    "bomRelationshipsFile": "ontology/bom-relationships.json"
+  },
+  "semanticLayer": {
+    "key": "etos-manufacturing-semantic",
+    "versionLabel": "1.0.0",
+    "summary": "Graph memory naming for manufacturing objects and BOM edges."
+  },
+  "lifecycle": {
+    "key": "etos-manufacturing-lifecycle",
+    "versionLabel": "1.0.0",
+    "summary": "Manufacturing lifecycle normalization vocabulary."
+  },
+  "attributeSchema": {
+    "key": "etos-manufacturing-attributes",
+    "versionLabel": "1.0.0",
+    "summary": "Tenant-safe canonical attributes for manufacturing imports."
+  },
+  "profiles": {
+    "importProfileFile": "profiles/import-profile.json",
+    "queryIntentExtensionsFile": "profiles/query-intent-extensions.json"
+  },
+  "demoImports": {
+    "flatPartImportFile": "demo-imports/flat-part-import.csv",
+    "bomComparisonFile": "demo-imports/bom-comparison.csv"
+  },
+  "artifacts": {
+    "capabilitiesFile": "artifacts/capabilities.json",
+    "businessPoliciesFile": "artifacts/business-policies.json",
+    "optimizationModelsFile": "artifacts/optimization-models.json",
+    "agentTemplatesFile": "artifacts/agent-templates.json"
+  }
+}

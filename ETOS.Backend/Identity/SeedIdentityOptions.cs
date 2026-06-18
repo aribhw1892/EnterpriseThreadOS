@@ -23,4 +23,6 @@ public sealed class SeedIdentityOptions
 
     [MinLength(1)]
     public string TenantName { get; set; } = "Local Tenant";
+
+    public bool InstallReferencePackage { get; set; } = true;
 }

@@ -14,10 +14,16 @@ using ETOS.Backend.Identity;
 using ETOS.Backend.Imports;
 using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Ontology;
+using ETOS.Backend.BusinessPolicies;
+using ETOS.Backend.Capabilities;
+using ETOS.Backend.OptimizationModels;
+using ETOS.Backend.AgentTemplates;
 using ETOS.Backend.Recommendations;
+using ETOS.Backend.Packages;
 using ETOS.Backend.Platform;
 using ETOS.Backend.Platform.Development;
 using Finbuckle.MultiTenant.AspNetCore.Extensions;
+using Microsoft.AspNetCore.Http;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,6 +64,10 @@ app.MapEnterpriseThreadGovernedChatEndpoints();
 app.MapEnterpriseThreadExplorerEndpoints();
 app.MapEnterpriseThreadDashboardReportEndpoints();
 app.MapEnterpriseThreadRecommendationEndpoints();
+app.MapEnterpriseThreadCapabilityDefinitionEndpoints();
+app.MapEnterpriseThreadBusinessPolicyDefinitionEndpoints();
+app.MapEnterpriseThreadOptimizationModelDefinitionEndpoints();
+app.MapEnterpriseThreadAgentTemplateDefinitionEndpoints();
 
 app.Run();
 
@@ -68,6 +78,24 @@ static async Task SeedDevelopmentIdentityAsync(WebApplication app)
         await using var scope = app.Services.CreateAsyncScope();
         var seeder = scope.ServiceProvider.GetRequiredService<IDevelopmentIdentitySeeder>();
         await seeder.SeedAsync(CancellationToken.None);
+
+        var seedOptions = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<SeedIdentityOptions>>().Value;
+        if (seedOptions.InstallReferencePackage)
+        {
+            var httpContextAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+            httpContextAccessor.HttpContext = new DefaultHttpContext
+            {
+                User = new System.Security.Claims.ClaimsPrincipal(
+                    new System.Security.Claims.ClaimsIdentity(
+                        [new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, seedOptions.AdminUserId.ToString())],
+                        "DevelopmentSeed"))
+            };
+            httpContextAccessor.HttpContext.Request.Headers[TenantHeaderNames.TenantId] = seedOptions.TenantId.ToString();
+            httpContextAccessor.HttpContext.Request.Headers[TenantHeaderNames.UserId] = seedOptions.AdminUserId.ToString();
+
+            var packageSeeder = scope.ServiceProvider.GetRequiredService<IDevelopmentPackageSeeder>();
+            await packageSeeder.SeedAsync(CancellationToken.None);
+        }
     }
     catch (Exception exception)
     {
