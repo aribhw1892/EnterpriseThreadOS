@@ -8,6 +8,7 @@ using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.OptimizationModels;
 using ETOS.Backend.Ontology;
+using ETOS.Backend.ToolRegistry;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.AgentTemplates;
@@ -433,7 +434,7 @@ public sealed class AgentTemplateDefinitionService(
                 join artifact in dbContext.Artifacts.AsNoTracking() on version.ArtifactId equals artifact.Id
                 where version.TenantId == tenantId
                     && toolVersionIds.Contains(version.Id)
-                    && artifact.ArtifactType == FutureToolDefinitionArtifactTypes.ToolDefinition
+                    && artifact.ArtifactType == ToolDefinitionArtifactTypes.ToolDefinition
                 select new AgentTemplateToolReferenceResponse(
                     version.Id,
                     artifact.Id,

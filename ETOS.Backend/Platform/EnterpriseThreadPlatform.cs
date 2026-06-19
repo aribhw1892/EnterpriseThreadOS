@@ -16,13 +16,18 @@ using ETOS.Backend.Imports;
 using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Infrastructure.Configuration;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.AgentRuns;
 using ETOS.Backend.AgentRuntime;
 using ETOS.Backend.AgentTemplates;
+using ETOS.Backend.AgentTypes;
+using ETOS.Backend.Agents;
 using ETOS.Backend.BusinessPolicies;
 using ETOS.Backend.Capabilities;
 using ETOS.Backend.OptimizationModels;
 using ETOS.Backend.Packages;
 using ETOS.Backend.Recommendations;
+using ETOS.Backend.ToolRegistry;
+using ETOS.Backend.Platform.JsonSchema;
 using ETOS.Backend.Imports.MappingSuggestions;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Platform.Development;
@@ -74,6 +79,9 @@ public static class EnterpriseThreadPlatform
 
         services.AddOptions<GovernedChatLlmOptions>()
             .Bind(configuration.GetSection(GovernedChatLlmOptions.SectionName));
+
+        services.AddOptions<AgentRuntimeOptions>()
+            .Bind(configuration.GetSection(AgentRuntimeOptions.SectionName));
 
         services.AddEnterpriseThreadGraphMemory(configuration);
 
@@ -167,6 +175,32 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IBusinessPolicyDefinitionService, BusinessPolicyDefinitionService>();
         services.AddScoped<IOptimizationModelDefinitionService, OptimizationModelDefinitionService>();
         services.AddScoped<IAgentTemplateDefinitionService, AgentTemplateDefinitionService>();
+        services.AddScoped<IAgentTypeDefinitionService, AgentTypeDefinitionService>();
+        services.AddScoped<IAgentDefinitionService, AgentDefinitionService>();
+        services.AddScoped<IJsonSchemaValidator, JsonSchemaValidatorService>();
+        services.AddScoped<IToolDefinitionService, ToolDefinitionService>();
+        services.AddScoped<IConnectorDefinitionService, ConnectorDefinitionService>();
+        services.AddScoped<ISkillDefinitionService, SkillDefinitionService>();
+        services.AddScoped<IToolRunService, ToolRunService>();
+        services.AddScoped<IAgentRunService, AgentRunService>();
+        services.AddScoped<IAgentExecutionService, AgentExecutionService>();
+        services.AddScoped<ITenantSecretProvider, DevelopmentTenantSecretProvider>();
+        services.AddScoped<IToolExecutionQueue, DisabledToolExecutionQueue>();
+        services.AddScoped<GovernedQueryToolHandler>();
+        services.AddScoped<DisabledWriteConnectorToolHandler>();
+        services.AddScoped<IToolHandler>(sp => sp.GetRequiredService<GovernedQueryToolHandler>());
+        services.AddScoped<IToolHandler>(sp => sp.GetRequiredService<DisabledWriteConnectorToolHandler>());
+        services.AddScoped<IToolGateway, ToolGatewayService>();
+        services.AddHttpClient<PydanticAiRuntimeAdapter>((serviceProvider, client) =>
+        {
+            var runtimeOptions = serviceProvider.GetRequiredService<IOptions<AgentRuntimeOptions>>().Value;
+            if (!string.IsNullOrWhiteSpace(runtimeOptions.BaseUrl))
+            {
+                client.BaseAddress = new Uri(runtimeOptions.BaseUrl.TrimEnd('/') + "/");
+            }
+
+            client.Timeout = TimeSpan.FromSeconds(Math.Max(5, runtimeOptions.TimeoutSeconds));
+        });
         services.AddScoped<PydanticAiRuntimeAdapter>();
         services.AddScoped<HermesRuntimeAdapter>();
         services.AddScoped<LangGraphRuntimeAdapter>();

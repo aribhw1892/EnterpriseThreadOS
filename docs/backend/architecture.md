@@ -30,7 +30,10 @@
 - `BusinessPolicies/`: governed `BusinessPolicyDefinitionVersion` artifacts (Layer 4 business constraints), separate from classification `PolicyVersion`, and minimal API endpoint mapping.
 - `OptimizationModels/`: governed `OptimizationModelVersion` artifacts (Layer 5 optimization objective metadata; no solver execution) and minimal API endpoint mapping.
 - `AgentTemplates/`: governed `AgentTemplateVersion` artifacts (Layer 6 reusable agent patterns) and minimal API endpoint mapping.
-- `AgentRuntime/`: compiled `IAgentRuntimeAdapter` contracts with PydanticAI stub and deferred Hermes/LangGraph adapters. No public execute endpoint.
+- `AgentTypes/`: governed `AgentTypeDefinition` catalog artifacts with readiness/publish workflow and minimal API endpoint mapping.
+- `Agents/`: tenant `AgentVersion` artifacts, from-template/from-prompt creation, readiness/publish with derived capability/risk, and minimal API endpoint mapping.
+- `AgentRuns/`: runtime `AgentRun` records with list/get APIs.
+- `AgentRuntime/`: `IAgentRuntimeAdapter` contracts, HTTP `PydanticAiRuntimeAdapter`, deferred Hermes/LangGraph adapters, `IAgentExecutionService` orchestration, and preview/test/execute endpoints under `/api/admin/agents`.
 - `Packages/`: reference package manifest loading, manufacturing reference package installer, and development install endpoint.
 - `Platform/Development/`: development-only endpoints including reference package install.
 - `Platform/Extensions/`: architecture-honest extension point catalog for deferred capabilities.
@@ -336,14 +339,31 @@ The agent-runtime module currently includes:
 - `IAgentRuntimeAdapter` and `IAgentRuntimeAdapterSelector` contracts.
 - `PydanticAiRuntimeAdapter` stub that throws a disabled-not-configured message.
 - deferred `HermesRuntimeAdapter` and `LangGraphRuntimeAdapter` stubs.
-- DI registration only; no public HTTP execute endpoint (Issue 22).
+- DI registration only; no tenant `AgentVersion` execute endpoint (Issue 23).
+
+### Tool Registry (Issue 22)
+
+The tool-registry module currently includes:
+
+- tenant-scoped `ToolDefinitionVersion`, `SkillDefinitionVersion`, and `ConnectorDefinitionVersion` artifacts on BaseArtifact with JSON Schema payloads and capability/risk metadata.
+- `ToolRun` runtime records with dry-run and sync execute paths, audit links, and AI Trace linkage (`AiTraceKind.ToolRun`).
+- `IToolGateway` with internal handlers `governed-query-v1` (delegates to governed query) and `disabled-write-connector-v1` (MVP write block).
+- `ITenantSecretProvider` development stub issuing scoped credential metadata only (no raw secrets in API responses).
+- `IJsonSchemaValidator` (JsonSchema.Net) for publish-time and execution-time schema validation.
+- `IToolExecutionQueue` disabled MassTransit placeholder.
+- admin endpoints under `/api/admin/tools`, `/api/admin/skills`, `/api/admin/connectors`, and `/api/admin/tool-runs`.
+- reference package seeds: `graph-query-tool`, `mock-erp-read`, `mock-erp-write-item`, `governed-graph-skill`.
+
+Permissions: `tools.read|create|readiness|admin|execute|dry_run`, `skills.*`, `connectors.*`, `tool-runs.read`.
+
+Write-capable connector execution and enterprise source-system writes remain disabled in MVP.
 
 ### Reference Package Installer (Issue 18.5)
 
 The packages module currently includes:
 
 - `ReferencePackageManifestLoader` for JSON manifest and fragment loading from `packages/<package>/`.
-- `ManufacturingReferencePackageInstaller` orchestrating publish order: ontology layers → model package with profiles → capability → business policy → optimization model → agent template chain.
+- `ManufacturingReferencePackageInstaller` orchestrating publish order: ontology layers → model package with profiles → capability → business policy → optimization model → connector → tool → skill → agent template chain.
 - idempotent development install endpoint: `POST /api/admin/development/install-reference-package` with body `{ "packageKey": "etos-manufacturing-reference" }`.
 - optional `DevelopmentPackageSeeder` / `SeedIdentity:InstallReferencePackage` auto-install on development startup.
 
@@ -443,10 +463,14 @@ Issue 18.1 tests cover mapping suggestion providers, package-driven staging/BOM 
 
 Issue 18.2–18.4 tests cover capability, business policy, optimization model, and agent template artifact CRUD/publish/readiness, layer separation guards, dependency resolution, and agent runtime adapter registration/stub behavior (`CapabilityDefinitionTests`, `BusinessPolicyDefinitionTests`, `OptimizationModelDefinitionTests`, `AgentTemplateDefinitionTests`, `AgentRuntimeAdapterTests`).
 
-Issue 18.5 tests cover reference package install idempotency, demo import/BOM comparison through installed package only, and published artifact seed chain (`ManufacturingReferencePackageTests`).
+Issue 18.5 tests cover reference package install idempotency, demo import/BOM comparison through installed package only, and published artifact seed chain including tools/connectors (`ManufacturingReferencePackageTests`).
+
+Issue 22 tests cover tool/skill/connector registry CRUD/publish, schema compatibility, dry-run without side effects, governed-query tool execution with ToolRun/audit/trace links, disabled write connector enforcement, tenant isolation, and scoped credential boundaries (`ToolRegistryTests`).
+
+Issue 23 tests cover agent type and agent version CRUD/publish, from-template creation, derived capability/risk readiness, draft permission rules, preview/test/execute orchestration, safe-mode blocking, ToolRun parent links, recommendation and AI Trace creation, HTTP PydanticAI adapter behavior, and manufacturing-reference E2E execution (`AgentTypeDefinitionTests`, `AgentVersionTests`, `AgentRunTests`, `AgentExecutionE2ETests`, `AgentRuntimeAdapterTests`).
 
 ## Planned Backend Areas
 
-The PRD and issue backlog define later modules for review tasks, decisions, outcomes, governance analytics, tool registry, agent execution, workflows, and multi-agent collaboration.
+The PRD and issue backlog define later modules for review tasks, decisions, outcomes, governance analytics, workflows, and multi-agent collaboration.
 
-Do not document or code these as implemented until the source code exists. Issue 22 (tool registry and agent runtime execution) is unblocked by Issue 18.5 but not started.
+Do not document or code these as implemented until the source code exists. Issue 23 (`AgentVersion`, live PydanticAI adapter, `AgentRun`) is the next agent-layer slice after Issue 22.

@@ -17,7 +17,12 @@ using ETOS.Backend.Ontology;
 using ETOS.Backend.BusinessPolicies;
 using ETOS.Backend.Capabilities;
 using ETOS.Backend.OptimizationModels;
+using ETOS.Backend.AgentRuns;
+using ETOS.Backend.AgentRuntime;
 using ETOS.Backend.AgentTemplates;
+using ETOS.Backend.AgentTypes;
+using ETOS.Backend.Agents;
+using ETOS.Backend.ToolRegistry;
 using ETOS.Backend.Recommendations;
 using ETOS.Backend.Packages;
 using ETOS.Backend.Platform;
@@ -68,6 +73,14 @@ app.MapEnterpriseThreadCapabilityDefinitionEndpoints();
 app.MapEnterpriseThreadBusinessPolicyDefinitionEndpoints();
 app.MapEnterpriseThreadOptimizationModelDefinitionEndpoints();
 app.MapEnterpriseThreadAgentTemplateDefinitionEndpoints();
+app.MapEnterpriseThreadAgentTypeDefinitionEndpoints();
+app.MapEnterpriseThreadAgentDefinitionEndpoints();
+app.MapEnterpriseThreadAgentExecutionEndpoints();
+app.MapEnterpriseThreadToolDefinitionEndpoints();
+app.MapEnterpriseThreadConnectorDefinitionEndpoints();
+app.MapEnterpriseThreadSkillDefinitionEndpoints();
+app.MapEnterpriseThreadToolRunEndpoints();
+app.MapEnterpriseThreadAgentRunEndpoints();
 
 app.Run();
 

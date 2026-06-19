@@ -22,6 +22,95 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ETOS.Backend.AgentRuns.AgentRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AgentVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AiTraceRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DerivedRiskSnapshotJson")
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.Property<string>("ErrorSafeSummary")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("FallbackUsedJson")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("GovernedContextSummaryJson")
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<string>("InputSafeSummaryJson")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.Property<bool>("IsDryRun")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPreview")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("OutputSafeSummaryJson")
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<Guid?>("RecommendationArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RetrievalRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("SafeModeApplied")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("StructuredOutputJson")
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ValidationResultJson")
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "StartedAt");
+
+                    b.HasIndex("TenantId", "AgentVersionId", "StartedAt");
+
+                    b.ToTable("agent_runs", (string)null);
+                });
+
             modelBuilder.Entity("ETOS.Backend.AiTrace.AiTraceArtifactLink", b =>
                 {
                     b.Property<Guid>("Id")
@@ -112,6 +201,9 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("AgentRunId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("AuditRecordId")
                         .HasColumnType("uuid");
 
@@ -120,7 +212,7 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("character varying(4000)");
 
-                    b.Property<Guid>("ContextPackageId")
+                    b.Property<Guid?>("ContextPackageId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -164,7 +256,7 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("RequestedByUserId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("RetrievalRunId")
+                    b.Property<Guid?>("RetrievalRunId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("SafeSummary")
@@ -195,6 +287,9 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("ToolRunId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("TraceKind")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -202,9 +297,13 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TenantId", "AgentRunId");
+
                     b.HasIndex("TenantId", "CreatedAt");
 
                     b.HasIndex("TenantId", "RetrievalRunId");
+
+                    b.HasIndex("TenantId", "ToolRunId");
 
                     b.ToTable("ai_trace_records", (string)null);
                 });
@@ -4113,6 +4212,84 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("tenant_scoped_sample_records", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.ToolRegistry.ToolRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AiTraceRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CompatibilityNotesJson")
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ConnectorCredentialSafeSummaryJson")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid?>("ConnectorDefinitionVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ErrorSafeSummary")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("InputSafeSummaryJson")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.Property<bool>("IsDryRun")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("OutputSafeSummaryJson")
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<Guid?>("ParentAgentRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RetrievalRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ToolDefinitionVersionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ValidationResultJson")
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "CreatedAt");
+
+                    b.HasIndex("TenantId", "ToolDefinitionVersionId", "CreatedAt");
+
+                    b.ToTable("tool_runs", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

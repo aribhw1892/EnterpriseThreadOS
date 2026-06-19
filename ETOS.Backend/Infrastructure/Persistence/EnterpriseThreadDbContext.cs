@@ -1,3 +1,4 @@
+using ETOS.Backend.AgentRuns;
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
@@ -13,6 +14,7 @@ using ETOS.Backend.Imports;
 using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Tenancy;
+using ETOS.Backend.ToolRegistry;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -157,6 +159,10 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<GovernedChatTurn> GovernedChatTurns => Set<GovernedChatTurn>();
 
     public DbSet<DashboardReportExportRecord> DashboardReportExportRecords => Set<DashboardReportExportRecord>();
+
+    public DbSet<ToolRun> ToolRuns => Set<ToolRun>();
+
+    public DbSet<AgentRun> AgentRuns => Set<AgentRun>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -539,6 +545,8 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
         ConfigureDocumentTables(modelBuilder);
         ConfigureGovernedQueryTables(modelBuilder);
         ConfigureAiTraceTables(modelBuilder);
+        ConfigureToolRegistryTables(modelBuilder);
+        ConfigureAgentRunTables(modelBuilder);
         ConfigureGovernedChatTables(modelBuilder);
         ConfigureDashboardReportTables(modelBuilder);
     }
@@ -665,9 +673,13 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.Property(trace => trace.GeneratedOutputJson).HasMaxLength(16000);
             entity.Property(trace => trace.TraceKind).HasConversion<string>().HasMaxLength(64).IsRequired();
             entity.Property(trace => trace.GovernedChatTurnId);
+            entity.Property(trace => trace.ToolRunId);
+            entity.Property(trace => trace.AgentRunId);
             entity.Property(trace => trace.CreatedAt).IsRequired();
             entity.HasIndex(trace => new { trace.TenantId, trace.CreatedAt });
             entity.HasIndex(trace => new { trace.TenantId, trace.RetrievalRunId });
+            entity.HasIndex(trace => new { trace.TenantId, trace.ToolRunId });
+            entity.HasIndex(trace => new { trace.TenantId, trace.AgentRunId });
         });
 
         modelBuilder.Entity<AiTraceArtifactLink>(entity =>
@@ -700,6 +712,52 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
                 .WithMany(trace => trace.ExportRecords)
                 .HasForeignKey(record => record.AiTraceRecordId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureToolRegistryTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ToolRun>(entity =>
+        {
+            entity.ToTable("tool_runs");
+            entity.HasKey(run => run.Id);
+            entity.Property(run => run.TenantId).IsRequired();
+            entity.Property(run => run.ToolDefinitionVersionId).IsRequired();
+            entity.Property(run => run.RequestedByUserId).IsRequired();
+            entity.Property(run => run.Status).HasMaxLength(64).IsRequired();
+            entity.Property(run => run.InputSafeSummaryJson).HasMaxLength(8000).IsRequired();
+            entity.Property(run => run.OutputSafeSummaryJson).HasMaxLength(16000);
+            entity.Property(run => run.ValidationResultJson).HasMaxLength(8000);
+            entity.Property(run => run.CompatibilityNotesJson).HasMaxLength(8000);
+            entity.Property(run => run.ErrorSafeSummary).HasMaxLength(2000);
+            entity.Property(run => run.ConnectorCredentialSafeSummaryJson).HasMaxLength(4000);
+            entity.Property(run => run.CreatedAt).IsRequired();
+            entity.HasIndex(run => new { run.TenantId, run.CreatedAt });
+            entity.HasIndex(run => new { run.TenantId, run.ToolDefinitionVersionId, run.CreatedAt });
+        });
+    }
+
+    private static void ConfigureAgentRunTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AgentRun>(entity =>
+        {
+            entity.ToTable("agent_runs");
+            entity.HasKey(run => run.Id);
+            entity.Property(run => run.TenantId).IsRequired();
+            entity.Property(run => run.AgentVersionId).IsRequired();
+            entity.Property(run => run.RequestedByUserId).IsRequired();
+            entity.Property(run => run.Status).HasMaxLength(64).IsRequired();
+            entity.Property(run => run.InputSafeSummaryJson).HasMaxLength(8000).IsRequired();
+            entity.Property(run => run.OutputSafeSummaryJson).HasMaxLength(16000);
+            entity.Property(run => run.StructuredOutputJson).HasMaxLength(16000);
+            entity.Property(run => run.DerivedRiskSnapshotJson).HasMaxLength(8000);
+            entity.Property(run => run.FallbackUsedJson).HasMaxLength(4000);
+            entity.Property(run => run.ValidationResultJson).HasMaxLength(8000);
+            entity.Property(run => run.ErrorSafeSummary).HasMaxLength(2000);
+            entity.Property(run => run.GovernedContextSummaryJson).HasMaxLength(16000);
+            entity.Property(run => run.StartedAt).IsRequired();
+            entity.HasIndex(run => new { run.TenantId, run.StartedAt });
+            entity.HasIndex(run => new { run.TenantId, run.AgentVersionId, run.StartedAt });
         });
     }
 

@@ -95,7 +95,8 @@ public enum EvidenceLinkType
     ManualNote = 11,
     Dashboard = 12,
     Report = 13,
-    AuditRecord = 14
+    ToolRun = 15,
+    AgentRun = 16
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

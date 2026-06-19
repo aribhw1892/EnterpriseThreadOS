@@ -63,6 +63,10 @@ public sealed class DevelopmentDemoDataCleaner(
 
         deletedCounts[nameof(dbContext.AiTraceExportRecords)] =
             await DeleteTenantRowsAsync(dbContext.AiTraceExportRecords, context.TenantId, cancellationToken);
+        deletedCounts[nameof(dbContext.ToolRuns)] =
+            await DeleteTenantRowsAsync(dbContext.ToolRuns, context.TenantId, cancellationToken);
+        deletedCounts[nameof(dbContext.AgentRuns)] =
+            await DeleteTenantRowsAsync(dbContext.AgentRuns, context.TenantId, cancellationToken);
         deletedCounts[nameof(dbContext.AiTraceArtifactLinks)] =
             await DeleteTenantRowsAsync(dbContext.AiTraceArtifactLinks, context.TenantId, cancellationToken);
         deletedCounts[nameof(dbContext.AiTraceRecords)] =

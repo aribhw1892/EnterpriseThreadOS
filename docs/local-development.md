@@ -39,6 +39,7 @@ Local services:
 - MinIO: object storage for import/document/trace package slices. Current import and document slices use local file-backed storage implementations for developer/test runs while keeping storage boundaries ready for MinIO-compatible object storage.
 - Redis: cache/runtime support for later slices.
 - RabbitMQ: messaging/runtime support for later slices.
+- Agent runtime (`ETOS.AgentRuntime`): Python FastAPI + PydanticAI sidecar for governed single-step agent execution. The .NET host calls it through `PydanticAiRuntimeAdapter`; tools and context assembly stay in .NET.
 
 Memgraph is retained as an optional evaluation profile behind the graph abstraction. To start it for adapter experiments, use a non-default Bolt port:
 
@@ -51,6 +52,39 @@ Stop services:
 
 ```powershell
 docker compose --env-file .env -f infra/local/docker-compose.yml down
+```
+
+## Agent Runtime (Python sidecar)
+
+The agent runtime is optional for most local backend work. Start it with Docker Compose (included in the default stack) or run it directly from the repo:
+
+```powershell
+Push-Location ETOS.AgentRuntime
+python -m pip install -e ".[dev]"
+$env:AGENT_RUNTIME_PORT = "8010"
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8010
+Pop-Location
+```
+
+Useful endpoints:
+
+- `GET http://localhost:8010/health`
+- `POST http://localhost:8010/v1/execute` — governed structured agent execution (no DB/tool access in Python)
+
+Environment:
+
+- `AGENT_RUNTIME_PORT`: host port mapped in Docker Compose (default `8010`).
+- `OPENAI_API_KEY`: optional passthrough for live PydanticAI/OpenAI calls. When unset, `/v1/execute` returns deterministic structured output that matches the supplied output JSON schema (used by pytest and local .NET adapter tests).
+
+The .NET backend reads `AgentRuntime:BaseUrl` (for example `http://localhost:8010`) when the HTTP `PydanticAiRuntimeAdapter` is configured in a later Issue 23 slice.
+
+Run Python tests:
+
+```powershell
+Push-Location ETOS.AgentRuntime
+python -m pip install -e ".[dev]"
+python -m pytest
+Pop-Location
 ```
 
 ## Backend

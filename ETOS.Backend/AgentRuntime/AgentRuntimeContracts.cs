@@ -30,13 +30,23 @@ public sealed record AgentRuntimeExecutionRequest(
     string? GovernedContextSummaryJson,
     string? StructuredInputJson,
     bool PreviewMode,
-    string? RequestedAdapterKey = null);
+    string? RequestedAdapterKey = null,
+    Guid? AgentVersionId = null,
+    Guid? AgentRunId = null,
+    string? PromptTemplatePayloadJson = null,
+    string? OutputSchemaJson = null,
+    string? PrimaryModelProviderKey = null,
+    string? PrimaryModelId = null,
+    string? FallbackModelsJson = null,
+    string? ToolOutputSummariesJson = null);
 
 public sealed record AgentRuntimeExecutionResult(
     string AdapterKey,
     string Status,
     string? StructuredOutputJson,
-    IReadOnlyCollection<string> TraceNotes);
+    IReadOnlyCollection<string> TraceNotes,
+    string? ModelUsed = null,
+    string? FallbackAppliedJson = null);
 
 public interface IAgentRuntimeAdapter
 {

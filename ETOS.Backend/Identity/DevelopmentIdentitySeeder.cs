@@ -3,7 +3,9 @@ using ETOS.Backend.Artifacts;
 using ETOS.Backend.BusinessPolicies;
 using ETOS.Backend.Capabilities;
 using ETOS.Backend.OptimizationModels;
+using ETOS.Backend.AgentRuns;
 using ETOS.Backend.AgentTemplates;
+using ETOS.Backend.AgentTypes;
 using ETOS.Backend.Classification;
 using ETOS.Backend.Dashboards;
 using ETOS.Backend.DataQuality;
@@ -14,6 +16,7 @@ using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Recommendations;
+using ETOS.Backend.ToolRegistry;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -99,6 +102,32 @@ public sealed class DevelopmentIdentitySeeder(
         var agentTemplateCreatePermission = await EnsurePermissionAsync(AgentTemplateDefinitionPermissions.Create, "Create tenant agent template definition artifacts.", cancellationToken);
         var agentTemplateReadinessPermission = await EnsurePermissionAsync(AgentTemplateDefinitionPermissions.Readiness, "Mark tenant agent template definition versions ready.", cancellationToken);
         var agentTemplateAdminPermission = await EnsurePermissionAsync(AgentTemplateDefinitionPermissions.Admin, "Administer tenant agent template definition records.", cancellationToken);
+        var toolReadPermission = await EnsurePermissionAsync(ToolDefinitionPermissions.Read, "Read tenant tool definition artifacts.", cancellationToken);
+        var toolCreatePermission = await EnsurePermissionAsync(ToolDefinitionPermissions.Create, "Create tenant tool definition artifacts.", cancellationToken);
+        var toolReadinessPermission = await EnsurePermissionAsync(ToolDefinitionPermissions.Readiness, "Mark tenant tool definition versions ready.", cancellationToken);
+        var toolAdminPermission = await EnsurePermissionAsync(ToolDefinitionPermissions.Admin, "Administer tenant tool definition records.", cancellationToken);
+        var toolExecutePermission = await EnsurePermissionAsync(ToolDefinitionPermissions.Execute, "Execute published tenant tools.", cancellationToken);
+        var toolDryRunPermission = await EnsurePermissionAsync(ToolDefinitionPermissions.DryRun, "Dry-run published tenant tools.", cancellationToken);
+        var skillReadPermission = await EnsurePermissionAsync(SkillDefinitionPermissions.Read, "Read tenant skill definition artifacts.", cancellationToken);
+        var skillCreatePermission = await EnsurePermissionAsync(SkillDefinitionPermissions.Create, "Create tenant skill definition artifacts.", cancellationToken);
+        var skillReadinessPermission = await EnsurePermissionAsync(SkillDefinitionPermissions.Readiness, "Mark tenant skill definition versions ready.", cancellationToken);
+        var skillAdminPermission = await EnsurePermissionAsync(SkillDefinitionPermissions.Admin, "Administer tenant skill definition records.", cancellationToken);
+        var connectorReadPermission = await EnsurePermissionAsync(ConnectorDefinitionPermissions.Read, "Read tenant connector definition artifacts.", cancellationToken);
+        var connectorCreatePermission = await EnsurePermissionAsync(ConnectorDefinitionPermissions.Create, "Create tenant connector definition artifacts.", cancellationToken);
+        var connectorReadinessPermission = await EnsurePermissionAsync(ConnectorDefinitionPermissions.Readiness, "Mark tenant connector definition versions ready.", cancellationToken);
+        var connectorAdminPermission = await EnsurePermissionAsync(ConnectorDefinitionPermissions.Admin, "Administer tenant connector definition records.", cancellationToken);
+        var toolRunReadPermission = await EnsurePermissionAsync(ToolRunPermissions.Read, "Read tenant tool run records.", cancellationToken);
+        var agentRunReadPermission = await EnsurePermissionAsync(AgentRunPermissions.Read, "Read tenant agent run records.", cancellationToken);
+        var agentTypeReadPermission = await EnsurePermissionAsync(AgentTypeDefinitionPermissions.Read, "Read tenant agent type definition artifacts.", cancellationToken);
+        var agentTypeCreatePermission = await EnsurePermissionAsync(AgentTypeDefinitionPermissions.Create, "Create tenant agent type definition artifacts.", cancellationToken);
+        var agentTypeReadinessPermission = await EnsurePermissionAsync(AgentTypeDefinitionPermissions.Readiness, "Mark tenant agent type definition versions ready.", cancellationToken);
+        var agentTypeAdminPermission = await EnsurePermissionAsync(AgentTypeDefinitionPermissions.Admin, "Administer tenant agent type definition records.", cancellationToken);
+        var agentsReadPermission = await EnsurePermissionAsync(AgentPermissions.Read, "Read tenant agent version artifacts.", cancellationToken);
+        var agentsCreatePermission = await EnsurePermissionAsync(AgentPermissions.Create, "Create tenant agent version artifacts.", cancellationToken);
+        var agentsReadinessPermission = await EnsurePermissionAsync(AgentPermissions.Readiness, "Mark tenant agent versions ready.", cancellationToken);
+        var agentsAdminPermission = await EnsurePermissionAsync(AgentPermissions.Admin, "Administer tenant agent records.", cancellationToken);
+        var agentsTestPermission = await EnsurePermissionAsync(AgentPermissions.Test, "Test-run draft tenant agents.", cancellationToken);
+        var agentsExecutePermission = await EnsurePermissionAsync(AgentPermissions.Execute, "Execute published tenant agents.", cancellationToken);
         var adminRole = await EnsureTenantRoleAsync(tenant.Id, cancellationToken);
         var chatRunnerRole = await EnsureChatRunnerRoleAsync(tenant.Id, cancellationToken);
         var chatRunner = await EnsureChatRunnerUserAsync(seedOptions, cancellationToken);
@@ -161,6 +190,32 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentTemplateCreatePermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentTemplateReadinessPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentTemplateAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, toolReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, toolCreatePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, toolReadinessPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, toolAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, toolExecutePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, toolDryRunPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, skillReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, skillCreatePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, skillReadinessPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, skillAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, connectorReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, connectorCreatePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, connectorReadinessPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, connectorAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, toolRunReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentRunReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentTypeReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentTypeCreatePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentTypeReadinessPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentTypeAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsCreatePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsReadinessPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsTestPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsExecutePermission.Id, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, chatRunner.Id, chatRunnerRole.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, governedChatRunPermission.Id, cancellationToken);
@@ -172,6 +227,7 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, recommendationReadPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, recommendationCreatePermission.Id, cancellationToken);
 
+        await EnsureAnalysisAgentTypeDefinitionAsync(tenant, admin, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         await EnsureBootstrapAuditAsync(tenant.Id, admin.Id, tenant.Identifier, cancellationToken);
 
@@ -179,6 +235,66 @@ public sealed class DevelopmentIdentitySeeder(
             "Seeded development identity admin {AdminEmail} for tenant {TenantIdentifier}.",
             seedOptions.AdminEmail,
             seedOptions.TenantIdentifier);
+    }
+
+    private async Task EnsureAnalysisAgentTypeDefinitionAsync(
+        Tenant tenant,
+        EtosUser admin,
+        CancellationToken cancellationToken)
+    {
+        var normalizedType = AgentTypeDefinitionArtifactTypes.AgentTypeDefinition.ToUpperInvariant();
+        var exists = await dbContext.Artifacts.AnyAsync(
+            artifact => artifact.TenantId == tenant.Id && artifact.NormalizedArtifactType == normalizedType,
+            cancellationToken);
+
+        if (exists)
+        {
+            return;
+        }
+
+        var payload = AgentTypeDefinitionPayloadParser.Create(
+            "analysis-agent",
+            "Governed analysis and investigation agents for local development.",
+            ["object-360-context", "bom-impact-context"],
+            "investigator",
+            ToolRiskLevels.Medium);
+
+        var artifact = new Artifact
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenant.Id,
+            ArtifactType = AgentTypeDefinitionArtifactTypes.AgentTypeDefinition,
+            NormalizedArtifactType = normalizedType,
+            Name = "Analysis Agent Type",
+            Description = "Development seed agent type catalog entry.",
+            OwnerUserId = admin.Id,
+            LifecycleState = ArtifactLifecycleState.Active,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+
+        var version = new ArtifactVersion
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenant.Id,
+            ArtifactId = artifact.Id,
+            VersionLabel = "1.0.0",
+            NormalizedVersionLabel = "1.0.0",
+            Summary = "Development seed analysis agent type.",
+            PayloadJson = AgentTypeDefinitionPayloadParser.Serialize(payload),
+            ReadinessState = ArtifactReadinessState.Published,
+            CompatibilityStatus = ArtifactCompatibilityStatus.Compatible,
+            CompatibilitySummary = "Development seed publish.",
+            PolicyRiskStatus = ArtifactPolicyRiskStatus.Acceptable,
+            CreatedByUserId = admin.Id,
+            CreatedAt = DateTimeOffset.UtcNow,
+            PublishedByUserId = admin.Id,
+            PublishedAt = DateTimeOffset.UtcNow,
+            PublishSummary = "Development seed publish."
+        };
+
+        dbContext.Artifacts.Add(artifact);
+        dbContext.ArtifactVersions.Add(version);
     }
 
     private async Task EnsureBootstrapAuditAsync(

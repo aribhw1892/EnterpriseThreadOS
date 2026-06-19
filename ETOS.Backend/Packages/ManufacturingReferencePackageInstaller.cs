@@ -12,6 +12,7 @@ using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.OptimizationModels;
 using ETOS.Backend.Ontology;
+using ETOS.Backend.ToolRegistry;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.Packages;
@@ -28,6 +29,9 @@ public sealed class ManufacturingReferencePackageInstaller(
     IBusinessPolicyDefinitionService businessPolicyDefinitionService,
     IOptimizationModelDefinitionService optimizationModelDefinitionService,
     IAgentTemplateDefinitionService agentTemplateDefinitionService,
+    IConnectorDefinitionService connectorDefinitionService,
+    IToolDefinitionService toolDefinitionService,
+    ISkillDefinitionService skillDefinitionService,
     IGovernedChatArtifactSeeder governedChatArtifactSeeder,
     EnterpriseThreadDbContext dbContext,
     ITenantContextResolver tenantContextResolver,
@@ -68,7 +72,10 @@ public sealed class ManufacturingReferencePackageInstaller(
         var capabilityVersions = await InstallCapabilitiesAsync(loaded, modelPackage.Id, installedArtifacts, cancellationToken);
         var policyVersions = await InstallBusinessPoliciesAsync(loaded, modelPackage.Id, capabilityVersions, installedArtifacts, cancellationToken);
         await InstallOptimizationModelsAsync(loaded, modelPackage.Id, capabilityVersions, policyVersions, installedArtifacts, cancellationToken);
-        await InstallAgentTemplatesAsync(context, loaded, modelPackage.Id, capabilityVersions, installedArtifacts, cancellationToken);
+        var connectorVersions = await InstallConnectorsAsync(loaded, installedArtifacts, cancellationToken);
+        var toolVersions = await InstallToolsAsync(loaded, modelPackage.Id, capabilityVersions, connectorVersions, installedArtifacts, cancellationToken);
+        await InstallSkillsAsync(loaded, toolVersions, installedArtifacts, cancellationToken);
+        await InstallAgentTemplatesAsync(context, loaded, modelPackage.Id, capabilityVersions, toolVersions, installedArtifacts, cancellationToken);
 
         await auditRecorder.RecordAsync(
             new AuditRecordWriteRequest(
@@ -318,11 +325,157 @@ public sealed class ManufacturingReferencePackageInstaller(
         }
     }
 
+    private async Task<Dictionary<string, Guid>> InstallConnectorsAsync(
+        LoadedReferencePackageManifest loaded,
+        List<InstalledReferenceArtifactResponse> installedArtifacts,
+        CancellationToken cancellationToken)
+    {
+        var connectorVersions = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+        if (loaded.Connectors.Count == 0)
+        {
+            return connectorVersions;
+        }
+
+        var publish = new PublishArtifactVersionRequest("Published by reference package installer.");
+        foreach (var connector in loaded.Connectors)
+        {
+            var created = await connectorDefinitionService.CreateAsync(
+                new CreateConnectorDefinitionRequest(
+                    connector.Name,
+                    connector.Description,
+                    connector.ConnectorKey,
+                    connector.ConnectorKind,
+                    connector.CallsExternalSystem,
+                    connector.WritesExternalSystem,
+                    connector.ExecutionEnabled,
+                    connector.DisabledReason,
+                    connector.CredentialScopeKey,
+                    connector.SecretReferenceKey,
+                    connector.SupportedOperations,
+                    connector.CompositionMetadata,
+                    connector.FutureExtensionPlaceholders),
+                cancellationToken);
+            await connectorDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
+            await connectorDefinitionService.PublishAsync(created.ArtifactId, created.VersionId, publish, cancellationToken);
+            connectorVersions[connector.ConnectorKey] = created.VersionId;
+            installedArtifacts.Add(new InstalledReferenceArtifactResponse(
+                "connector",
+                connector.ConnectorKey,
+                created.ArtifactId,
+                created.VersionId));
+        }
+
+        return connectorVersions;
+    }
+
+    private async Task<Dictionary<string, Guid>> InstallToolsAsync(
+        LoadedReferencePackageManifest loaded,
+        Guid modelPackageVersionId,
+        IReadOnlyDictionary<string, Guid> capabilityVersions,
+        IReadOnlyDictionary<string, Guid> connectorVersions,
+        List<InstalledReferenceArtifactResponse> installedArtifacts,
+        CancellationToken cancellationToken)
+    {
+        var toolVersions = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+        if (loaded.Tools.Count == 0)
+        {
+            return toolVersions;
+        }
+
+        var publish = new PublishArtifactVersionRequest("Published by reference package installer.");
+        foreach (var tool in loaded.Tools)
+        {
+            Guid? connectorVersionId = null;
+            if (!string.IsNullOrWhiteSpace(tool.ReferencedConnectorKey))
+            {
+                connectorVersionId = connectorVersions[tool.ReferencedConnectorKey];
+            }
+
+            var created = await toolDefinitionService.CreateAsync(
+                new CreateToolDefinitionRequest(
+                    tool.Name,
+                    tool.Description,
+                    tool.ToolKey,
+                    tool.ToolCategory,
+                    tool.RiskLevel,
+                    tool.ReadOnly,
+                    tool.CreatesPlatformArtifact,
+                    tool.CreatesReviewTask,
+                    tool.CreatesDecision,
+                    tool.CallsExternalSystem,
+                    tool.WritesExternalSystem,
+                    tool.RequiresApproval,
+                    tool.SupportsDryRun,
+                    tool.RequiredPermissionKeys,
+                    tool.InputSchemaJson,
+                    tool.OutputSchemaJson,
+                    tool.InternalHandlerKey,
+                    null,
+                    connectorVersionId,
+                    [modelPackageVersionId],
+                    null,
+                    tool.ReferencedCapabilityKeys.Select(key => capabilityVersions[key]).ToList(),
+                    null,
+                    tool.AllowedQueryIntentKeys,
+                    tool.CompositionMetadata,
+                    tool.FutureExtensionPlaceholders),
+                cancellationToken);
+            await toolDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
+            await toolDefinitionService.PublishAsync(created.ArtifactId, created.VersionId, publish, cancellationToken);
+            toolVersions[tool.ToolKey] = created.VersionId;
+            installedArtifacts.Add(new InstalledReferenceArtifactResponse(
+                "tool",
+                tool.ToolKey,
+                created.ArtifactId,
+                created.VersionId));
+        }
+
+        return toolVersions;
+    }
+
+    private async Task InstallSkillsAsync(
+        LoadedReferencePackageManifest loaded,
+        IReadOnlyDictionary<string, Guid> toolVersions,
+        List<InstalledReferenceArtifactResponse> installedArtifacts,
+        CancellationToken cancellationToken)
+    {
+        if (loaded.Skills.Count == 0)
+        {
+            return;
+        }
+
+        var publish = new PublishArtifactVersionRequest("Published by reference package installer.");
+        foreach (var skill in loaded.Skills)
+        {
+            var created = await skillDefinitionService.CreateAsync(
+                new CreateSkillDefinitionRequest(
+                    skill.Name,
+                    skill.Description,
+                    skill.SkillKey,
+                    skill.SkillSummary,
+                    skill.IsGloballyShared,
+                    skill.InputSchemaJson,
+                    skill.OutputSchemaJson,
+                    skill.ReferencedToolKeys.Select(key => toolVersions[key]).ToList(),
+                    skill.CompositionMetadata,
+                    skill.FutureExtensionPlaceholders),
+                cancellationToken);
+            await skillDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
+            await skillDefinitionService.PublishAsync(created.ArtifactId, created.VersionId, publish, cancellationToken);
+            installedArtifacts.Add(new InstalledReferenceArtifactResponse(
+                "skill",
+                skill.SkillKey,
+                created.ArtifactId,
+                created.VersionId));
+        }
+    }
+
     private async Task InstallAgentTemplatesAsync(
         ActiveTenantContext context,
         LoadedReferencePackageManifest loaded,
         Guid modelPackageVersionId,
         IReadOnlyDictionary<string, Guid> capabilityVersions,
+        IReadOnlyDictionary<string, Guid> toolVersions,
         List<InstalledReferenceArtifactResponse> installedArtifacts,
         CancellationToken cancellationToken)
     {
@@ -375,7 +528,7 @@ public sealed class ManufacturingReferencePackageInstaller(
                     chatArtifacts.ChatAnswerSchema.VersionId,
                     queryIntentId,
                     retrievalStrategyId,
-                    null,
+                    template.ReferencedToolKeys?.Select(key => toolVersions[key]).ToList(),
                     template.CompositionMetadata,
                     template.FutureExtensionPlaceholders),
                 cancellationToken);

@@ -7,6 +7,7 @@
     "patternSummary": "Investigate manufacturing context with governed retrieval.",
     "preferredRuntimeAdapterKey": "pydantic-ai-v1",
     "referencedCapabilityKeys": ["bom-impact-analysis"],
+    "referencedToolKeys": ["graph-query-tool"],
     "referencedOptimizationModelKeys": ["minimize-transport-distance"],
     "queryIntentKey": "object-360-context",
     "retrievalStrategyKey": "trusted-graph-first",

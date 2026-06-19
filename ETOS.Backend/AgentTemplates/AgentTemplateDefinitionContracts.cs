@@ -1,4 +1,5 @@
 using ETOS.Backend.AgentRuntime;
+using ETOS.Backend.Agents;
 
 namespace ETOS.Backend.AgentTemplates;
 
@@ -20,13 +21,9 @@ public static class AgentTemplateDefinitionArtifactTypes
 /// </summary>
 public static class FutureAgentArtifactTypes
 {
-    public const string AgentVersion = "AgentVersion";
+    [Obsolete("Use AgentDefinitionArtifactTypes.AgentVersion from ETOS.Backend.Agents.")]
+    public const string AgentVersion = AgentDefinitionArtifactTypes.AgentVersion;
     public const string AgentCapabilityProfile = "AgentCapabilityProfileVersion";
-}
-
-public static class FutureToolDefinitionArtifactTypes
-{
-    public const string ToolDefinition = "ToolDefinitionVersion";
 }
 
 public sealed record AgentTemplateCapabilityReferenceResponse(

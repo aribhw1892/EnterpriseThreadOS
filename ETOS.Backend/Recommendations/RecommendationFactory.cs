@@ -1,3 +1,5 @@
+using System.Text.Json;
+using ETOS.Backend.Agents;
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.GraphMemory;
@@ -28,6 +30,7 @@ public interface IRecommendationFactory
         Guid artifactId,
         Guid versionId,
         CancellationToken cancellationToken);
+    Task<CreateRecommendationResponse> FromAgentRunAsync(Guid agentRunId, CancellationToken cancellationToken);
 }
 
 public sealed class RecommendationFactory(
@@ -289,6 +292,119 @@ public sealed class RecommendationFactory(
             payload.LifecycleStatus);
     }
 
+    public async Task<CreateRecommendationResponse> FromAgentRunAsync(Guid agentRunId, CancellationToken cancellationToken)
+    {
+        var context = await RequireCreatePermissionAsync(cancellationToken);
+        var agentRun = await dbContext.AgentRuns
+            .SingleOrDefaultAsync(item => item.Id == agentRunId && item.TenantId == context.TenantId, cancellationToken)
+            ?? throw new RequestValidationException("Agent run was not found.");
+
+        if (string.IsNullOrWhiteSpace(agentRun.StructuredOutputJson))
+        {
+            throw new RequestValidationException("Agent run does not contain structured output for recommendation creation.");
+        }
+
+        var agentVersion = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .SingleOrDefaultAsync(item => item.Id == agentRun.AgentVersionId, cancellationToken)
+            ?? throw new RequestValidationException("Agent version was not found.");
+
+        var outputSchemaPayload = await LoadOutputSchemaPayloadAsync(context.TenantId, agentVersion.PayloadJson, cancellationToken);
+        if (OutputSchemaCreatesDecision(outputSchemaPayload))
+        {
+            throw new RequestValidationException("Agent output schema must not create decision artifacts.");
+        }
+
+        GuardStructuredOutputAgainstDecisionCreation(agentRun.StructuredOutputJson);
+
+        var uniqueSourceKey = $"agent:{agentRun.Id}";
+        var existing = await FindByUniqueSourceKeyAsync(context.TenantId, uniqueSourceKey, cancellationToken);
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        using var outputDocument = JsonDocument.Parse(agentRun.StructuredOutputJson);
+        var title = ReadStringProperty(outputDocument.RootElement, "title", "displayName", "name")
+            ?? $"Agent recommendation: {agentVersion.Artifact?.Name ?? agentRun.Id.ToString()}";
+        var summary = ReadStringProperty(outputDocument.RootElement, "summary", "answer", "rationale", "recommendation")
+            ?? agentRun.OutputSafeSummaryJson
+            ?? "Recommendation created from governed agent execution.";
+
+        var evidence = new List<RecommendationPayloadParser.RecommendationEvidenceLinkDocument>
+        {
+            new(
+                Guid.NewGuid(),
+                EvidenceLinkType.AgentRun,
+                agentRun.Id,
+                agentRun.OutputSafeSummaryJson ?? summary,
+                TrustState.Provisional,
+                false)
+        };
+
+        if (agentRun.RetrievalRunId is Guid retrievalRunId)
+        {
+            evidence.Add(new RecommendationPayloadParser.RecommendationEvidenceLinkDocument(
+                Guid.NewGuid(),
+                EvidenceLinkType.RetrievalRun,
+                retrievalRunId,
+                "Governed retrieval evidence from agent execution.",
+                TrustState.Provisional,
+                false));
+        }
+
+        if (agentRun.AiTraceRecordId is Guid aiTraceId)
+        {
+            evidence.Add(new RecommendationPayloadParser.RecommendationEvidenceLinkDocument(
+                Guid.NewGuid(),
+                EvidenceLinkType.AiTrace,
+                aiTraceId,
+                "AI trace evidence from agent execution.",
+                TrustState.Provisional,
+                false));
+        }
+
+        var childToolRuns = await dbContext.ToolRuns
+            .AsNoTracking()
+            .Where(item => item.ParentAgentRunId == agentRun.Id && item.TenantId == context.TenantId)
+            .OrderBy(item => item.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        foreach (var toolRun in childToolRuns)
+        {
+            evidence.Add(new RecommendationPayloadParser.RecommendationEvidenceLinkDocument(
+                Guid.NewGuid(),
+                EvidenceLinkType.ToolRun,
+                toolRun.Id,
+                toolRun.OutputSafeSummaryJson ?? $"Tool run {toolRun.Status}.",
+                TrustState.Provisional,
+                false));
+        }
+
+        var suggestedActions = BuildSuggestedActionsFromOutput(outputDocument.RootElement, summary);
+        var explainability = new RecommendationPayloadParser.RecommendationExplainabilityDocument(
+            agentRun.AiTraceRecordId,
+            null,
+            agentRun.RetrievalRunId);
+
+        return await CreateArtifactAsync(
+            context,
+            title,
+            summary,
+            RecommendationType.Policy,
+            RecommendationCreationSource.AgentDeferred,
+            RecommendationRiskState.Medium,
+            RecommendationCapabilityState.ReviewRequired,
+            evidence,
+            suggestedActions,
+            [],
+            explainability,
+            new RecommendationPayloadParser.RecommendationSourceReferenceDocument("agent_run", agentRun.Id),
+            uniqueSourceKey,
+            cancellationToken);
+    }
+
     private async Task<CreateRecommendationResponse> CreateArtifactAsync(
         ActiveTenantContext context,
         string title,
@@ -485,4 +601,133 @@ public sealed class RecommendationFactory(
             DataQualitySeverity.Medium => RecommendationRiskState.Medium,
             _ => RecommendationRiskState.Low
         };
+
+    private static IReadOnlyCollection<RecommendationPayloadParser.RecommendationSuggestedActionDocument> BuildSuggestedActionsFromOutput(
+        JsonElement output,
+        string fallbackRationale)
+    {
+        if (!output.TryGetProperty("suggestedActions", out var actionsElement) || actionsElement.ValueKind != JsonValueKind.Array)
+        {
+            return
+            [
+                new RecommendationPayloadParser.RecommendationSuggestedActionDocument(
+                    Guid.NewGuid(),
+                    "Review agent recommendation",
+                    "REVIEW_AGENT_RECOMMENDATION",
+                    RecommendationRiskState.Medium,
+                    "DOMAIN_REVIEW",
+                    SuggestedActionStatus.Proposed,
+                    fallbackRationale)
+            ];
+        }
+
+        var actions = new List<RecommendationPayloadParser.RecommendationSuggestedActionDocument>();
+        foreach (var actionElement in actionsElement.EnumerateArray())
+        {
+            var title = ReadStringProperty(actionElement, "title", "name") ?? "Review agent recommendation";
+            var code = ReadStringProperty(actionElement, "code", "actionCode") ?? "REVIEW_AGENT_RECOMMENDATION";
+            var rationale = ReadStringProperty(actionElement, "rationale", "summary") ?? fallbackRationale;
+            actions.Add(new RecommendationPayloadParser.RecommendationSuggestedActionDocument(
+                Guid.NewGuid(),
+                title,
+                code,
+                RecommendationRiskState.Medium,
+                "DOMAIN_REVIEW",
+                SuggestedActionStatus.Proposed,
+                rationale));
+        }
+
+        return actions.Count == 0
+            ?
+            [
+                new RecommendationPayloadParser.RecommendationSuggestedActionDocument(
+                    Guid.NewGuid(),
+                    "Review agent recommendation",
+                    "REVIEW_AGENT_RECOMMENDATION",
+                    RecommendationRiskState.Medium,
+                    "DOMAIN_REVIEW",
+                    SuggestedActionStatus.Proposed,
+                    fallbackRationale)
+            ]
+            : actions;
+    }
+
+    private async Task<string?> LoadOutputSchemaPayloadAsync(
+        Guid tenantId,
+        string? agentVersionPayloadJson,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(agentVersionPayloadJson))
+        {
+            return null;
+        }
+
+        var agentPayload = AgentDefinitionPayloadParser.Deserialize(agentVersionPayloadJson);
+        if (agentPayload.OutputSchemaVersionId is not Guid outputSchemaVersionId || outputSchemaVersionId == Guid.Empty)
+        {
+            return null;
+        }
+
+        var version = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Id == outputSchemaVersionId && item.TenantId == tenantId, cancellationToken);
+        return version?.PayloadJson;
+    }
+
+    private static bool OutputSchemaCreatesDecision(string? payloadJson)
+    {
+        if (string.IsNullOrWhiteSpace(payloadJson))
+        {
+            return false;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(payloadJson);
+            foreach (var property in document.RootElement.EnumerateObject())
+            {
+                if (property.Name.Equals("createsDecision", StringComparison.OrdinalIgnoreCase)
+                    && property.Value.ValueKind == JsonValueKind.True)
+                {
+                    return true;
+                }
+            }
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+
+        return false;
+    }
+
+    private static void GuardStructuredOutputAgainstDecisionCreation(string structuredOutputJson)
+    {
+        using var document = JsonDocument.Parse(structuredOutputJson);
+        foreach (var property in document.RootElement.EnumerateObject())
+        {
+            if (property.Name.Equals("createsDecision", StringComparison.OrdinalIgnoreCase)
+                && property.Value.ValueKind == JsonValueKind.True)
+            {
+                throw new RequestValidationException("Agent structured output must not create decision artifacts.");
+            }
+        }
+    }
+
+    private static string? ReadStringProperty(JsonElement element, params string[] propertyNames)
+    {
+        foreach (var propertyName in propertyNames)
+        {
+            if (element.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.String)
+            {
+                var value = property.GetString();
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    return value.Trim();
+                }
+            }
+        }
+
+        return null;
+    }
 }

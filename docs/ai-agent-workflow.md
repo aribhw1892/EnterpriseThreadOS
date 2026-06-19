@@ -70,8 +70,10 @@ Examples:
 - Business policy definition artifacts: Issue 18.3.
 - Optimization model and agent template artifacts, agent runtime adapter contracts: Issue 18.4.
 - Manufacturing reference package extraction and installer: Issue 18.5.
+- Tool/skill/connector registry, `ToolRun`, dry-run, disabled write connectors, internal governed-query handler: Issue 22.
+- Tenant `AgentTypeDefinition`, `AgentVersion`, `AgentRun`, governed agent preview/test/execute, HTTP PydanticAI adapter, and recommendation-only agent output: Issue 23.
 
-Do not jump ahead to later issues unless the user explicitly asks and the prerequisite boundaries are already present or intentionally scoped as documentation. Issue 22 requires Issue 18.5 complete; adapter contracts exist but agent execution does not.
+Do not jump ahead to later issues unless the user explicitly asks and the prerequisite boundaries are already present or intentionally scoped as documentation. Workflows, enterprise write actions, and deferred Hermes/LangGraph live execution remain later slices.
 
 ## Editing Workflow
 

@@ -25,7 +25,10 @@ public sealed record LoadedReferencePackageManifest(
     IReadOnlyList<ReferenceCapabilityDocument> Capabilities,
     IReadOnlyList<ReferenceBusinessPolicyDocument> BusinessPolicies,
     IReadOnlyList<ReferenceOptimizationModelDocument> OptimizationModels,
-    IReadOnlyList<ReferenceAgentTemplateDocument> AgentTemplates);
+    IReadOnlyList<ReferenceAgentTemplateDocument> AgentTemplates,
+    IReadOnlyList<ReferenceConnectorDocument> Connectors,
+    IReadOnlyList<ReferenceToolDocument> Tools,
+    IReadOnlyList<ReferenceSkillDocument> Skills);
 
 public sealed class ReferencePackageManifestLoader(
     IWebHostEnvironment environment,
@@ -67,7 +70,10 @@ public sealed class ReferencePackageManifestLoader(
             DeserializeRelative<ReferenceCapabilityDocument[]>(packageDirectory, manifest.Artifacts.CapabilitiesFile),
             DeserializeRelative<ReferenceBusinessPolicyDocument[]>(packageDirectory, manifest.Artifacts.BusinessPoliciesFile),
             DeserializeRelative<ReferenceOptimizationModelDocument[]>(packageDirectory, manifest.Artifacts.OptimizationModelsFile),
-            DeserializeRelative<ReferenceAgentTemplateDocument[]>(packageDirectory, manifest.Artifacts.AgentTemplatesFile));
+            DeserializeRelative<ReferenceAgentTemplateDocument[]>(packageDirectory, manifest.Artifacts.AgentTemplatesFile),
+            DeserializeRelative<ReferenceConnectorDocument[]>(packageDirectory, manifest.Artifacts.ConnectorsFile),
+            DeserializeRelative<ReferenceToolDocument[]>(packageDirectory, manifest.Artifacts.ToolsFile),
+            DeserializeRelative<ReferenceSkillDocument[]>(packageDirectory, manifest.Artifacts.SkillsFile));
     }
 
     public string ReadPackageFile(string packageKey, string relativePath)
@@ -191,6 +197,9 @@ public sealed class ReferenceArtifactsManifestSection
     public required string BusinessPoliciesFile { get; init; }
     public required string OptimizationModelsFile { get; init; }
     public required string AgentTemplatesFile { get; init; }
+    public required string ToolsFile { get; init; }
+    public required string ConnectorsFile { get; init; }
+    public required string SkillsFile { get; init; }
 }
 
 public sealed class ReferenceObjectTypeDocument
@@ -321,6 +330,64 @@ public sealed class ReferenceAgentTemplateDocument
     public IReadOnlyCollection<string>? ReferencedOptimizationModelKeys { get; init; }
     public required string QueryIntentKey { get; init; }
     public required string RetrievalStrategyKey { get; init; }
+    public IReadOnlyCollection<string>? ReferencedToolKeys { get; init; }
+    public IReadOnlyDictionary<string, string>? CompositionMetadata { get; init; }
+    public IReadOnlyCollection<string>? FutureExtensionPlaceholders { get; init; }
+}
+
+public sealed class ReferenceConnectorDocument
+{
+    public required string ConnectorKey { get; init; }
+    public required string Name { get; init; }
+    public string? Description { get; init; }
+    public required string ConnectorKind { get; init; }
+    public bool CallsExternalSystem { get; init; }
+    public bool WritesExternalSystem { get; init; }
+    public bool ExecutionEnabled { get; init; }
+    public string? DisabledReason { get; init; }
+    public required string CredentialScopeKey { get; init; }
+    public required string SecretReferenceKey { get; init; }
+    public IReadOnlyCollection<string>? SupportedOperations { get; init; }
+    public IReadOnlyDictionary<string, string>? CompositionMetadata { get; init; }
+    public IReadOnlyCollection<string>? FutureExtensionPlaceholders { get; init; }
+}
+
+public sealed class ReferenceToolDocument
+{
+    public required string ToolKey { get; init; }
+    public required string Name { get; init; }
+    public string? Description { get; init; }
+    public required string ToolCategory { get; init; }
+    public required string RiskLevel { get; init; }
+    public bool ReadOnly { get; init; } = true;
+    public bool CreatesPlatformArtifact { get; init; }
+    public bool CreatesReviewTask { get; init; }
+    public bool CreatesDecision { get; init; }
+    public bool CallsExternalSystem { get; init; }
+    public bool WritesExternalSystem { get; init; }
+    public bool RequiresApproval { get; init; }
+    public bool SupportsDryRun { get; init; } = true;
+    public IReadOnlyCollection<string>? RequiredPermissionKeys { get; init; }
+    public required string InputSchemaJson { get; init; }
+    public required string OutputSchemaJson { get; init; }
+    public string? InternalHandlerKey { get; init; }
+    public string? ReferencedConnectorKey { get; init; }
+    public required IReadOnlyCollection<string> ReferencedCapabilityKeys { get; init; }
+    public IReadOnlyCollection<string>? AllowedQueryIntentKeys { get; init; }
+    public IReadOnlyDictionary<string, string>? CompositionMetadata { get; init; }
+    public IReadOnlyCollection<string>? FutureExtensionPlaceholders { get; init; }
+}
+
+public sealed class ReferenceSkillDocument
+{
+    public required string SkillKey { get; init; }
+    public required string Name { get; init; }
+    public string? Description { get; init; }
+    public required string SkillSummary { get; init; }
+    public bool IsGloballyShared { get; init; }
+    public required string InputSchemaJson { get; init; }
+    public required string OutputSchemaJson { get; init; }
+    public required IReadOnlyCollection<string> ReferencedToolKeys { get; init; }
     public IReadOnlyDictionary<string, string>? CompositionMetadata { get; init; }
     public IReadOnlyCollection<string>? FutureExtensionPlaceholders { get; init; }
 }

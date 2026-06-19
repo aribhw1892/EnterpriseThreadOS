@@ -245,6 +245,8 @@ public sealed class AiTraceService(
             trace.TenantId,
             trace.RetrievalRunId,
             trace.ContextPackageId,
+            trace.ToolRunId,
+            trace.AgentRunId,
             trace.AuditRecordId,
             trace.TraceKind,
             trace.IntentKey,

@@ -1,0 +1,31 @@
+[
+  {
+    "connectorKey": "mock-erp-read",
+    "name": "Mock ERP Read Connector",
+    "description": "Read-only ERP export connector for local demo.",
+    "connectorKind": "Read",
+    "callsExternalSystem": true,
+    "writesExternalSystem": false,
+    "executionEnabled": true,
+    "credentialScopeKey": "erp.read.export",
+    "secretReferenceKey": "connectors/mock-erp-read",
+    "supportedOperations": ["read-export", "list-items"],
+    "compositionMetadata": { "mode": "read-only" },
+    "futureExtensionPlaceholders": []
+  },
+  {
+    "connectorKey": "mock-erp-write-item",
+    "name": "Mock ERP Write Item Connector",
+    "description": "Disabled write connector contract for MVP governance demo.",
+    "connectorKind": "Write",
+    "callsExternalSystem": true,
+    "writesExternalSystem": true,
+    "executionEnabled": false,
+    "disabledReason": "Enterprise write actions remain disabled in MVP.",
+    "credentialScopeKey": "erp.write.item",
+    "secretReferenceKey": "connectors/mock-erp-write-item",
+    "supportedOperations": ["create-item"],
+    "compositionMetadata": { "mode": "disabled-write-contract" },
+    "futureExtensionPlaceholders": []
+  }
+]

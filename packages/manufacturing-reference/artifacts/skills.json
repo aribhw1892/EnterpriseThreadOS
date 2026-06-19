@@ -1,0 +1,14 @@
+[
+  {
+    "skillKey": "governed-graph-skill",
+    "name": "Governed Graph Skill",
+    "description": "Reusable skill wrapping the graph query tool.",
+    "skillSummary": "Execute governed graph retrieval through the graph query tool.",
+    "isGloballyShared": true,
+    "inputSchemaJson": "{\"type\":\"object\",\"required\":[\"intentKey\",\"queryText\"],\"properties\":{\"intentKey\":{\"type\":\"string\"},\"queryText\":{\"type\":\"string\"}}}",
+    "outputSchemaJson": "{\"type\":\"object\",\"required\":[\"retrievalRunId\",\"safeSummary\",\"status\"],\"properties\":{\"retrievalRunId\":{\"type\":\"string\"},\"safeSummary\":{\"type\":\"string\"},\"status\":{\"type\":\"string\"}}}",
+    "referencedToolKeys": ["graph-query-tool"],
+    "compositionMetadata": { "mode": "skill-wrapper" },
+    "futureExtensionPlaceholders": []
+  }
+]

@@ -6,6 +6,7 @@ using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.OptimizationModels;
 using ETOS.Backend.Ontology;
+using ETOS.Backend.ToolRegistry;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.AgentTemplates;
@@ -125,7 +126,7 @@ public static class AgentTemplateDefinitionReadinessValidator
                 dbContext,
                 tenantId,
                 toolVersionId,
-                FutureToolDefinitionArtifactTypes.ToolDefinition,
+                ToolDefinitionArtifactTypes.ToolDefinition,
                 "tool definition",
                 cancellationToken));
         }

@@ -6,28 +6,25 @@
       "ai_agent_workflow_guide",
       "architecture_extension_points_doc",
       "backend_architecture_doc",
-      "frontend_architecture_doc"
+      "domain_packages_document",
+      "frontend_architecture_doc",
+      "local_development_guide"
     ],
     "1": [
+      "ai_agent_workflow",
+      "architecture_extensionpoints_enterprisethreadosextensionpoints",
+      "backend_architecture",
+      "frontend_architecture",
+      "local_development"
+    ],
+    "2": [
       "domainpackages_agenttemplateversion",
       "domainpackages_businesspolicydefinitionversion",
       "domainpackages_capabilitydefinitionversion",
       "domainpackages_modelpackageversion",
       "domainpackages_optimizationmodelversion"
     ],
-    "2": [
-      "ai_agent_workflow",
-      "backend_architecture",
-      "frontend_architecture",
-      "local_development"
-    ],
     "3": [
-      "backend_architecture_document",
-      "domain_packages_document",
-      "frontend_architecture_document",
-      "local_development_guide"
-    ],
-    "4": [
       "domainpackages_enterprisethreados",
       "domainpackages_etos_backend",
       "domainpackages_packages_manufacturing_reference",
@@ -35,18 +32,12 @@
     ]
   },
   "cohesion": {
-    "0": 0.7333333333333333,
-    "1": 0.6,
-    "2": 0.8333333333333334,
-    "3": 1.0,
-    "4": 0.5
+    "0": 0.6071428571428571,
+    "1": 0.7,
+    "2": 0.6,
+    "3": 0.5
   },
   "gods": [
-    {
-      "id": "local_development_guide",
-      "label": "Local Development Guide",
-      "degree": 6
-    },
     {
       "id": "backend_architecture_doc",
       "label": "Backend Architecture Document",
@@ -68,9 +59,14 @@
       "degree": 5
     },
     {
-      "id": "domain_packages_document",
-      "label": "Domain Packages Document",
-      "degree": 5
+      "id": "local_development_guide",
+      "label": "Local Development Guide",
+      "degree": 4
+    },
+    {
+      "id": "backend_architecture",
+      "label": "Backend Architecture",
+      "degree": 4
     },
     {
       "id": "domainpackages_capabilitydefinitionversion",
@@ -88,12 +84,56 @@
       "degree": 3
     },
     {
-      "id": "local_development",
-      "label": "Local Development",
+      "id": "ai_agent_workflow",
+      "label": "AI Agent Workflow",
       "degree": 3
     }
   ],
   "surprises": [
+    {
+      "source": "ADR 0002: Artifact Lifecycle",
+      "target": "AI Agent Workflow Guide",
+      "source_files": [
+        "architecture/adr/0002-artifact-lifecycle.md",
+        "ai-agent-workflow.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "Architecture Decision Records README",
+      "target": "AI Agent Workflow Guide",
+      "source_files": [
+        "architecture/adr/README.md",
+        "ai-agent-workflow.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "AI Agent Workflow Guide",
+      "target": "EnterpriseThreadOS Extension Points Document",
+      "source_files": [
+        "ai-agent-workflow.md",
+        "architecture/extension-points.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "Frontend Architecture Document",
+      "target": "AI Agent Workflow Guide",
+      "source_files": [
+        "frontend/architecture.md",
+        "ai-agent-workflow.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
     {
       "source": "Local Development Guide",
       "target": "AI Agent Workflow Guide",
@@ -103,55 +143,11 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "references",
-      "why": "connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "Local Development Guide",
-      "target": "Backend Architecture Document",
-      "source_files": [
-        "local-development.md",
-        "backend/architecture.md"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "Local Development Guide",
-      "target": "Frontend Architecture Document",
-      "source_files": [
-        "local-development.md",
-        "frontend/architecture.md"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "Backend Architecture Document",
-      "target": "Domain Packages Document",
-      "source_files": [
-        "backend/architecture.md",
-        "architecture/domain-packages.md"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "Frontend Architecture Document",
-      "target": "Domain Packages Document",
-      "source_files": [
-        "frontend/architecture.md",
-        "architecture/domain-packages.md"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "connects across different repos/directories; bridges separate communities"
+      "why": "connects across different repos/directories"
     }
   ],
   "tokens": {
-    "input": 1252,
-    "output": 1022
+    "input": 8618,
+    "output": 268
   }
 }

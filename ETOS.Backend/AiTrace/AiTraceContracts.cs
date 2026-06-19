@@ -40,8 +40,10 @@ public sealed record AiTraceArtifactLinkResponse(
 public sealed record AiTraceDetailResponse(
     Guid Id,
     Guid TenantId,
-    Guid RetrievalRunId,
-    Guid ContextPackageId,
+    Guid? RetrievalRunId,
+    Guid? ContextPackageId,
+    Guid? ToolRunId,
+    Guid? AgentRunId,
     Guid? AuditRecordId,
     AiTraceKind TraceKind,
     string IntentKey,

@@ -1,8 +1,10 @@
 using System.Text.Json;
+using ETOS.Backend.AgentRuns;
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.GovernedChat;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.ToolRegistry;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.AiTrace;
@@ -12,6 +14,10 @@ public interface IAiTraceRecorder
     Task<Guid> CreateFromRetrievalRunAsync(Guid retrievalRunId, Guid? auditRecordId, CancellationToken cancellationToken);
 
     Task<Guid> CreateFromChatTurnAsync(Guid chatTurnId, Guid? auditRecordId, CancellationToken cancellationToken);
+
+    Task<Guid> CreateFromToolRunAsync(Guid toolRunId, Guid? auditRecordId, CancellationToken cancellationToken);
+
+    Task<Guid> CreateFromAgentRunAsync(Guid agentRunId, Guid? auditRecordId, CancellationToken cancellationToken);
 }
 
 public sealed class AiTraceRecorder(EnterpriseThreadDbContext dbContext) : IAiTraceRecorder
@@ -126,6 +132,177 @@ public sealed class AiTraceRecorder(EnterpriseThreadDbContext dbContext) : IAiTr
         };
 
         trace.ArtifactLinks.AddRange(BuildChatArtifactLinks(trace.TenantId, trace.Id, turn, run, package));
+        dbContext.AiTraceRecords.Add(trace);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return trace.Id;
+    }
+
+    public async Task<Guid> CreateFromToolRunAsync(Guid toolRunId, Guid? auditRecordId, CancellationToken cancellationToken)
+    {
+        var toolRun = await dbContext.ToolRuns
+            .SingleOrDefaultAsync(item => item.Id == toolRunId, cancellationToken)
+            ?? throw new InvalidOperationException("Tool run was not found for AI Trace creation.");
+
+        var toolVersion = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .SingleOrDefaultAsync(item => item.Id == toolRun.ToolDefinitionVersionId, cancellationToken)
+            ?? throw new InvalidOperationException("Tool definition version was not found for AI Trace creation.");
+
+        RetrievalRun? retrievalRun = null;
+        ContextPackage? package = null;
+        if (toolRun.RetrievalRunId is Guid retrievalRunId)
+        {
+            retrievalRun = await dbContext.RetrievalRuns
+                .Include(item => item.QueryIntentVersion)
+                .Include(item => item.RetrievalStrategyVersion)
+                .Include(item => item.ContextPackages)
+                .SingleOrDefaultAsync(item => item.Id == retrievalRunId, cancellationToken);
+            package = retrievalRun?.ContextPackages.OrderByDescending(item => item.CreatedAt).FirstOrDefault();
+        }
+
+        var trace = new AiTraceRecord
+        {
+            Id = Guid.NewGuid(),
+            TenantId = toolRun.TenantId,
+            RetrievalRunId = toolRun.RetrievalRunId,
+            ContextPackageId = package?.Id,
+            ToolRunId = toolRun.Id,
+            AuditRecordId = auditRecordId,
+            TraceKind = AiTraceKind.ToolRun,
+            IntentKey = toolVersion.Artifact?.Name ?? "tool-run",
+            StrategyKey = toolRun.IsDryRun ? "tool-dry-run" : "tool-execute",
+            QueryText = toolRun.InputSafeSummaryJson,
+            Status = toolRun.Status,
+            SafeSummary = toolRun.OutputSafeSummaryJson ?? toolRun.ErrorSafeSummary ?? $"Tool run {toolRun.Status}.",
+            SourcesSummaryJson = Serialize(new[] { new AiTraceSourceSummaryResponse("ToolRun", 1, [toolRun.InputSafeSummaryJson]) }),
+            FilteredSummariesJson = Serialize(Array.Empty<TraceContextSummaryResponse>()),
+            DeniedSafeSummariesJson = "[]",
+            SensitiveDeniedReferencesJson = "[]",
+            ConfidenceImpactJson = Serialize(new AiTraceConfidenceImpactResponse(0, 0, 0, 0, null, "Tool run trace.")),
+            GeneratedOutputJson = toolRun.OutputSafeSummaryJson,
+            RequestedByUserId = toolRun.RequestedByUserId,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        trace.ArtifactLinks.Add(CreateLink(toolRun.TenantId, trace.Id, AiTraceArtifactLinkKind.ToolRun, nameof(ToolRun), toolRun.Id.ToString()));
+        trace.ArtifactLinks.Add(CreateLink(toolRun.TenantId, trace.Id, AiTraceArtifactLinkKind.ToolDefinition, nameof(ArtifactVersion), toolRun.ToolDefinitionVersionId.ToString()));
+        if (toolRun.ConnectorDefinitionVersionId is not null)
+        {
+            trace.ArtifactLinks.Add(CreateLink(toolRun.TenantId, trace.Id, AiTraceArtifactLinkKind.ConnectorDefinition, nameof(ArtifactVersion), toolRun.ConnectorDefinitionVersionId.Value.ToString()));
+        }
+
+        if (retrievalRun is not null && package is not null)
+        {
+            trace.ArtifactLinks.AddRange(BuildArtifactLinks(trace.TenantId, trace.Id, retrievalRun, package));
+        }
+
+        dbContext.AiTraceRecords.Add(trace);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return trace.Id;
+    }
+
+    public async Task<Guid> CreateFromAgentRunAsync(Guid agentRunId, Guid? auditRecordId, CancellationToken cancellationToken)
+    {
+        var agentRun = await dbContext.AgentRuns
+            .SingleOrDefaultAsync(item => item.Id == agentRunId, cancellationToken)
+            ?? throw new InvalidOperationException("Agent run was not found for AI Trace creation.");
+
+        var agentVersion = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .SingleOrDefaultAsync(item => item.Id == agentRun.AgentVersionId, cancellationToken);
+
+        var childToolRuns = await dbContext.ToolRuns
+            .AsNoTracking()
+            .Where(item => item.ParentAgentRunId == agentRunId)
+            .OrderBy(item => item.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        RetrievalRun? retrievalRun = null;
+        ContextPackage? package = null;
+        if (agentRun.RetrievalRunId is Guid retrievalRunId)
+        {
+            retrievalRun = await dbContext.RetrievalRuns
+                .Include(item => item.QueryIntentVersion)
+                .Include(item => item.RetrievalStrategyVersion)
+                .Include(item => item.ContextPackages)
+                .SingleOrDefaultAsync(item => item.Id == retrievalRunId, cancellationToken);
+            package = retrievalRun?.ContextPackages.OrderByDescending(item => item.CreatedAt).FirstOrDefault();
+        }
+
+        var trace = new AiTraceRecord
+        {
+            Id = Guid.NewGuid(),
+            TenantId = agentRun.TenantId,
+            RetrievalRunId = agentRun.RetrievalRunId,
+            ContextPackageId = package?.Id,
+            AgentRunId = agentRun.Id,
+            AuditRecordId = auditRecordId,
+            TraceKind = AiTraceKind.AgentRun,
+            IntentKey = agentVersion?.Artifact?.Name ?? "agent-run",
+            StrategyKey = agentRun.IsPreview
+                ? "agent-preview"
+                : agentRun.IsDryRun
+                    ? "agent-dry-run"
+                    : "agent-execute",
+            QueryText = agentRun.InputSafeSummaryJson,
+            Status = agentRun.Status,
+            SafeSummary = agentRun.OutputSafeSummaryJson ?? agentRun.ErrorSafeSummary ?? $"Agent run {agentRun.Status}.",
+            SourcesSummaryJson = Serialize(new[]
+            {
+                new AiTraceSourceSummaryResponse(
+                    "AgentRun",
+                    1,
+                    [agentRun.InputSafeSummaryJson])
+            }),
+            FilteredSummariesJson = Serialize(Array.Empty<TraceContextSummaryResponse>()),
+            DeniedSafeSummariesJson = "[]",
+            SensitiveDeniedReferencesJson = "[]",
+            ConfidenceImpactJson = Serialize(new AiTraceConfidenceImpactResponse(
+                0,
+                0,
+                0,
+                0,
+                null,
+                "Agent run trace.")),
+            GeneratedOutputJson = agentRun.StructuredOutputJson ?? agentRun.OutputSafeSummaryJson,
+            RequestedByUserId = agentRun.RequestedByUserId,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        trace.ArtifactLinks.Add(CreateLink(
+            agentRun.TenantId,
+            trace.Id,
+            AiTraceArtifactLinkKind.AgentRun,
+            nameof(AgentRun),
+            agentRun.Id.ToString()));
+
+        if (agentVersion is not null)
+        {
+            trace.ArtifactLinks.Add(CreateLink(
+                agentRun.TenantId,
+                trace.Id,
+                AiTraceArtifactLinkKind.AgentVersion,
+                nameof(ArtifactVersion),
+                agentVersion.Id.ToString()));
+        }
+
+        foreach (var toolRun in childToolRuns)
+        {
+            trace.ArtifactLinks.Add(CreateLink(
+                agentRun.TenantId,
+                trace.Id,
+                AiTraceArtifactLinkKind.ToolRun,
+                nameof(ToolRun),
+                toolRun.Id.ToString()));
+        }
+
+        if (retrievalRun is not null && package is not null)
+        {
+            trace.ArtifactLinks.AddRange(BuildArtifactLinks(trace.TenantId, trace.Id, retrievalRun, package));
+        }
+
         dbContext.AiTraceRecords.Add(trace);
         await dbContext.SaveChangesAsync(cancellationToken);
         return trace.Id;

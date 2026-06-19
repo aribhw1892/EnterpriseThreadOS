@@ -11,6 +11,7 @@ using ETOS.Backend.OptimizationModels;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Packages;
 using ETOS.Backend.Tests.Fixtures;
+using ETOS.Backend.ToolRegistry;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -90,6 +91,22 @@ public sealed class ManufacturingReferencePackageTests
         Assert.True(templateResponse.StatusCode == HttpStatusCode.OK);
         Assert.NotNull(templates);
         Assert.Contains(templates, item => item.TemplateKey == "manufacturing-investigator");
+
+        using var toolRequest = new HttpRequestMessage(HttpMethod.Get, "/api/admin/tools");
+        AddTenantHeaders(toolRequest, context.TenantId, context.UserId);
+        var toolResponse = await client.SendAsync(toolRequest);
+        var tools = await toolResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ToolDefinitionArtifactSummaryResponse>>();
+        Assert.True(toolResponse.StatusCode == HttpStatusCode.OK);
+        Assert.NotNull(tools);
+        Assert.Contains(tools, item => item.ToolKey == "graph-query-tool");
+
+        using var connectorRequest = new HttpRequestMessage(HttpMethod.Get, "/api/admin/connectors");
+        AddTenantHeaders(connectorRequest, context.TenantId, context.UserId);
+        var connectorResponse = await client.SendAsync(connectorRequest);
+        var connectors = await connectorResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<ConnectorDefinitionArtifactSummaryResponse>>();
+        Assert.True(connectorResponse.StatusCode == HttpStatusCode.OK);
+        Assert.NotNull(connectors);
+        Assert.Contains(connectors, item => item.ConnectorKey == "mock-erp-read");
     }
 
     [Fact]

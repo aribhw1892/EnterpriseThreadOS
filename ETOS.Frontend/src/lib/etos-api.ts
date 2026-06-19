@@ -3602,6 +3602,668 @@ export async function publishAgentTemplateDefinition(
   );
 }
 
+// --- Tool registry artifacts (Issue 22) ---
+
+export type ToolCapabilityFlags = {
+  readOnly: boolean;
+  createsPlatformArtifact: boolean;
+  createsReviewTask: boolean;
+  createsDecision: boolean;
+  callsExternalSystem: boolean;
+  writesExternalSystem: boolean;
+  requiresApproval: boolean;
+  supportsDryRun: boolean;
+};
+
+export type ToolDefinitionArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  toolKey?: string | null;
+  toolCategory?: string | null;
+  riskLevel?: string | null;
+  updatedAt: string;
+};
+
+export type SkillDefinitionArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  skillKey?: string | null;
+  updatedAt: string;
+};
+
+export type ConnectorDefinitionArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  connectorKey?: string | null;
+  connectorKind?: string | null;
+  executionEnabled?: boolean | null;
+  updatedAt: string;
+};
+
+export type ToolDefinitionDetail = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  name: string;
+  description?: string | null;
+  artifactReadinessState: string;
+  toolKey: string;
+  toolCategory: string;
+  riskLevel: string;
+  capabilityFlags: ToolCapabilityFlags;
+  requiredPermissionKeys: string[];
+  inputSchemaJson: string;
+  outputSchemaJson: string;
+  internalHandlerKey?: string | null;
+  compatibleModelPackages: CapabilityModelPackageReference[];
+  compatibleOntologies: CapabilityOntologyReference[];
+  referencedCapabilities: {
+    capabilityDefinitionVersionId: string;
+    capabilityArtifactId: string;
+    capabilityArtifactName: string;
+    capabilityKey: string;
+    versionLabel: string;
+    readinessState: string;
+  }[];
+  referencedBusinessPolicies: {
+    businessPolicyDefinitionVersionId: string;
+    businessPolicyArtifactId: string;
+    businessPolicyArtifactName: string;
+    policyKey: string;
+    versionLabel: string;
+    readinessState: string;
+  }[];
+  referencedOutputSchema?: {
+    outputSchemaVersionId: string;
+    outputSchemaArtifactId: string;
+    outputSchemaArtifactName: string;
+    versionLabel: string;
+    readinessState: string;
+  } | null;
+  referencedConnector?: {
+    connectorDefinitionVersionId: string;
+    connectorArtifactId: string;
+    connectorArtifactName: string;
+    connectorKey: string;
+    versionLabel: string;
+    readinessState: string;
+  } | null;
+  allowedQueryIntentKeys: string[];
+  compositionMetadata: Record<string, string>;
+  futureExtensionPlaceholders: string[];
+};
+
+export type ConnectorDefinitionDetail = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  name: string;
+  description?: string | null;
+  artifactReadinessState: string;
+  connectorKey: string;
+  connectorKind: string;
+  callsExternalSystem: boolean;
+  writesExternalSystem: boolean;
+  executionEnabled: boolean;
+  disabledReason?: string | null;
+  credentialScopeKey: string;
+  secretReferenceKey: string;
+  supportedOperations: string[];
+  compositionMetadata: Record<string, string>;
+  futureExtensionPlaceholders: string[];
+};
+
+export type ToolRunSummary = {
+  id: string;
+  toolDefinitionVersionId: string;
+  status: string;
+  isDryRun: boolean;
+  inputSafeSummary: string;
+  requestedByUserId: string;
+  aiTraceRecordId?: string | null;
+  parentAgentRunId?: string | null;
+  createdAt: string;
+};
+
+export type ToolRunDetail = {
+  id: string;
+  tenantId: string;
+  toolDefinitionVersionId: string;
+  connectorDefinitionVersionId?: string | null;
+  parentAgentRunId?: string | null;
+  status: string;
+  isDryRun: boolean;
+  inputSafeSummaryJson: string;
+  outputSafeSummaryJson?: string | null;
+  validationResultJson?: string | null;
+  compatibilityNotesJson?: string | null;
+  errorSafeSummary?: string | null;
+  connectorCredentialSafeSummaryJson?: string | null;
+  retrievalRunId?: string | null;
+  auditRecordId?: string | null;
+  aiTraceRecordId?: string | null;
+  requestedByUserId: string;
+  createdAt: string;
+  completedAt?: string | null;
+};
+
+export async function getToolDefinitionArtifacts(): Promise<ApiResult<ToolDefinitionArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ToolDefinitionArtifactSummary[]>();
+  }
+
+  return await fetchApi<ToolDefinitionArtifactSummary[]>("/api/admin/tools", tenantHeaders);
+}
+
+export async function getSkillDefinitionArtifacts(): Promise<ApiResult<SkillDefinitionArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<SkillDefinitionArtifactSummary[]>();
+  }
+
+  return await fetchApi<SkillDefinitionArtifactSummary[]>("/api/admin/skills", tenantHeaders);
+}
+
+export async function getConnectorDefinitionArtifacts(): Promise<ApiResult<ConnectorDefinitionArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ConnectorDefinitionArtifactSummary[]>();
+  }
+
+  return await fetchApi<ConnectorDefinitionArtifactSummary[]>("/api/admin/connectors", tenantHeaders);
+}
+
+export async function getToolDefinitionDetail(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<ToolDefinitionDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ToolDefinitionDetail>();
+  }
+
+  return await fetchApi<ToolDefinitionDetail>(
+    `/api/admin/tools/${artifactId}/versions/${versionId}`,
+    tenantHeaders,
+  );
+}
+
+export async function getConnectorDefinitionDetail(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<ConnectorDefinitionDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ConnectorDefinitionDetail>();
+  }
+
+  return await fetchApi<ConnectorDefinitionDetail>(
+    `/api/admin/connectors/${artifactId}/versions/${versionId}`,
+    tenantHeaders,
+  );
+}
+
+export async function getToolRuns(): Promise<ApiResult<ToolRunSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ToolRunSummary[]>();
+  }
+
+  return await fetchApi<ToolRunSummary[]>("/api/admin/tool-runs", tenantHeaders);
+}
+
+export async function getToolRunDetail(runId: string): Promise<ApiResult<ToolRunDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ToolRunDetail>();
+  }
+
+  return await fetchApi<ToolRunDetail>(`/api/admin/tool-runs/${runId}`, tenantHeaders);
+}
+
+// --- Agent type definitions (Issue 23) ---
+
+export type AgentTypeDefinitionArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  typeKey?: string | null;
+  defaultPatternCategory?: string | null;
+  riskBaseline?: string | null;
+  updatedAt: string;
+};
+
+export type AgentTypeDefinitionDetail = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  name: string;
+  description?: string | null;
+  artifactReadinessState: string;
+  typeKey: string;
+  purpose: string;
+  allowedIntentCategoryKeys: string[];
+  defaultPatternCategory: string;
+  riskBaseline: string;
+};
+
+// --- Agent version definitions (Issue 23) ---
+
+export type AgentVersionArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  agentKey?: string | null;
+  displayName?: string | null;
+  preferredRuntimeAdapterKey?: string | null;
+  updatedAt: string;
+};
+
+export type AgentFallbackModel = {
+  providerKey: string;
+  modelId: string;
+  triggerReason: string;
+};
+
+export type AgentTypeReference = {
+  agentTypeDefinitionVersionId: string;
+  agentTypeArtifactId: string;
+  agentTypeArtifactName: string;
+  typeKey: string;
+  versionLabel: string;
+  readinessState: string;
+  riskBaseline: string;
+};
+
+export type AgentArtifactVersionReference = {
+  versionId: string;
+  artifactId: string;
+  artifactType: string;
+  artifactName: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type AgentToolReference = {
+  toolDefinitionVersionId: string;
+  toolArtifactId: string;
+  toolArtifactName: string;
+  versionLabel: string;
+  readinessState: string;
+  riskLevel: string;
+};
+
+export type AgentSkillReference = {
+  skillDefinitionVersionId: string;
+  skillArtifactId: string;
+  skillArtifactName: string;
+  skillKey: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type AgentDerivedCapabilityRisk = {
+  effectiveRiskLevel: string;
+  toolRiskContributions: { toolDefinitionVersionId: string; riskLevel: string }[];
+  retrievalRisk: { allowsSemanticFallback: boolean; allowsVectorFallback: boolean };
+  permissionCeiling: string;
+};
+
+export type AgentVersionDetail = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  name: string;
+  description?: string | null;
+  artifactReadinessState: string;
+  agentKey: string;
+  displayName: string;
+  agentDescription?: string | null;
+  agentType?: AgentTypeReference | null;
+  sourceAgentTemplateVersionId?: string | null;
+  preferredRuntimeAdapterKey: string;
+  compatibleModelPackages: { modelPackageVersionId: string; key: string; name: string; versionLabel: string; state: string }[];
+  compatibleOntologies: { ontologyVersionId: string; key: string; versionLabel: string; state: string }[];
+  referencedCapabilities: {
+    capabilityDefinitionVersionId: string;
+    capabilityArtifactId: string;
+    capabilityArtifactName: string;
+    capabilityKey: string;
+    versionLabel: string;
+    readinessState: string;
+  }[];
+  referencedBusinessPolicies: {
+    businessPolicyDefinitionVersionId: string;
+    businessPolicyArtifactId: string;
+    businessPolicyArtifactName: string;
+    policyKey: string;
+    versionLabel: string;
+    readinessState: string;
+  }[];
+  referencedOptimizationModels: {
+    optimizationModelVersionId: string;
+    optimizationModelArtifactId: string;
+    optimizationModelArtifactName: string;
+    optimizationKey: string;
+    versionLabel: string;
+    readinessState: string;
+  }[];
+  promptTemplate?: AgentArtifactVersionReference | null;
+  outputSchema?: AgentArtifactVersionReference | null;
+  queryIntent?: { queryIntentVersionId: string; intentKey: string; versionLabel: string; isEnabled: boolean } | null;
+  retrievalStrategy?: {
+    retrievalStrategyVersionId: string;
+    strategyKey: string;
+    versionLabel: string;
+    isEnabled: boolean;
+  } | null;
+  referencedTools: AgentToolReference[];
+  referencedSkills: AgentSkillReference[];
+  primaryModelProviderKey: string;
+  primaryModelId: string;
+  fallbackModels: AgentFallbackModel[];
+  safeModeEnabled: boolean;
+  previewModeDefault: boolean;
+  blockedModeMessage?: string | null;
+  compatibilityTestNotes: string[];
+  compatibilityFixtureKeys: string[];
+  derivedCapabilityRisk?: AgentDerivedCapabilityRisk | null;
+  createdByUserId: string;
+  compositionMetadata: Record<string, string>;
+};
+
+export type AgentExecutionRequest = {
+  structuredInputJson?: string | null;
+  queryText?: string | null;
+  startGraphNodeId?: string | null;
+  documentArtifactId?: string | null;
+};
+
+export type AgentExecutionResponse = {
+  agentRunId: string;
+  status: string;
+  isPreview: boolean;
+  isDryRun: boolean;
+  structuredOutputJson?: string | null;
+  outputSafeSummaryJson?: string | null;
+  recommendationArtifactId?: string | null;
+  recommendationVersionId?: string | null;
+  aiTraceRecordId?: string | null;
+  retrievalRunId?: string | null;
+  toolRunIds: string[];
+  validationNotes: string[];
+};
+
+export type AgentRunSummary = {
+  id: string;
+  agentVersionId: string;
+  status: string;
+  isPreview: boolean;
+  isDryRun: boolean;
+  inputSafeSummary: string;
+  requestedByUserId: string;
+  aiTraceRecordId?: string | null;
+  startedAt: string;
+};
+
+export type AgentRunDetail = {
+  id: string;
+  tenantId: string;
+  agentVersionId: string;
+  status: string;
+  isPreview: boolean;
+  isDryRun: boolean;
+  safeModeApplied: boolean;
+  inputSafeSummaryJson: string;
+  outputSafeSummaryJson?: string | null;
+  structuredOutputJson?: string | null;
+  derivedRiskSnapshotJson?: string | null;
+  fallbackUsedJson?: string | null;
+  validationResultJson?: string | null;
+  errorSafeSummary?: string | null;
+  governedContextSummaryJson?: string | null;
+  retrievalRunId?: string | null;
+  recommendationArtifactId?: string | null;
+  auditRecordId?: string | null;
+  aiTraceRecordId?: string | null;
+  requestedByUserId: string;
+  startedAt: string;
+  completedAt?: string | null;
+};
+
+export type CreateAgentFromTemplateRequest = {
+  sourceAgentTemplateVersionId: string;
+  agentKey?: string | null;
+  displayName?: string | null;
+  description?: string | null;
+  agentTypeDefinitionVersionId?: string | null;
+  primaryModelProviderKey: string;
+  primaryModelId: string;
+};
+
+export type CreateAgentFromPromptRequest = {
+  prompt: string;
+  agentTypeDefinitionVersionId?: string | null;
+  primaryModelProviderKey: string;
+  primaryModelId: string;
+};
+
+export type CreateAgentDefinitionResponse = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+};
+
+export async function getAgentTypeDefinitionArtifacts(): Promise<ApiResult<AgentTypeDefinitionArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<AgentTypeDefinitionArtifactSummary[]>();
+  }
+
+  return await fetchApi<AgentTypeDefinitionArtifactSummary[]>("/api/admin/agent-types", tenantHeaders);
+}
+
+export async function getAgentTypeDefinitionDetail(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<AgentTypeDefinitionDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<AgentTypeDefinitionDetail>();
+  }
+
+  return await fetchApi<AgentTypeDefinitionDetail>(
+    `/api/admin/agent-types/${artifactId}/versions/${versionId}`,
+    tenantHeaders,
+  );
+}
+
+export async function getAgentDefinitionArtifacts(): Promise<ApiResult<AgentVersionArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<AgentVersionArtifactSummary[]>();
+  }
+
+  return await fetchApi<AgentVersionArtifactSummary[]>("/api/admin/agents", tenantHeaders);
+}
+
+export async function getAgentDefinitionDetail(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<AgentVersionDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<AgentVersionDetail>();
+  }
+
+  return await fetchApi<AgentVersionDetail>(`/api/admin/agents/${artifactId}/versions/${versionId}`, tenantHeaders);
+}
+
+export async function loadAgentVersionByKey(
+  agentKey: string,
+  versionId?: string,
+): Promise<
+  ApiResult<{
+    artifactId: string;
+    versionId: string;
+    artifactName: string;
+    detail: AgentVersionDetail;
+    readiness: ArtifactReadiness;
+  }>
+> {
+  const list = await getAgentDefinitionArtifacts();
+  if (!list.data) {
+    return { data: null, error: list.error };
+  }
+
+  const artifact = list.data.find((item) => item.agentKey === agentKey);
+  if (!artifact) {
+    return { data: null, error: `Agent '${agentKey}' was not found.` };
+  }
+
+  const versions = await getArtifactVersions(artifact.id);
+  if (!versions.data || versions.data.length === 0) {
+    return { data: null, error: versions.error ?? "No agent versions found." };
+  }
+
+  const selectedVersionId = versionId ?? versions.data[0].id;
+  const detail = await getAgentDefinitionDetail(artifact.id, selectedVersionId);
+  if (!detail.data) {
+    return { data: null, error: detail.error };
+  }
+
+  const readiness = await getArtifactReadiness(artifact.id, selectedVersionId);
+  if (!readiness.data) {
+    return { data: null, error: readiness.error };
+  }
+
+  return {
+    data: {
+      artifactId: artifact.id,
+      versionId: selectedVersionId,
+      artifactName: artifact.name,
+      detail: detail.data,
+      readiness: readiness.data,
+    },
+    error: null,
+  };
+}
+
+export async function postAgentFromTemplate(
+  request: CreateAgentFromTemplateRequest,
+): Promise<ApiResult<CreateAgentDefinitionResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<CreateAgentDefinitionResponse>();
+  }
+
+  return await postApi<CreateAgentDefinitionResponse>("/api/admin/agents/from-template", request, tenantHeaders);
+}
+
+export async function postAgentFromPrompt(
+  request: CreateAgentFromPromptRequest,
+): Promise<ApiResult<CreateAgentDefinitionResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<CreateAgentDefinitionResponse>();
+  }
+
+  return await postApi<CreateAgentDefinitionResponse>("/api/admin/agents/from-prompt", request, tenantHeaders);
+}
+
+export async function postAgentPreview(
+  artifactId: string,
+  versionId: string,
+  request: AgentExecutionRequest,
+): Promise<ApiResult<AgentExecutionResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<AgentExecutionResponse>();
+  }
+
+  return await postApi<AgentExecutionResponse>(
+    `/api/admin/agents/${artifactId}/versions/${versionId}/preview`,
+    request,
+    tenantHeaders,
+  );
+}
+
+export async function postAgentTestRun(
+  artifactId: string,
+  versionId: string,
+  request: AgentExecutionRequest,
+): Promise<ApiResult<AgentExecutionResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<AgentExecutionResponse>();
+  }
+
+  return await postApi<AgentExecutionResponse>(
+    `/api/admin/agents/${artifactId}/versions/${versionId}/test-run`,
+    request,
+    tenantHeaders,
+  );
+}
+
+export async function postAgentExecute(
+  artifactId: string,
+  versionId: string,
+  request: AgentExecutionRequest,
+): Promise<ApiResult<AgentExecutionResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<AgentExecutionResponse>();
+  }
+
+  return await postApi<AgentExecutionResponse>(
+    `/api/admin/agents/${artifactId}/versions/${versionId}/execute`,
+    request,
+    tenantHeaders,
+  );
+}
+
+export async function getAgentRuns(): Promise<ApiResult<AgentRunSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<AgentRunSummary[]>();
+  }
+
+  return await fetchApi<AgentRunSummary[]>("/api/admin/agent-runs", tenantHeaders);
+}
+
+export async function getAgentRunDetail(runId: string): Promise<ApiResult<AgentRunDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<AgentRunDetail>();
+  }
+
+  return await fetchApi<AgentRunDetail>(`/api/admin/agent-runs/${runId}`, tenantHeaders);
+}
+
 // --- HTTP transport layer ---
 
 /** Returns tenant headers when env vars are set; otherwise null. */

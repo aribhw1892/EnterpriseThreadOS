@@ -1,0 +1,25 @@
+[
+  {
+    "toolKey": "graph-query-tool",
+    "name": "Graph Query Tool",
+    "description": "Governed graph-first query tool for trusted context retrieval.",
+    "toolCategory": "retrieval",
+    "riskLevel": "Medium",
+    "readOnly": true,
+    "createsPlatformArtifact": false,
+    "createsReviewTask": false,
+    "createsDecision": false,
+    "callsExternalSystem": false,
+    "writesExternalSystem": false,
+    "requiresApproval": false,
+    "supportsDryRun": true,
+    "requiredPermissionKeys": ["governed_query.run"],
+    "inputSchemaJson": "{\"type\":\"object\",\"required\":[\"intentKey\",\"queryText\"],\"properties\":{\"intentKey\":{\"type\":\"string\"},\"queryText\":{\"type\":\"string\"},\"startGraphNodeId\":{\"type\":\"string\"},\"documentArtifactId\":{\"type\":\"string\"},\"policyKey\":{\"type\":\"string\"},\"maxDepth\":{\"type\":\"integer\"}}}",
+    "outputSchemaJson": "{\"type\":\"object\",\"required\":[\"retrievalRunId\",\"safeSummary\",\"status\"],\"properties\":{\"retrievalRunId\":{\"type\":\"string\"},\"safeSummary\":{\"type\":\"string\"},\"retrievedCount\":{\"type\":\"integer\"},\"filteredCount\":{\"type\":\"integer\"},\"deniedCount\":{\"type\":\"integer\"},\"status\":{\"type\":\"string\"}}}",
+    "internalHandlerKey": "governed-query-v1",
+    "referencedCapabilityKeys": ["bom-impact-analysis"],
+    "allowedQueryIntentKeys": ["object-360-context", "bom-impact-context"],
+    "compositionMetadata": { "mode": "governed-retrieval" },
+    "futureExtensionPlaceholders": []
+  }
+]

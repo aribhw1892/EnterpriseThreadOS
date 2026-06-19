@@ -7,8 +7,10 @@ public sealed class AiTraceRecord : ITenantScoped
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
-    public Guid RetrievalRunId { get; set; }
-    public Guid ContextPackageId { get; set; }
+    public Guid? RetrievalRunId { get; set; }
+    public Guid? ContextPackageId { get; set; }
+    public Guid? ToolRunId { get; set; }
+    public Guid? AgentRunId { get; set; }
     public Guid? AuditRecordId { get; set; }
     public Guid? GovernedChatTurnId { get; set; }
     public AiTraceKind TraceKind { get; set; } = AiTraceKind.GovernedQuery;
@@ -61,7 +63,9 @@ public sealed class AiTraceExportRecord : ITenantScoped
 public enum AiTraceKind
 {
     GovernedQuery = 0,
-    GovernedChat = 1
+    GovernedChat = 1,
+    ToolRun = 2,
+    AgentRun = 3
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -76,5 +80,10 @@ public enum AiTraceArtifactLinkKind
     PromptTemplate = 6,
     OutputSchema = 7,
     DraftArtifact = 8,
-    GovernedChatTurn = 9
+    GovernedChatTurn = 9,
+    ToolRun = 10,
+    ToolDefinition = 11,
+    ConnectorDefinition = 12,
+    AgentRun = 13,
+    AgentVersion = 14
 }

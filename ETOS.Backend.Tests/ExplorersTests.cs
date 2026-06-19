@@ -647,6 +647,8 @@ public sealed class ExplorersTests
     {
         public Task<Guid> CreateFromRetrievalRunAsync(Guid retrievalRunId, Guid? auditRecordId, CancellationToken cancellationToken) => Task.FromResult(Guid.NewGuid());
         public Task<Guid> CreateFromChatTurnAsync(Guid chatTurnId, Guid? auditRecordId, CancellationToken cancellationToken) => Task.FromResult(Guid.NewGuid());
+        public Task<Guid> CreateFromToolRunAsync(Guid toolRunId, Guid? auditRecordId, CancellationToken cancellationToken) => Task.FromResult(Guid.NewGuid());
+        public Task<Guid> CreateFromAgentRunAsync(Guid agentRunId, Guid? auditRecordId, CancellationToken cancellationToken) => Task.FromResult(Guid.NewGuid());
     }
 
     private sealed class NoOpDocumentFileStorage : IDocumentFileStorage

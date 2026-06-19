@@ -1,5 +1,104 @@
 # EnterpriseThreadOS Engineering Execution Checkpoints
 
+## 2026-06-19 - Milestone 3 And Abstraction Sprint Ready (Issues 13-18, 18.1-18.5)
+
+Source docs reviewed:
+
+- `.docs/.prd/engineering-execution-prd.md`
+- `.docs/.prd/engineering-execution-issues.md`
+- `.docs/.gapAnalysis/issues-1-18-gap-analysis.md`
+- `.cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md`
+- `.cursor/plans/issue_15_governed_chat.plan.md`
+- `.cursor/plans/issue_16_explorers_context_views.plan.md`
+- `.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md`
+- `.cursor/plans/issue_18_recommendations_f30d3826.plan.md`
+- `.cursor/plans/issue_18.1_cleanup_e7dbd526.plan.md`
+- `.cursor/plans/issue_18.2_capabilities_3556da49.plan.md`
+- `.cursor/plans/issue_18.3_business_policies_05e07e22.plan.md`
+- `.cursor/plans/issue_18.4_optimization_agents_0c306932.plan.md`
+- `.cursor/plans/issue_18.5_package_1d585402.plan.md`
+
+Previous checkpoint reviewed:
+
+- `2026-06-11 - Slice 10 Data Quality Ready`
+
+Working framing:
+
+- Issues 11 through 18 and the Architectural Abstraction Sprint (Issues 18.1-18.5) are now implemented at foundation depth. Milestone 3 (governed query, AI Trace, chat, explorers, dashboards/reports, recommendations) and Milestone 4.5 abstraction work (industry-neutral core, Layer 3-6 artifacts, reference package) are complete for local demo and test coverage.
+- Manufacturing demo semantics live in `packages/manufacturing-reference/` and install through `ManufacturingReferencePackageInstaller` / `POST /api/admin/development/install-reference-package` with key `etos-manufacturing-reference`. Platform core reads generic package metadata; it does not hardcode manufacturing object types or BOM relationship names in hot paths.
+- Review tasks, decisions, governance KPI analytics (Issues 19-21), tool registry, agent execution, workflows, and multi-agent teams (Issues 22-25) remain roadmap. Issue 22 is unblocked by Issue 18.5 per PRD; official backlog still lists Issue 21 as a blocker, but the team may defer 19-21 to spike the agent implementation layer (22-23 minimum) because agents create recommendations only and do not require review-task or decision artifacts.
+
+Design decisions:
+
+- Kept Milestone 3 artifacts on existing BaseArtifact registry tables via `PayloadJson` where possible (recommendations, capabilities, business policies, optimization models, agent templates). No separate EF tables for Layer 3-6 artifact payloads in this sprint.
+- Separated classification `PolicyVersion` (governance/ABAC) from `BusinessPolicyDefinitionVersion` (Layer 4 business constraints) with distinct modules, routes (`/api/admin/business-policies`), permissions, and compile-time guards.
+- Refactored import mapping behind `IMappingSuggestionProvider` with `rule-based-v1` default; PydanticAI and Hermes mapping providers are contract-only stubs.
+- Added `ImportProfileJson` and `QueryIntentExtensionsJson` on published `ModelPackageVersion` records plus `IModelPackageContextResolver` so import staging, BOM comparison, `bom-impact-context`, and recommendation copy are package-driven.
+- Added mapping learning-signal inputs (`ImportMappingLearningSignalInput`) on approve/reject/correct; full `LearningSignalArtifact` lifecycle remains Issues 19-21.
+- Implemented `IAgentRuntimeAdapter` and deferred Hermes/LangGraph adapters in Issue 18.4 as compiled contracts only. No public agent execute API yet; Issue 23 owns live runtime.
+- Extracted manufacturing reference package to `packages/manufacturing-reference/`; frontend `Create seed model package` delegates to install endpoint instead of inline ontology JSON.
+- Renamed BOM comparison counters to neutral `MissingInPrimarySideCount` / `MissingInSecondarySideCount` (migration `Issue185NeutralBomComparisonSideCounts`).
+
+Implemented or partially implemented:
+
+- **Issue 11:** trusted graph promotion, snapshots, diffs, package-driven BOM comparison, post-comparison recommendation hook.
+- **Issue 12:** document memory, object links, vector index metadata records, disabled CAD/Qdrant placeholders.
+- **Issue 13:** governed query intents, retrieval runs, context packages, policy-filtered context assembly; package-driven `bom-impact-context`.
+- **Issue 14:** AI Trace records, artifact links, export audit, `/ai-traces` UI.
+- **Issue 15:** governed chat, chat-to-artifact drafting, deterministic/OpenAI LLM provider switch, `/chat` UI.
+- **Issue 16:** explorers hub, 360° context views, governance flow foundation, `/explorers` routes.
+- **Issue 17:** dashboard/report templates, governed-query preview, JSON export, KPI placeholder catalog, `/dashboards` + `/reports` UI.
+- **Issue 18:** `RecommendationVersion` artifacts, evidence gates, suggested actions, creation from DQ/BOM/chat/dashboards, `/recommendations` UI.
+- **Issue 18.1:** package profiles, mapping providers, mapping reject endpoint, learning-signal emitter, ontology-driven staging.
+- **Issue 18.2:** `CapabilityDefinitionVersion` module, `/api/admin/capabilities`, `/capabilities` UI.
+- **Issue 18.3:** `BusinessPolicyDefinitionVersion` module, `/api/admin/business-policies`, `/business-policies` UI.
+- **Issue 18.4:** `OptimizationModelVersion`, `AgentTemplateVersion`, `IAgentRuntimeAdapter` stubs, `/optimization-models` + `/agent-templates` UI.
+- **Issue 18.5:** `packages/manufacturing-reference/`, reference package installer, dev auto-seed (`SeedIdentity:InstallReferencePackage`), `ManufacturingReferencePackageTests`.
+- Documentation updated: `ARCHITECTURE.md`, `AGENTS.md`, `README.md`, `docs/backend/architecture.md`, `docs/frontend/architecture.md`, `docs/local-development.md`, `docs/architecture/domain-packages.md`, `.docs/.gapAnalysis/issues-1-18-gap-analysis.md`, `.docs/.QA/issues-1-18-e2e-flow-to-recommendations.md`.
+
+Changes since previous checkpoint:
+
+- Moved from Issue 10 foundation to full Milestone 3 plus Abstraction Sprint (Issues 11-18, 18.1-18.5).
+- Backend test count increased from 50 tests to **165 tests**.
+- Frontend grew from imports-focused admin shell to explorers hub, chat, AI traces, dashboards/reports, recommendations, and Layer 3-6 artifact list/detail shells (29 `page.tsx` routes).
+- Model-artifacts seed action now installs reference package; package key unified to `etos-manufacturing-reference`.
+- `CONVERTED_TO_REVIEW_TASK` on recommendations remains status-only until Issue 19.
+- `RecommendationCreationSource.AgentDeferred` contract exists; no agent/workflow auto-creation yet.
+
+Not implemented yet:
+
+- **Issues 19-21:** review tasks, decisions/outcomes/learning evidence, governance dashboard live KPI analytics.
+- **Issue 22:** `ToolDefinitionVersion`, `SkillDefinitionVersion`, `ConnectorDefinitionVersion`, `ToolRun` records.
+- **Issue 23:** `AgentVersion`, `AgentRun`, live `PydanticAiRuntimeAdapter`, public execute API.
+- **Issues 24-25:** Dapr Workflow runtime, multi-agent teams, LangGraph orchestration.
+- **Issue 26:** full end-to-end MVP demo including review task → decision → custom agent/workflow run.
+- Live MinIO/Qdrant integrations, real OIDC login, OpenTelemetry/Serilog baseline, production CI/CD.
+- Runtime enforcement of business policies, optimization solvers, and agent capability profiles.
+- `ETOS.Langraph` does not exist yet.
+
+Verification run:
+
+- `dotnet test EnterpriseThreadOS.sln`: passed, **165 tests**.
+- Documentation links and implemented-vs-planned wording reviewed for Issues 18.1-18.5.
+- `graphify ./docs --update` + `graphify cluster-only ./docs --no-viz`: passed after doc updates.
+
+Recommended next implementation slice:
+
+**Option A — Agent layer spike (team preference to validate Milestone 5 early):**
+
+1. Begin **Issue 22**: tool/skill/connector registry, schema compatibility, `ToolRun`, dry-run, disabled write connectors.
+2. Begin **Issue 23**: `AgentVersion`, publish governance, live PydanticAI adapter, `AgentRun`, execute API, recommendation-only output, AI Trace links.
+3. Defer Issues 19-21 unless workflow steps need real review-task creation (Issue 24); stub task hooks if needed.
+4. Use reference package agent template + governed query context for first end-to-end agent run test.
+
+**Option B — Full PRD human-governance loop first:**
+
+1. Begin **Issue 19**: `ReviewTaskArtifact`, assignments, task chains, creation from recommendations and data-quality issues.
+2. Continue **Issue 20** → **Issue 21** → **Issue 22** in dependency order.
+3. Reserve Issue 26 demo until review → decision → agent/workflow path is wired.
+
+Official backlog note: Issue 22 lists blocked by Issue 21 and Issue 18.5. Issue 18.5 is complete; Option A treats 19-21 as parallel/deferred for agent-focused work.
+
 ## 2026-06-11 - Slice 10 Data Quality Ready
 
 Source docs reviewed:
@@ -377,3 +476,4 @@ Recommended next implementation slice:
 1. Begin Issue 2: Tenant Identity and Access Baseline.
 2. Start Issue 2 with tenant/user/role/membership domain models, tenant context resolution, and tests for cross-tenant denial.
 3. Add the minimal admin UI only after backend tenant isolation and permission tests are passing.
+

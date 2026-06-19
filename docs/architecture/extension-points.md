@@ -23,7 +23,9 @@ Issue 1 establishes architecture-honest placeholders for future platform capabil
 | Keycloak | Deferred | Add enterprise IdP federation after tenant identity and access foundations are implemented. |
 | Temporal | Deferred | Add workflow runtime integration after workflow contracts and runtime boundaries exist. |
 | Kubernetes | Deferred | Keep Issue 1 local-first with Docker Compose; add manifests or Helm charts during deployment hardening. |
-| CI/CD | Deferred | Document local verification first; add pipeline automation in a later delivery slice. |
+| CI/CD | Deferred | Document local verification first; add pipeline automation in a later delivery hardening slice. |
+| MassTransit tool execution queue | Deferred | `IToolExecutionQueue` is registered as `DisabledToolExecutionQueue`; sync tool execute is MVP. Enable MassTransit-backed async `ToolRun` processing in a later slice. |
+| Enterprise write connectors | Disabled contract | Write-capable `ConnectorDefinitionVersion` records may be published with `executionEnabled=false`; source-system writes remain blocked in MVP. |
 
 ## Backend Contract
 

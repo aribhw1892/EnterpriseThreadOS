@@ -15,9 +15,9 @@
     "semantic_hash": "0b42a848c4e2a87dfd14ede403ff3d3d"
   },
   "architecture/extension-points.md": {
-    "mtime": 1781102946.9281342,
-    "ast_hash": "4c6f118fb15e2e724bc77a92d7834622",
-    "semantic_hash": "4c6f118fb15e2e724bc77a92d7834622"
+    "mtime": 1781890142.8063505,
+    "ast_hash": "4e4517669640c43314a221c4c4c57e2b",
+    "semantic_hash": "4e4517669640c43314a221c4c4c57e2b"
   },
   "backend/architecture.md": {
     "mtime": 1781808731.6716883,
@@ -33,5 +33,10 @@
     "mtime": 1781808737.29694,
     "ast_hash": "759a47dcb4df2974aea588fe293b0a94",
     "semantic_hash": "759a47dcb4df2974aea588fe293b0a94"
+  },
+  "architecture/domain-packages.md": {
+    "mtime": 1781808899.5912602,
+    "ast_hash": "28d85e7803e92e2683d60cdeafd4d5ad",
+    "semantic_hash": "28d85e7803e92e2683d60cdeafd4d5ad"
   }
 }

@@ -4,25 +4,39 @@
       "adr_0002_artifact_lifecycle",
       "adr_readme",
       "ai_agent_workflow_guide",
-      "architecture_extension_points_doc"
-    ],
-    "1": [
-      "ai_agent_workflow",
-      "backend_architecture",
-      "frontend_architecture",
-      "local_development"
-    ],
-    "2": [
+      "architecture_extension_points_doc",
       "backend_architecture_doc",
       "domain_packages_document",
       "frontend_architecture_doc",
       "local_development_guide"
+    ],
+    "1": [
+      "ai_agent_workflow",
+      "architecture_extensionpoints_enterprisethreadosextensionpoints",
+      "backend_architecture",
+      "backend_architecture_backendarchitecture",
+      "frontend_architecture",
+      "local_development"
+    ],
+    "2": [
+      "domainpackages_agenttemplateversion",
+      "domainpackages_businesspolicydefinitionversion",
+      "domainpackages_capabilitydefinitionversion",
+      "domainpackages_modelpackageversion",
+      "domainpackages_optimizationmodelversion"
+    ],
+    "3": [
+      "domainpackages_enterprisethreados",
+      "domainpackages_etos_backend",
+      "domainpackages_packages_manufacturing_reference",
+      "domainpackages_referencepackagemanifestloader"
     ]
   },
   "cohesion": {
-    "0": 0.8333333333333334,
-    "1": 0.8333333333333334,
-    "2": 1.0
+    "0": 0.6071428571428571,
+    "1": 0.5333333333333333,
+    "2": 0.6,
+    "3": 0.5
   },
   "gods": [
     {
@@ -51,6 +65,16 @@
       "degree": 4
     },
     {
+      "id": "ai_agent_workflow",
+      "label": "AI Agent Workflow",
+      "degree": 4
+    },
+    {
+      "id": "domainpackages_capabilitydefinitionversion",
+      "label": "CapabilityDefinitionVersion",
+      "degree": 4
+    },
+    {
       "id": "adr_0002_artifact_lifecycle",
       "label": "ADR 0002: Artifact Lifecycle",
       "degree": 3
@@ -64,19 +88,42 @@
       "id": "local_development",
       "label": "Local Development",
       "degree": 3
-    },
-    {
-      "id": "backend_architecture",
-      "label": "Backend Architecture",
-      "degree": 3
-    },
-    {
-      "id": "domain_packages_document",
-      "label": "Domain Packages Document",
-      "degree": 3
     }
   ],
   "surprises": [
+    {
+      "source": "ADR 0002: Artifact Lifecycle",
+      "target": "AI Agent Workflow Guide",
+      "source_files": [
+        "architecture/adr/0002-artifact-lifecycle.md",
+        "ai-agent-workflow.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "Architecture Decision Records README",
+      "target": "AI Agent Workflow Guide",
+      "source_files": [
+        "architecture/adr/README.md",
+        "ai-agent-workflow.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "AI Agent Workflow Guide",
+      "target": "EnterpriseThreadOS Extension Points Document",
+      "source_files": [
+        "ai-agent-workflow.md",
+        "architecture/extension-points.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
     {
       "source": "Frontend Architecture Document",
       "target": "AI Agent Workflow Guide",
@@ -86,7 +133,7 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "references",
-      "why": "connects across different repos/directories; bridges separate communities"
+      "why": "connects across different repos/directories"
     },
     {
       "source": "Local Development Guide",
@@ -97,44 +144,11 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "references",
-      "why": "connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "EnterpriseThreadOS Extension Points Document",
-      "target": "Backend Architecture Document",
-      "source_files": [
-        "architecture/extension-points.md",
-        "backend/architecture.md"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "EnterpriseThreadOS Extension Points Document",
-      "target": "Frontend Architecture Document",
-      "source_files": [
-        "architecture/extension-points.md",
-        "frontend/architecture.md"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "ADR 0002: Artifact Lifecycle",
-      "target": "Backend Architecture Document",
-      "source_files": [
-        "architecture/adr/0002-artifact-lifecycle.md",
-        "backend/architecture.md"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "connects across different repos/directories; bridges separate communities"
+      "why": "connects across different repos/directories"
     }
   ],
   "tokens": {
-    "input": 11438,
-    "output": 631
+    "input": 6169,
+    "output": 370
   }
 }
