@@ -31,7 +31,7 @@ isProject: false
 ## Scope and prerequisites
 
 - **Source of intent:** [`.docs/.prd/engineering-execution-issues.md`](.docs/.prd/engineering-execution-issues.md) (Issue 18.1), PRD Milestone 4.5 in [`.docs/.prd/engineering-execution-prd.md`](.docs/.prd/engineering-execution-prd.md) (lines 772–792, 499–511)
-- **Blocked by:** Issue 18 (complete ~90% per [`.docs/.gapAnalysis/issues-1-18-gap-analysis.md`](.docs/.gapAnalysis/issues-1-18-gap-analysis.md))
+- **Blocked by:** Issue 18 (complete ~90% per [`.docs/.gapAnalysis/issues-1-18.5-22-23-gap-analysis.md`](.docs/.gapAnalysis/issues-1-18.5-22-23-gap-analysis.md))
 - **Unlocks:** Issue 18.2 (Capability Definition Artifacts)
 - **Explicitly deferred to 18.5:** standalone manufacturing reference package project and package architecture docs
 

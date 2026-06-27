@@ -13,7 +13,37 @@ public sealed class RuleBasedMappingProvider : IMappingSuggestionProvider
     {
         var columnSuggestions = BuildColumnSuggestions(request.Headers, request.ModelContext).ToList();
         var lifecycleSuggestions = BuildLifecycleSuggestions(request.Headers, request.SampleRows, request.ModelContext, columnSuggestions).ToList();
-        return Task.FromResult(new ImportMappingSuggestionResult(ProviderKey, columnSuggestions, lifecycleSuggestions));
+        ImportMappingSuggestionDiagnostics? diagnostics = null;
+        if (request.IncludeDiagnostics)
+        {
+            diagnostics = new ImportMappingSuggestionDiagnostics(
+                ProviderKey,
+                RuntimeCalled: false,
+                null,
+                null,
+                null,
+                null,
+                [],
+                PrefetchAttempted: false,
+                PrefetchSucceeded: false,
+                null,
+                null,
+                null,
+                null,
+                null,
+                MappingSuggestionContextBuilder.BuildGovernedContextJson(request.ModelContext),
+                MappingSuggestionContextBuilder.BuildStructuredInputJson(request),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UsedRuleBasedFallback: false,
+                ErrorMessage: null);
+        }
+
+        return Task.FromResult(new ImportMappingSuggestionResult(ProviderKey, columnSuggestions, lifecycleSuggestions, diagnostics));
     }
 
     internal static IEnumerable<ImportColumnMappingSuggestionResponse> BuildColumnSuggestions(

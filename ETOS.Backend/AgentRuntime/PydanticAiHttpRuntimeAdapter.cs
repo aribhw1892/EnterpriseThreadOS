@@ -35,7 +35,8 @@ public sealed class PydanticAiRuntimeAdapter(
             request.PrimaryModelId ?? "mock-v1",
             fallbackModels,
             request.StructuredInputJson,
-            request.PreviewMode);
+            request.PreviewMode,
+            request.ToolOutputSummariesJson);
 
         var baseUrl = runtimeOptions.BaseUrl.TrimEnd('/');
         using var response = await httpClient.PostAsJsonAsync($"{baseUrl}/v1/execute", payload, JsonOptions, cancellationToken);
@@ -124,7 +125,8 @@ public sealed class PydanticAiRuntimeAdapter(
         [property: JsonPropertyName("primaryModelId")] string PrimaryModelId,
         [property: JsonPropertyName("fallbackModels")] IReadOnlyCollection<FallbackModelHttpRequest> FallbackModels,
         [property: JsonPropertyName("structuredInputJson")] string? StructuredInputJson,
-        [property: JsonPropertyName("preview")] bool Preview);
+        [property: JsonPropertyName("preview")] bool Preview,
+        [property: JsonPropertyName("toolOutputSummariesJson")] string? ToolOutputSummariesJson);
 
     private sealed record FallbackModelHttpRequest(
         [property: JsonPropertyName("providerKey")] string ProviderKey,

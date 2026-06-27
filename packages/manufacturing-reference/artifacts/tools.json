@@ -21,5 +21,27 @@
     "allowedQueryIntentKeys": ["object-360-context", "bom-impact-context"],
     "compositionMetadata": { "mode": "governed-retrieval" },
     "futureExtensionPlaceholders": []
+  },
+  {
+    "toolKey": "mapping-predictor-tool",
+    "name": "Mapping Predictor Tool",
+    "description": "Deterministic rule-based mapping predictor used as a prefetch hint for LLM-assisted import mapping.",
+    "toolCategory": "analysis",
+    "riskLevel": "Low",
+    "readOnly": true,
+    "createsPlatformArtifact": false,
+    "createsReviewTask": false,
+    "createsDecision": false,
+    "callsExternalSystem": false,
+    "writesExternalSystem": false,
+    "requiresApproval": false,
+    "supportsDryRun": true,
+    "requiredPermissionKeys": ["imports.read"],
+    "inputSchemaJson": "{\"type\":\"object\",\"required\":[\"headers\",\"sampleRows\",\"modelPackageVersionId\"],\"properties\":{\"headers\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"sampleRows\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"modelPackageVersionId\":{\"type\":\"string\"}}}",
+    "outputSchemaJson": "{\"type\":\"object\",\"required\":[\"providerKey\",\"columnSuggestions\",\"lifecycleSuggestions\"],\"properties\":{\"providerKey\":{\"type\":\"string\"},\"columnSuggestions\":{\"type\":\"array\"},\"lifecycleSuggestions\":{\"type\":\"array\"}}}",
+    "internalHandlerKey": "mapping-predictor-v1",
+    "referencedCapabilityKeys": [],
+    "compositionMetadata": { "mode": "mapping-predictor" },
+    "futureExtensionPlaceholders": []
   }
 ]

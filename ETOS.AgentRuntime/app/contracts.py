@@ -27,6 +27,10 @@ class ExecuteRequest(BaseModel):
     )
     structured_input_json: str | None = Field(default=None, alias="structuredInputJson")
     preview: bool = False
+    tool_output_summaries_json: str | None = Field(
+        default=None,
+        alias="toolOutputSummariesJson",
+    )
 
 
 class ExecuteResponse(BaseModel):

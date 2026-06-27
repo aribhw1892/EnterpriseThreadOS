@@ -6,12 +6,14 @@ public sealed record ImportMappingSuggestionRequest(
     IReadOnlyCollection<string> Headers,
     IReadOnlyCollection<IReadOnlyDictionary<string, string?>> SampleRows,
     ResolvedModelPackageContext ModelContext,
-    string? RequestedProviderKey = null);
+    string? RequestedProviderKey = null,
+    bool IncludeDiagnostics = false);
 
 public sealed record ImportMappingSuggestionResult(
     string ProviderKey,
     IReadOnlyCollection<ImportColumnMappingSuggestionResponse> ColumnSuggestions,
-    IReadOnlyCollection<ImportLifecycleMappingSuggestionResponse> LifecycleSuggestions);
+    IReadOnlyCollection<ImportLifecycleMappingSuggestionResponse> LifecycleSuggestions,
+    ImportMappingSuggestionDiagnostics? Diagnostics = null);
 
 public interface IMappingSuggestionProvider
 {

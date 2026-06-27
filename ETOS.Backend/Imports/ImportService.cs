@@ -160,7 +160,8 @@ public sealed class ImportService(
                 parsed.Headers,
                 parsed.Rows.Take(sampleRowLimit).ToList(),
                 modelContext.Resolved,
-                request.SuggestionProviderKey),
+                request.SuggestionProviderKey,
+                request.IncludeDiagnostics),
             cancellationToken);
 
         return new ImportPreviewResponse(
@@ -173,7 +174,8 @@ public sealed class ImportService(
             parsed.Headers,
             parsed.Rows.Take(sampleRowLimit).ToList(),
             suggestions.ColumnSuggestions,
-            suggestions.LifecycleSuggestions);
+            suggestions.LifecycleSuggestions,
+            MapDiagnostics(suggestions.Diagnostics));
     }
 
     public async Task<ImportMappingVersionResponse> CreateMappingVersionAsync(CreateImportMappingVersionRequest request, CancellationToken cancellationToken)
@@ -1174,6 +1176,40 @@ public sealed class ImportService(
             RuleFor(request => request.Description).MaximumLength(1000);
             RuleFor(request => request.ModelPackageKey).MaximumLength(120);
         }
+    }
+
+    private static ImportMappingSuggestionDiagnosticsResponse? MapDiagnostics(ImportMappingSuggestionDiagnostics? diagnostics)
+    {
+        if (diagnostics is null)
+        {
+            return null;
+        }
+
+        return new ImportMappingSuggestionDiagnosticsResponse(
+            diagnostics.ProviderKey,
+            diagnostics.RuntimeCalled,
+            diagnostics.RuntimeAdapterKey,
+            diagnostics.RuntimeStatus,
+            diagnostics.ModelUsed,
+            diagnostics.FallbackAppliedJson,
+            diagnostics.TraceNotes,
+            diagnostics.PrefetchAttempted,
+            diagnostics.PrefetchSucceeded,
+            diagnostics.PrefetchToolKey,
+            diagnostics.PrefetchToolRunId,
+            diagnostics.PrefetchStatus,
+            diagnostics.PrefetchError,
+            diagnostics.PrefetchToolOutputJson,
+            diagnostics.GovernedContextJson,
+            diagnostics.StructuredInputJson,
+            diagnostics.ToolOutputSummariesJson,
+            diagnostics.PromptTemplateBody,
+            diagnostics.OutputSchemaJson,
+            diagnostics.PrimaryModelProviderKey,
+            diagnostics.PrimaryModelId,
+            diagnostics.RuntimeStructuredOutputJson,
+            diagnostics.UsedRuleBasedFallback,
+            diagnostics.ErrorMessage);
     }
 
     private sealed class CreateImportMappingVersionRequestValidator : AbstractValidator<CreateImportMappingVersionRequest>

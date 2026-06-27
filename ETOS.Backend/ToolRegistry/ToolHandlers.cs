@@ -2,6 +2,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Identity;
+using ETOS.Backend.Imports.MappingSuggestions;
+using ETOS.Backend.Ontology;
 
 namespace ETOS.Backend.ToolRegistry;
 
@@ -136,4 +138,126 @@ public sealed class DisabledWriteConnectorToolHandler : IToolHandler
             context.ToolDocument.OutputSchemaJson ?? "{}",
             "Dry-run confirms write-capable connector contract remains disabled in MVP.",
             null);
+}
+
+public sealed class MappingPredictorToolHandler(IModelPackageContextResolver modelPackageContextResolver) : IToolHandler
+{
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
+    public string HandlerKey => ToolInternalHandlerKeys.MappingPredictor;
+
+    public async Task<ToolHandlerResult> ExecuteAsync(ToolHandlerContext context, CancellationToken cancellationToken)
+    {
+        var input = ParseInput(context.InputJson);
+        var tenantContext = new ActiveTenantContext(
+            context.TenantId,
+            "mapping-predictor",
+            "mapping-predictor",
+            context.UserId);
+        var modelContext = await modelPackageContextResolver.ResolvePublishedAsync(
+            input.ModelPackageVersionId,
+            tenantContext,
+            "tools.execute",
+            cancellationToken);
+
+        var columnSuggestions = RuleBasedMappingProvider
+            .BuildColumnSuggestions(input.Headers, modelContext)
+            .ToList();
+        var lifecycleSuggestions = RuleBasedMappingProvider
+            .BuildLifecycleSuggestions(input.Headers, input.SampleRows, modelContext, columnSuggestions)
+            .ToList();
+
+        var output = new
+        {
+            providerKey = MappingSuggestionProviderKeys.RuleBased,
+            columnSuggestionCount = columnSuggestions.Count,
+            lifecycleSuggestionCount = lifecycleSuggestions.Count,
+            columnSuggestions = columnSuggestions
+                .Take(8)
+                .Select(item => new
+                {
+                    item.SourceColumn,
+                    item.CanonicalObjectType,
+                    item.CanonicalAttributeKey,
+                    item.Confidence,
+                    item.Rationale
+                }),
+            lifecycleSuggestions = lifecycleSuggestions
+                .Take(8)
+                .Select(item => new
+                {
+                    item.SourceValue,
+                    item.CanonicalLifecycleKey,
+                    item.Confidence,
+                    item.Rationale
+                })
+        };
+
+        return new ToolHandlerResult(
+            true,
+            JsonSerializer.Serialize(output, JsonOptions),
+            null,
+            null);
+    }
+
+    public ToolHandlerDryRunResult SimulateDryRun(ToolHandlerContext context)
+    {
+        var input = ParseInput(context.InputJson);
+        return new ToolHandlerDryRunResult(
+            context.ToolDocument.OutputSchemaJson ?? "{}",
+            $"Dry-run would predict mapping suggestions for {input.Headers.Count} header(s) using rule-based heuristics.",
+            null);
+    }
+
+    private static MappingPredictorInput ParseInput(string inputJson)
+    {
+        var node = JsonNode.Parse(inputJson) as JsonObject
+            ?? throw new RequestValidationException("Tool input must be a JSON object.");
+
+        var modelPackageVersionId = ParseRequiredGuid(node["modelPackageVersionId"], "modelPackageVersionId");
+        var headers = node["headers"]?.AsArray()
+            ?? throw new RequestValidationException("headers is required.");
+        var sampleRowsNode = node["sampleRows"]?.AsArray() ?? [];
+
+        var parsedHeaders = headers
+            .Select(item => item?.GetValue<string>()?.Trim())
+            .Where(item => !string.IsNullOrWhiteSpace(item))
+            .Select(item => item!)
+            .ToList();
+
+        var sampleRows = sampleRowsNode
+            .Select(ParseSampleRow)
+            .ToList();
+
+        return new MappingPredictorInput(modelPackageVersionId, parsedHeaders, sampleRows);
+    }
+
+    private static Guid ParseRequiredGuid(JsonNode? node, string fieldName)
+    {
+        var value = node?.GetValue<string>()?.Trim();
+        if (Guid.TryParse(value, out var parsed))
+        {
+            return parsed;
+        }
+
+        throw new RequestValidationException($"{fieldName} is required.");
+    }
+
+    private static IReadOnlyDictionary<string, string?> ParseSampleRow(JsonNode? node)
+    {
+        if (node is not JsonObject rowObject)
+        {
+            return new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        return rowObject.ToDictionary(
+            pair => pair.Key,
+            pair => pair.Value?.GetValue<string>(),
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    private sealed record MappingPredictorInput(
+        Guid ModelPackageVersionId,
+        IReadOnlyCollection<string> Headers,
+        IReadOnlyCollection<IReadOnlyDictionary<string, string?>> SampleRows);
 }

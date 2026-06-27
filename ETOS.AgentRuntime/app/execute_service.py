@@ -32,6 +32,18 @@ def _parse_json_object(raw: str | None, field_name: str) -> dict[str, Any]:
     return parsed
 
 
+def _parse_json_array(raw: str | None, field_name: str) -> list[Any]:
+    if raw is None or not raw.strip():
+        return []
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{field_name} must be valid JSON.") from exc
+    if not isinstance(parsed, list):
+        raise ValueError(f"{field_name} must be a JSON array.")
+    return parsed
+
+
 def _parse_output_schema(raw: str) -> dict[str, Any]:
     schema = _parse_json_object(raw, "outputSchemaJson")
     if schema.get("type") not in (None, "object"):
@@ -58,6 +70,17 @@ def _render_prompt(request: ExecuteRequest) -> str:
             [
                 "Structured user input:",
                 json.dumps(structured_input, indent=2, sort_keys=True),
+            ]
+        )
+    if request.tool_output_summaries_json and request.tool_output_summaries_json.strip():
+        tool_outputs = _parse_json_array(
+            request.tool_output_summaries_json,
+            "toolOutputSummariesJson",
+        )
+        sections.extend(
+            [
+                "Tool output summaries (deterministic hints):",
+                json.dumps(tool_outputs, indent=2, sort_keys=True),
             ]
         )
     if request.preview:

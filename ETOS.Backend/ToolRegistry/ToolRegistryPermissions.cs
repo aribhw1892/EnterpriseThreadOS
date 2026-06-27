@@ -59,11 +59,13 @@ public static class ToolInternalHandlerKeys
 {
     public const string GovernedQuery = "governed-query-v1";
     public const string DisabledWriteConnector = "disabled-write-connector-v1";
+    public const string MappingPredictor = "mapping-predictor-v1";
 
     public static readonly IReadOnlyCollection<string> All =
     [
         GovernedQuery,
-        DisabledWriteConnector
+        DisabledWriteConnector,
+        MappingPredictor
     ];
 }
 

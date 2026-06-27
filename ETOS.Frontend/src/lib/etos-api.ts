@@ -1146,6 +1146,33 @@ export type ArtifactImpact = {
 
 // --- Import preview and validation (used by demo flows) ---
 
+export type ImportMappingSuggestionDiagnostics = {
+  providerKey: string;
+  runtimeCalled: boolean;
+  runtimeAdapterKey?: string | null;
+  runtimeStatus?: string | null;
+  modelUsed?: string | null;
+  fallbackAppliedJson?: string | null;
+  traceNotes: string[];
+  prefetchAttempted: boolean;
+  prefetchSucceeded: boolean;
+  prefetchToolKey?: string | null;
+  prefetchToolRunId?: string | null;
+  prefetchStatus?: string | null;
+  prefetchError?: string | null;
+  prefetchToolOutputJson?: string | null;
+  governedContextJson?: string | null;
+  structuredInputJson?: string | null;
+  toolOutputSummariesJson?: string | null;
+  promptTemplateBody?: string | null;
+  outputSchemaJson?: string | null;
+  primaryModelProviderKey?: string | null;
+  primaryModelId?: string | null;
+  runtimeStructuredOutputJson?: string | null;
+  usedRuleBasedFallback: boolean;
+  errorMessage?: string | null;
+};
+
 export type ImportPreview = {
   batchId: string;
   evidenceId: string;
@@ -1170,6 +1197,7 @@ export type ImportPreview = {
     confidence: number;
     rationale: string;
   }[];
+  diagnostics?: ImportMappingSuggestionDiagnostics | null;
 };
 
 export type ImportValidation = {
@@ -1536,6 +1564,29 @@ export async function getOntologyLists() {
     modelPackages,
     activeModelPackage,
   };
+}
+
+/** Mapping preview with optional agent/runtime diagnostics for local debugging. */
+export async function previewImportMapping(
+  batchId: string,
+  request: {
+    evidenceId?: string | null;
+    sampleRowLimit?: number;
+    suggestionProviderKey?: string | null;
+    includeDiagnostics?: boolean;
+  },
+  tenantHeaders?: { userId?: string; tenantId?: string },
+): Promise<ApiResult<ImportPreview>> {
+  return postApi<ImportPreview>(
+    `/api/admin/imports/batches/${batchId}/mapping-preview`,
+    {
+      evidenceId: request.evidenceId ?? null,
+      sampleRowLimit: request.sampleRowLimit ?? 10,
+      suggestionProviderKey: request.suggestionProviderKey ?? null,
+      includeDiagnostics: request.includeDiagnostics ?? false,
+    },
+    tenantHeaders,
+  );
 }
 
 /** Imports page: batches, first batch detail, identity candidates, trust scores, data quality. */

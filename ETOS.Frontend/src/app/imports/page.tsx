@@ -7,6 +7,7 @@ import {
   ImportColumnMapping,
   ImportFileEvidence,
   ImportMappingVersion,
+  ImportPreview,
   ImportStagingGraphRun,
   ImportValidationIssue,
   TrustScoreRecord,
@@ -26,10 +27,12 @@ import {
   promoteReadyStagedImportBatch,
   rejectLatestStagedImportBatch,
   runIdentityResolutionDemoFlow,
+  previewImportMapping,
   selectedTenantId,
   stageLatestImportBatch,
   validateLatestImportBatch,
 } from "@/lib/etos-api";
+import { MappingAgentDebugPanel } from "@/components/imports/MappingAgentDebugPanel";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
@@ -142,6 +145,39 @@ async function rejectStagedBatch() {
 
   revalidatePath("/imports");
   redirect("/imports");
+}
+
+async function runMappingPreviewDebug(input: {
+  batchId: string;
+  evidenceId?: string | null;
+  suggestionProviderKey: string;
+}): Promise<{ preview: ImportPreview | null; error: string | null }> {
+  "use server";
+
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return { preview: null, error: "Missing tenant or admin user environment configuration." };
+  }
+
+  const result = await previewImportMapping(
+    input.batchId,
+    {
+      evidenceId: input.evidenceId,
+      sampleRowLimit: 10,
+      suggestionProviderKey: input.suggestionProviderKey,
+      includeDiagnostics: true,
+    },
+    tenantHeaders,
+  );
+
+  if (result.error) {
+    return { preview: null, error: result.error };
+  }
+
+  return { preview: result.data, error: null };
 }
 
 function formatStatus(status: string | number) {
@@ -607,6 +643,8 @@ export default async function ImportsPage({ searchParams }: PageProps) {
   const { error: actionError } = await searchParams;
   const lists = await getImportLists();
   const batches = lists.batches.data ?? [];
+  const firstBatch = batches[0];
+  const firstEvidence = lists.firstBatchDetail.data?.evidence[0];
   const stagedBatchCount = batches.filter((batch) => batch.status === "Staged").length;
   const promotedBatchCount = batches.filter((batch) => batch.status === "Promoted").length;
 
@@ -659,6 +697,12 @@ export default async function ImportsPage({ searchParams }: PageProps) {
         </header>
 
         {actionError ? <ErrorState error={actionError} /> : null}
+
+        <MappingAgentDebugPanel
+          batchId={firstBatch?.id}
+          evidenceId={firstEvidence?.id}
+          runPreview={runMappingPreviewDebug}
+        />
 
         <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
           <h2 className="text-2xl font-semibold">Trusted Graph Promotion</h2>

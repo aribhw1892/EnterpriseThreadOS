@@ -188,8 +188,11 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IToolExecutionQueue, DisabledToolExecutionQueue>();
         services.AddScoped<GovernedQueryToolHandler>();
         services.AddScoped<DisabledWriteConnectorToolHandler>();
+        services.AddScoped<MappingPredictorToolHandler>();
         services.AddScoped<IToolHandler>(sp => sp.GetRequiredService<GovernedQueryToolHandler>());
         services.AddScoped<IToolHandler>(sp => sp.GetRequiredService<DisabledWriteConnectorToolHandler>());
+        services.AddScoped<IToolHandler>(sp => sp.GetRequiredService<MappingPredictorToolHandler>());
+        services.AddScoped<IPublishedToolVersionResolver, PublishedToolVersionResolver>();
         services.AddScoped<IToolGateway, ToolGatewayService>();
         services.AddHttpClient<PydanticAiRuntimeAdapter>((serviceProvider, client) =>
         {

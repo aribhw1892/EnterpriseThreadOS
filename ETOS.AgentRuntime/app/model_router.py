@@ -12,6 +12,8 @@ class RetriableModelError(Exception):
 
 SUPPORTED_PROVIDERS = frozenset({"openai", "openai-v1", "openai-compatible"})
 
+DEFAULT_OPENAI_COMPATIBLE_BASE_URL = "http://host.docker.internal:1234/v1"
+
 
 @dataclass(frozen=True)
 class ModelCandidate:
@@ -25,9 +27,17 @@ def _normalize_provider_key(provider_key: str) -> str:
     return provider_key.strip().lower()
 
 
+def _openai_compatible_base_url() -> str:
+    return os.environ.get("OPENAI_BASE_URL", DEFAULT_OPENAI_COMPATIBLE_BASE_URL).strip()
+
+
 def provider_has_api_key(provider_key: str) -> bool:
     normalized = _normalize_provider_key(provider_key)
-    if normalized in {"openai", "openai-v1", "openai-compatible"}:
+    if normalized == "openai-compatible":
+        return bool(_openai_compatible_base_url()) or bool(
+            os.environ.get("OPENAI_API_KEY", "").strip()
+        )
+    if normalized in {"openai", "openai-v1"}:
         return bool(os.environ.get("OPENAI_API_KEY", "").strip())
     return False
 
@@ -35,6 +45,8 @@ def provider_has_api_key(provider_key: str) -> bool:
 def should_use_deterministic_mock(provider_key: str) -> bool:
     normalized = _normalize_provider_key(provider_key)
     if normalized not in SUPPORTED_PROVIDERS:
+        return False
+    if normalized == "openai-compatible" and _openai_compatible_base_url():
         return False
     return not provider_has_api_key(provider_key)
 
@@ -72,6 +84,17 @@ def create_pydantic_ai_model(candidate: ModelCandidate):
             f"Unsupported model provider '{candidate.provider_key}'."
         )
 
-    from pydantic_ai.models.openai import OpenAIModel
+    from pydantic_ai.models.openai import OpenAIChatModel
+    from pydantic_ai.providers.openai import OpenAIProvider
 
-    return OpenAIModel(candidate.model_id)
+    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if normalized == "openai-compatible":
+        base_url = _openai_compatible_base_url()
+        provider = OpenAIProvider(
+            base_url=base_url,
+            api_key=api_key or "lm-studio",
+        )
+        return OpenAIChatModel(candidate.model_id, provider=provider)
+
+    provider = OpenAIProvider(api_key=api_key or None)
+    return OpenAIChatModel(candidate.model_id, provider=provider)

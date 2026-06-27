@@ -16,7 +16,7 @@ Read `ETOS.Frontend/AGENTS.md` before frontend edits. This project uses a newer 
 
 - `src/app/page.tsx`: current server-rendered admin foundation shell.
 - `src/app/model-artifacts/page.tsx`: server-rendered canonical model artifact admin page with seed publish action.
-- `src/app/imports/page.tsx`: server-rendered import admin page with demo import, mapping approval, validation, staging, identity candidate, and trust-score actions.
+- `src/app/imports/page.tsx`: server-rendered import admin page with demo import, mapping approval, validation, staging, identity candidate, trust-score actions, and **Mapping Agent Debug** (client panel via `src/components/imports/MappingAgentDebugPanel.tsx`).
 - `src/app/documents/page.tsx`: server-rendered document memory admin page with demo document creation, version metadata, object links, vector hook records, and CAD placeholder status.
 - `src/app/chat/page.tsx`: governed chat shell with evidence/confidence responses and chat-to-artifact drafting.
 - `src/app/explorers/page.tsx`: explorer hub with links to artifact, graph, document, context-package, decision, 360° context, and governance flow routes.
@@ -112,7 +112,7 @@ It exposes small server actions for the Issue 8 import flow and Issue 9 identity
 ```text
 POST /api/admin/imports/batches
 POST /api/admin/imports/batches/{batchId}/files
-POST /api/admin/imports/batches/{batchId}/mapping-preview
+POST /api/admin/imports/batches/{batchId}/mapping-preview   # optional includeDiagnostics, suggestionProviderKey
 POST /api/admin/imports/mappings
 POST /api/admin/imports/mappings/{mappingVersionId}/approve
 POST /api/admin/imports/batches/{batchId}/validate
@@ -122,7 +122,7 @@ POST /api/admin/identity-resolution/candidates/{candidateId}/approve
 POST /api/admin/identity-resolution/candidates/{candidateId}/mark-conflicted
 ```
 
-The page renders batches, raw evidence metadata, mapping versions, validation issues, staging run summaries, identity candidates, and trust score breakdowns. The `Run identity demo` action creates two source batches, approves their mappings, validates rows, stages both batches, and generates identity candidates. Manual tools are labeled as latest-batch-only for debugging. The page intentionally keeps upload UI minimal and documents backend multipart upload support because Next.js server actions have request body limits.
+The page renders batches, raw evidence metadata, mapping versions, validation issues, staging run summaries, identity candidates, and trust score breakdowns. The **Mapping Agent Debug** panel (client component) calls mapping preview with `includeDiagnostics: true` through server action `runMappingPreviewDebug` and typed helper `previewImportMapping` in `src/lib/etos-api.ts`. It shows runtime/prefetch status pills, expandable JSON for governed context, tool prefetch output, runtime structured output, and final suggestions with rationales — without persisting a draft mapping version. The `Run identity demo` action creates two source batches, approves their mappings, validates rows, stages both batches, and generates identity candidates. Manual tools are labeled as latest-batch-only for debugging. The page intentionally keeps upload UI minimal and documents backend multipart upload support because Next.js server actions have request body limits.
 
 `src/app/documents/page.tsx` fetches:
 

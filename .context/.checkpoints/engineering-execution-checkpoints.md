@@ -6,7 +6,7 @@ Source docs reviewed:
 
 - `.docs/.prd/engineering-execution-prd.md`
 - `.docs/.prd/engineering-execution-issues.md`
-- `.docs/.gapAnalysis/issues-1-18-gap-analysis.md`
+- `.docs/.gapAnalysis/issues-1-18.5-22-23-gap-analysis.md`
 - `.cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md`
 - `.cursor/plans/issue_15_governed_chat.plan.md`
 - `.cursor/plans/issue_16_explorers_context_views.plan.md`
@@ -32,7 +32,7 @@ Design decisions:
 
 - Kept Milestone 3 artifacts on existing BaseArtifact registry tables via `PayloadJson` where possible (recommendations, capabilities, business policies, optimization models, agent templates). No separate EF tables for Layer 3-6 artifact payloads in this sprint.
 - Separated classification `PolicyVersion` (governance/ABAC) from `BusinessPolicyDefinitionVersion` (Layer 4 business constraints) with distinct modules, routes (`/api/admin/business-policies`), permissions, and compile-time guards.
-- Refactored import mapping behind `IMappingSuggestionProvider` with `rule-based-v1` default; PydanticAI and Hermes mapping providers are contract-only stubs.
+- Refactored import mapping behind `IMappingSuggestionProvider` with `rule-based-v1` default (base config) and live `pydantic-ai-v1` LLM provider via `PydanticAiMappingProvider`, agent runtime sidecar, optional `mapping-predictor-tool` prefetch, mapping preview diagnostics, and Mapping Agent Debug UI on `/imports`; `hermes-v1` mapping provider remains deferred.
 - Added `ImportProfileJson` and `QueryIntentExtensionsJson` on published `ModelPackageVersion` records plus `IModelPackageContextResolver` so import staging, BOM comparison, `bom-impact-context`, and recommendation copy are package-driven.
 - Added mapping learning-signal inputs (`ImportMappingLearningSignalInput`) on approve/reject/correct; full `LearningSignalArtifact` lifecycle remains Issues 19-21.
 - Implemented `IAgentRuntimeAdapter` and deferred Hermes/LangGraph adapters in Issue 18.4 as compiled contracts only. No public agent execute API yet; Issue 23 owns live runtime.
@@ -54,7 +54,7 @@ Implemented or partially implemented:
 - **Issue 18.3:** `BusinessPolicyDefinitionVersion` module, `/api/admin/business-policies`, `/business-policies` UI.
 - **Issue 18.4:** `OptimizationModelVersion`, `AgentTemplateVersion`, `IAgentRuntimeAdapter` stubs, `/optimization-models` + `/agent-templates` UI.
 - **Issue 18.5:** `packages/manufacturing-reference/`, reference package installer, dev auto-seed (`SeedIdentity:InstallReferencePackage`), `ManufacturingReferencePackageTests`.
-- Documentation updated: `ARCHITECTURE.md`, `AGENTS.md`, `README.md`, `docs/backend/architecture.md`, `docs/frontend/architecture.md`, `docs/local-development.md`, `docs/architecture/domain-packages.md`, `.docs/.gapAnalysis/issues-1-18-gap-analysis.md`, `.docs/.QA/issues-1-18-e2e-flow-to-recommendations.md`.
+- Documentation updated: `ARCHITECTURE.md`, `AGENTS.md`, `README.md`, `docs/backend/architecture.md`, `docs/frontend/architecture.md`, `docs/local-development.md`, `docs/architecture/domain-packages.md`, `.docs/.gapAnalysis/issues-1-18.5-22-23-gap-analysis.md`, `.docs/.QA/issues-1-18-e2e-flow-to-recommendations.md`.
 
 Changes since previous checkpoint:
 

@@ -75,8 +75,61 @@ Environment:
 
 - `AGENT_RUNTIME_PORT`: host port mapped in Docker Compose (default `8010`).
 - `OPENAI_API_KEY`: optional passthrough for live PydanticAI/OpenAI calls. When unset, `/v1/execute` returns deterministic structured output that matches the supplied output JSON schema (used by pytest and local .NET adapter tests).
+- `OPENAI_BASE_URL`: optional base URL for local OpenAI-compatible servers such as LM Studio. Use with `PrimaryModelProviderKey: openai-compatible` in `ImportMappingSuggestions` or agent runtime model config. A placeholder key such as `lm-studio` is sufficient when the local server does not enforce authentication.
 
-The .NET backend reads `AgentRuntime:BaseUrl` (for example `http://localhost:8010`) when the HTTP `PydanticAiRuntimeAdapter` is configured in a later Issue 23 slice.
+Docker Compose passes both `OPENAI_API_KEY` and `OPENAI_BASE_URL` into the `agent-runtime` service. When LM Studio runs on the **host** (not in Docker), set in `.env`:
+
+```env
+OPENAI_API_KEY=lm-studio
+OPENAI_BASE_URL=http://host.docker.internal:1234/v1
+```
+
+When running the Python sidecar **locally** (not in Docker) against host LM Studio, use `http://localhost:1234/v1` instead.
+
+The .NET backend reads `AgentRuntime:BaseUrl` (for example `http://localhost:8010`) for governed agent execution and LLM-assisted import mapping preview through `PydanticAiRuntimeAdapter`.
+
+### LLM-assisted import mapping (local)
+
+Development defaults in `ETOS.Backend/appsettings.Development.json` enable `ImportMappingSuggestions` with provider `pydantic-ai-v1`, `openai-compatible` model routing, optional prefetch via `mapping-predictor-tool`, and `FallbackToRuleBasedOnRuntimeFailure: true`. Production/base config in `appsettings.json` keeps `ImportMappingSuggestions:Enabled` false and default provider `rule-based-v1`.
+
+Set `PrimaryModelId` in Development config to the model id LM Studio exposes (for example `google/gemma-3-1b`), not a placeholder name.
+
+Example `.env` for LM Studio on the host with agent-runtime in Docker:
+
+```env
+OPENAI_API_KEY=lm-studio
+OPENAI_BASE_URL=http://host.docker.internal:1234/v1
+```
+
+Reinstall the manufacturing reference package after pulling tool seed changes so tenants receive `mapping-predictor-tool` for optional prefetch hints:
+
+```powershell
+POST http://localhost:5000/api/admin/development/install-reference-package
+```
+
+Mapping preview API:
+
+```powershell
+POST http://localhost:5000/api/admin/imports/batches/{batchId}/mapping-preview
+```
+
+Request body fields:
+
+- `evidenceId` (optional)
+- `sampleRowLimit` (default 25)
+- `suggestionProviderKey` (optional; Development default is `pydantic-ai-v1`)
+- `includeDiagnostics` (optional; when `true`, returns governed context, prefetch tool output, runtime request metadata, trace notes, and raw structured LLM output for debugging)
+
+### Mapping Agent Debug UI
+
+Open `http://localhost:3000/imports` and use the **Mapping Agent Debug** panel (purple section below the action buttons). It calls mapping preview with `includeDiagnostics: true` without saving a draft mapping version. Use it to verify:
+
+- whether the runtime sidecar was called
+- prefetch tool status (`mapping-predictor-tool`)
+- governed ontology context and CSV sample input sent to the agent
+- raw runtime structured output and final column/lifecycle suggestions with rationales
+
+Compare `pydantic-ai-v1` vs `rule-based-v1` on the same batch. After debug succeeds, **Create CAD/PDM draft batch** saves a mapping version; check **Mapping Versions** for `Suggestion provider: pydantic-ai-v1`.
 
 Run Python tests:
 
@@ -194,7 +247,7 @@ Open `http://localhost:3000`.
 
 Open `http://localhost:3000/model-artifacts` to inspect and seed the manufacturing reference model package. The `Create seed model package` action calls `POST /api/admin/development/install-reference-package` with package key `etos-manufacturing-reference`, publishing ontology layers, import/query profiles, and governed capability/policy/optimization/agent-template seeds from [`packages/manufacturing-reference/`](../packages/manufacturing-reference/). Re-running the action is idempotent for the same tenant.
 
-Open `http://localhost:3000/imports` to inspect import batches and run import/identity demo flows. The recommended `Run identity demo` button creates two CSV-backed source batches, approves their generated mapping drafts, validates records, stages unverified graph nodes for both batches, and generates identity candidates with trust score breakdowns. The manual tools on the page intentionally operate on the newest batch only and are meant for step-by-step debugging. Multipart upload is supported by the backend API at `/api/admin/imports/batches/{batchId}/files`; the UI intentionally keeps upload behavior small because Next.js server actions have body-size limits.
+Open `http://localhost:3000/imports` to inspect import batches and run import/identity demo flows. The **Mapping Agent Debug** panel runs mapping preview with diagnostics (runtime call, prefetch tool output, governed context, structured input/output) without creating a draft mapping. The recommended `Run identity demo` button creates two CSV-backed source batches, approves their generated mapping drafts, validates records, stages unverified graph nodes for both batches, and generates identity candidates with trust score breakdowns. The manual tools on the page intentionally operate on the newest batch only and are meant for step-by-step debugging. Multipart upload is supported by the backend API at `/api/admin/imports/batches/{batchId}/files`; the UI intentionally keeps upload behavior small because Next.js server actions have body-size limits.
 
 Open `http://localhost:3000/chat` for governed chat with evidence/confidence responses and chat-to-artifact drafting.
 

@@ -99,6 +99,7 @@ public sealed class ManufacturingReferencePackageTests
         Assert.True(toolResponse.StatusCode == HttpStatusCode.OK);
         Assert.NotNull(tools);
         Assert.Contains(tools, item => item.ToolKey == "graph-query-tool");
+        Assert.Contains(tools, item => item.ToolKey == "mapping-predictor-tool");
 
         using var connectorRequest = new HttpRequestMessage(HttpMethod.Get, "/api/admin/connectors");
         AddTenantHeaders(connectorRequest, context.TenantId, context.UserId);

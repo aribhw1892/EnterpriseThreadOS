@@ -118,6 +118,7 @@ services:
     container_name: etos-agent-runtime
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
       PORT: 8010
     ports:
       - "${AGENT_RUNTIME_PORT:-8010}:8010"

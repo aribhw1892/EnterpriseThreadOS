@@ -59,7 +59,8 @@ public sealed record ImportFileEvidenceResponse(
 public sealed record ImportPreviewRequest(
     Guid? EvidenceId,
     int SampleRowLimit,
-    string? SuggestionProviderKey = null);
+    string? SuggestionProviderKey = null,
+    bool IncludeDiagnostics = false);
 
 public sealed record ImportPreviewResponse(
     Guid BatchId,
@@ -71,7 +72,34 @@ public sealed record ImportPreviewResponse(
     IReadOnlyCollection<string> Headers,
     IReadOnlyCollection<IReadOnlyDictionary<string, string?>> SampleRows,
     IReadOnlyCollection<ImportColumnMappingSuggestionResponse> ColumnSuggestions,
-    IReadOnlyCollection<ImportLifecycleMappingSuggestionResponse> LifecycleSuggestions);
+    IReadOnlyCollection<ImportLifecycleMappingSuggestionResponse> LifecycleSuggestions,
+    ImportMappingSuggestionDiagnosticsResponse? Diagnostics = null);
+
+public sealed record ImportMappingSuggestionDiagnosticsResponse(
+    string ProviderKey,
+    bool RuntimeCalled,
+    string? RuntimeAdapterKey,
+    string? RuntimeStatus,
+    string? ModelUsed,
+    string? FallbackAppliedJson,
+    IReadOnlyCollection<string> TraceNotes,
+    bool PrefetchAttempted,
+    bool PrefetchSucceeded,
+    string? PrefetchToolKey,
+    Guid? PrefetchToolRunId,
+    string? PrefetchStatus,
+    string? PrefetchError,
+    string? PrefetchToolOutputJson,
+    string? GovernedContextJson,
+    string? StructuredInputJson,
+    string? ToolOutputSummariesJson,
+    string? PromptTemplateBody,
+    string? OutputSchemaJson,
+    string? PrimaryModelProviderKey,
+    string? PrimaryModelId,
+    string? RuntimeStructuredOutputJson,
+    bool UsedRuleBasedFallback,
+    string? ErrorMessage);
 
 public sealed record ImportColumnMappingSuggestionResponse(
     string SourceColumn,

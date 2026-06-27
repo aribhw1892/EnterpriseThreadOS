@@ -1,0 +1,27 @@
+namespace ETOS.Backend.Imports.MappingSuggestions;
+
+public sealed record ImportMappingSuggestionDiagnostics(
+    string ProviderKey,
+    bool RuntimeCalled,
+    string? RuntimeAdapterKey,
+    string? RuntimeStatus,
+    string? ModelUsed,
+    string? FallbackAppliedJson,
+    IReadOnlyCollection<string> TraceNotes,
+    bool PrefetchAttempted,
+    bool PrefetchSucceeded,
+    string? PrefetchToolKey,
+    Guid? PrefetchToolRunId,
+    string? PrefetchStatus,
+    string? PrefetchError,
+    string? PrefetchToolOutputJson,
+    string? GovernedContextJson,
+    string? StructuredInputJson,
+    string? ToolOutputSummariesJson,
+    string? PromptTemplateBody,
+    string? OutputSchemaJson,
+    string? PrimaryModelProviderKey,
+    string? PrimaryModelId,
+    string? RuntimeStructuredOutputJson,
+    bool UsedRuleBasedFallback,
+    string? ErrorMessage);

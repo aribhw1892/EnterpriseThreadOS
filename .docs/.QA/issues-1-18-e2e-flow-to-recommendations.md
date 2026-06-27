@@ -113,6 +113,7 @@ Expected results:
 
 Optional actions on the same page:
 
+- **Mapping Agent Debug** — runs mapping preview with `includeDiagnostics: true` (provider `pydantic-ai-v1` in Development) without saving a draft mapping. Shows runtime call status, prefetch tool output, governed context, and structured LLM output. Requires agent-runtime sidecar and optional LM Studio; see `docs/local-development.md`.
 - **Approve first reviewable candidate** — exercises trusted link path
 - **Mark first candidate conflicted** — blocks trusted recommendations later
 - **Generate quality issues** — promotes validation findings into data-quality artifacts

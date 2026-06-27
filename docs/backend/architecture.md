@@ -16,7 +16,7 @@
 - `Classification/`: versioned classification schemes, policy versions, restricted context rules, policy evaluation, and artifact policy-risk integration.
 - `GraphMemory/`: internal graph memory contracts, Neo4j implementation, graph health/bootstrap, and disabled Memgraph placeholder.
 - `Ontology/`: versioned ontology, semantic layer, lifecycle vocabulary, tenant attribute schema, BOM metadata, model package publishing, import/query profile JSON, and `IModelPackageContextResolver`.
-- `Imports/`: tenant-scoped import batches, raw file evidence metadata, CSV/Excel parsing, `IMappingSuggestionProvider` mapping preview, mapping approve/reject learning-signal inputs, package-driven validation/staging/BOM comparison, and staging graph creation.
+- `Imports/`: tenant-scoped import batches, raw file evidence metadata, CSV/Excel parsing, `IMappingSuggestionProvider` mapping preview (`rule-based-v1` default; live `pydantic-ai-v1` when enabled), optional mapping-predictor prefetch, preview diagnostics, mapping approve/reject learning-signal inputs, package-driven validation/staging/BOM comparison, and staging graph creation.
 - `IdentityResolution/`: tenant-scoped identity rules, deterministic candidate links, review decisions, learning evidence, trust scores, and identity-link graph relationships.
 - `DataQuality/`: tenant-scoped durable data-quality issues, source links, trust-impact metadata, security-event review hooks, inert monitoring placeholders, and issue endpoints.
 - `Documents/`: tenant-scoped document artifacts, immutable versions, document-object links, extraction issue hooks, vector indexing metadata records, disabled native CAD parsing placeholder, and document endpoints.
@@ -150,7 +150,7 @@ The import module currently includes:
 - raw file evidence metadata with storage key, checksum, content type, size, original filename, tenant, batch, and audit linkage.
 - `IImportFileStorage` as the raw payload storage boundary. The current local implementation is file-backed for developer/test workflows; production MinIO-compatible storage can be added behind the same interface.
 - CSV and Excel import parsing through `IImportFileParser`.
-- `IMappingSuggestionProvider` pluggable mapping preview suggestions. Default provider key: `rule-based-v1`. Deferred contracts: `pydantic-ai-v1`, `hermes-v1` (throw disabled/deferred messages unless configured).
+- `IMappingSuggestionProvider` pluggable mapping preview suggestions. Default provider key: `rule-based-v1` (base config). Live LLM provider: `pydantic-ai-v1` via `PydanticAiMappingProvider`, `MappingSuggestionOptions` (`ImportMappingSuggestions` config section), and the existing `IAgentRuntimeAdapter` / `ETOS.AgentRuntime` sidecar (OpenAI or LM Studio through `openai-compatible`). Optional prefetch uses internal tool `mapping-predictor-tool` (`mapping-predictor-v1` handler, rule-based stand-in) through `IToolGateway` and `IPublishedToolVersionResolver`; prefetch failures are non-fatal. Mapping preview accepts `includeDiagnostics: true` and returns `ImportMappingSuggestionDiagnosticsResponse` with governed context, prefetch output, runtime metadata, trace notes, and raw structured output. Tool run safe summaries are capped for DB storage (`ToolSafeSummaryTruncator`, 1000 chars). Deferred contract: `hermes-v1`.
 - draft/approved/rejected mapping versions, with approved mappings immutable by service invariant and no update endpoint.
 - `POST /api/admin/imports/mappings/{mappingVersionId}/reject` for mapping rejection.
 - `ImportMappingLearningSignalInput` records emitted on mapping approve, reject, and corrected drafts via `IImportMappingLearningSignalEmitter`.
@@ -332,14 +332,17 @@ The agent-templates module currently includes:
 
 Permissions: `agent-templates.read`, `agent-templates.create`, `agent-templates.readiness`, `agent-templates.admin`.
 
-### Agent Runtime Adapter Contracts (Issue 18.4)
+### Agent Runtime Adapter Contracts (Issue 18.4 + Issue 23)
 
 The agent-runtime module currently includes:
 
 - `IAgentRuntimeAdapter` and `IAgentRuntimeAdapterSelector` contracts.
-- `PydanticAiRuntimeAdapter` stub that throws a disabled-not-configured message.
+- `PydanticAiRuntimeAdapter` HTTP adapter calling `ETOS.AgentRuntime` `/v1/execute` (structured JSON output, model fallback chain, optional `toolOutputSummariesJson` in prompts).
 - deferred `HermesRuntimeAdapter` and `LangGraphRuntimeAdapter` stubs.
-- DI registration only; no tenant `AgentVersion` execute endpoint (Issue 23).
+- governed agent execute/preview/test endpoints via `IAgentExecutionService` (Issue 23).
+- reuse by `PydanticAiMappingProvider` for import mapping preview (no `AgentRun`; preview mode only).
+
+Local sidecar: `ETOS.AgentRuntime/` (FastAPI). Supports OpenAI cloud and `openai-compatible` providers (LM Studio via `OPENAI_BASE_URL`). Deterministic mock output when no API key/base URL is configured.
 
 ### Tool Registry (Issue 22)
 
@@ -347,12 +350,13 @@ The tool-registry module currently includes:
 
 - tenant-scoped `ToolDefinitionVersion`, `SkillDefinitionVersion`, and `ConnectorDefinitionVersion` artifacts on BaseArtifact with JSON Schema payloads and capability/risk metadata.
 - `ToolRun` runtime records with dry-run and sync execute paths, audit links, and AI Trace linkage (`AiTraceKind.ToolRun`).
-- `IToolGateway` with internal handlers `governed-query-v1` (delegates to governed query) and `disabled-write-connector-v1` (MVP write block).
+- `IToolGateway` with internal handlers `governed-query-v1` (delegates to governed query), `mapping-predictor-v1` (rule-based mapping hint for LLM prefetch), and `disabled-write-connector-v1` (MVP write block).
+- `IPublishedToolVersionResolver` for resolving published tools by `toolKey` (used by mapping prefetch).
 - `ITenantSecretProvider` development stub issuing scoped credential metadata only (no raw secrets in API responses).
 - `IJsonSchemaValidator` (JsonSchema.Net) for publish-time and execution-time schema validation.
 - `IToolExecutionQueue` disabled MassTransit placeholder.
 - admin endpoints under `/api/admin/tools`, `/api/admin/skills`, `/api/admin/connectors`, and `/api/admin/tool-runs`.
-- reference package seeds: `graph-query-tool`, `mock-erp-read`, `mock-erp-write-item`, `governed-graph-skill`.
+- reference package seeds: `graph-query-tool`, `mapping-predictor-tool`, `mock-erp-read`, `mock-erp-write-item`, `governed-graph-skill`.
 
 Permissions: `tools.read|create|readiness|admin|execute|dry_run`, `skills.*`, `connectors.*`, `tool-runs.read`.
 
@@ -459,7 +463,7 @@ Issue 12 document-memory tests cover document creation, version metadata, extrac
 
 Issue 18 recommendation tests cover evidence gates, conflict blocking, suggested-action validation, creation from data-quality issues and BOM comparison runs, governed chat drafts, tenant isolation, audit/trace links, and governance-flow integration.
 
-Issue 18.1 tests cover mapping suggestion providers, package-driven staging/BOM comparison, governed query package extensions, mapping learning-signal emit on approve/reject/correct, and recommendation template neutralization (`MappingSuggestionProviderTests`, `ImportMappingLearningSignalTests`, extended `ImportTests`, `GovernedQueryTests`).
+Issue 18.1 tests cover mapping suggestion providers (including `PydanticAiMappingProvider` diagnostics and `mapping-predictor-v1` handler), package-driven staging/BOM comparison, governed query package extensions, mapping learning-signal emit on approve/reject/correct, and recommendation template neutralization (`MappingSuggestionProviderTests`, `ImportMappingLearningSignalTests`, extended `ImportTests`, `GovernedQueryTests`).
 
 Issue 18.2–18.4 tests cover capability, business policy, optimization model, and agent template artifact CRUD/publish/readiness, layer separation guards, dependency resolution, and agent runtime adapter registration/stub behavior (`CapabilityDefinitionTests`, `BusinessPolicyDefinitionTests`, `OptimizationModelDefinitionTests`, `AgentTemplateDefinitionTests`, `AgentRuntimeAdapterTests`).
 
