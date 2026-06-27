@@ -329,7 +329,8 @@ public sealed class ImportTests
                     configuration.AddInMemoryCollection(new Dictionary<string, string?>
                     {
                         ["ImportFileStorage:RootPath"] = storageRoot,
-                        ["GraphMemory:Neo4j:BootstrapOnStartup"] = "false"
+                        ["GraphMemory:Neo4j:BootstrapOnStartup"] = "false",
+                        ["ImportMappingSuggestions:DefaultProviderKey"] = "rule-based-v1"
                     });
                 });
                 builder.ConfigureServices(services =>

@@ -1148,6 +1148,7 @@ export type ArtifactImpact = {
 
 export type ImportMappingSuggestionDiagnostics = {
   providerKey: string;
+  resolvedAgentKey?: string | null;
   runtimeCalled: boolean;
   runtimeAdapterKey?: string | null;
   runtimeStatus?: string | null;
@@ -1574,6 +1575,8 @@ export async function previewImportMapping(
     sampleRowLimit?: number;
     suggestionProviderKey?: string | null;
     includeDiagnostics?: boolean;
+    mappingAssistantAgentKey?: string | null;
+    mappingAssistantAgentVersionId?: string | null;
   },
   tenantHeaders?: { userId?: string; tenantId?: string },
 ): Promise<ApiResult<ImportPreview>> {
@@ -1584,6 +1587,8 @@ export async function previewImportMapping(
       sampleRowLimit: request.sampleRowLimit ?? 10,
       suggestionProviderKey: request.suggestionProviderKey ?? null,
       includeDiagnostics: request.includeDiagnostics ?? false,
+      mappingAssistantAgentKey: request.mappingAssistantAgentKey ?? null,
+      mappingAssistantAgentVersionId: request.mappingAssistantAgentVersionId ?? null,
     },
     tenantHeaders,
   );

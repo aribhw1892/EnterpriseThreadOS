@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using ETOS.Backend.AgentTemplates;
+using ETOS.Backend.Agents;
 using ETOS.Backend.BusinessPolicies;
 using ETOS.Backend.Capabilities;
 using ETOS.Backend.GraphMemory;
@@ -91,6 +92,20 @@ public sealed class ManufacturingReferencePackageTests
         Assert.True(templateResponse.StatusCode == HttpStatusCode.OK);
         Assert.NotNull(templates);
         Assert.Contains(templates, item => item.TemplateKey == "manufacturing-investigator");
+        Assert.Contains(templates, item => item.TemplateKey == "import-mapping-assistant");
+
+        using var agentsRequest = new HttpRequestMessage(HttpMethod.Get, "/api/admin/agents");
+        AddTenantHeaders(agentsRequest, context.TenantId, context.UserId);
+        var agentsResponse = await client.SendAsync(agentsRequest);
+        var agents = await agentsResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<AgentDefinitionArtifactSummaryResponse>>();
+        Assert.True(agentsResponse.StatusCode == HttpStatusCode.OK);
+        Assert.NotNull(agents);
+        Assert.Contains(agents, item => item.AgentKey == "import-mapping-assistant");
+
+        await using var scope = application.Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<EnterpriseThreadDbContext>();
+        var package = await dbContext.ModelPackageVersions.SingleAsync(item => item.Id == context.ModelPackage.Id);
+        Assert.Contains("import-mapping-assistant", package.ImportProfileJson, StringComparison.OrdinalIgnoreCase);
 
         using var toolRequest = new HttpRequestMessage(HttpMethod.Get, "/api/admin/tools");
         AddTenantHeaders(toolRequest, context.TenantId, context.UserId);
@@ -172,7 +187,8 @@ public sealed class ManufacturingReferencePackageTests
                     {
                         ["ImportFileStorage:RootPath"] = storageRoot,
                         ["GraphMemory:Neo4j:BootstrapOnStartup"] = "false",
-                        ["ReferencePackages:RootPath"] = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "packages"))
+                        ["ReferencePackages:RootPath"] = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "packages")),
+                        ["ImportMappingSuggestions:DefaultProviderKey"] = "rule-based-v1"
                     });
                 });
                 builder.ConfigureServices(services =>

@@ -7,7 +7,9 @@ public sealed record ImportMappingSuggestionRequest(
     IReadOnlyCollection<IReadOnlyDictionary<string, string?>> SampleRows,
     ResolvedModelPackageContext ModelContext,
     string? RequestedProviderKey = null,
-    bool IncludeDiagnostics = false);
+    bool IncludeDiagnostics = false,
+    string? MappingAssistantAgentKey = null,
+    Guid? MappingAssistantAgentVersionId = null);
 
 public sealed record ImportMappingSuggestionResult(
     string ProviderKey,

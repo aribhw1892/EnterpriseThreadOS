@@ -12,6 +12,21 @@ namespace ETOS.Backend.Tests;
 
 public sealed class MappingSuggestionProviderTests
 {
+    private static readonly AgentExecutionProfile TestProfile = new(
+        "import-mapping-assistant",
+        "mapping-assistant",
+        Guid.NewGuid(),
+        Guid.NewGuid(),
+        AgentRuntimeAdapterKeys.PydanticAi,
+        "openai",
+        "gpt-4o-mini",
+        [],
+        Guid.NewGuid(),
+        Guid.NewGuid(),
+        null,
+        null,
+        [Guid.NewGuid()]);
+
     [Fact]
     public async Task RuleBasedProviderMatchesOntologyAttributesAndLifecycle()
     {
@@ -39,8 +54,7 @@ public sealed class MappingSuggestionProviderTests
         var runtimeAdapter = new RecordingAgentRuntimeAdapter(CreateValidMappingOutputJson());
         var provider = CreatePydanticAiProvider(
             runtimeAdapter,
-            enabled: true,
-            prefetchEnabled: false);
+            enabled: true);
 
         var result = await provider.SuggestAsync(
             new ImportMappingSuggestionRequest(
@@ -56,6 +70,8 @@ public sealed class MappingSuggestionProviderTests
         Assert.NotNull(runtimeAdapter.LastRequest);
         Assert.True(runtimeAdapter.LastRequest!.PreviewMode);
         Assert.Null(runtimeAdapter.LastRequest.AgentRunId);
+        Assert.Equal("openai", runtimeAdapter.LastRequest.PrimaryModelProviderKey);
+        Assert.Equal("gpt-4o-mini", runtimeAdapter.LastRequest.PrimaryModelId);
     }
 
     [Fact]
@@ -80,8 +96,7 @@ public sealed class MappingSuggestionProviderTests
             """;
         var provider = CreatePydanticAiProvider(
             new RecordingAgentRuntimeAdapter(invalidOutput),
-            enabled: true,
-            prefetchEnabled: false);
+            enabled: true);
 
         var exception = await Assert.ThrowsAsync<RequestValidationException>(() =>
             provider.SuggestAsync(
@@ -96,8 +111,7 @@ public sealed class MappingSuggestionProviderTests
     {
         var provider = CreatePydanticAiProvider(
             new RecordingAgentRuntimeAdapter(CreateValidMappingOutputJson()),
-            enabled: false,
-            prefetchEnabled: false);
+            enabled: false);
 
         var exception = await Assert.ThrowsAsync<RequestValidationException>(() =>
             provider.SuggestAsync(
@@ -113,14 +127,12 @@ public sealed class MappingSuggestionProviderTests
         var resolved = CreateResolvedContext();
         var runtimeAdapter = new RecordingAgentRuntimeAdapter(CreateValidMappingOutputJson());
         var toolGateway = new RecordingToolGateway("""{"providerKey":"rule-based-v1","columnSuggestions":[],"lifecycleSuggestions":[]}""");
-        var toolVersionId = Guid.NewGuid();
-        var toolArtifactId = Guid.NewGuid();
+        var toolVersionId = TestProfile.ReferencedToolDefinitionVersionIds.First();
         var provider = CreatePydanticAiProvider(
             runtimeAdapter,
             enabled: true,
-            prefetchEnabled: true,
             toolGateway: toolGateway,
-            publishedToolResolver: new StubPublishedToolVersionResolver(toolArtifactId, toolVersionId));
+            profile: TestProfile with { ReferencedToolDefinitionVersionIds = [toolVersionId] });
 
         await provider.SuggestAsync(
             new ImportMappingSuggestionRequest(["partNumber"], [], resolved),
@@ -170,27 +182,24 @@ public sealed class MappingSuggestionProviderTests
     private static PydanticAiMappingProvider CreatePydanticAiProvider(
         IAgentRuntimeAdapter runtimeAdapter,
         bool enabled,
-        bool prefetchEnabled,
         IToolGateway? toolGateway = null,
-        IPublishedToolVersionResolver? publishedToolResolver = null)
+        AgentExecutionProfile? profile = null)
     {
         var tenantId = Guid.NewGuid();
         var userId = Guid.NewGuid();
+        var executionProfile = profile ?? TestProfile;
         return new PydanticAiMappingProvider(
-            new StubAgentRuntimeAdapterSelector(runtimeAdapter),
+            new StubAgentExecutionProfileResolver(executionProfile),
+            new StubAgentRuntimePreviewOrchestrator(runtimeAdapter, toolGateway ?? new NoOpToolGateway(), executionProfile),
             Options.Create(new MappingSuggestionOptions
             {
                 Enabled = enabled,
-                PrefetchToolEnabled = prefetchEnabled,
-                PrefetchToolKey = "mapping-predictor-tool",
-                PrimaryModelProviderKey = "openai",
-                PrimaryModelId = "gpt-4o-mini"
+                MappingAssistantAgentKey = executionProfile.AgentKey,
+                FallbackToRuleBasedOnRuntimeFailure = false
             }),
             Options.Create(new AgentRuntimeOptions { BaseUrl = "http://localhost:8010", TimeoutSeconds = 30 }),
             new StubTenantContextResolver(new ActiveTenantContext(tenantId, "local", "Local", userId)),
-            new RuleBasedMappingProvider(),
-            toolGateway ?? new NoOpToolGateway(),
-            publishedToolResolver ?? new StubPublishedToolVersionResolver(null, null));
+            new RuleBasedMappingProvider());
     }
 
     private static string CreateValidMappingOutputJson() =>
@@ -323,6 +332,84 @@ public sealed class MappingSuggestionProviderTests
             ontology.BomRelationships.FirstOrDefault());
     }
 
+    private sealed class StubAgentExecutionProfileResolver(AgentExecutionProfile profile) : IAgentExecutionProfileResolver
+    {
+        public Task<AgentExecutionProfile> ResolveByAgentKeyAsync(Guid tenantId, string agentKey, CancellationToken cancellationToken)
+            => Task.FromResult(profile);
+
+        public Task<AgentExecutionProfile> ResolveByAgentVersionIdAsync(Guid tenantId, Guid agentVersionId, CancellationToken cancellationToken)
+            => Task.FromResult(profile);
+
+        public Task<AgentExecutionProfile> ResolveMappingAssistantAsync(
+            Guid tenantId,
+            ResolvedModelPackageContext modelContext,
+            string? agentKeyOverride = null,
+            Guid? agentVersionIdOverride = null,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult(profile);
+    }
+
+    private sealed class StubAgentRuntimePreviewOrchestrator(
+        IAgentRuntimeAdapter runtimeAdapter,
+        IToolGateway toolGateway,
+        AgentExecutionProfile profile) : IAgentRuntimePreviewOrchestrator
+    {
+        public async Task<AgentRuntimePreviewOrchestratorResult> RunPreviewAsync(
+            AgentExecutionProfile executionProfile,
+            AgentRuntimePreviewInput input,
+            CancellationToken cancellationToken)
+        {
+            var toolPrefetchSummaries = new List<AgentRuntimeToolPrefetchSummary>();
+            var toolOutputSummaries = new List<object>();
+            foreach (var toolVersionId in profile.ReferencedToolDefinitionVersionIds)
+            {
+                var toolResponse = await toolGateway.ExecuteAsync(
+                    Guid.NewGuid(),
+                    toolVersionId,
+                    new ToolExecutionRequest(input.BuildToolInputJson(toolVersionId), null),
+                    cancellationToken);
+                toolPrefetchSummaries.Add(new AgentRuntimeToolPrefetchSummary(
+                    toolVersionId,
+                    toolResponse.ToolRunId,
+                    toolResponse.Status,
+                    toolResponse.OutputSafeSummaryJson,
+                    null));
+                toolOutputSummaries.Add(new
+                {
+                    toolDefinitionVersionId = toolVersionId,
+                    toolRunId = toolResponse.ToolRunId,
+                    status = toolResponse.Status,
+                    outputSafeSummaryJson = toolResponse.OutputSafeSummaryJson
+                });
+            }
+
+            var runtimeRequest = new AgentRuntimeExecutionRequest(
+                input.TenantId,
+                input.UserId,
+                profile.SourceAgentTemplateVersionId,
+                input.GovernedContextSummaryJson,
+                input.StructuredInputJson,
+                input.PreviewMode,
+                profile.PreferredRuntimeAdapterKey,
+                profile.AgentVersionId,
+                input.AgentRunId,
+                "prompt-body",
+                MappingSuggestionOutputSchema.Json,
+                profile.PrimaryModelProviderKey,
+                profile.PrimaryModelId,
+                "[]",
+                JsonSerializer.Serialize(toolOutputSummaries));
+
+            var runtimeResult = await runtimeAdapter.ExecuteAsync(runtimeRequest, cancellationToken);
+            return new AgentRuntimePreviewOrchestratorResult(
+                runtimeResult,
+                "prompt-body",
+                MappingSuggestionOutputSchema.Json,
+                JsonSerializer.Serialize(toolOutputSummaries),
+                toolPrefetchSummaries);
+        }
+    }
+
     private sealed class RecordingAgentRuntimeAdapter(string structuredOutputJson) : IAgentRuntimeAdapter
     {
         public AgentRuntimeExecutionRequest? LastRequest { get; private set; }
@@ -344,31 +431,10 @@ public sealed class MappingSuggestionProviderTests
         }
     }
 
-    private sealed class StubAgentRuntimeAdapterSelector(IAgentRuntimeAdapter adapter) : IAgentRuntimeAdapterSelector
-    {
-        public IAgentRuntimeAdapter Resolve(string adapterKey) => adapter;
-
-        public Task<AgentRuntimeExecutionResult> ExecuteAsync(
-            AgentRuntimeExecutionRequest request,
-            CancellationToken cancellationToken)
-            => adapter.ExecuteAsync(request, cancellationToken);
-    }
-
     private sealed class StubTenantContextResolver(ActiveTenantContext context) : ITenantContextResolver
     {
         public Task<ActiveTenantContext> ResolveAsync(string action, CancellationToken cancellationToken)
             => Task.FromResult(context);
-    }
-
-    private sealed class StubPublishedToolVersionResolver(Guid? artifactId, Guid? versionId) : IPublishedToolVersionResolver
-    {
-        public Task<(Guid ArtifactId, Guid VersionId)?> TryResolvePublishedToolAsync(
-            Guid tenantId,
-            string toolKey,
-            CancellationToken cancellationToken)
-            => Task.FromResult(artifactId is null || versionId is null
-                ? ((Guid ArtifactId, Guid VersionId)?)null
-                : (artifactId.Value, versionId.Value));
     }
 
     private sealed class RecordingToolGateway(string outputJson) : IToolGateway

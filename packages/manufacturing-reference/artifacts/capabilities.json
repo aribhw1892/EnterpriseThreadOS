@@ -8,5 +8,15 @@
     "outcomeMetadata": { "domain": "manufacturing" },
     "suggestedQueryIntentRefs": ["bom-impact-context"],
     "futureExtensionPlaceholders": []
+  },
+  {
+    "capabilityKey": "import-mapping-assistance",
+    "name": "Import Mapping Assistance",
+    "description": "Suggest governed CSV column and lifecycle mappings against the active model package ontology.",
+    "outcomeCategory": "import_mapping",
+    "outcomeSummary": "Suggest governed CSV column and lifecycle mappings against the active model package ontology.",
+    "outcomeMetadata": { "domain": "imports" },
+    "suggestedQueryIntentRefs": [],
+    "futureExtensionPlaceholders": []
   }
 ]

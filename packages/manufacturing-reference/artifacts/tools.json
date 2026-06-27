@@ -40,7 +40,7 @@
     "inputSchemaJson": "{\"type\":\"object\",\"required\":[\"headers\",\"sampleRows\",\"modelPackageVersionId\"],\"properties\":{\"headers\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"sampleRows\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"modelPackageVersionId\":{\"type\":\"string\"}}}",
     "outputSchemaJson": "{\"type\":\"object\",\"required\":[\"providerKey\",\"columnSuggestions\",\"lifecycleSuggestions\"],\"properties\":{\"providerKey\":{\"type\":\"string\"},\"columnSuggestions\":{\"type\":\"array\"},\"lifecycleSuggestions\":{\"type\":\"array\"}}}",
     "internalHandlerKey": "mapping-predictor-v1",
-    "referencedCapabilityKeys": [],
+    "referencedCapabilityKeys": ["import-mapping-assistance"],
     "compositionMetadata": { "mode": "mapping-predictor" },
     "futureExtensionPlaceholders": []
   }

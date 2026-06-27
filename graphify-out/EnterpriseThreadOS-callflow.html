@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>EnterpriseThreadOS — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 8615 nodes, 17411 edges, 451 communities. Commit: ab925b8</p>
+<p class="subtitle">Generated from graphify knowledge graph: 8708 nodes, 17600 edges, 451 communities. Commit: 37632f1</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -74,7 +74,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
     <a href="#tests-fixtures">Tests &amp; Fixtures</a>
     <a href="#identity-resolution-service">Identity Resolution Service</a>
     <a href="#ontology-and-versioning-ui">Ontology and Versioning UI</a>
-    <a href="#identity-access-testing">Identity Access Testing</a>
+    <a href="#graph-diff-service">Graph Diff Service</a>
     <a href="#import-batch-and-mapping">Import Batch and Mapping</a>
     <a href="#etos-frontend">ETOS Frontend</a>
     <a href="#vercel-svg-icon">Vercel SVG Icon</a>
@@ -88,7 +88,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>435 nodes</small>")
+    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>430 nodes</small>")
     class EXTRACT_PIPELINE_5F350230 module;
     BUILD_GRAPH_321CBB04("Graph Build<br/><small>715 nodes</small>")
     class BUILD_GRAPH_321CBB04 module;
@@ -96,40 +96,40 @@ flowchart LR
     class ANALYSIS_CLUSTERING_C79796DA module;
     OUTPUTS_DOCS_ED82387C("Outputs &amp; Docs<br/><small>117 nodes</small>")
     class OUTPUTS_DOCS_ED82387C module;
-    CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>231 nodes</small>")
+    CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>238 nodes</small>")
     class CLI_SKILLS_9964CBB8 module;
-    SERVE_API_35EC8E86("Serving API<br/><small>531 nodes</small>")
+    SERVE_API_35EC8E86("Serving API<br/><small>548 nodes</small>")
     class SERVE_API_35EC8E86 module;
-    SECURITY_GLOBAL_5B9C6A04("Security &amp; Global Graph<br/><small>52 nodes</small>")
+    SECURITY_GLOBAL_5B9C6A04("Security &amp; Global Graph<br/><small>58 nodes</small>")
     class SECURITY_GLOBAL_5B9C6A04 module;
-    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>2044 nodes</small>")
+    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>2078 nodes</small>")
     class TESTS_FIXTURES_B84B1DCC module;
     IDENTITY_RESOLUTION_SERVICE_40A4B2BB("Identity Resolution Service<br/><small>119 nodes</small>")
     class IDENTITY_RESOLUTION_SERVICE_40A4B2BB module;
     ONTOLOGY_AND_VERSIONING_UI_EDBCFDF4("Ontology and Versioning UI<br/><small>108 nodes</small>")
     class ONTOLOGY_AND_VERSIONING_UI_EDBCFDF4 module;
-    IDENTITY_ACCESS_TESTING_93619199("Identity Access Testing<br/><small>102 nodes</small>")
-    class IDENTITY_ACCESS_TESTING_93619199 module;
+    GRAPH_DIFF_SERVICE_F9FF5730("Graph Diff Service<br/><small>102 nodes</small>")
+    class GRAPH_DIFF_SERVICE_F9FF5730 module;
     IMPORT_BATCH_AND_MAPPING_2410DCDC("Import Batch and Mapping<br/><small>101 nodes</small>")
     class IMPORT_BATCH_AND_MAPPING_2410DCDC module;
     ETOS_FRONTEND_BBF23E07("ETOS Frontend<br/><small>101 nodes</small>")
     class ETOS_FRONTEND_BBF23E07 module;
     VERCEL_SVG_ICON_28D54B48("Vercel SVG Icon<br/><small>101 nodes</small>")
     class VERCEL_SVG_ICON_28D54B48 module;
-    OTHER_D0941E68("Other<br/><small>3746 nodes</small>")
+    OTHER_D0941E68("Other<br/><small>3780 nodes</small>")
     class OTHER_D0941E68 module;
     OTHER_D0941E68 -->|contains x50| ETOS_FRONTEND_BBF23E07
     IMPORT_BATCH_AND_MAPPING_2410DCDC -->|contains x50| VERCEL_SVG_ICON_28D54B48
     IMPORT_BATCH_AND_MAPPING_2410DCDC -->|contains x50| OTHER_D0941E68
     OTHER_D0941E68 -->|contains x41| BUILD_GRAPH_321CBB04
+    TESTS_FIXTURES_B84B1DCC -->|implements x36| OTHER_D0941E68
     OTHER_D0941E68 -->|implements x33| EXTRACT_PIPELINE_5F350230
-    TESTS_FIXTURES_B84B1DCC -->|implements x30| OTHER_D0941E68
-    SERVE_API_35EC8E86 -->|contains x30| EXTRACT_PIPELINE_5F350230
-    EXTRACT_PIPELINE_5F350230 -->|calls x23| SERVE_API_35EC8E86
-    CLI_SKILLS_9964CBB8 -->|calls x13| SERVE_API_35EC8E86
-    OTHER_D0941E68 -->|imports x10| TESTS_FIXTURES_B84B1DCC
+    SERVE_API_35EC8E86 -->|contains x29| EXTRACT_PIPELINE_5F350230
+    EXTRACT_PIPELINE_5F350230 -->|calls x25| SERVE_API_35EC8E86
     ANALYSIS_CLUSTERING_C79796DA -->|references x9| CLI_SKILLS_9964CBB8
+    OTHER_D0941E68 -->|imports x7| TESTS_FIXTURES_B84B1DCC
     BUILD_GRAPH_321CBB04 -->|inherits x7| OTHER_D0941E68
+    SECURITY_GLOBAL_5B9C6A04 -->|references x7| CLI_SKILLS_9964CBB8
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -146,19 +146,19 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Extraction Pipeline</td><td>435</td><td><code>17, 112, 124, 173, 77, 93, 137, 125, 190, 141, 147, 156, 139, 197, 181, 201, 229, 256, 251, 260, 83, 371, 372</code></td></tr><tr><td>Graph Build</td><td>715</td><td><code>10, 70, 9, 13, 15, 88, 98, 119, 123, 144, 99, 170, 193, 205, 270, 343, 274, 279, 354, 423, 426, 428</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>112</td><td><code>101, 110, 122, 133, 159, 204, 272</code></td></tr><tr><td>Outputs &amp; Docs</td><td>117</td><td><code>60, 103, 206, 207, 304, 305, 346, 380, 388, 389, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 413, 432, 443, 444, 445, 446, 447</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>231</td><td><code>61, 82, 79, 104, 127, 132, 134, 136, 187, 192, 249, 273, 387, 407, 409, 411, 412, 416, 417, 440, 441, 442, 456</code></td></tr><tr><td>Serving API</td><td>531</td><td><code>7, 16, 27, 40, 72, 78, 89, 90, 95, 96, 100, 120, 128, 172, 145</code></td></tr><tr><td>Security &amp; Global Graph</td><td>52</td><td><code>54, 242, 415</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>2044</td><td><code>24, 5, 46, 8, 102, 11, 12, 19, 22, 25, 28, 18, 6, 38, 50, 109, 47, 49, 51, 52, 55, 85, 59, 64, 66, 68, 113, 86, 87, 91, 94, 108, 118, 39, 126, 121, 160, 142, 148, 182, 149, 65, 158, 169, 165, 166, 186, 175, 208, 184, 267, 230, 247, 265, 299, 264, 338, 339, 341, 376</code></td></tr><tr><td>Identity Resolution Service</td><td>119</td><td><code>3</code></td></tr><tr><td>Ontology and Versioning UI</td><td>108</td><td><code>26</code></td></tr><tr><td>Identity Access Testing</td><td>102</td><td><code>35</code></td></tr><tr><td>Import Batch and Mapping</td><td>101</td><td><code>1</code></td></tr><tr><td>ETOS Frontend</td><td>101</td><td><code>115</code></td></tr><tr><td>Vercel SVG Icon</td><td>101</td><td><code>116</code></td></tr><tr><td>Other</td><td>3746</td><td><code>117, 2, 36, 130, 131, 0, 14, 20, 21, 4, 23, 29, 30, 31, 32, 150, 33, 34, 37, 41, 42, 43, 44, 45, 48, 129, 53, 157, 56, 58, 62, 63, 57, 344, 67, 69, 71, 73, 74, 75, 76, 161, 81, 80, 84, 92, 97, 105, 106, 107, 111, 114, 135, 138, 140, 143, 146, 151, 152, 153, 154, 155, 162, 163, 164, 167, 168, 174, 176, 177, 178, 179, 180, 183, 185, 188, 189, 191, 194, 195, 196, 198, 199, 200, 202, 203, 243, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 171, 245, 246, 248, 250, 252, 253, 254, 257, 271, 258, 259, 261, 262, 268, 269, 244, 275, 276, 277, 278, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 300, 301, 302, 303, 255, 263, 266, 306, 307, 308, 309, 311, 312, 314, 315, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 342, 347, 349, 350, 351, 352, 353, 310, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 373, 374, 375, 377, 378, 379, 382, 383, 384, 385, 386, 405, 406, 408, 410, 414, 418, 419, 420, 421, 422, 424, 425, 427, 429, 430, 431, 433, 434, 435, 436, 437, 438, 439, 448, 449, 450, 451, 452, 453, 454, 455, 457, 458, 459</code></td></tr>
+      <tr><td>Extraction Pipeline</td><td>430</td><td><code>17, 112, 77, 190, 124, 173, 83, 93, 137, 125, 141, 139, 147, 156, 230, 201, 229, 256, 251, 260, 264, 371, 372</code></td></tr><tr><td>Graph Build</td><td>715</td><td><code>10, 70, 9, 13, 15, 88, 98, 119, 123, 144, 99, 170, 193, 205, 270, 343, 274, 279, 354, 423, 426, 428</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>112</td><td><code>101, 110, 122, 133, 159, 204, 272</code></td></tr><tr><td>Outputs &amp; Docs</td><td>117</td><td><code>60, 103, 206, 207, 304, 305, 346, 380, 388, 389, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 413, 432, 443, 444, 445, 446, 447</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>238</td><td><code>61, 79, 82, 104, 127, 132, 134, 136, 247, 187, 192, 273, 387, 407, 409, 411, 412, 416, 417, 440, 441, 442, 456</code></td></tr><tr><td>Serving API</td><td>548</td><td><code>7, 16, 27, 40, 90, 72, 78, 89, 145, 96, 100, 181, 120, 128, 172</code></td></tr><tr><td>Security &amp; Global Graph</td><td>58</td><td><code>54, 242, 415</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>2078</td><td><code>5, 29, 6, 46, 8, 11, 12, 95, 22, 25, 39, 102, 28, 18, 50, 38, 47, 49, 51, 52, 55, 59, 65, 64, 66, 68, 113, 109, 85, 86, 87, 91, 94, 148, 108, 121, 118, 126, 182, 186, 160, 142, 197, 149, 208, 158, 169, 165, 166, 175, 184, 265, 299, 267, 338, 339, 341, 376</code></td></tr><tr><td>Identity Resolution Service</td><td>119</td><td><code>3</code></td></tr><tr><td>Ontology and Versioning UI</td><td>108</td><td><code>26</code></td></tr><tr><td>Graph Diff Service</td><td>102</td><td><code>36</code></td></tr><tr><td>Import Batch and Mapping</td><td>101</td><td><code>1</code></td></tr><tr><td>ETOS Frontend</td><td>101</td><td><code>115</code></td></tr><tr><td>Vercel SVG Icon</td><td>101</td><td><code>116</code></td></tr><tr><td>Other</td><td>3780</td><td><code>117, 2, 35, 130, 131, 0, 14, 20, 21, 4, 23, 24, 30, 31, 32, 150, 33, 34, 37, 41, 42, 43, 44, 45, 48, 53, 157, 56, 58, 62, 63, 67, 129, 57, 344, 19, 69, 71, 73, 74, 75, 76, 161, 81, 80, 84, 92, 97, 105, 106, 107, 111, 114, 135, 138, 140, 143, 146, 151, 152, 153, 154, 155, 162, 163, 164, 167, 168, 174, 176, 177, 178, 179, 180, 183, 185, 188, 189, 191, 194, 195, 196, 198, 199, 200, 202, 203, 243, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 171, 245, 246, 248, 250, 252, 253, 254, 257, 271, 258, 259, 262, 268, 269, 280, 244, 249, 255, 261, 275, 277, 278, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 300, 301, 302, 303, 263, 306, 307, 308, 309, 311, 312, 314, 315, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 342, 347, 349, 350, 351, 352, 353, 266, 310, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 373, 374, 375, 377, 378, 379, 382, 383, 384, 385, 386, 276, 405, 406, 408, 410, 414, 418, 419, 420, 421, 422, 424, 425, 427, 429, 430, 431, 433, 434, 435, 436, 437, 438, 439, 448, 449, 450, 451, 452, 453, 454, 455, 457, 458, 459</code></td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Core Flow</h4>
-    <div class="arrow-chain">Outputs &amp; Docs -&gt; Extraction Pipeline -&gt; Serving API -&gt; CLI &amp; Skill Installers -&gt; Security &amp; Global Graph -&gt; Analysis &amp; Clustering -&gt; Other</div>
+    <div class="arrow-chain">Outputs &amp; Docs -&gt; Extraction Pipeline -&gt; Serving API -&gt; Other -&gt; ETOS Frontend -&gt; Graph Build -&gt; Identity Resolution Service</div>
   </div>
 </div>
 <div class="grid">
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>8615 nodes · 17411 edges · 451 communities (364 shown, 87 thin omitted)</li>
+      <li>8708 nodes · 17600 edges · 451 communities (362 shown, 89 thin omitted)</li>
       <li>Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 59 edges (avg confidence: 0.72)</li>
       <li>Token cost: 0 input · 0 output</li>
       <li>1. `EnterpriseThreadOS Implementation Issues` - 205 edges</li>
@@ -170,12 +170,12 @@ flowchart LR
 <hr>
 <!-- ====== 2. Extraction Pipeline ====== -->
 <h2 id="extract-pipeline">2. Extraction Pipeline</h2>
-<p>Extraction Pipeline groups implementation around imports, etosbackend, importservicecs, mappingsuggestions, mostly in ETOS.Backend/Imports/ImportService.cs, app/imports/page.tsx, Imports/MappingSuggestions/PydanticAiMappingProvider.cs. This section covers 435 nodes and 904 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Extraction Pipeline groups implementation around imports, etosbackend, importservicecs, mappingsuggestions, mostly in ETOS.Backend/Imports/ImportService.cs, app/imports/page.tsx, src/lib/etos-api.ts. This section covers 430 nodes and 890 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Extraction Pipeline (435 nodes, 904 edges)
+    %% Section: Extraction Pipeline (430 nodes, 890 edges)
     subgraph extract_pipeline_ETOS_Backend_Imports_ImportFile_f251b09d["ETOS.Backend/Imports/ImportFileParser.cs"]
         imports_importfileparser_iimportfileparser_5c239621("IImportFileParser<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
         imports_importfileparser_iimportfileparser_parse_6027d6bf("ParseAsync()<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
@@ -217,7 +217,7 @@ flowchart LR
     imports_importfileparser_csvimportfileparser_rea_9a7d3f16 -->|calls| imports_importfileparser_csvimportfileparser_par_a627dd5c
     imports_importservice_importservice_e3aca74c -->|method| imports_importservice_importservice_createmappin_c96af6b3
     imports_importservice_importservice_e3aca74c -->|method| imports_importservice_importservice_stagebatchas_a2a84b18
-    %% Omitted for readability: 417 nodes, 0 edges
+    %% Omitted for readability: 412 nodes, 0 edges
     class imports_importfileparser_iimportfileparser_5c239621 klass;
     class imports_importfileparser_iimportfileparser_parse_6027d6bf async;
     class imports_importfileparser_csvimportfileparser_9ebfabdc klass;
@@ -262,7 +262,7 @@ flowchart LR
   <td><code>page.tsx</code><br><small style="color:var(--muted)">app/imports/page.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>approveLatestIdentityCandidate()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>approveLatestImportMapping()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>createDemoComparisonImportFlow()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+25 more</td>
+  <td><code>approveLatestIdentityCandidate()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>approveLatestImportMapping()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br><code>createDemoComparisonImportFlow()</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small><br>+22 more</td>
   <td>Module file in app/imports/page.tsx.</td>
 </tr>
 <tr>
@@ -506,8 +506,8 @@ flowchart LR
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>ETOS.Backend/Imports/ImportService.cs</code></td><td>122 nodes</td></tr>
 <tr><td><code>app/imports/page.tsx</code></td><td>37 nodes</td></tr>
-<tr><td><code>Imports/MappingSuggestions/PydanticAiMappingProvider.cs</code></td><td>35 nodes</td></tr>
-<tr><td><code>src/lib/etos-api.ts</code></td><td>30 nodes</td></tr>
+<tr><td><code>src/lib/etos-api.ts</code></td><td>29 nodes</td></tr>
+<tr><td><code>Imports/MappingSuggestions/PydanticAiMappingProvider.cs</code></td><td>25 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportStructuralImportHelper.cs</code></td><td>24 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportMappingLearningSignalEmitter.cs</code></td><td>20 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportFileParser.cs</code></td><td>17 nodes</td></tr>
@@ -516,7 +516,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x414, calls x183, method x124, contains x117. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x413, calls x178, method x127, contains x109. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -1583,27 +1583,20 @@ flowchart LR
 
 <!-- ====== 6. CLI & Skill Installers ====== -->
 <h2 id="cli-skills">6. CLI &amp; Skill Installers</h2>
-<p>CLI &amp; Skill Installers groups implementation around docs, cursor, issue, agent, mostly in .prd/.ui/ui-agent-implementation-guide.md, .cursor/plans/issue_22_tool_registry_a7b0bb72.plan.md, .cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md. This section covers 231 nodes and 228 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>CLI &amp; Skill Installers groups implementation around docs, cursor, agent, issue, mostly in .prd/.ui/ui-agent-implementation-guide.md, .cursor/plans/issue_22_tool_registry_a7b0bb72.plan.md, .cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md. This section covers 238 nodes and 230 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: CLI &amp; Skill Installers (231 nodes, 228 edges)
-    subgraph cli_skills_agent_runs_runId_page_tsx_2b6c51bb["agent-runs/[runId]/page.tsx"]
-        etos_frontend_src_app_agent_runs_runid_page_tsx_729bda54("page.tsx")
-        runid_page_loadchildtoolrunids_303b368a("loadChildToolRunIds()<br/><small>agent-runs/[runId]/page.tsx</small>")
-        runid_page_agentrundetailpage_bf6bc0be("AgentRunDetailPage()<br/><small>agent-runs/[runId]/page.tsx</small>")
-        etos_frontend_src_app_agent_runs_runid_page_tsx_a271809a("PageProps<br/><small>agent-runs/[runId]/page.tsx</small>")
-    end
-    subgraph cli_skills_src_lib_etos_api_ts_960795f4["src/lib/etos-api.ts"]
-        lib_etos_api_gettoolrundetail_054dc263("getToolRunDetail()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_gettoolruns_11c8d737("getToolRuns()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_getagentrundetail_056dea13("getAgentRunDetail()<br/><small>src/lib/etos-api.ts</small>")
-    end
-    subgraph cli_skills_tool_runs_runId_page_tsx_75c0beac["tool-runs/[runId]/page.tsx"]
-        etos_frontend_src_app_tool_runs_runid_page_tsx_r_0e23459a("page.tsx")
-        runid_page_toolrundetailpage_c6f7e473("ToolRunDetailPage()<br/><small>tool-runs/[runId]/page.tsx</small>")
-    end
+    %% Section: CLI &amp; Skill Installers (238 nodes, 230 edges)
+    plans_issue_23_agents_6542739e_plan_issue_23_ten_ab70492c("Issue 23 — Tenant-Defined Agents and Ag...<br/><small>.cursor/plans/issue_23_agents_6542739e.plan.md</small>")
+    initialconversation_chatgpt_conversation_part_00_6a057f13("Key Capabilities<br/><small>.prd/.initialConversation/chatgpt-conversation-part-001-1-100.md</small>")
+    ui_ui_agent_implementation_guide_ui_agent_implem_3c82e6b5("UI Agent Implementation Guide<br/><small>.prd/.ui/ui-agent-implementation-guide.md</small>")
+    agents_enterprisethreados_agent_guide_29dc1250("EnterpriseThreadOS Agent Guide<br/><small>AGENTS.md</small>")
+    readme_enterprisethreados_readme_52d27092("EnterpriseThreadOS README<br/><small>README.md</small>")
+    docs_ai_agent_workflow_ai_agent_workflow_d27ebe59("AI Agent Workflow<br/><small>docs/ai-agent-workflow.md</small>")
+    docs_local_development_local_development_2e60bd62("Local Development<br/><small>docs/local-development.md</small>")
+    docs_engineering_execution_prd_with_digital_thre_db69dbec("Implementation Decisions<br/><small>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small>")
     index_enterprise_command_center_d05e3b11("Enterprise command center<br/><small>etos_ui_mockups/html/01-command-center.html</small>")
     etos_ui_mockups_images_28_agent_builder_8921af9d("Agent builder UI screenshot<br/><small>etos_ui_mockups/images/28-agent-builder.png</small>")
     etos_ui_mockups_images_29_agent_advanced_configu_88d1788e("Agent advanced configuration UI screenshot<br/><small>etos_ui_mockups/images/29-agent-advanced-configuration.png</small>")
@@ -1613,25 +1606,22 @@ flowchart LR
     etos_ui_mockups_36_agent_team_run_consensus_494553be("Agent team run consensus UI screenshot<br/><small>etos_ui_mockups/images/36-agent-team-run-consensus.png</small>")
     dockercompose_infra_local_docker_compose_8cbfe235("Docker Compose Infrastructure<br/><small>infra/local/docker-compose.yml</small>")
     cavemanskill_caveman_3f0ddadc("Caveman Skill<br/><small>skills/caveman/SKILL.md</small>")
-    runid_page_loadchildtoolrunids_303b368a -->|calls| runid_page_agentrundetailpage_bf6bc0be
-    runid_page_loadchildtoolrunids_303b368a -->|calls| lib_etos_api_gettoolrundetail_054dc263
-    runid_page_loadchildtoolrunids_303b368a -->|calls| lib_etos_api_gettoolruns_11c8d737
-    runid_page_agentrundetailpage_bf6bc0be -->|calls| lib_etos_api_getagentrundetail_056dea13
-    runid_page_toolrundetailpage_c6f7e473 -->|calls| lib_etos_api_gettoolrundetail_054dc263
-    etos_frontend_src_app_agent_runs_runid_page_tsx_729bda54 -->|imports| lib_etos_api_getagentrundetail_056dea13
-    etos_frontend_src_app_agent_runs_runid_page_tsx_729bda54 -->|imports| lib_etos_api_gettoolrundetail_054dc263
-    etos_frontend_src_app_agent_runs_runid_page_tsx_729bda54 -->|imports| lib_etos_api_gettoolruns_11c8d737
-    etos_frontend_src_app_tool_runs_runid_page_tsx_r_0e23459a -->|imports| lib_etos_api_gettoolrundetail_054dc263
-    %% Omitted for readability: 213 nodes, 0 edges
-    class etos_frontend_src_app_agent_runs_runid_page_tsx_729bda54 ui;
-    class runid_page_loadchildtoolrunids_303b368a ui;
-    class runid_page_agentrundetailpage_bf6bc0be ui;
-    class etos_frontend_src_app_agent_runs_runid_page_tsx_a271809a ui;
-    class lib_etos_api_gettoolrundetail_054dc263 function;
-    class lib_etos_api_gettoolruns_11c8d737 function;
-    class lib_etos_api_getagentrundetail_056dea13 function;
-    class etos_frontend_src_app_tool_runs_runid_page_tsx_r_0e23459a ui;
-    class runid_page_toolrundetailpage_c6f7e473 ui;
+    projectcheckpointskill_projectcheckpoint_51670d36("Project Checkpoint Skill<br/><small>skills/projectcheckpoint/SKILL.md</small>")
+    agents_enterprisethreados_agent_guide_29dc1250 -->|references| docs_ai_agent_workflow_ai_agent_workflow_d27ebe59
+    agents_enterprisethreados_agent_guide_29dc1250 -->|references| readme_enterprisethreados_readme_52d27092
+    docs_ai_agent_workflow_ai_agent_workflow_d27ebe59 -->|references| readme_enterprisethreados_readme_52d27092
+    docs_local_development_local_development_2e60bd62 -->|references| dockercompose_infra_local_docker_compose_8cbfe235
+    docs_local_development_local_development_2e60bd62 -->|references| readme_enterprisethreados_readme_52d27092
+    readme_enterprisethreados_readme_52d27092 -->|references| dockercompose_infra_local_docker_compose_8cbfe235
+    %% Omitted for readability: 220 nodes, 0 edges
+    class plans_issue_23_agents_6542739e_plan_issue_23_ten_ab70492c concept;
+    class initialconversation_chatgpt_conversation_part_00_6a057f13 concept;
+    class ui_ui_agent_implementation_guide_ui_agent_implem_3c82e6b5 concept;
+    class agents_enterprisethreados_agent_guide_29dc1250 concept;
+    class readme_enterprisethreados_readme_52d27092 concept;
+    class docs_ai_agent_workflow_ai_agent_workflow_d27ebe59 concept;
+    class docs_local_development_local_development_2e60bd62 concept;
+    class docs_engineering_execution_prd_with_digital_thre_db69dbec concept;
     class index_enterprise_command_center_d05e3b11 entry;
     class etos_ui_mockups_images_28_agent_builder_8921af9d klass;
     class etos_ui_mockups_images_29_agent_advanced_configu_88d1788e klass;
@@ -1641,6 +1631,7 @@ flowchart LR
     class etos_ui_mockups_36_agent_team_run_consensus_494553be klass;
     class dockercompose_infra_local_docker_compose_8cbfe235 klass;
     class cavemanskill_caveman_3f0ddadc klass;
+    class projectcheckpointskill_projectcheckpoint_51670d36 klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -1916,38 +1907,38 @@ flowchart LR
 <tr><td><code>.docs/.prd/engineering-execution-prd.md</code></td><td>18 nodes</td></tr>
 <tr><td><code>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</code></td><td>18 nodes</td></tr>
 <tr><td><code>docs/local-development.md</code></td><td>15 nodes</td></tr>
-<tr><td><code>skills/caveman/SKILL.md</code></td><td>12 nodes</td></tr>
+<tr><td><code>.cursor/plans/unified_mapping_agent_framework_a3314020.plan.md</code></td><td>12 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x189, references x25, calls x5, imports x4. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x199, references x26, unlocks x4, semantically similar to x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 7. Serving API ====== -->
 <h2 id="serve-api">7. Serving API</h2>
-<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, .cursor/plans/issue_16_explorers_context_views.plan.md, src/app/page.tsx. This section covers 531 nodes and 1088 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, .cursor/plans/issue_16_explorers_context_views.plan.md, src/app/page.tsx. This section covers 548 nodes and 1128 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Serving API (531 nodes, 1088 edges)
+    %% Section: Serving API (548 nodes, 1128 edges)
     subgraph serve_api_src_lib_etos_api_ts_396531a3["src/lib/etos-api.ts"]
+        lib_etos_api_gettoolrundetail_054dc263("getToolRunDetail()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_gettoolruns_11c8d737("getToolRuns()<br/><small>src/lib/etos-api.ts</small>")
+        lib_etos_api_getagentrundetail_056dea13("getAgentRunDetail()<br/><small>src/lib/etos-api.ts</small>")
         lib_etos_api_getagentruns_39890e4c("getAgentRuns()<br/><small>src/lib/etos-api.ts</small>")
         lib_etos_api_getagenttemplatedefinitionartifacts_0d9a8f9a("getAgentTemplateDefinitionArtifacts()<br/><small>src/lib/etos-api.ts</small>")
         lib_etos_api_loadagentversionbykey_b2100040("loadAgentVersionByKey()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_postagenttestrun_6f198545("postAgentTestRun()<br/><small>src/lib/etos-api.ts</small>")
-        lib_etos_api_postagentpreview_f4045b80("postAgentPreview()<br/><small>src/lib/etos-api.ts</small>")
     end
-    subgraph serve_api_agentKey_test_run_page_tsx_3b23d5e1["[agentKey]/test-run/page.tsx"]
-        test_run_page_testrunaction_582e724f("testRunAction()<br/><small>[agentKey]/test-run/page.tsx</small>")
-        test_run_page_previewaction_45d08842("previewAction()<br/><small>[agentKey]/test-run/page.tsx</small>")
-        test_run_page_agenttestrunpage_1c9d64a7("AgentTestRunPage()<br/><small>[agentKey]/test-run/page.tsx</small>")
+    subgraph serve_api_agent_runs_runId_page_tsx_896abe4c["agent-runs/[runId]/page.tsx"]
+        runid_page_loadchildtoolrunids_303b368a("loadChildToolRunIds()<br/><small>agent-runs/[runId]/page.tsx</small>")
+        runid_page_agentrundetailpage_bf6bc0be("AgentRunDetailPage()<br/><small>agent-runs/[runId]/page.tsx</small>")
     end
     configure_page_agentconfigurepage_f3561cef("AgentConfigurePage()<br/><small>[agentKey]/configure/page.tsx</small>")
-    new_page_createfromtemplateaction_8419a7ee("createFromTemplateAction()<br/><small>agents/new/page.tsx</small>")
+    test_run_page_testrunaction_582e724f("testRunAction()<br/><small>[agentKey]/test-run/page.tsx</small>")
     agent_runs_page_agentrunspage_d2417bcb("AgentRunsPage()<br/><small>app/agent-runs/page.tsx</small>")
     agent_templates_page_agenttemplatespage_b089fdff("AgentTemplatesPage()<br/><small>app/agent-templates/page.tsx</small>")
     chat_page_569bcbe7("page.tsx")
@@ -1956,24 +1947,25 @@ flowchart LR
     business_policies_businesspolicydefinitiondetail_c080ae93("BusinessPolicyDefinitionDetailView.tsx")
     dashboards_dashboardreportdetailview_a9bbab07("DashboardReportDetailView.tsx")
     app_page_c77e992c("page.tsx")
+    runid_page_loadchildtoolrunids_303b368a -->|calls| runid_page_agentrundetailpage_bf6bc0be
+    runid_page_loadchildtoolrunids_303b368a -->|calls| lib_etos_api_gettoolrundetail_054dc263
+    runid_page_loadchildtoolrunids_303b368a -->|calls| lib_etos_api_gettoolruns_11c8d737
+    runid_page_agentrundetailpage_bf6bc0be -->|calls| lib_etos_api_getagentrundetail_056dea13
     agent_runs_page_agentrunspage_d2417bcb -->|calls| lib_etos_api_getagentruns_39890e4c
     agent_templates_page_agenttemplatespage_b089fdff -->|calls| lib_etos_api_getagenttemplatedefinitionartifacts_0d9a8f9a
     configure_page_agentconfigurepage_f3561cef -->|calls| lib_etos_api_loadagentversionbykey_b2100040
-    test_run_page_testrunaction_582e724f -->|calls| lib_etos_api_postagenttestrun_6f198545
-    test_run_page_previewaction_45d08842 -->|calls| lib_etos_api_postagentpreview_f4045b80
-    test_run_page_agenttestrunpage_1c9d64a7 -->|calls| lib_etos_api_loadagentversionbykey_b2100040
     agent_templates_agenttemplatedefinitiondetailvie_8b9b15c9 -->|imports| lib_etos_api_getagenttemplatedefinitionartifacts_0d9a8f9a
-    %% Omitted for readability: 513 nodes, 0 edges
+    %% Omitted for readability: 530 nodes, 0 edges
+    class lib_etos_api_gettoolrundetail_054dc263 function;
+    class lib_etos_api_gettoolruns_11c8d737 function;
+    class lib_etos_api_getagentrundetail_056dea13 function;
     class lib_etos_api_getagentruns_39890e4c function;
     class lib_etos_api_getagenttemplatedefinitionartifacts_0d9a8f9a function;
     class lib_etos_api_loadagentversionbykey_b2100040 function;
-    class lib_etos_api_postagenttestrun_6f198545 function;
-    class lib_etos_api_postagentpreview_f4045b80 function;
-    class test_run_page_testrunaction_582e724f test;
-    class test_run_page_previewaction_45d08842 test;
-    class test_run_page_agenttestrunpage_1c9d64a7 test;
+    class runid_page_loadchildtoolrunids_303b368a ui;
+    class runid_page_agentrundetailpage_bf6bc0be ui;
     class configure_page_agentconfigurepage_f3561cef ui;
-    class new_page_createfromtemplateaction_8419a7ee ui;
+    class test_run_page_testrunaction_582e724f test;
     class agent_runs_page_agentrunspage_d2417bcb ui;
     class agent_templates_page_agenttemplatespage_b089fdff ui;
     class chat_page_569bcbe7 ui;
@@ -2007,7 +1999,7 @@ flowchart LR
   <td>1</td>
   <td><code>etos-api.ts</code><br><small style="color:var(--muted)">src/lib/etos-api.ts</small></td>
   <td><span class="tag tag-endpoint">API</span></td>
-  <td><code>AgentTemplateDefinitionDetailView.tsx</code><br><small style="color:var(--muted)">components/agent-templates/AgentTemplateDefinitionDetailView.tsx</small><br><code>BusinessPolicyDefinitionDetailView.tsx</code><br><small style="color:var(--muted)">components/business-policies/BusinessPolicyDefinitionDetailView.tsx</small><br><code>CapabilityDefinitionDetailView.tsx</code><br><small style="color:var(--muted)">components/capabilities/CapabilityDefinitionDetailView.tsx</small><br>+36 more</td>
+  <td><code>AgentTemplateDefinitionDetailView.tsx</code><br><small style="color:var(--muted)">components/agent-templates/AgentTemplateDefinitionDetailView.tsx</small><br><code>BusinessPolicyDefinitionDetailView.tsx</code><br><small style="color:var(--muted)">components/business-policies/BusinessPolicyDefinitionDetailView.tsx</small><br><code>CapabilityDefinitionDetailView.tsx</code><br><small style="color:var(--muted)">components/capabilities/CapabilityDefinitionDetailView.tsx</small><br>+39 more</td>
   <td>No direct outbound edge</td>
   <td>Module file in src/lib/etos-api.ts.</td>
 </tr>
@@ -2250,7 +2242,7 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>src/lib/etos-api.ts</code></td><td>233 nodes</td></tr>
+      <tr><td><code>src/lib/etos-api.ts</code></td><td>237 nodes</td></tr>
 <tr><td><code>.cursor/plans/issue_16_explorers_context_views.plan.md</code></td><td>25 nodes</td></tr>
 <tr><td><code>src/app/page.tsx</code></td><td>22 nodes</td></tr>
 <tr><td><code>app/documents/page.tsx</code></td><td>17 nodes</td></tr>
@@ -2262,19 +2254,19 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x489, calls x273, imports x232, imports x84. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x503, calls x285, imports x241, imports x89. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 8. Security & Global Graph ====== -->
 <h2 id="security-global">8. Security &amp; Global Graph</h2>
-<p>Security &amp; Global Graph groups implementation around execution, engineering, etos, digital, mostly in etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md, .docs/.prd/engineering-execution-prd.md, .cursor/plans/slice-3-audit_cb5f4911.plan.md. This section covers 52 nodes and 86 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Security &amp; Global Graph groups implementation around execution, engineering, etos, digital, mostly in etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md, .docs/.prd/engineering-execution-prd.md, .cursor/plans/slice-3-audit_cb5f4911.plan.md. This section covers 58 nodes and 92 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Security &amp; Global Graph (52 nodes, 86 edges)
+    %% Section: Security &amp; Global Graph (58 nodes, 92 edges)
     subgraph security_global_context_checkpoints_engineering_1606a36f[".context/.checkpoints/engineering-execution-checkpoints.md"]
         checkpoints_engineering_execution_checkpoints_en_3af8f573("EnterpriseThreadOS Engineering Executio...<br/><small>.context/.checkpoints/engineering-execution-checkpoints.md</small>")
         checkpoints_engineering_execution_checkpoints_ea9c371f("engineering-execution-checkpoints.md")
@@ -2292,12 +2284,12 @@ flowchart LR
         slice3auditcb5f4911planmd_slice_3_audit_d1f329cb("Slice 3 Audit and Security Events<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
         plans_slice_3_audit_cb5f4911_plan_assumptions_666151da("Assumptions<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
     end
-    subgraph security_global_docs_prd_engineering_execution_p_50a3ed67[".docs/.prd/engineering-execution-prd.md"]
-        prd_engineering_execution_prd_enterprisethreados_5e27b483("EnterpriseThreadOS Engineering Executio...<br/><small>.docs/.prd/engineering-execution-prd.md</small>")
-        prd_engineering_execution_prd_7a879741("engineering-execution-prd.md")
+    subgraph security_global_etos_ui_mockups_docs_engineering_0ca0420d["etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md"]
+        docs_engineering_execution_prd_with_digital_thre_e7f01762("Architecture Diagrams<br/><small>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small>")
+        docs_engineering_execution_prd_with_digital_thre_c8e8de96("EnterpriseThreadOS Engineering Executio...<br/><small>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small>")
     end
+    prd_engineering_execution_prd_enterprisethreados_5e27b483("EnterpriseThreadOS Engineering Executio...<br/><small>.docs/.prd/engineering-execution-prd.md</small>")
     references_ui_mockupcontactsheet_fa786bed("EnterpriseThreadOS UI Mockup Contact Sheet<br/><small>etos_ui_mockup_pack_with_digital_thread_timeline/etos_ui_mockups/etos_ui_mockups_contact_sheet.png</small>")
-    docs_engineering_execution_prd_with_digital_thre_c8e8de96("EnterpriseThreadOS Engineering Executio...<br/><small>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small>")
     etos_ui_mockups_34_workflow_run_safe_mode_7852dc38("Workflow run safe mode trace UI screenshot<br/><small>etos_ui_mockups/images/34-workflow-run-safe-mode.png</small>")
     prd_engineering_execution_prd_enterprisethreados_5e27b483 -->|references| docs_engineering_execution_prd_with_digital_thre_c8e8de96
     prd_engineering_execution_prd_enterprisethreados_5e27b483 -->|references| references_ui_mockupcontactsheet_fa786bed
@@ -2323,7 +2315,7 @@ flowchart LR
     checkpoints_engineering_execution_checkpoints_20_0b499568 -->|contains| docs_engineering_execution_prd_with_digital_thre_c8e8de96
     checkpoints_engineering_execution_checkpoints_20_0b499568 -->|contains| prd_engineering_execution_prd_enterprisethreados_5e27b483
     checkpoints_engineering_execution_checkpoints_20_73b7f15a -->|contains| docs_engineering_execution_prd_with_digital_thre_c8e8de96
-    %% Omitted for readability: 34 nodes, 9 edges
+    %% Omitted for readability: 40 nodes, 8 edges
     class checkpoints_engineering_execution_checkpoints_en_3af8f573 concept;
     class checkpoints_engineering_execution_checkpoints_ea9c371f concept;
     class checkpoints_engineering_execution_checkpoints_20_ca70a50f concept;
@@ -2337,10 +2329,10 @@ flowchart LR
     class plans_slice_3_audit_cb5f4911_plan_c67ec5b0 concept;
     class slice3auditcb5f4911planmd_slice_3_audit_d1f329cb concept;
     class plans_slice_3_audit_cb5f4911_plan_assumptions_666151da concept;
-    class prd_engineering_execution_prd_enterprisethreados_5e27b483 concept;
-    class prd_engineering_execution_prd_7a879741 concept;
-    class references_ui_mockupcontactsheet_fa786bed klass;
+    class docs_engineering_execution_prd_with_digital_thre_e7f01762 concept;
     class docs_engineering_execution_prd_with_digital_thre_c8e8de96 concept;
+    class prd_engineering_execution_prd_enterprisethreados_5e27b483 concept;
+    class references_ui_mockupcontactsheet_fa786bed klass;
     class etos_ui_mockups_34_workflow_run_safe_mode_7852dc38 klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
@@ -2597,11 +2589,11 @@ flowchart LR
 </tr>
 <tr>
   <td>30</td>
-  <td><code>User Stories</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small></td>
+  <td><code>Architecture Diagrams</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing User Stories.</td>
+  <td>Documentation node describing Architecture Diagrams.</td>
 </tr>
 </table>
 
@@ -2610,7 +2602,7 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</code></td><td>16 nodes</td></tr>
+      <tr><td><code>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</code></td><td>22 nodes</td></tr>
 <tr><td><code>.docs/.prd/engineering-execution-prd.md</code></td><td>15 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-3-audit_cb5f4911.plan.md</code></td><td>10 nodes</td></tr>
 <tr><td><code>.context/.checkpoints/engineering-execution-checkpoints.md</code></td><td>9 nodes</td></tr>
@@ -2620,19 +2612,19 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x83, references x3. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x89, references x3. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 9. Tests & Fixtures ====== -->
 <h2 id="tests-fixtures">9. Tests &amp; Fixtures</h2>
-<p>Tests &amp; Fixtures groups implementation around etosbackendtests, etosbackend, explorerstestscs, recommendationtestscs, mostly in ETOS.Backend.Tests/ExplorersTests.cs, ETOS.Backend.Tests/RecommendationTests.cs, ETOS.Backend.Tests/DashboardReportTests.cs. This section covers 2044 nodes and 5166 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Tests &amp; Fixtures groups implementation around etosbackendtests, etosbackend, explorerstestscs, recommendationtestscs, mostly in ETOS.Backend.Tests/ExplorersTests.cs, ETOS.Backend.Tests/RecommendationTests.cs, ETOS.Backend.Tests/DashboardReportTests.cs. This section covers 2078 nodes and 5199 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Tests &amp; Fixtures (2044 nodes, 5166 edges)
+    %% Section: Tests &amp; Fixtures (2078 nodes, 5199 edges)
     subgraph tests_fixtures_ETOS_AgentRuntime_app_execute_ser_73082a54["ETOS.AgentRuntime/app/execute_service.py"]
         app_execute_service_parse_json_object_3cfdb647("_parse_json_object()<br/><small>ETOS.AgentRuntime/app/execute_service.py</small>")
         app_execute_service_execute_request_9d3ab1b0("execute_request()<br/><small>ETOS.AgentRuntime/app/execute_service.py</small>")
@@ -2651,10 +2643,10 @@ flowchart LR
     end
     etos_backend_tests_agenttemplatedefinitiontests_6cf23e28("AgentTemplateDefinitionTests<br/><small>ETOS.Backend.Tests/AgentTemplateDefinitionTests.cs</small>")
     etos_backend_tests_explorerstests_explorerstests_9705c161("ExplorersTests<br/><small>ETOS.Backend.Tests/ExplorersTests.cs</small>")
+    etos_backend_tests_identityresolutiontests_ident_a7bd97f7("IdentityResolutionTests<br/><small>ETOS.Backend.Tests/IdentityResolutionTests.cs</small>")
     etos_backend_tests_importtests_importtests_419a3725("ImportTests<br/><small>ETOS.Backend.Tests/ImportTests.cs</small>")
     etos_backend_tests_optimizationmodeldefinitionte_c82d1692("OptimizationModelDefinitionTests<br/><small>ETOS.Backend.Tests/OptimizationModelDefinitionTests.cs</small>")
     etos_backend_tests_recommendationtests_recommend_16611ae5("RecommendationTests<br/><small>ETOS.Backend.Tests/RecommendationTests.cs</small>")
-    toolregistry_tooldefinitionservice_tooldefinitio_57e30779("ToolDefinitionService<br/><small>ETOS.Backend/ToolRegistry/ToolDefinitionService.cs</small>")
     app_execute_service_parse_json_object_3cfdb647 -->|calls| app_execute_service_execute_request_9d3ab1b0
     app_execute_service_parse_json_object_3cfdb647 -->|calls| app_execute_service_parse_output_schema_1c84590d
     app_execute_service_parse_json_object_3cfdb647 -->|calls| app_execute_service_render_prompt_214a5d89
@@ -2668,7 +2660,7 @@ flowchart LR
     app_execute_service_run_with_model_5e92d03b -->|calls| app_execute_service_execute_request_9d3ab1b0
     app_execute_service_run_with_model_5e92d03b -->|calls| app_model_router_create_pydantic_ai_model_dbbe6ed1
     app_execute_service_run_with_model_5e92d03b -->|calls| app_model_router_should_use_deterministic_mock_345cffb3
-    %% Omitted for readability: 2026 nodes, 0 edges
+    %% Omitted for readability: 2060 nodes, 0 edges
     class app_execute_service_parse_json_object_3cfdb647 function;
     class app_execute_service_execute_request_9d3ab1b0 function;
     class app_execute_service_parse_output_schema_1c84590d function;
@@ -2683,10 +2675,10 @@ flowchart LR
     class app_model_router_should_use_deterministic_mock_345cffb3 function;
     class etos_backend_tests_agenttemplatedefinitiontests_6cf23e28 test;
     class etos_backend_tests_explorerstests_explorerstests_9705c161 test;
+    class etos_backend_tests_identityresolutiontests_ident_a7bd97f7 test;
     class etos_backend_tests_importtests_importtests_419a3725 test;
     class etos_backend_tests_optimizationmodeldefinitionte_c82d1692 test;
     class etos_backend_tests_recommendationtests_recommend_16611ae5 test;
-    class toolregistry_tooldefinitionservice_tooldefinitio_57e30779 klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -2710,243 +2702,243 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
-  <td><code>AgentTemplateDefinitionTests.cs</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AgentTemplateDefinitionTests.cs</small></td>
+  <td><code>DashboardReportTests.cs</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>BusinessPolicies</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionService.cs</small></td>
+  <td>No direct outbound edge</td>
   <td>Verifies imports, entry points, or version behavior.</td>
 </tr>
 <tr>
   <td>2</td>
-  <td><code>BusinessPolicyDefinitionTests.cs</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/BusinessPolicyDefinitionTests.cs</small></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>BusinessPolicies</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionService.cs</small></td>
+  <td><code>ChatCreatedDashboardTemplatePreviewsViaGovernedQuery()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateArtifactRegistryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateChatService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+16 more</td>
   <td>Verifies imports, entry points, or version behavior.</td>
 </tr>
 <tr>
   <td>3</td>
-  <td><code>OptimizationModelDefinitionTests.cs</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/OptimizationModelDefinitionTests.cs</small></td>
+  <td><code>.ChatCreatedDashboardTemplatePreviewsViaGovernedQuery()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td><span class="tag tag-func">Test</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>BusinessPolicies</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionService.cs</small></td>
-  <td>Verifies imports, entry points, or version behavior.</td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>Supports retrieval-augmented Q&amp;A or streaming chat.</td>
 </tr>
 <tr>
   <td>4</td>
-  <td><code>AgentTemplateDefinitionReadinessValidator.cs</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
+  <td><code>Task</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>BusinessPolicies</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionService.cs</small></td>
-  <td>AgentTemplateDefinitionReadinessValidator.cs node in ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs.</td>
+  <td>No direct outbound edge</td>
+  <td>Task node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>5</td>
-  <td><code>AgentTemplateDefinitionReadinessValidator</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
+  <td><code>Fact</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ValidatePublishedArtifactVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small><br><code>ValidatePublishedDependenciesAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small><br><code>ValidateRequiredFields()</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td>AgentTemplateDefinitionReadinessValidator node in ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs.</td>
+  <td>No direct outbound edge</td>
+  <td>Fact node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>6</td>
-  <td><code>.ValidateRequiredFields()</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>AgentTemplateDefinitionReadinessValidator</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><code>ValidatePublishedDependenciesAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td>.ValidateRequiredFields() node in ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs.</td>
+  <td><code>.PreviewExcludesDeniedContextFromBlockSummaries()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.PreviewExcludesDeniedContextFromBlockSummaries() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>7</td>
-  <td><code>AgentTemplateDefinitionPayloadDocument</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>AgentTemplateDefinitionPayloadDocument node in ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs.</td>
+  <td><code>.PreviewRejectsUnsupportedQueryIntentRef()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>SeedInvalidDashboardVersion()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.PreviewRejectsUnsupportedQueryIntentRef() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>8</td>
-  <td><code>IReadOnlyCollection</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>IReadOnlyCollection node in ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs.</td>
+  <td><code>.UserWithoutExportPermissionCannotExport()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>Exports documentation data to a target format.</td>
 </tr>
 <tr>
   <td>9</td>
-  <td><code>.ValidatePublishedDependenciesAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-async">Async</span></td>
-  <td><code>AgentTemplateDefinitionReadinessValidator</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small><br><code>ValidateRequiredFields()</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><code>ValidatePublishedArtifactVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td>.ValidatePublishedDependenciesAsync() node in ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs.</td>
+  <td><code>.ExportWritesAuditRecordAndRedactionMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>Exports documentation data to a target format.</td>
 </tr>
 <tr>
   <td>10</td>
-  <td><code>EnterpriseThreadDbContext</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>EnterpriseThreadDbContext node in ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs.</td>
+  <td><code>.MarkReadyFailsWhenObject360WidgetMissingAnchor()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>SeedDashboardVersionWithoutAnchor()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.MarkReadyFailsWhenObject360WidgetMissingAnchor() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>11</td>
-  <td><code>Guid</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Guid node in ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs.</td>
+  <td><code>.MarkReadyThenPublishSucceedsWhenDependenciesPublished()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateArtifactRegistryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+2 more</td>
+  <td>.MarkReadyThenPublishSucceedsWhenDependenciesPublished() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>12</td>
-  <td><code>CancellationToken</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>CancellationToken node in ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs.</td>
+  <td><code>.PublishBlockedWhileStillDraft()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateArtifactRegistryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.PublishBlockedWhileStillDraft() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>13</td>
-  <td><code>Task</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Task node in ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs.</td>
+  <td><code>.DependencyImpactReflectsUnpublishedOutputSchemaDependency()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateArtifactRegistryService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>Builds dependency relationships and graph data.</td>
 </tr>
 <tr>
   <td>14</td>
-  <td><code>.ValidatePublishedArtifactVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-async">Async</span></td>
-  <td><code>AgentTemplateDefinitionReadinessValidator</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small><br><code>ValidatePublishedDependenciesAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small></td>
-  <td>No direct outbound edge</td>
-  <td>.ValidatePublishedArtifactVersionAsync() node in ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs.</td>
+  <td><code>.KpiPlaceholderBlockReturnsDeferredCatalogMetadata()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.KpiPlaceholderBlockReturnsDeferredCatalogMetadata() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>15</td>
-  <td><code>AgentDefinitionReadinessValidator.cs</code><br><small style="color:var(--muted)">ETOS.Backend/Agents/AgentDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>BusinessPolicies</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionService.cs</small></td>
-  <td>AgentDefinitionReadinessValidator.cs node in ETOS.Backend/Agents/AgentDefinitionReadinessValidator.cs.</td>
+  <td><code>.CrossTenantPreviewIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CreateDbContext()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+1 more</td>
+  <td>.CrossTenantPreviewIsDenied() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>16</td>
-  <td><code>OptimizationModelDefinitionReadinessValidator.cs</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>BusinessPolicies</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionService.cs</small></td>
-  <td>OptimizationModelDefinitionReadinessValidator.cs node in ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs.</td>
+  <td><code>.CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>ChatCreatedDashboardTemplatePreviewsViaGovernedQuery()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CrossTenantPreviewIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+7 more</td>
+  <td><code>CreateChatService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td>.CreateDashboardDraftAsync() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>17</td>
-  <td><code>OptimizationModelDefinitionReadinessValidator</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
+  <td><code>EnterpriseThreadDbContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ValidatePublishedDependenciesAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small><br><code>ValidateRequiredFields()</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td>OptimizationModelDefinitionReadinessValidator node in ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs.</td>
+  <td>No direct outbound edge</td>
+  <td>EnterpriseThreadDbContext node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>18</td>
-  <td><code>.ValidateRequiredFields()</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>OptimizationModelDefinitionReadinessVal...</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td><code>ValidatePublishedDependenciesAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td>.ValidateRequiredFields() node in ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs.</td>
+  <td><code>TestContext</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
 </tr>
 <tr>
   <td>19</td>
-  <td><code>OptimizationModelDefinitionPayloadDocument</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
+  <td><code>Guid</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>OptimizationModelDefinitionPayloadDocument node in ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs.</td>
+  <td>Guid node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>20</td>
-  <td><code>IReadOnlyCollection</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
+  <td><code>ArtifactId</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>IReadOnlyCollection node in ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs.</td>
+  <td>ArtifactId node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>21</td>
-  <td><code>.ValidatePublishedDependenciesAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-async">Async</span></td>
-  <td><code>OptimizationModelDefinitionReadinessVal...</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small><br><code>ValidateRequiredFields()</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
+  <td><code>VersionId</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>.ValidatePublishedDependenciesAsync() node in ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs.</td>
+  <td>VersionId node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>22</td>
-  <td><code>EnterpriseThreadDbContext</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>.SeedDashboardVersionWithoutAnchor()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>MarkReadyFailsWhenObject360WidgetMissingAnchor()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>EnterpriseThreadDbContext node in ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs.</td>
+  <td>.SeedDashboardVersionWithoutAnchor() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>23</td>
-  <td><code>Guid</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
+  <td><code>ArtifactVersion</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Guid node in ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs.</td>
+  <td>ArtifactVersion node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>24</td>
-  <td><code>CancellationToken</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>.SeedInvalidDashboardVersion()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>PreviewRejectsUnsupportedQueryIntentRef()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>CancellationToken node in ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs.</td>
+  <td>.SeedInvalidDashboardVersion() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>25</td>
-  <td><code>Task</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>.CreateDashboardReportService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>ChatCreatedDashboardTemplatePreviewsViaGovernedQuery()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>CrossTenantPreviewIsDenied()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br>+7 more</td>
   <td>No direct outbound edge</td>
-  <td>Task node in ETOS.Backend/OptimizationModels/OptimizationModelDefinitionReadinessValidator.cs.</td>
+  <td>.CreateDashboardReportService() node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>26</td>
-  <td><code>BusinessPolicies</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionService.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td><code>AgentDefinitionReadinessValidator.cs</code><br><small style="color:var(--muted)">ETOS.Backend/Agents/AgentDefinitionReadinessValidator.cs</small><br><code>AgentTemplateDefinitionReadinessValidat...</code><br><small style="color:var(--muted)">ETOS.Backend/AgentTemplates/AgentTemplateDefinitionReadinessValidator.cs</small><br><code>AgentTemplateDefinitionTests.cs</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/AgentTemplateDefinitionTests.cs</small><br>+4 more</td>
-  <td><code>EnterpriseThreadPlatform.cs</code><br><small style="color:var(--muted)">ETOS.Backend/Platform/EnterpriseThreadPlatform.cs</small><br><code>Program.cs</code><br><small style="color:var(--muted)">ETOS.Backend/Program.cs</small><br><code>ToolDefinitionReadinessValidator.cs</code><br><small style="color:var(--muted)">ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs</small><br>+1 more</td>
-  <td>BusinessPolicies node in ETOS.Backend/OptimizationModels/OptimizationModelDefinitionService.cs.</td>
+  <td><code>IClassificationPolicyService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>IClassificationPolicyService node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>27</td>
-  <td><code>ToolDefinitionReadinessValidator.cs</code><br><small style="color:var(--muted)">ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td><code>BusinessPolicies</code><br><small style="color:var(--muted)">ETOS.Backend/OptimizationModels/OptimizationModelDefinitionService.cs</small></td>
+  <td><code>IAccessPermissionService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ToolDefinitionReadinessValidator.cs node in ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs.</td>
+  <td>IAccessPermissionService node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>28</td>
-  <td><code>ToolDefinitionReadinessValidator</code><br><small style="color:var(--muted)">ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
+  <td><code>RecordingAuditRecorder</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ValidatePublishedArtifactVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs</small><br><code>ValidatePublishedDependenciesAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs</small><br><code>ValidateRequiredFields()</code><br><small style="color:var(--muted)">ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs</small></td>
-  <td>ToolDefinitionReadinessValidator node in ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs.</td>
+  <td>No direct outbound edge</td>
+  <td>RecordingAuditRecorder node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>29</td>
-  <td><code>.ValidateRequiredFields()</code><br><small style="color:var(--muted)">ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>ToolDefinitionReadinessValidator</code><br><small style="color:var(--muted)">ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs</small></td>
-  <td><code>ValidatePublishedDependenciesAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs</small></td>
-  <td>.ValidateRequiredFields() node in ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs.</td>
+  <td><code>DashboardReportService</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>DashboardReportService node in ETOS.Backend.Tests/DashboardReportTests.cs.</td>
 </tr>
 <tr>
   <td>30</td>
-  <td><code>ToolDefinitionPayloadDocument</code><br><small style="color:var(--muted)">ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
+  <td><code>.CreateChatService()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>CreateDashboardDraftAsync()</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small><br><code>DashboardReportTests</code><br><small style="color:var(--muted)">ETOS.Backend.Tests/DashboardReportTests.cs</small></td>
   <td>No direct outbound edge</td>
-  <td>ToolDefinitionPayloadDocument node in ETOS.Backend/ToolRegistry/ToolDefinitionReadinessValidator.cs.</td>
+  <td>Supports retrieval-augmented Q&amp;A or streaming chat.</td>
 </tr>
 </table>
 
@@ -2967,7 +2959,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x2844, calls x993, method x848, contains x295. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x2871, calls x983, method x846, contains x306. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -3651,69 +3643,69 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 12. Identity Access Testing ====== -->
-<h2 id="identity-access-testing">12. Identity Access Testing</h2>
-<p>Identity Access Testing groups implementation around chatgpt, conversation, part, 401, mostly in .prd/.initialConversation/chatgpt-conversation-part-005-401-500.md, .prd/.initialConversation/chatgpt-conversation-part-001-1-100.md. This section covers 102 nodes and 101 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<!-- ====== 12. Graph Diff Service ====== -->
+<h2 id="graph-diff-service">12. Graph Diff Service</h2>
+<p>Graph Diff Service groups implementation around chatgpt, conversation, part, 701, mostly in .prd/.initialConversation/chatgpt-conversation-part-008-701-800.md, .prd/.initialConversation/chatgpt-conversation-part-001-1-100.md. This section covers 102 nodes and 101 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Identity Access Testing (102 nodes, 101 edges)
-    subgraph identity_access_testing_prd_initialConversation_f5cad6f9[".prd/.initialConversation/chatgpt-conversation-part-005-401-500.md"]
-        initialconversation_chatgpt_conversation_part_00_6c87c950("chatgpt-conversation-part-005-401-500.md")
-        initialconversation_chatgpt_conversation_part_00_9f5e6600("401. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_64d6aae2("402. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_2b43441c("403. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_146c78c0("404. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_3798d6c2("405. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_df1e0aa7("406. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_a74666f9("407. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_63f5c266("408. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_68f65a46("409. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_201e4c2c("410. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_fdabb8dd("411. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_5951c744("412. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_9b167d84("413. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_f0442c0b("414. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_3d416b94("415. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
-        initialconversation_chatgpt_conversation_part_00_230c09e7("416. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small>")
+    %% Section: Graph Diff Service (102 nodes, 101 edges)
+    subgraph graph_diff_service_prd_initialConversation_chatg_85a29db4[".prd/.initialConversation/chatgpt-conversation-part-008-701-800.md"]
+        initialconversation_chatgpt_conversation_part_00_61fe9744("chatgpt-conversation-part-008-701-800.md")
+        initialconversation_chatgpt_conversation_part_00_3d056195("701. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_6a34d5bf("702. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_91600ffa("703. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_abbf7b0c("704. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_fc4099da("705. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_198c8056("706. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_0c40ddc9("707. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_a3fc623d("708. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_05932cc1("709. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_24f8526c("710. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_173a89ba("711. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_21d7494a("712. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_208983c9("713. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_45dd4450("714. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_a7954e7e("715. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
+        initialconversation_chatgpt_conversation_part_00_f13f480c("716. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small>")
     end
     initialconversation_chatgpt_conversation_part_00_14d870a4("2. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-001-1-100.md</small>")
-    initialconversation_chatgpt_conversation_part_00_14d870a4 -->|contains| initialconversation_chatgpt_conversation_part_00_6c87c950
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_9f5e6600
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_64d6aae2
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_2b43441c
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_146c78c0
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_3798d6c2
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_df1e0aa7
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_a74666f9
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_63f5c266
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_68f65a46
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_201e4c2c
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_fdabb8dd
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_5951c744
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_9b167d84
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_f0442c0b
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_3d416b94
-    initialconversation_chatgpt_conversation_part_00_6c87c950 -->|contains| initialconversation_chatgpt_conversation_part_00_230c09e7
+    initialconversation_chatgpt_conversation_part_00_14d870a4 -->|contains| initialconversation_chatgpt_conversation_part_00_61fe9744
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_3d056195
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_6a34d5bf
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_91600ffa
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_abbf7b0c
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_fc4099da
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_198c8056
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_0c40ddc9
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_a3fc623d
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_05932cc1
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_24f8526c
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_173a89ba
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_21d7494a
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_208983c9
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_45dd4450
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_a7954e7e
+    initialconversation_chatgpt_conversation_part_00_61fe9744 -->|contains| initialconversation_chatgpt_conversation_part_00_f13f480c
     %% Omitted for readability: 84 nodes, 0 edges
-    class initialconversation_chatgpt_conversation_part_00_6c87c950 concept;
-    class initialconversation_chatgpt_conversation_part_00_9f5e6600 concept;
-    class initialconversation_chatgpt_conversation_part_00_64d6aae2 concept;
-    class initialconversation_chatgpt_conversation_part_00_2b43441c concept;
-    class initialconversation_chatgpt_conversation_part_00_146c78c0 concept;
-    class initialconversation_chatgpt_conversation_part_00_3798d6c2 concept;
-    class initialconversation_chatgpt_conversation_part_00_df1e0aa7 concept;
-    class initialconversation_chatgpt_conversation_part_00_a74666f9 concept;
-    class initialconversation_chatgpt_conversation_part_00_63f5c266 concept;
-    class initialconversation_chatgpt_conversation_part_00_68f65a46 concept;
-    class initialconversation_chatgpt_conversation_part_00_201e4c2c concept;
-    class initialconversation_chatgpt_conversation_part_00_fdabb8dd concept;
-    class initialconversation_chatgpt_conversation_part_00_5951c744 concept;
-    class initialconversation_chatgpt_conversation_part_00_9b167d84 concept;
-    class initialconversation_chatgpt_conversation_part_00_f0442c0b concept;
-    class initialconversation_chatgpt_conversation_part_00_3d416b94 concept;
-    class initialconversation_chatgpt_conversation_part_00_230c09e7 concept;
+    class initialconversation_chatgpt_conversation_part_00_61fe9744 concept;
+    class initialconversation_chatgpt_conversation_part_00_3d056195 concept;
+    class initialconversation_chatgpt_conversation_part_00_6a34d5bf concept;
+    class initialconversation_chatgpt_conversation_part_00_91600ffa concept;
+    class initialconversation_chatgpt_conversation_part_00_abbf7b0c concept;
+    class initialconversation_chatgpt_conversation_part_00_fc4099da concept;
+    class initialconversation_chatgpt_conversation_part_00_198c8056 concept;
+    class initialconversation_chatgpt_conversation_part_00_0c40ddc9 concept;
+    class initialconversation_chatgpt_conversation_part_00_a3fc623d concept;
+    class initialconversation_chatgpt_conversation_part_00_05932cc1 concept;
+    class initialconversation_chatgpt_conversation_part_00_24f8526c concept;
+    class initialconversation_chatgpt_conversation_part_00_173a89ba concept;
+    class initialconversation_chatgpt_conversation_part_00_21d7494a concept;
+    class initialconversation_chatgpt_conversation_part_00_208983c9 concept;
+    class initialconversation_chatgpt_conversation_part_00_45dd4450 concept;
+    class initialconversation_chatgpt_conversation_part_00_a7954e7e concept;
+    class initialconversation_chatgpt_conversation_part_00_f13f480c concept;
     class initialconversation_chatgpt_conversation_part_00_14d870a4 concept;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
@@ -3746,235 +3738,235 @@ flowchart LR
 </tr>
 <tr>
   <td>2</td>
-  <td><code>chatgpt-conversation-part-005-401-500.md</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>chatgpt-conversation-part-008-701-800.md</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing chatgpt-conversation-part-005-401-500.md.</td>
+  <td>Documentation node describing chatgpt-conversation-part-008-701-800.md.</td>
 </tr>
 <tr>
   <td>3</td>
-  <td><code>401. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>701. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 401. assistant.</td>
+  <td>Documentation node describing 701. assistant.</td>
 </tr>
 <tr>
   <td>4</td>
-  <td><code>402. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>702. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 402. user.</td>
+  <td>Documentation node describing 702. user.</td>
 </tr>
 <tr>
   <td>5</td>
-  <td><code>403. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>703. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 403. assistant.</td>
+  <td>Documentation node describing 703. assistant.</td>
 </tr>
 <tr>
   <td>6</td>
-  <td><code>404. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>704. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 404. user.</td>
+  <td>Documentation node describing 704. user.</td>
 </tr>
 <tr>
   <td>7</td>
-  <td><code>405. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>705. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 405. assistant.</td>
+  <td>Documentation node describing 705. assistant.</td>
 </tr>
 <tr>
   <td>8</td>
-  <td><code>406. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>706. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 406. user.</td>
+  <td>Documentation node describing 706. user.</td>
 </tr>
 <tr>
   <td>9</td>
-  <td><code>407. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>707. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 407. assistant.</td>
+  <td>Documentation node describing 707. assistant.</td>
 </tr>
 <tr>
   <td>10</td>
-  <td><code>408. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>708. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 408. user.</td>
+  <td>Documentation node describing 708. user.</td>
 </tr>
 <tr>
   <td>11</td>
-  <td><code>409. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>709. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 409. assistant.</td>
+  <td>Documentation node describing 709. assistant.</td>
 </tr>
 <tr>
   <td>12</td>
-  <td><code>410. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>710. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 410. user.</td>
+  <td>Documentation node describing 710. user.</td>
 </tr>
 <tr>
   <td>13</td>
-  <td><code>411. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>711. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 411. assistant.</td>
+  <td>Documentation node describing 711. assistant.</td>
 </tr>
 <tr>
   <td>14</td>
-  <td><code>412. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>712. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 412. user.</td>
+  <td>Documentation node describing 712. user.</td>
 </tr>
 <tr>
   <td>15</td>
-  <td><code>413. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>713. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 413. assistant.</td>
+  <td>Documentation node describing 713. assistant.</td>
 </tr>
 <tr>
   <td>16</td>
-  <td><code>414. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>714. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 414. user.</td>
+  <td>Documentation node describing 714. user.</td>
 </tr>
 <tr>
   <td>17</td>
-  <td><code>415. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>715. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 415. assistant.</td>
+  <td>Documentation node describing 715. assistant.</td>
 </tr>
 <tr>
   <td>18</td>
-  <td><code>416. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>716. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 416. user.</td>
+  <td>Documentation node describing 716. user.</td>
 </tr>
 <tr>
   <td>19</td>
-  <td><code>417. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>717. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 417. assistant.</td>
+  <td>Documentation node describing 717. assistant.</td>
 </tr>
 <tr>
   <td>20</td>
-  <td><code>418. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>718. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 418. user.</td>
+  <td>Documentation node describing 718. user.</td>
 </tr>
 <tr>
   <td>21</td>
-  <td><code>419. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>719. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 419. assistant.</td>
+  <td>Documentation node describing 719. assistant.</td>
 </tr>
 <tr>
   <td>22</td>
-  <td><code>420. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>720. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 420. user.</td>
+  <td>Documentation node describing 720. user.</td>
 </tr>
 <tr>
   <td>23</td>
-  <td><code>421. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>721. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 421. assistant.</td>
+  <td>Documentation node describing 721. assistant.</td>
 </tr>
 <tr>
   <td>24</td>
-  <td><code>422. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>722. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 422. user.</td>
+  <td>Documentation node describing 722. user.</td>
 </tr>
 <tr>
   <td>25</td>
-  <td><code>423. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>723. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 423. assistant.</td>
+  <td>Documentation node describing 723. assistant.</td>
 </tr>
 <tr>
   <td>26</td>
-  <td><code>424. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>724. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 424. user.</td>
+  <td>Documentation node describing 724. user.</td>
 </tr>
 <tr>
   <td>27</td>
-  <td><code>425. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>725. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 425. assistant.</td>
+  <td>Documentation node describing 725. assistant.</td>
 </tr>
 <tr>
   <td>28</td>
-  <td><code>426. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>726. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 426. user.</td>
+  <td>Documentation node describing 726. user.</td>
 </tr>
 <tr>
   <td>29</td>
-  <td><code>427. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>727. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 427. assistant.</td>
+  <td>Documentation node describing 727. assistant.</td>
 </tr>
 <tr>
   <td>30</td>
-  <td><code>428. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</small></td>
+  <td><code>728. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing 428. user.</td>
+  <td>Documentation node describing 728. user.</td>
 </tr>
 </table>
 
@@ -3983,7 +3975,7 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</code></td><td>101 nodes</td></tr>
+      <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</code></td><td>101 nodes</td></tr>
 <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-001-1-100.md</code></td><td>1 nodes</td></tr>
     </table>
   </div>
@@ -5016,12 +5008,12 @@ flowchart LR
 
 <!-- ====== 16. Other ====== -->
 <h2 id="other">16. Other</h2>
-<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md, .prd/.initialConversation/chatgpt-conversation-part-002-101-200.md, .prd/.initialConversation/chatgpt-conversation-part-008-701-800.md. This section covers 3746 nodes and 6978 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md, .prd/.initialConversation/chatgpt-conversation-part-002-101-200.md, .prd/.initialConversation/chatgpt-conversation-part-005-401-500.md. This section covers 3780 nodes and 7113 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Other (3746 nodes, 6978 edges)
+    %% Section: Other (3780 nodes, 7113 edges)
     subgraph other_ETOS_Backend_AgentRuns_AgentRunService_cs_a82ae235["ETOS.Backend/AgentRuns/AgentRunService.cs"]
         agentruns_agentrunservice_iagentrunservice_a076c105("IAgentRunService<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
         agentruns_agentrunservice_iagentrunservice_getas_cfb5db9b("GetAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
@@ -5042,10 +5034,10 @@ flowchart LR
     end
     agenttemplates_agenttemplatedefinitionservice_ag_4b6e7565("AgentTemplateDefinitionService<br/><small>ETOS.Backend/AgentTemplates/AgentTemplateDefinitionService.cs</small>")
     agents_agentdefinitionservice_agentdefinitionser_b95acd20("AgentDefinitionService<br/><small>ETOS.Backend/Agents/AgentDefinitionService.cs</small>")
-    artifacts_artifactregistryservice_artifactregist_5bf4a65c("ArtifactRegistryService<br/><small>ETOS.Backend/Artifacts/ArtifactRegistryService.cs</small>")
     dataquality_dataqualityservice_dataqualityissues_c3a4fac1("DataQualityIssueService<br/><small>ETOS.Backend/DataQuality/DataQualityService.cs</small>")
     documents_documentservice_documentservice_5e7e63ca("DocumentService<br/><small>ETOS.Backend/Documents/DocumentService.cs</small>")
     governedquery_governedqueryservice_governedquery_9453975b("GovernedQueryService<br/><small>ETOS.Backend/GovernedQuery/GovernedQueryService.cs</small>")
+    toolregistry_tooldefinitionservice_tooldefinitio_57e30779("ToolDefinitionService<br/><small>ETOS.Backend/ToolRegistry/ToolDefinitionService.cs</small>")
     agentruns_agentrunendpointextensions_agentrunend_9b0cc282 -->|method| agentruns_agentrunendpointextensions_agentrunend_f98f816d
     agentruns_agentrunendpointextensions_agentrunend_9b0cc282 -->|method| agentruns_agentrunendpointextensions_agentrunend_18142f9f
     agentruns_agentrunendpointextensions_agentrunend_18142f9f -->|calls| agentruns_agentrunendpointextensions_agentrunend_f98f816d
@@ -5057,7 +5049,7 @@ flowchart LR
     agentruns_agentrunservice_agentrunservice_listas_66c9e297 -->|calls| agentruns_agentrunservice_agentrunservice_requir_a827e1af
     agentruns_agentrunservice_agentrunservice_getasy_e39310d8 -->|calls| agentruns_agentrunservice_agentrunservice_requir_a827e1af
     agentruntime_agentexecutionendpointextensions_ag_9d8245b6 -->|method| agentruntime_agentexecutionendpointextensions_ag_f96cbf93
-    %% Omitted for readability: 3728 nodes, 0 edges
+    %% Omitted for readability: 3762 nodes, 0 edges
     class agentruns_agentrunservice_iagentrunservice_a076c105 klass;
     class agentruns_agentrunservice_iagentrunservice_getas_cfb5db9b async;
     class agentruns_agentrunservice_iagentrunservice_lista_513318c2 async;
@@ -5072,10 +5064,10 @@ flowchart LR
     class agentruntime_agentexecutionendpointextensions_ag_f96cbf93 async;
     class agenttemplates_agenttemplatedefinitionservice_ag_4b6e7565 klass;
     class agents_agentdefinitionservice_agentdefinitionser_b95acd20 klass;
-    class artifacts_artifactregistryservice_artifactregist_5bf4a65c klass;
     class dataquality_dataqualityservice_dataqualityissues_c3a4fac1 klass;
     class documents_documentservice_documentservice_5e7e63ca klass;
     class governedquery_governedqueryservice_governedquery_9453975b klass;
+    class toolregistry_tooldefinitionservice_tooldefinitio_57e30779 klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -5345,8 +5337,8 @@ flowchart LR
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-002-101-200.md</code></td><td>101 nodes</td></tr>
+<tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</code></td><td>101 nodes</td></tr>
 <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-007-601-700.md</code></td><td>101 nodes</td></tr>
-<tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-008-701-800.md</code></td><td>101 nodes</td></tr>
 <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</code></td><td>101 nodes</td></tr>
 <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-010-901-1000.md</code></td><td>101 nodes</td></tr>
 <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-011-1001-1100.md</code></td><td>101 nodes</td></tr>
@@ -5356,7 +5348,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x3407, contains x1483, method x1057, calls x930. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x3493, contains x1476, method x1085, calls x957. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -5367,8 +5359,8 @@ flowchart LR
   <div class="card">
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>Nodes</td><td>8615</td></tr>
-      <tr><td>Edges</td><td>17411</td></tr>
+      <tr><td>Nodes</td><td>8708</td></tr>
+      <tr><td>Edges</td><td>17600</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
       <tr><td>Communities</td><td>451</td></tr>
       <tr><td>Documented Sections</td><td>15</td></tr>
@@ -5377,7 +5369,7 @@ flowchart LR
   <div class="card">
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>EXTRACTED</td><td>17352</td></tr>
+      <tr><td>EXTRACTED</td><td>17541</td></tr>
       <tr><td>INFERRED</td><td>59</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
@@ -5386,7 +5378,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>EnterpriseThreadOS — Architecture Documentation</p>
-  <p>Generated: 2026-06-27 18:00 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-06-27 18:27 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

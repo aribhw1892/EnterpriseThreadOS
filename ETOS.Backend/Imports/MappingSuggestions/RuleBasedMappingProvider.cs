@@ -18,6 +18,7 @@ public sealed class RuleBasedMappingProvider : IMappingSuggestionProvider
         {
             diagnostics = new ImportMappingSuggestionDiagnostics(
                 ProviderKey,
+                ResolvedAgentKey: null,
                 RuntimeCalled: false,
                 null,
                 null,

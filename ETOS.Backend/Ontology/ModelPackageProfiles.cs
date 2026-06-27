@@ -13,6 +13,7 @@ public sealed class ModelPackageImportProfile
     public IReadOnlyCollection<string> UsageColumnSynonyms { get; init; } = [];
     public IReadOnlyCollection<string> ComparisonSideColumnSynonyms { get; init; } = [];
     public IReadOnlyCollection<StructuralComparisonSideProfile> ComparisonSides { get; init; } = [];
+    public string? MappingAssistantAgentKey { get; init; }
     public ModelPackageRecommendationTemplates? RecommendationTemplates { get; init; }
 }
 

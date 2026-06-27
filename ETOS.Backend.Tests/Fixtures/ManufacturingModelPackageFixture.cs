@@ -18,6 +18,7 @@ public static class ManufacturingModelPackageFixture
         var userId = Guid.NewGuid();
         await CreateUserAsync(client, userId, userId, email);
         var tenant = await CreateTenantAsync(client, userId, tenantIdentifier);
+        await AgentExecutionTestSupport.CreateAndPublishAnalysisAgentTypeAsync(client, tenant.Id, userId);
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/admin/development/install-reference-package")
         {

@@ -1,7 +1,9 @@
 "use client";
 
-import type { ImportPreview } from "@/lib/etos-api";
-import { useState } from "react";
+import type { AgentVersionArtifactSummary, ImportPreview } from "@/lib/etos-api";
+import { getAgentDefinitionArtifacts } from "@/lib/etos-api";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 type MappingAgentDebugPanelProps = {
   batchId?: string | null;
@@ -10,6 +12,7 @@ type MappingAgentDebugPanelProps = {
     batchId: string;
     evidenceId?: string | null;
     suggestionProviderKey: string;
+    mappingAssistantAgentKey?: string | null;
   }) => Promise<{ preview: ImportPreview | null; error: string | null }>;
 };
 
@@ -55,9 +58,32 @@ function StatusPill({ label, tone }: { label: string; tone: "ok" | "warn" | "err
 
 export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: MappingAgentDebugPanelProps) {
   const [providerKey, setProviderKey] = useState("pydantic-ai-v1");
+  const [mappingAgentKey, setMappingAgentKey] = useState("");
+  const [mappingAgents, setMappingAgents] = useState<AgentVersionArtifactSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<ImportPreview | null>(null);
+
+  useEffect(() => {
+    void getAgentDefinitionArtifacts().then((result) => {
+      if (!result.data) {
+        return;
+      }
+
+      const candidates = result.data.filter(
+        (agent) =>
+          agent.readinessState?.toLowerCase() === "published" &&
+          (agent.agentKey?.includes("mapping") ||
+            agent.displayName?.toLowerCase().includes("mapping") ||
+            agent.agentKey === "import-mapping-assistant"),
+      );
+      setMappingAgents(candidates);
+      const defaultAgent = candidates.find((agent) => agent.agentKey === "import-mapping-assistant") ?? candidates[0];
+      if (defaultAgent?.agentKey) {
+        setMappingAgentKey(defaultAgent.agentKey);
+      }
+    });
+  }, []);
 
   async function handleRun() {
     if (!batchId) {
@@ -72,6 +98,7 @@ export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: Mapp
         batchId,
         evidenceId,
         suggestionProviderKey: providerKey,
+        mappingAssistantAgentKey: mappingAgentKey || null,
       });
       if (result.error) {
         setError(result.error);
@@ -86,6 +113,7 @@ export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: Mapp
   }
 
   const diagnostics = preview?.diagnostics;
+  const resolvedAgentKey = diagnostics?.resolvedAgentKey ?? mappingAgentKey;
   const runtimeOk =
     diagnostics?.runtimeStatus?.toLowerCase() === "succeeded" ||
     (providerKey === "rule-based-v1" && !diagnostics?.runtimeCalled);
@@ -94,8 +122,8 @@ export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: Mapp
     <section className="rounded-3xl border border-violet-400/30 bg-violet-400/5 p-6">
       <h2 className="text-2xl font-semibold">Mapping Agent Debug</h2>
       <p className="mt-2 text-sm text-slate-300">
-        Run mapping preview without saving a draft mapping version. Inspect prefetch tool output, governed context,
-        runtime request metadata, and structured LLM output.
+        Run mapping preview without saving a draft mapping version. Model routing comes from the published mapping
+        assistant agent configuration, not appsettings.
       </p>
 
       <div className="mt-4 flex flex-wrap items-end gap-3">
@@ -110,6 +138,26 @@ export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: Mapp
             <option value="rule-based-v1">rule-based-v1 (deterministic)</option>
           </select>
         </label>
+        {providerKey === "pydantic-ai-v1" ? (
+          <label className="grid gap-1 text-sm text-slate-300">
+            Mapping assistant agent
+            <select
+              className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+              value={mappingAgentKey}
+              onChange={(event) => setMappingAgentKey(event.target.value)}
+            >
+              {mappingAgents.length === 0 ? (
+                <option value="">import-mapping-assistant (default)</option>
+              ) : (
+                mappingAgents.map((agent) => (
+                  <option key={agent.id} value={agent.agentKey ?? agent.name}>
+                    {agent.displayName ?? agent.agentKey ?? agent.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </label>
+        ) : null}
         <button
           type="button"
           className="rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
@@ -119,6 +167,21 @@ export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: Mapp
           {loading ? "Running preview..." : "Run mapping preview debug"}
         </button>
       </div>
+
+      {resolvedAgentKey ? (
+        <p className="mt-3 text-xs text-slate-400">
+          Resolved agent:{" "}
+          <Link className="text-cyan-300 underline" href={`/agents/${resolvedAgentKey}/configure`}>
+            {resolvedAgentKey}
+          </Link>
+          {diagnostics?.primaryModelProviderKey ? (
+            <>
+              {" "}
+              · {diagnostics.primaryModelProviderKey}/{diagnostics.primaryModelId}
+            </>
+          ) : null}
+        </p>
+      ) : null}
 
       {!batchId ? (
         <p className="mt-4 text-sm text-amber-200">
@@ -164,6 +227,12 @@ export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: Mapp
                 />
                 {diagnostics.modelUsed ? (
                   <StatusPill label={`Model: ${diagnostics.modelUsed}`} tone="neutral" />
+                ) : null}
+                {diagnostics.primaryModelProviderKey ? (
+                  <StatusPill
+                    label={`Config: ${diagnostics.primaryModelProviderKey}/${diagnostics.primaryModelId ?? "n/a"}`}
+                    tone="neutral"
+                  />
                 ) : null}
                 {diagnostics.usedRuleBasedFallback ? (
                   <StatusPill label="Rule-based fallback used" tone="warn" />

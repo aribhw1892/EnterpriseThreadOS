@@ -151,6 +151,7 @@ async function runMappingPreviewDebug(input: {
   batchId: string;
   evidenceId?: string | null;
   suggestionProviderKey: string;
+  mappingAssistantAgentKey?: string | null;
 }): Promise<{ preview: ImportPreview | null; error: string | null }> {
   "use server";
 
@@ -169,6 +170,7 @@ async function runMappingPreviewDebug(input: {
       sampleRowLimit: 10,
       suggestionProviderKey: input.suggestionProviderKey,
       includeDiagnostics: true,
+      mappingAssistantAgentKey: input.mappingAssistantAgentKey,
     },
     tenantHeaders,
   );

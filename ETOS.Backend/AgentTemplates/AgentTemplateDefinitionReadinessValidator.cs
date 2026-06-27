@@ -17,6 +17,10 @@ public static class AgentTemplateDefinitionReadinessValidator
         AgentTemplateDefinitionPayloadParser.AgentTemplateDefinitionPayloadDocument document)
     {
         var notes = new List<string>();
+        var isMappingAssistant = string.Equals(
+            document.PatternCategory,
+            "mapping-assistant",
+            StringComparison.OrdinalIgnoreCase);
 
         if (string.IsNullOrWhiteSpace(document.TemplateKey))
         {
@@ -66,14 +70,17 @@ public static class AgentTemplateDefinitionReadinessValidator
             notes.Add("outputSchemaVersionId is required.");
         }
 
-        if (document.QueryIntentVersionId is null || document.QueryIntentVersionId == Guid.Empty)
+        if (!isMappingAssistant)
         {
-            notes.Add("queryIntentVersionId is required.");
-        }
+            if (document.QueryIntentVersionId is null || document.QueryIntentVersionId == Guid.Empty)
+            {
+                notes.Add("queryIntentVersionId is required.");
+            }
 
-        if (document.RetrievalStrategyVersionId is null || document.RetrievalStrategyVersionId == Guid.Empty)
-        {
-            notes.Add("retrievalStrategyVersionId is required.");
+            if (document.RetrievalStrategyVersionId is null || document.RetrievalStrategyVersionId == Guid.Empty)
+            {
+                notes.Add("retrievalStrategyVersionId is required.");
+            }
         }
 
         return notes;

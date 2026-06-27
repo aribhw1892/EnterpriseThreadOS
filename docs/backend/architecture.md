@@ -33,7 +33,7 @@
 - `AgentTypes/`: governed `AgentTypeDefinition` catalog artifacts with readiness/publish workflow and minimal API endpoint mapping.
 - `Agents/`: tenant `AgentVersion` artifacts, from-template/from-prompt creation, readiness/publish with derived capability/risk, and minimal API endpoint mapping.
 - `AgentRuns/`: runtime `AgentRun` records with list/get APIs.
-- `AgentRuntime/`: `IAgentRuntimeAdapter` contracts, HTTP `PydanticAiRuntimeAdapter`, deferred Hermes/LangGraph adapters, `IAgentExecutionService` orchestration, and preview/test/execute endpoints under `/api/admin/agents`.
+- `AgentRuntime/`: `IAgentRuntimeAdapter` contracts, HTTP `PydanticAiRuntimeAdapter`, deferred Hermes/LangGraph adapters, shared `AgentExecutionProfile` / `IAgentExecutionProfileResolver` / `IAgentRuntimePreviewOrchestrator` kernel, `IAgentExecutionService` orchestration, and preview/test/execute endpoints under `/api/admin/agents`. Import mapping reuses the preview orchestrator without persisting `AgentRun`.
 - `Packages/`: reference package manifest loading, manufacturing reference package installer, and development install endpoint.
 - `Platform/Development/`: development-only endpoints including reference package install.
 - `Platform/Extensions/`: architecture-honest extension point catalog for deferred capabilities.
@@ -150,7 +150,7 @@ The import module currently includes:
 - raw file evidence metadata with storage key, checksum, content type, size, original filename, tenant, batch, and audit linkage.
 - `IImportFileStorage` as the raw payload storage boundary. The current local implementation is file-backed for developer/test workflows; production MinIO-compatible storage can be added behind the same interface.
 - CSV and Excel import parsing through `IImportFileParser`.
-- `IMappingSuggestionProvider` pluggable mapping preview suggestions. Default provider key: `rule-based-v1` (base config). Live LLM provider: `pydantic-ai-v1` via `PydanticAiMappingProvider`, `MappingSuggestionOptions` (`ImportMappingSuggestions` config section), and the existing `IAgentRuntimeAdapter` / `ETOS.AgentRuntime` sidecar (OpenAI or LM Studio through `openai-compatible`). Optional prefetch uses internal tool `mapping-predictor-tool` (`mapping-predictor-v1` handler, rule-based stand-in) through `IToolGateway` and `IPublishedToolVersionResolver`; prefetch failures are non-fatal. Mapping preview accepts `includeDiagnostics: true` and returns `ImportMappingSuggestionDiagnosticsResponse` with governed context, prefetch output, runtime metadata, trace notes, and raw structured output. Tool run safe summaries are capped for DB storage (`ToolSafeSummaryTruncator`, 1000 chars). Deferred contract: `hermes-v1`.
+- `IMappingSuggestionProvider` pluggable mapping preview suggestions. Default provider key: `rule-based-v1` (base config). Live LLM provider: `pydantic-ai-v1` via `PydanticAiMappingProvider`, shared kernel types `IAgentExecutionProfileResolver` + `IAgentRuntimePreviewOrchestrator`, and the existing `IAgentRuntimeAdapter` / `ETOS.AgentRuntime` sidecar. Model/prompt/schema/tool config comes from published tenant `AgentVersion` (seeded from `import-mapping-assistant` template) or import profile `mappingAssistantAgentKey`; `MappingSuggestionOptions` only gates enablement and rule-based fallback. Prefetch runs referenced tools (typically `mapping-predictor-tool`) through the orchestrator and `IToolGateway`; prefetch failures are non-fatal. Mapping preview accepts `includeDiagnostics: true`, optional `mappingAssistantAgentKey` / `mappingAssistantAgentVersionId`, and returns `ImportMappingSuggestionDiagnosticsResponse` with resolved agent key, governed context, prefetch output, runtime metadata, trace notes, and raw structured output. No `AgentRun` is persisted on the mapping preview path. Tool run safe summaries are capped for DB storage (`ToolSafeSummaryTruncator`, 1000 chars). Deferred contract: `hermes-v1`.
 - draft/approved/rejected mapping versions, with approved mappings immutable by service invariant and no update endpoint.
 - `POST /api/admin/imports/mappings/{mappingVersionId}/reject` for mapping rejection.
 - `ImportMappingLearningSignalInput` records emitted on mapping approve, reject, and corrected drafts via `IImportMappingLearningSignalEmitter`.
@@ -340,7 +340,7 @@ The agent-runtime module currently includes:
 - `PydanticAiRuntimeAdapter` HTTP adapter calling `ETOS.AgentRuntime` `/v1/execute` (structured JSON output, model fallback chain, optional `toolOutputSummariesJson` in prompts).
 - deferred `HermesRuntimeAdapter` and `LangGraphRuntimeAdapter` stubs.
 - governed agent execute/preview/test endpoints via `IAgentExecutionService` (Issue 23).
-- reuse by `PydanticAiMappingProvider` for import mapping preview (no `AgentRun`; preview mode only).
+- reuse by `PydanticAiMappingProvider` for import mapping preview through the shared preview orchestrator (no `AgentRun`; preview mode only; agent config from published `AgentVersion` or template fallback).
 
 Local sidecar: `ETOS.AgentRuntime/` (FastAPI). Supports OpenAI cloud and `openai-compatible` providers (LM Studio via `OPENAI_BASE_URL`). Deterministic mock output when no API key/base URL is configured.
 

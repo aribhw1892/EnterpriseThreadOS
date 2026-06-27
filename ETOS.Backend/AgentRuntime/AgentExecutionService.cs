@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using ETOS.Backend.AgentRuns;
 using ETOS.Backend.Agents;
+using ETOS.Backend.AgentTemplates;
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.AiTrace;
 using ETOS.Backend.Governance;
@@ -43,8 +44,7 @@ public sealed class AgentExecutionService(
     IAccessDenialRecorder denialRecorder,
     IAuditRecorder auditRecorder,
     IGovernedQueryService governedQueryService,
-    IToolGateway toolGateway,
-    IAgentRuntimeAdapterSelector adapterSelector,
+    IAgentRuntimePreviewOrchestrator previewOrchestrator,
     IOutputSchemaValidator outputSchemaValidator,
     IRecommendationFactory recommendationFactory,
     IAiTraceRecorder aiTraceRecorder) : IAgentExecutionService
@@ -158,53 +158,28 @@ public sealed class AgentExecutionService(
             var governedContextSummaryJson = BuildGovernedContextSummary(contextPackage, retrievalRun);
             agentRun.GovernedContextSummaryJson = governedContextSummaryJson;
 
-            var toolOutputSummaries = new List<object>();
-            foreach (var toolVersionId in payload.ReferencedToolDefinitionVersionIds ?? [])
+            var profile = await BuildExecutionProfileAsync(context.TenantId, version.Id, payload, cancellationToken);
+
+            var orchestratorResult = await previewOrchestrator.RunPreviewAsync(
+                profile,
+                new AgentRuntimePreviewInput(
+                    context.TenantId,
+                    context.UserId,
+                    governedContextSummaryJson,
+                    request.StructuredInputJson,
+                    isPreview || isDryRun,
+                    isDryRun,
+                    version.Id,
+                    agentRun.Id,
+                    _ => BuildToolInputJson(queryIntent.IntentKey, queryText, request)),
+                cancellationToken);
+
+            foreach (var prefetch in orchestratorResult.ToolPrefetchSummaries.Where(item => item.ToolRunId != Guid.Empty))
             {
-                var toolVersion = await dbContext.ArtifactVersions
-                    .AsNoTracking()
-                    .SingleOrDefaultAsync(item => item.Id == toolVersionId && item.TenantId == context.TenantId, cancellationToken)
-                    ?? throw new RequestValidationException($"Referenced tool version '{toolVersionId}' was not found.");
-
-                var toolInputJson = BuildToolInputJson(queryIntent.IntentKey, queryText, request);
-                var toolRequest = new ToolExecutionRequest(toolInputJson, agentRun.Id);
-                var toolResponse = isDryRun
-                    ? await toolGateway.DryRunAsync(toolVersion.ArtifactId, toolVersion.Id, toolRequest, cancellationToken)
-                    : await toolGateway.ExecuteAsync(toolVersion.ArtifactId, toolVersion.Id, toolRequest, cancellationToken);
-
-                toolRunIds.Add(toolResponse.ToolRunId);
-                validationNotes.AddRange(toolResponse.ValidationNotes);
-                toolOutputSummaries.Add(new
-                {
-                    toolDefinitionVersionId = toolVersion.Id,
-                    toolRunId = toolResponse.ToolRunId,
-                    status = toolResponse.Status,
-                    outputSafeSummaryJson = toolResponse.OutputSafeSummaryJson
-                });
+                toolRunIds.Add(prefetch.ToolRunId);
             }
 
-            var promptTemplatePayloadJson = await LoadArtifactPayloadAsync(context.TenantId, payload.PromptTemplateVersionId!.Value, cancellationToken);
-            var outputSchemaJson = await LoadArtifactPayloadAsync(context.TenantId, payload.OutputSchemaVersionId!.Value, cancellationToken);
-            var fallbackModelsJson = JsonSerializer.Serialize(payload.FallbackModels ?? [], JsonOptions);
-
-            var runtimeRequest = new AgentRuntimeExecutionRequest(
-                context.TenantId,
-                context.UserId,
-                payload.SourceAgentTemplateVersionId,
-                governedContextSummaryJson,
-                request.StructuredInputJson,
-                isPreview || isDryRun,
-                payload.PreferredRuntimeAdapterKey,
-                version.Id,
-                agentRun.Id,
-                promptTemplatePayloadJson,
-                outputSchemaJson,
-                payload.PrimaryModelProviderKey,
-                payload.PrimaryModelId,
-                fallbackModelsJson,
-                JsonSerializer.Serialize(toolOutputSummaries, JsonOptions));
-
-            var runtimeResult = await adapterSelector.ExecuteAsync(runtimeRequest, cancellationToken);
+            var runtimeResult = orchestratorResult.RuntimeResult;
             if (!string.Equals(runtimeResult.Status, AgentRuntimeExecutionStatuses.Succeeded, StringComparison.OrdinalIgnoreCase))
             {
                 var failureMessage = runtimeResult.TraceNotes.Count > 0
@@ -216,8 +191,8 @@ public sealed class AgentExecutionService(
             var structuredOutputJson = runtimeResult.StructuredOutputJson
                 ?? throw new RequestValidationException("Agent runtime did not return structured output.");
 
-            outputSchemaValidator.Validate(structuredOutputJson, outputSchemaJson);
-            GuardAgainstDecisionCreation(outputSchemaJson, structuredOutputJson);
+            outputSchemaValidator.Validate(structuredOutputJson, orchestratorResult.OutputSchemaJson);
+            GuardAgainstDecisionCreation(orchestratorResult.OutputSchemaJson, structuredOutputJson);
 
             agentRun.StructuredOutputJson = structuredOutputJson;
             agentRun.OutputSafeSummaryJson = BuildOutputSafeSummary(structuredOutputJson);
@@ -615,13 +590,29 @@ public sealed class AgentExecutionService(
         return false;
     }
 
-    private async Task<string> LoadArtifactPayloadAsync(Guid tenantId, Guid versionId, CancellationToken cancellationToken)
+    private async Task<AgentExecutionProfile> BuildExecutionProfileAsync(
+        Guid tenantId,
+        Guid agentVersionId,
+        AgentDefinitionPayloadParser.AgentDefinitionPayloadDocument payload,
+        CancellationToken cancellationToken)
     {
-        var version = await dbContext.ArtifactVersions
-            .AsNoTracking()
-            .SingleOrDefaultAsync(item => item.Id == versionId && item.TenantId == tenantId, cancellationToken)
-            ?? throw new RequestValidationException($"Referenced artifact version '{versionId}' was not found.");
-        return version.PayloadJson ?? "{}";
+        var patternCategory = "investigator";
+        if (payload.SourceAgentTemplateVersionId is Guid templateVersionId)
+        {
+            var templateVersion = await dbContext.ArtifactVersions
+                .AsNoTracking()
+                .SingleOrDefaultAsync(item => item.Id == templateVersionId && item.TenantId == tenantId, cancellationToken);
+            if (templateVersion?.PayloadJson is not null)
+            {
+                var template = AgentTemplateDefinitionPayloadParser.Deserialize(templateVersion.PayloadJson);
+                if (!string.IsNullOrWhiteSpace(template.PatternCategory))
+                {
+                    patternCategory = template.PatternCategory.Trim();
+                }
+            }
+        }
+
+        return AgentExecutionProfile.FromAgentPayload(payload.AgentKey!.Trim(), patternCategory, agentVersionId, payload);
     }
 
     private async Task<bool> HasAdminPermissionAsync(ActiveTenantContext context, CancellationToken cancellationToken)

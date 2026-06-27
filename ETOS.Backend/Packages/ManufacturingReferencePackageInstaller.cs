@@ -1,6 +1,8 @@
 using System.Text.Json;
 using ETOS.Backend.AgentRuntime;
 using ETOS.Backend.AgentTemplates;
+using ETOS.Backend.Agents;
+using ETOS.Backend.AgentTypes;
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.BusinessPolicies;
 using ETOS.Backend.Capabilities;
@@ -9,6 +11,7 @@ using ETOS.Backend.GovernedChat;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
+using ETOS.Backend.Imports;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.OptimizationModels;
 using ETOS.Backend.Ontology;
@@ -33,6 +36,8 @@ public sealed class ManufacturingReferencePackageInstaller(
     IToolDefinitionService toolDefinitionService,
     ISkillDefinitionService skillDefinitionService,
     IGovernedChatArtifactSeeder governedChatArtifactSeeder,
+    IImportMappingArtifactSeeder importMappingArtifactSeeder,
+    IAgentDefinitionService agentDefinitionService,
     EnterpriseThreadDbContext dbContext,
     ITenantContextResolver tenantContextResolver,
     IAccessPermissionService permissionService,
@@ -76,6 +81,7 @@ public sealed class ManufacturingReferencePackageInstaller(
         var toolVersions = await InstallToolsAsync(loaded, modelPackage.Id, capabilityVersions, connectorVersions, installedArtifacts, cancellationToken);
         await InstallSkillsAsync(loaded, toolVersions, installedArtifacts, cancellationToken);
         await InstallAgentTemplatesAsync(context, loaded, modelPackage.Id, capabilityVersions, toolVersions, installedArtifacts, cancellationToken);
+        await EnsureMappingAssistantAgentAsync(context, loaded, cancellationToken);
 
         await auditRecorder.RecordAsync(
             new AuditRecordWriteRequest(
@@ -486,6 +492,7 @@ public sealed class ManufacturingReferencePackageInstaller(
 
         var publish = new PublishArtifactVersionRequest("Published by reference package installer.");
         var chatArtifacts = await governedChatArtifactSeeder.EnsurePlatformArtifactsAsync(context, cancellationToken);
+        var mappingArtifacts = await importMappingArtifactSeeder.EnsurePlatformArtifactsAsync(context, cancellationToken);
         var queryIntentId = await EnsureQueryIntentAsync(context, cancellationToken);
         var retrievalStrategyId = await EnsureRetrievalStrategyAsync(context, cancellationToken);
         var optimizationVersions = await dbContext.Artifacts
@@ -511,6 +518,11 @@ public sealed class ManufacturingReferencePackageInstaller(
                     ?.Id;
             }
 
+            var isMappingAssistant = string.Equals(
+                template.PatternCategory,
+                "mapping-assistant",
+                StringComparison.OrdinalIgnoreCase);
+
             var created = await agentTemplateDefinitionService.CreateAsync(
                 new CreateAgentTemplateDefinitionRequest(
                     template.Name,
@@ -524,8 +536,8 @@ public sealed class ManufacturingReferencePackageInstaller(
                     template.ReferencedCapabilityKeys.Select(key => capabilityVersions[key]).ToList(),
                     null,
                     optimizationVersionId is null ? null : [optimizationVersionId.Value],
-                    chatArtifacts.PromptTemplate.VersionId,
-                    chatArtifacts.ChatAnswerSchema.VersionId,
+                    isMappingAssistant ? mappingArtifacts.PromptTemplate.VersionId : chatArtifacts.PromptTemplate.VersionId,
+                    isMappingAssistant ? mappingArtifacts.OutputSchema.VersionId : chatArtifacts.ChatAnswerSchema.VersionId,
                     queryIntentId,
                     retrievalStrategyId,
                     template.ReferencedToolKeys?.Select(key => toolVersions[key]).ToList(),
@@ -540,6 +552,102 @@ public sealed class ManufacturingReferencePackageInstaller(
                 created.ArtifactId,
                 created.VersionId));
         }
+    }
+
+    private async Task EnsureMappingAssistantAgentAsync(
+        ActiveTenantContext context,
+        LoadedReferencePackageManifest loaded,
+        CancellationToken cancellationToken)
+    {
+        const string mappingAgentKey = "import-mapping-assistant";
+        var mappingTemplate = loaded.AgentTemplates.FirstOrDefault(item =>
+            string.Equals(item.TemplateKey, mappingAgentKey, StringComparison.OrdinalIgnoreCase));
+        if (mappingTemplate is null)
+        {
+            return;
+        }
+
+        var existingAgent = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .Where(item => item.TenantId == context.TenantId
+                && item.ReadinessState == ArtifactReadinessState.Published
+                && item.Artifact!.NormalizedArtifactType == AgentDefinitionArtifactTypes.AgentVersion.ToUpperInvariant())
+            .ToListAsync(cancellationToken);
+
+        foreach (var version in existingAgent)
+        {
+            var payload = AgentDefinitionPayloadParser.Deserialize(version.PayloadJson ?? "{}");
+            if (string.Equals(payload.AgentKey, mappingAgentKey, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+        }
+
+        var templateVersion = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .Where(item => item.TenantId == context.TenantId
+                && item.ReadinessState == ArtifactReadinessState.Published
+                && item.Artifact!.NormalizedArtifactType == AgentTemplateDefinitionArtifactTypes.AgentTemplate.ToUpperInvariant())
+            .ToListAsync(cancellationToken);
+
+        Guid? sourceTemplateVersionId = null;
+        foreach (var version in templateVersion)
+        {
+            var templatePayload = AgentTemplateDefinitionPayloadParser.Deserialize(version.PayloadJson ?? "{}");
+            if (string.Equals(templatePayload.TemplateKey, mappingAgentKey, StringComparison.OrdinalIgnoreCase))
+            {
+                sourceTemplateVersionId = version.Id;
+                break;
+            }
+        }
+
+        if (sourceTemplateVersionId is null)
+        {
+            return;
+        }
+
+        var agentTypeVersionId = await TryResolveDefaultAgentTypeVersionIdAsync(context.TenantId, cancellationToken);
+        if (agentTypeVersionId is null)
+        {
+            return;
+        }
+
+        var providerKey = mappingTemplate.CompositionMetadata?.GetValueOrDefault("primaryModelProviderKey") ?? "openai";
+        var modelId = mappingTemplate.CompositionMetadata?.GetValueOrDefault("primaryModelId") ?? "gpt-4o-mini";
+
+        var created = await agentDefinitionService.CreateFromTemplateAsync(
+            new CreateAgentFromTemplateRequest(
+                sourceTemplateVersionId.Value,
+                mappingAgentKey,
+                mappingTemplate.Name,
+                mappingTemplate.Description,
+                agentTypeVersionId,
+                providerKey,
+                modelId),
+            cancellationToken);
+        await agentDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
+        await agentDefinitionService.PublishAsync(
+            created.ArtifactId,
+            created.VersionId,
+            new PublishArtifactVersionRequest("Published by reference package installer."),
+            cancellationToken);
+    }
+
+    private async Task<Guid?> TryResolveDefaultAgentTypeVersionIdAsync(Guid tenantId, CancellationToken cancellationToken)
+    {
+        var version = await (
+            from artifact in dbContext.Artifacts.AsNoTracking()
+            join artifactVersion in dbContext.ArtifactVersions.AsNoTracking() on artifact.Id equals artifactVersion.ArtifactId
+            where artifact.TenantId == tenantId
+                && artifact.NormalizedArtifactType == AgentTypeDefinitionArtifactTypes.AgentTypeDefinition.ToUpperInvariant()
+                && artifactVersion.ReadinessState == ArtifactReadinessState.Published
+            orderby artifactVersion.PublishedAt descending, artifactVersion.CreatedAt descending
+            select artifactVersion)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return version?.Id;
     }
 
     private async Task<Guid> EnsureQueryIntentAsync(ActiveTenantContext context, CancellationToken cancellationToken)

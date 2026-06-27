@@ -2,6 +2,7 @@ namespace ETOS.Backend.Imports.MappingSuggestions;
 
 public sealed record ImportMappingSuggestionDiagnostics(
     string ProviderKey,
+    string? ResolvedAgentKey,
     bool RuntimeCalled,
     string? RuntimeAdapterKey,
     string? RuntimeStatus,

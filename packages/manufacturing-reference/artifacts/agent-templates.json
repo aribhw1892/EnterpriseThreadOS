@@ -13,5 +13,23 @@
     "retrievalStrategyKey": "trusted-graph-first",
     "compositionMetadata": { "mode": "analysis" },
     "futureExtensionPlaceholders": []
+  },
+  {
+    "templateKey": "import-mapping-assistant",
+    "name": "Import Mapping Assistant",
+    "description": "Suggest governed CSV column and lifecycle mappings using ontology context and deterministic prefetch hints.",
+    "patternCategory": "mapping-assistant",
+    "patternSummary": "Suggest governed CSV column and lifecycle mappings using ontology context and deterministic prefetch hints.",
+    "preferredRuntimeAdapterKey": "pydantic-ai-v1",
+    "referencedCapabilityKeys": ["import-mapping-assistance"],
+    "referencedToolKeys": ["mapping-predictor-tool"],
+    "queryIntentKey": "object-360-context",
+    "retrievalStrategyKey": "trusted-graph-first",
+    "compositionMetadata": {
+      "mode": "import-mapping",
+      "primaryModelProviderKey": "openai-compatible",
+      "primaryModelId": "local-model"
+    },
+    "futureExtensionPlaceholders": []
   }
 ]

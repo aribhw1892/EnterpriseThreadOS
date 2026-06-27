@@ -160,6 +160,9 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IAiTraceRecorder, AiTraceRecorder>();
         services.AddScoped<IAiTraceService, AiTraceService>();
         services.AddScoped<IGovernedChatArtifactSeeder, GovernedChatArtifactSeeder>();
+        services.AddScoped<IImportMappingArtifactSeeder, ImportMappingArtifactSeeder>();
+        services.AddScoped<IAgentExecutionProfileResolver, AgentExecutionProfileResolver>();
+        services.AddScoped<IAgentRuntimePreviewOrchestrator, AgentRuntimePreviewOrchestrator>();
         services.AddScoped<IOutputSchemaValidator, OutputSchemaValidator>();
         services.AddScoped<IChatArtifactDraftBuilder, ChatArtifactDraftBuilder>();
         services.AddScoped<IGovernedChatService, GovernedChatService>();

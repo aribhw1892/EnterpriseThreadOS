@@ -161,7 +161,9 @@ public sealed class ImportService(
                 parsed.Rows.Take(sampleRowLimit).ToList(),
                 modelContext.Resolved,
                 request.SuggestionProviderKey,
-                request.IncludeDiagnostics),
+                request.IncludeDiagnostics,
+                request.MappingAssistantAgentKey,
+                request.MappingAssistantAgentVersionId),
             cancellationToken);
 
         return new ImportPreviewResponse(
@@ -1187,6 +1189,7 @@ public sealed class ImportService(
 
         return new ImportMappingSuggestionDiagnosticsResponse(
             diagnostics.ProviderKey,
+            diagnostics.ResolvedAgentKey,
             diagnostics.RuntimeCalled,
             diagnostics.RuntimeAdapterKey,
             diagnostics.RuntimeStatus,

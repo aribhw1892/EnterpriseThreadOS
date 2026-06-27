@@ -75,7 +75,7 @@ Environment:
 
 - `AGENT_RUNTIME_PORT`: host port mapped in Docker Compose (default `8010`).
 - `OPENAI_API_KEY`: optional passthrough for live PydanticAI/OpenAI calls. When unset, `/v1/execute` returns deterministic structured output that matches the supplied output JSON schema (used by pytest and local .NET adapter tests).
-- `OPENAI_BASE_URL`: optional base URL for local OpenAI-compatible servers such as LM Studio. Use with `PrimaryModelProviderKey: openai-compatible` in `ImportMappingSuggestions` or agent runtime model config. A placeholder key such as `lm-studio` is sufficient when the local server does not enforce authentication.
+- `OPENAI_BASE_URL`: optional base URL for local OpenAI-compatible servers such as LM Studio. Mapping and governed agents select `openai` vs `openai-compatible` per published `AgentVersion`, not via appsettings. Keep both a real `OPENAI_API_KEY` and `OPENAI_BASE_URL` in `.env` when switching providers locally without restarting services.
 
 Docker Compose passes both `OPENAI_API_KEY` and `OPENAI_BASE_URL` into the `agent-runtime` service. When LM Studio runs on the **host** (not in Docker), set in `.env`:
 
@@ -90,16 +90,20 @@ The .NET backend reads `AgentRuntime:BaseUrl` (for example `http://localhost:801
 
 ### LLM-assisted import mapping (local)
 
-Development defaults in `ETOS.Backend/appsettings.Development.json` enable `ImportMappingSuggestions` with provider `pydantic-ai-v1`, `openai-compatible` model routing, optional prefetch via `mapping-predictor-tool`, and `FallbackToRuleBasedOnRuntimeFailure: true`. Production/base config in `appsettings.json` keeps `ImportMappingSuggestions:Enabled` false and default provider `rule-based-v1`.
+Development defaults in `ETOS.Backend/appsettings.Development.json` enable `ImportMappingSuggestions` with provider `pydantic-ai-v1` and `FallbackToRuleBasedOnRuntimeFailure: true`. Production/base config in `appsettings.json` keeps `ImportMappingSuggestions:Enabled` false and default provider `rule-based-v1`.
 
-Set `PrimaryModelId` in Development config to the model id LM Studio exposes (for example `google/gemma-3-1b`), not a placeholder name.
+**Model routing is configured on the tenant mapping assistant agent**, not in appsettings. After installing the manufacturing reference package, open `/agents/import-mapping-assistant/configure` (or the agent key from the model package import profile) and set `primaryModelProviderKey` / `primaryModelId` on the published `AgentVersion`. Changes apply on the next mapping preview without restarting the backend or Docker stack.
 
-Example `.env` for LM Studio on the host with agent-runtime in Docker:
+Keep both real OpenAI credentials and LM Studio `OPENAI_BASE_URL` in `.env` when you switch between cloud and local models. Per-request routing uses the agent's `primaryModelProviderKey` (`openai` vs `openai-compatible`).
+
+Example `.env` for LM Studio on the host with agent-runtime in Docker (you can keep a real `OPENAI_API_KEY` alongside this for fallback):
 
 ```env
 OPENAI_API_KEY=lm-studio
 OPENAI_BASE_URL=http://host.docker.internal:1234/v1
 ```
+
+Set the agent's `primaryModelId` to the model id LM Studio exposes (for example `google/gemma-3-1b`), not a placeholder name.
 
 Reinstall the manufacturing reference package after pulling tool seed changes so tenants receive `mapping-predictor-tool` for optional prefetch hints:
 

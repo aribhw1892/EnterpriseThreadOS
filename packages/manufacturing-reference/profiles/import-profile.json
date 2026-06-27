@@ -1,5 +1,6 @@
 {
   "defaultBomRelationshipType": "contains",
+  "mappingAssistantAgentKey": "import-mapping-assistant",
   "parentColumnSynonyms": ["parent", "parentPart", "parent_part", "assembly", "assemblyNumber"],
   "childColumnSynonyms": ["child", "childPart", "child_part", "component", "componentNumber", "item"],
   "quantityColumnSynonyms": ["quantity", "qty"],

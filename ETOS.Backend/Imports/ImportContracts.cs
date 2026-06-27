@@ -60,7 +60,9 @@ public sealed record ImportPreviewRequest(
     Guid? EvidenceId,
     int SampleRowLimit,
     string? SuggestionProviderKey = null,
-    bool IncludeDiagnostics = false);
+    bool IncludeDiagnostics = false,
+    string? MappingAssistantAgentKey = null,
+    Guid? MappingAssistantAgentVersionId = null);
 
 public sealed record ImportPreviewResponse(
     Guid BatchId,
@@ -77,6 +79,7 @@ public sealed record ImportPreviewResponse(
 
 public sealed record ImportMappingSuggestionDiagnosticsResponse(
     string ProviderKey,
+    string? ResolvedAgentKey,
     bool RuntimeCalled,
     string? RuntimeAdapterKey,
     string? RuntimeStatus,
