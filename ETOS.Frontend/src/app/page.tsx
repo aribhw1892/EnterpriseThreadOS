@@ -462,6 +462,18 @@ export default async function Home() {
                 Agents
               </Link>
               <Link
+                href="/agent-runs"
+                className="rounded-full border border-cyan-300 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"
+              >
+                Agent runs
+              </Link>
+              <Link
+                href="/tools"
+                className="rounded-full border border-cyan-300 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"
+              >
+                Tools
+              </Link>
+              <Link
                 href="/documents"
                 className="rounded-full border border-cyan-300 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"
               >

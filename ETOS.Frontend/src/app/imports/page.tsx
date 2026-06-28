@@ -33,6 +33,7 @@ import {
   validateLatestImportBatch,
 } from "@/lib/etos-api";
 import { MappingAgentDebugPanel } from "@/components/imports/MappingAgentDebugPanel";
+import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
@@ -664,6 +665,11 @@ export default async function ImportsPage({ searchParams }: PageProps) {
                 Upload evidence through the imports API, approve deterministic mapping versions, validate CSV rows,
                 and create untrusted staging graph records before later review slices promote trust.
               </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <ExplorerNavLink href="/agents/import-mapping-assistant/configure">Mapping agent</ExplorerNavLink>
+              <ExplorerNavLink href="/agents">Agents</ExplorerNavLink>
+              <ExplorerNavLink href="/">Home</ExplorerNavLink>
             </div>
           </div>
           <div className="mt-5 grid gap-2 text-xs text-slate-500 md:grid-cols-2">

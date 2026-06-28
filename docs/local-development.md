@@ -92,7 +92,7 @@ The .NET backend reads `AgentRuntime:BaseUrl` (for example `http://localhost:801
 
 Development defaults in `ETOS.Backend/appsettings.Development.json` enable `ImportMappingSuggestions` with provider `pydantic-ai-v1` and `FallbackToRuleBasedOnRuntimeFailure: true`. Production/base config in `appsettings.json` keeps `ImportMappingSuggestions:Enabled` false and default provider `rule-based-v1`.
 
-**Model routing is configured on the tenant mapping assistant agent**, not in appsettings. After installing the manufacturing reference package, open `/agents/import-mapping-assistant/configure` (or the agent key from the model package import profile) and set `primaryModelProviderKey` / `primaryModelId` on the published `AgentVersion`. Changes apply on the next mapping preview without restarting the backend or Docker stack.
+**Model routing is configured on the tenant mapping assistant agent**, not in appsettings. After installing the manufacturing reference package, open `/agents/import-mapping-assistant/configure` (or the agent key from the model package import profile). Use **Model routing** on that page to set `primaryModelProviderKey`, `primaryModelId`, and optional fallback models. Saving on a published version creates a new draft (for example `1.0.1`); use **Mark ready** then **Publish** to activate the change. No backend or Docker restart is required once the new version is published.
 
 Keep both real OpenAI credentials and LM Studio `OPENAI_BASE_URL` in `.env` when you switch between cloud and local models. Per-request routing uses the agent's `primaryModelProviderKey` (`openai` vs `openai-compatible`).
 
@@ -103,13 +103,26 @@ OPENAI_API_KEY=lm-studio
 OPENAI_BASE_URL=http://host.docker.internal:1234/v1
 ```
 
-Set the agent's `primaryModelId` to the model id LM Studio exposes (for example `google/gemma-3-1b`), not a placeholder name.
+Set the agent's `primaryModelId` to the model id LM Studio exposes (for example `google/gemma-3-1b`), not the package seed placeholder `local-model`.
 
-Reinstall the manufacturing reference package after pulling tool seed changes so tenants receive `mapping-predictor-tool` for optional prefetch hints:
+#### Default model id (`local-model`)
+
+A fresh reference-package install seeds the tenant `import-mapping-assistant` agent from [`packages/manufacturing-reference/artifacts/agent-templates.json`](../packages/manufacturing-reference/artifacts/agent-templates.json) with `primaryModelProviderKey: openai-compatible` and `primaryModelId: local-model`. The configure page displays whatever is stored on the published tenant `AgentVersion` payload—it does not read the model currently loaded in LM Studio. Loading `google/gemma-3-1b` in LM Studio only affects the local server reached through `OPENAI_BASE_URL`; ETOS still sends the agent's configured model id on each LLM call until you update **Primary model id** on the configure page and **Mark ready** → **Publish**. Use **Mapping Agent Debug** on `/imports` with diagnostics enabled to verify the resolved provider/model at runtime.
+
+#### Reference package reinstall and recovery
+
+Re-running `POST /api/admin/development/install-reference-package` is safe when the model package is already published. The installer ensures missing reference artifacts for the tenant—analysis agent type, capabilities, connectors, tools, agent templates, and the `import-mapping-assistant` tenant agent—without republishing an unchanged model package. UI entry points:
+
+- **Create seed model package** on `/model-artifacts`
+- **Install / ensure reference package** on `/agents/import-mapping-assistant/configure` when the tenant agent is missing
+
+Reinstall after pulling reference-package seed changes (for example new tools such as `mapping-predictor-tool`) so tenants receive missing artifacts:
 
 ```powershell
 POST http://localhost:5000/api/admin/development/install-reference-package
 ```
+
+If **Clean demo dataset** on the home page removed governed artifacts but left the published model package row, use one of the reinstall actions above. Restart the backend after pulling installer changes so development seeders and the updated ensure logic are loaded.
 
 Mapping preview API:
 
@@ -249,7 +262,9 @@ Pop-Location
 
 Open `http://localhost:3000`.
 
-Open `http://localhost:3000/model-artifacts` to inspect and seed the manufacturing reference model package. The `Create seed model package` action calls `POST /api/admin/development/install-reference-package` with package key `etos-manufacturing-reference`, publishing ontology layers, import/query profiles, and governed capability/policy/optimization/agent-template seeds from [`packages/manufacturing-reference/`](../packages/manufacturing-reference/). Re-running the action is idempotent for the same tenant.
+Open `http://localhost:3000/model-artifacts` to inspect and seed the manufacturing reference model package. The `Create seed model package` action calls `POST /api/admin/development/install-reference-package` with package key `etos-manufacturing-reference`, publishing ontology layers, import/query profiles, and governed capability/policy/optimization/agent-template seeds from [`packages/manufacturing-reference/`](../packages/manufacturing-reference/). Re-running the action is safe for the same tenant: when the model package is already published, the installer ensures missing reference artifacts and the tenant mapping assistant agent without republishing the package.
+
+Open `http://localhost:3000/agents/import-mapping-assistant/configure` to edit mapping-assistant model routing (`openai` vs `openai-compatible`, primary model id, fallbacks). See [LLM-assisted import mapping (local)](#llm-assisted-import-mapping-local) above.
 
 Open `http://localhost:3000/imports` to inspect import batches and run import/identity demo flows. The **Mapping Agent Debug** panel runs mapping preview with diagnostics (runtime call, prefetch tool output, governed context, structured input/output) without creating a draft mapping. The recommended `Run identity demo` button creates two CSV-backed source batches, approves their generated mapping drafts, validates records, stages unverified graph nodes for both batches, and generates identity candidates with trust score breakdowns. The manual tools on the page intentionally operate on the newest batch only and are meant for step-by-step debugging. Multipart upload is supported by the backend API at `/api/admin/imports/batches/{batchId}/files`; the UI intentionally keeps upload behavior small because Next.js server actions have body-size limits.
 

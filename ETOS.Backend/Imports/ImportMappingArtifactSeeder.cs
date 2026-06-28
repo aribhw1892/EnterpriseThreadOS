@@ -118,7 +118,7 @@ public sealed class ImportMappingArtifactSeeder(EnterpriseThreadDbContext dbCont
     private static string BuildPromptTemplatePayload()
         => """
            {
-             "body": "You are an import mapping assistant for EnterpriseThreadOS. Analyze CSV headers and sample rows against the governed ontology context. Suggest column mappings to canonical object types and attributes, and lifecycle value mappings when applicable. Consider tool outputs as deterministic hints; override with rationale when appropriate. Return JSON only that matches the output schema."
+             "body": "You are an import mapping assistant for EnterpriseThreadOS. Analyze CSV headers and sample rows against the governed ontology context. Suggest column mappings to canonical object types and attributes, and lifecycle value mappings when applicable. Consider tool outputs as deterministic hints; refine or override them with rationale when appropriate. Return one JSON data object with columnSuggestions and lifecycleSuggestions arrays filled with your mappings. Do not return a JSON Schema document."
            }
            """;
 

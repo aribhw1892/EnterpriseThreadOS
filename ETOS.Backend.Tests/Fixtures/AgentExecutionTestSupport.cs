@@ -211,6 +211,29 @@ internal static class AgentExecutionTestSupport
         return publish;
     }
 
+    internal static async Task<UpdateAgentModelConfigResponse> UpdateAgentModelConfigAsync(
+        HttpClient client,
+        Guid tenantId,
+        Guid userId,
+        Guid artifactId,
+        Guid versionId,
+        UpdateAgentModelConfigRequest request)
+    {
+        using var httpRequest = new HttpRequestMessage(
+            HttpMethod.Post,
+            $"/api/admin/agents/{artifactId}/versions/{versionId}/model-config")
+        {
+            Content = JsonContent.Create(request)
+        };
+        AddTenantHeaders(httpRequest, tenantId, userId);
+
+        var response = await client.SendAsync(httpRequest);
+        var updated = await response.Content.ReadFromJsonAsync<UpdateAgentModelConfigResponse>();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+        Assert.NotNull(updated);
+        return updated;
+    }
+
     internal static async Task<AgentExecutionResponse> PreviewAgentAsync(
         HttpClient client,
         Guid tenantId,

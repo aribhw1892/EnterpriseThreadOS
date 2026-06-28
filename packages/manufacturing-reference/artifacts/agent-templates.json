@@ -28,7 +28,7 @@
     "compositionMetadata": {
       "mode": "import-mapping",
       "primaryModelProviderKey": "openai-compatible",
-      "primaryModelId": "local-model"
+      "primaryModelId": "google/gemma-3-1b"
     },
     "futureExtensionPlaceholders": []
   }

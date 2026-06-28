@@ -145,8 +145,22 @@ def _generate_deterministic_output(
     return output
 
 
-def _extract_json_object(text: str) -> dict[str, Any]:
+def _strip_markdown_fence(text: str) -> str:
     stripped = text.strip()
+    if not stripped.startswith("```"):
+        return stripped
+    stripped = re.sub(r"^```(?:json)?\s*", "", stripped, flags=re.IGNORECASE)
+    return re.sub(r"\s*```$", "", stripped).strip()
+
+
+def _looks_like_json_schema_document(output: dict[str, Any]) -> bool:
+    if "properties" not in output:
+        return False
+    return "type" in output or "required" in output
+
+
+def _extract_json_object(text: str) -> dict[str, Any]:
+    stripped = _strip_markdown_fence(text)
     if not stripped:
         raise ValueError("Model returned empty output.")
 
@@ -167,11 +181,22 @@ def _extract_json_object(text: str) -> dict[str, Any]:
 
 
 def _validate_required_fields(output: dict[str, Any], schema: dict[str, Any]) -> None:
+    if _looks_like_json_schema_document(output):
+        raise ValueError(
+            "Model returned a JSON Schema document instead of task data. "
+            "Return a data object with the required fields filled in, "
+            "not a schema with properties/type/required at the root."
+        )
+
     required = schema.get("required", [])
     missing = [name for name in required if name not in output]
     if missing:
         joined = ", ".join(missing)
-        raise ValueError(f"Structured output missing required fields: {joined}")
+        received = ", ".join(sorted(output.keys())) or "(empty object)"
+        raise ValueError(
+            f"Structured output missing required fields: {joined}. "
+            f"Received top-level keys: {received}."
+        )
 
 
 async def _run_with_model(
@@ -194,14 +219,21 @@ async def _run_with_model(
         model,
         system_prompt=(
             "You are a governed EnterpriseThreadOS agent. "
-            "Return only JSON matching the requested output schema. "
+            "Respond with one JSON object containing task DATA values only. "
+            "Never return a JSON Schema document (no root-level properties, type, or required). "
             "Do not execute tools or access databases."
         ),
     )
+    example_output = _generate_deterministic_output(schema, structured_input)
+    example_json = json.dumps(example_output, indent=2, sort_keys=True)
     schema_instruction = json.dumps(schema, indent=2, sort_keys=True)
     user_prompt = (
         f"{prompt}\n\n"
-        "Output JSON schema (respond with JSON only):\n"
+        "Return ONE JSON object with your analysis as DATA values.\n"
+        "Do NOT return the JSON Schema. Do NOT wrap the answer in markdown code fences.\n\n"
+        "Example response shape (replace mock values with your analysis):\n"
+        f"{example_json}\n\n"
+        "Field definitions (reference only — do not return this schema document):\n"
         f"{schema_instruction}"
     )
     result = await agent.run(user_prompt)

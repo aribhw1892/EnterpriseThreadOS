@@ -64,6 +64,8 @@ POST /api/admin/development/install-reference-package
 { "packageKey": "etos-manufacturing-reference" }
 ```
 
+Safe to re-run when the model package is already published: the installer ensures missing reference artifacts and the tenant `import-mapping-assistant` agent without republishing the package.
+
 When `SeedIdentity:InstallReferencePackage` is true (default in Development), the backend seeds the reference package for the development tenant on startup.
 
 ## Adding a new domain package

@@ -275,6 +275,18 @@ public sealed record PublishAgentDefinitionResponse(
     Guid ArtifactId,
     Guid VersionId);
 
+public sealed record UpdateAgentModelConfigRequest(
+    string PrimaryModelProviderKey,
+    string PrimaryModelId,
+    IReadOnlyCollection<AgentFallbackModelRequest>? FallbackModels);
+
+public sealed record UpdateAgentModelConfigResponse(
+    Guid ArtifactId,
+    Guid VersionId,
+    string VersionLabel,
+    string ReadinessState,
+    bool CreatedNewVersion);
+
 public static class AgentMvpBlockedRuntimeAdapters
 {
     public static readonly IReadOnlyCollection<string> All =

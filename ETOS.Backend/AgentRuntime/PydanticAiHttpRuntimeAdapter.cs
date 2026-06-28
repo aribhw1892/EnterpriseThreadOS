@@ -43,12 +43,25 @@ public sealed class PydanticAiRuntimeAdapter(
         var body = await response.Content.ReadFromJsonAsync<ExecuteHttpResponse>(JsonOptions, cancellationToken)
             ?? throw new RequestValidationException("Agent runtime returned an empty response.");
 
-        if (!response.IsSuccessStatusCode && !string.Equals(body.Status, AgentRuntimeExecutionStatuses.Succeeded, StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(body.Status, AgentRuntimeExecutionStatuses.Succeeded, StringComparison.OrdinalIgnoreCase))
         {
-            var detail = body.TraceNotes.Count > 0
-                ? string.Join(" ", body.TraceNotes)
-                : $"Agent runtime request failed with status {(int)response.StatusCode}.";
-            throw new RequestValidationException(detail);
+            var traceNotes = body.TraceNotes.Count > 0
+                ? body.TraceNotes
+                : [$"Agent runtime request failed with status {(int)response.StatusCode}."];
+
+            return new AgentRuntimeExecutionResult(
+                AdapterKey,
+                body.Status,
+                body.StructuredOutputJson,
+                traceNotes,
+                body.ModelUsed,
+                null);
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new RequestValidationException(
+                $"Agent runtime request failed with status {(int)response.StatusCode}.");
         }
 
         var fallbackAppliedJson = body.FallbackApplied

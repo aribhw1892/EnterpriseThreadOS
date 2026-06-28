@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ETOS.Backend.AgentRuntime;
 using ETOS.Backend.AgentRuns;
 using ETOS.Backend.AgentTemplates;
 using ETOS.Backend.AgentTypes;
@@ -35,6 +36,11 @@ public interface IAgentDefinitionService
         Guid artifactId,
         Guid versionId,
         PublishArtifactVersionRequest request,
+        CancellationToken cancellationToken);
+    Task<UpdateAgentModelConfigResponse> UpdateModelConfigAsync(
+        Guid artifactId,
+        Guid versionId,
+        UpdateAgentModelConfigRequest request,
         CancellationToken cancellationToken);
 }
 
@@ -462,6 +468,145 @@ public sealed class AgentDefinitionService(
             result.BlockingReasons,
             artifactId,
             versionId);
+    }
+
+    public async Task<UpdateAgentModelConfigResponse> UpdateModelConfigAsync(
+        Guid artifactId,
+        Guid versionId,
+        UpdateAgentModelConfigRequest request,
+        CancellationToken cancellationToken)
+    {
+        var context = await RequireCreatePermissionAsync(cancellationToken);
+        var (artifact, version) = await RequireVersionAsync(artifactId, versionId, "agents.model-config.update", cancellationToken);
+        ValidateModelConfigRequest(request);
+
+        var document = AgentDefinitionPayloadParser.Deserialize(version.PayloadJson ?? "{}");
+        ApplyModelConfig(document, request);
+        AgentDefinitionPayloadParser.ValidateCore(document);
+
+        if (version.ReadinessState == ArtifactReadinessState.Draft)
+        {
+            await RequireDraftOwnerOrAdminAsync(context, version, "agents.model-config.update", cancellationToken);
+            version.PayloadJson = AgentDefinitionPayloadParser.Serialize(document);
+            artifact.UpdatedAt = DateTimeOffset.UtcNow;
+            await dbContext.SaveChangesAsync(cancellationToken);
+
+            await auditRecorder.RecordAsync(
+                new AuditRecordWriteRequest(
+                    context.TenantId,
+                    context.UserId,
+                    "agents.model-config.update",
+                    AuditResult.Success,
+                    null,
+                    $"Agent version '{version.VersionLabel}' model config was updated in place.",
+                    nameof(ArtifactVersion),
+                    version.Id.ToString(),
+                    RetentionCategory: AuditRetentionCategory.Operational),
+                cancellationToken);
+
+            return new UpdateAgentModelConfigResponse(
+                artifact.Id,
+                version.Id,
+                version.VersionLabel,
+                version.ReadinessState.ToString(),
+                CreatedNewVersion: false);
+        }
+
+        if (version.ReadinessState is ArtifactReadinessState.Published
+            or ArtifactReadinessState.Ready
+            or ArtifactReadinessState.Blocked)
+        {
+            document.CreatedByUserId = context.UserId;
+            document.DerivedCapabilityRiskJson = null;
+
+            var existingLabels = await dbContext.ArtifactVersions
+                .AsNoTracking()
+                .Where(item => item.ArtifactId == artifactId)
+                .Select(item => item.VersionLabel)
+                .ToListAsync(cancellationToken);
+            var versionLabel = AgentVersionLabelBuilder.NextVersionLabel(version.VersionLabel, existingLabels);
+
+            var newVersion = new ArtifactVersion
+            {
+                Id = Guid.NewGuid(),
+                TenantId = context.TenantId,
+                ArtifactId = artifact.Id,
+                VersionLabel = versionLabel,
+                NormalizedVersionLabel = versionLabel.ToUpperInvariant(),
+                Summary = version.Summary,
+                PayloadJson = AgentDefinitionPayloadParser.Serialize(document),
+                ReadinessState = ArtifactReadinessState.Draft,
+                CreatedByUserId = context.UserId,
+                CreatedAt = DateTimeOffset.UtcNow
+            };
+
+            artifact.UpdatedAt = DateTimeOffset.UtcNow;
+            dbContext.ArtifactVersions.Add(newVersion);
+            await dbContext.SaveChangesAsync(cancellationToken);
+
+            await auditRecorder.RecordAsync(
+                new AuditRecordWriteRequest(
+                    context.TenantId,
+                    context.UserId,
+                    "agents.model-config.update",
+                    AuditResult.Success,
+                    null,
+                    $"Agent version '{newVersion.VersionLabel}' was created as a draft with updated model config.",
+                    nameof(ArtifactVersion),
+                    newVersion.Id.ToString(),
+                    RetentionCategory: AuditRetentionCategory.Operational),
+                cancellationToken);
+
+            return new UpdateAgentModelConfigResponse(
+                artifact.Id,
+                newVersion.Id,
+                newVersion.VersionLabel,
+                newVersion.ReadinessState.ToString(),
+                CreatedNewVersion: true);
+        }
+
+        throw new RequestValidationException(
+            $"Version readiness is {version.ReadinessState} and cannot receive model config updates.");
+    }
+
+    private static void ValidateModelConfigRequest(UpdateAgentModelConfigRequest request)
+    {
+        AgentModelProviderKeys.Validate(request.PrimaryModelProviderKey);
+
+        if (string.IsNullOrWhiteSpace(request.PrimaryModelId))
+        {
+            throw new RequestValidationException("primaryModelId is required.");
+        }
+
+        foreach (var fallback in request.FallbackModels ?? [])
+        {
+            AgentModelProviderKeys.Validate(fallback.ProviderKey);
+            if (string.IsNullOrWhiteSpace(fallback.ModelId))
+            {
+                throw new RequestValidationException("fallback modelId is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(fallback.TriggerReason))
+            {
+                throw new RequestValidationException("fallback triggerReason is required.");
+            }
+        }
+    }
+
+    private static void ApplyModelConfig(
+        AgentDefinitionPayloadParser.AgentDefinitionPayloadDocument document,
+        UpdateAgentModelConfigRequest request)
+    {
+        document.PrimaryModelProviderKey = request.PrimaryModelProviderKey.Trim();
+        document.PrimaryModelId = request.PrimaryModelId.Trim();
+        document.FallbackModels = (request.FallbackModels ?? [])
+            .Select(item => new AgentDefinitionPayloadParser.FallbackModelDocument
+            {
+                ProviderKey = item.ProviderKey.Trim(),
+                ModelId = item.ModelId.Trim(),
+                TriggerReason = item.TriggerReason.Trim()
+            })
+            .ToList();
     }
 
     private async Task<CreateAgentDefinitionResponse> PersistNewAgentAsync(

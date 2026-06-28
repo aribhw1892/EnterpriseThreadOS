@@ -550,16 +550,17 @@ public sealed class ArtifactRegistryService(
                 dbContext.Artifacts,
                 relationship => relationship.TargetArtifactId,
                 artifact => artifact.Id,
-                (relationship, artifact) => new ArtifactRelationshipResponse(
-                    relationship.Id,
-                    relationship.TenantId,
-                    relationship.SourceArtifactId,
-                    relationship.TargetArtifactId,
-                    artifact.Name,
-                    relationship.RelationshipType,
-                    relationship.Description,
-                    relationship.CreatedAt))
-            .OrderBy(relationship => relationship.TargetArtifactName);
+                (relationship, artifact) => new { relationship, artifact })
+            .OrderBy(pair => pair.artifact.Name)
+            .Select(pair => new ArtifactRelationshipResponse(
+                pair.relationship.Id,
+                pair.relationship.TenantId,
+                pair.relationship.SourceArtifactId,
+                pair.relationship.TargetArtifactId,
+                pair.artifact.Name,
+                pair.relationship.RelationshipType,
+                pair.relationship.Description,
+                pair.relationship.CreatedAt));
     }
 
     private IQueryable<ArtifactDependencyResponse> DependenciesQuery(Guid tenantId, Guid versionId)
@@ -576,18 +577,19 @@ public sealed class ArtifactRegistryService(
                 dbContext.ArtifactVersions,
                 pair => pair.dependency.RequiredVersionId,
                 version => version.Id,
-                (pair, version) => new ArtifactDependencyResponse(
-                    pair.dependency.Id,
-                    pair.dependency.TenantId,
-                    pair.dependency.DependentVersionId,
-                    pair.dependency.RequiredArtifactId,
-                    pair.artifact.Name,
-                    pair.dependency.RequiredVersionId,
-                    version.VersionLabel,
-                    version.ReadinessState,
-                    pair.dependency.DependencyKind,
-                    pair.dependency.CreatedAt))
-            .OrderBy(dependency => dependency.RequiredArtifactName);
+                (pair, version) => new { pair, version })
+            .OrderBy(item => item.pair.artifact.Name)
+            .Select(item => new ArtifactDependencyResponse(
+                item.pair.dependency.Id,
+                item.pair.dependency.TenantId,
+                item.pair.dependency.DependentVersionId,
+                item.pair.dependency.RequiredArtifactId,
+                item.pair.artifact.Name,
+                item.pair.dependency.RequiredVersionId,
+                item.version.VersionLabel,
+                item.version.ReadinessState,
+                item.pair.dependency.DependencyKind,
+                item.pair.dependency.CreatedAt));
     }
 
     private async Task<(ArtifactReadinessState State, IReadOnlyCollection<string> BlockingReasons)> CalculateReadinessAsync(

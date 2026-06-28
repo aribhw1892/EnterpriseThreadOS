@@ -69,7 +69,62 @@ npm run dev
 Pop-Location
 ```
 
-Open `http://localhost:3000` to view the local platform health, identity, governance, artifact registry, classification/policy, and infrastructure admin shell. Open `http://localhost:3000/model-artifacts` and click **Create seed model package** to install the manufacturing reference package (`etos-manufacturing-reference`) from `packages/manufacturing-reference/`. Open `http://localhost:3000/imports` and click `Run identity demo` to create two source imports, approve mappings, validate rows, stage unverified graph records, generate identity candidates, view trust score breakdowns, and generate durable data-quality issues from validation results. Use the **Mapping Agent Debug** panel on the same page to run LLM mapping preview with diagnostics (requires agent-runtime and optional LM Studio — see `docs/local-development.md`). Open `http://localhost:3000/chat` for governed chat, `http://localhost:3000/explorers` for explorer hubs (including capabilities, business policies, optimization models, and agent templates), `http://localhost:3000/dashboards` and `http://localhost:3000/reports` for dashboard/report shells, and `http://localhost:3000/recommendations` to create, inspect, and transition recommendation drafts with evidence links and suggested actions.
+Open `http://localhost:3000` to view the local platform health, identity, governance, artifact registry, classification/policy, and infrastructure admin shell. Open `http://localhost:3000/model-artifacts` and click **Create seed model package** to install the manufacturing reference package (`etos-manufacturing-reference`) from `packages/manufacturing-reference/`. Open `http://localhost:3000/agents/import-mapping-assistant/configure` to set LM Studio or OpenAI model routing for the mapping assistant (see `docs/local-development.md`). Open `http://localhost:3000/imports` and click `Run identity demo` to create two source imports, approve mappings, validate rows, stage unverified graph records, generate identity candidates, view trust score breakdowns, and generate durable data-quality issues from validation results. Use the **Mapping Agent Debug** panel on the same page to run LLM mapping preview with diagnostics (requires agent-runtime and optional LM Studio — see `docs/local-development.md`). Open `http://localhost:3000/chat` for governed chat, `http://localhost:3000/explorers` for explorer hubs (including capabilities, business policies, optimization models, and agent templates), `http://localhost:3000/dashboards` and `http://localhost:3000/reports` for dashboard/report shells, and `http://localhost:3000/recommendations` to create, inspect, and transition recommendation drafts with evidence links and suggested actions.
+
+## LLM mapping, LM Studio, and agent-runtime Docker
+
+Mapping preview and governed agents call the Python sidecar (`ETOS.AgentRuntime`) at `AgentRuntime:BaseUrl` in `ETOS.Backend/appsettings.json` (default `http://localhost:8010`). Docker Compose starts that sidecar as `agent-runtime`; the .NET backend is **not** containerized in the default local workflow—you run it with `dotnet run` above.
+
+| Component | Where it runs | Config location |
+| --- | --- | --- |
+| LM Studio server | Host (outside Docker) | LM Studio UI; OpenAI-compatible server (default port `1234`) |
+| Sidecar → LM Studio URL | `agent-runtime` container env | `.env`: `OPENAI_BASE_URL`, `OPENAI_API_KEY` (see `.env.example`) |
+| Sidecar Python code | `agent-runtime` Docker image | `ETOS.AgentRuntime/` (baked in at image build) |
+| Mapping provider + model id | Published tenant agent | `/agents/import-mapping-assistant/configure`; seed defaults in `packages/manufacturing-reference/artifacts/agent-templates.json` |
+| Enable mapping preview in dev | Backend | `ETOS.Backend/appsettings.Development.json` → `ImportMappingSuggestions` |
+
+Example `.env` when LM Studio runs on the host and `agent-runtime` runs in Docker:
+
+```env
+OPENAI_API_KEY=lm-studio
+OPENAI_BASE_URL=http://host.docker.internal:1234/v1
+```
+
+Set the agent's **Primary model id** to the id LM Studio exposes (for example `google/gemma-3-1b`), not the package seed placeholder `local-model`. Full workflow: `docs/local-development.md` (LLM-assisted import mapping).
+
+### When to rebuild vs restart
+
+| Change | Action |
+| --- | --- |
+| `ETOS.AgentRuntime/` Python code (prompt handling, model router, etc.) | **Rebuild** the `agent-runtime` image and recreate the container |
+| `.env` only (`OPENAI_BASE_URL`, `OPENAI_API_KEY`) | **Restart** the `agent-runtime` container (no rebuild) |
+| `ETOS.Backend/` C# code (resolver, mapping provider, API) | **Restart** `dotnet run` (no Docker) |
+| Agent model routing on the configure page | Publish agent version in UI (no Docker) |
+| LM Studio model loaded in the UI | No ETOS rebuild; ensure `primaryModelId` matches LM Studio |
+
+Rebuild and restart the sidecar after Python changes:
+
+```powershell
+docker compose --env-file .env -f infra/local/docker-compose.yml up -d --build agent-runtime
+```
+
+Restart only (for example after editing `.env`):
+
+```powershell
+docker compose --env-file .env -f infra/local/docker-compose.yml up -d agent-runtime
+```
+
+Optional: run the sidecar on the host instead of Docker during development (code changes then only need a uvicorn restart):
+
+```powershell
+Push-Location ETOS.AgentRuntime
+$env:OPENAI_BASE_URL = "http://localhost:1234/v1"
+$env:OPENAI_API_KEY = "lm-studio"
+uvicorn app.main:app --host 0.0.0.0 --port 8010
+Pop-Location
+```
+
+Keep `AgentRuntime:BaseUrl` as `http://localhost:8010` when using this mode.
 
 ## Useful Endpoints
 

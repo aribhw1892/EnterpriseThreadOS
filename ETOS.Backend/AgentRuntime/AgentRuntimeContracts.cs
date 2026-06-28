@@ -21,6 +21,7 @@ public static class AgentRuntimeExecutionStatuses
     public const string Disabled = "Disabled";
     public const string Deferred = "Deferred";
     public const string Succeeded = "Succeeded";
+    public const string Failed = "Failed";
 }
 
 public sealed record AgentRuntimeExecutionRequest(

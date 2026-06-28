@@ -55,6 +55,37 @@ public sealed class ManufacturingReferencePackageTests
     }
 
     [Fact]
+    public async Task Reinstall_EnsuresMappingAssistantAgentWhenTenantAgentWasRemoved()
+    {
+        await using var application = CreateApplication();
+        using var client = application.CreateClient();
+        var context = await ManufacturingModelPackageFixture.CreatePublishedPackageAsync(client, "tenant-ref-remap", "remap@example.test");
+
+        await using (var scope = application.Services.CreateAsyncScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<EnterpriseThreadDbContext>();
+            var agentArtifacts = await dbContext.Artifacts
+                .Where(artifact => artifact.TenantId == context.TenantId
+                    && artifact.NormalizedArtifactType == AgentDefinitionArtifactTypes.AgentVersion.ToUpperInvariant())
+                .ToListAsync();
+            dbContext.Artifacts.RemoveRange(agentArtifacts);
+            await dbContext.SaveChangesAsync();
+        }
+
+        var reinstall = await InstallReferencePackageAsync(client, context.TenantId, context.UserId);
+        Assert.True(reinstall.AlreadyInstalled);
+
+        using var agentsRequest = new HttpRequestMessage(HttpMethod.Get, "/api/admin/agents");
+        AddTenantHeaders(agentsRequest, context.TenantId, context.UserId);
+        var agentsResponse = await client.SendAsync(agentsRequest);
+        var agents = await agentsResponse.Content.ReadFromJsonAsync<IReadOnlyCollection<AgentDefinitionArtifactSummaryResponse>>();
+
+        Assert.True(agentsResponse.StatusCode == HttpStatusCode.OK);
+        Assert.NotNull(agents);
+        Assert.Contains(agents, item => item.AgentKey == "import-mapping-assistant");
+    }
+
+    [Fact]
     public async Task Install_PublishesCapabilityPolicyOptimizationAndAgentTemplateChain()
     {
         await using var application = CreateApplication();

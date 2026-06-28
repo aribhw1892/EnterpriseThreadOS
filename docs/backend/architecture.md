@@ -367,8 +367,8 @@ Write-capable connector execution and enterprise source-system writes remain dis
 The packages module currently includes:
 
 - `ReferencePackageManifestLoader` for JSON manifest and fragment loading from `packages/<package>/`.
-- `ManufacturingReferencePackageInstaller` orchestrating publish order: ontology layers → model package with profiles → capability → business policy → optimization model → connector → tool → skill → agent template chain.
-- idempotent development install endpoint: `POST /api/admin/development/install-reference-package` with body `{ "packageKey": "etos-manufacturing-reference" }`.
+- `ManufacturingReferencePackageInstaller` orchestrating publish order: ontology layers → model package with profiles → capability → business policy → optimization model → connector → tool → skill → agent template chain, plus tenant `import-mapping-assistant` agent creation on first install.
+- development install endpoint: `POST /api/admin/development/install-reference-package` with body `{ "packageKey": "etos-manufacturing-reference" }`. Safe to re-run when the model package is already published: ensures missing reference artifacts (capabilities, tools, templates, analysis agent type, mapping assistant tenant agent) without republishing the package.
 - optional `DevelopmentPackageSeeder` / `SeedIdentity:InstallReferencePackage` auto-install on development startup.
 
 See [Domain packages](../architecture/domain-packages.md) for package layout and boundaries.

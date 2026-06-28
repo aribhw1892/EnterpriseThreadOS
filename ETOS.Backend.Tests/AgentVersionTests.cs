@@ -182,4 +182,155 @@ public sealed class AgentVersionTests
         Assert.True(publish.Succeeded);
         Assert.Equal(nameof(ArtifactReadinessState.Published), publish.ReadinessState);
     }
+
+    [Fact]
+    public async Task UpdateModelConfigOnPublishedAgentCreatesDraftVersion()
+    {
+        await using var application = AgentExecutionTestSupport.CreateApplication();
+        using var client = application.CreateClient();
+        var packageContext = await ManufacturingModelPackageFixture.CreatePublishedPackageAsync(client);
+        var (agent, _) = await AgentExecutionTestSupport.PreparePublishedManufacturingAgentAsync(
+            client,
+            application,
+            packageContext.TenantId,
+            packageContext.UserId,
+            "model-config-published-agent");
+
+        var updated = await AgentExecutionTestSupport.UpdateAgentModelConfigAsync(
+            client,
+            packageContext.TenantId,
+            packageContext.UserId,
+            agent.ArtifactId,
+            agent.VersionId,
+            new UpdateAgentModelConfigRequest(
+                "openai",
+                "gpt-4o-mini",
+                [
+                    new AgentFallbackModelRequest(
+                        "openai-compatible",
+                        "local-model",
+                        "local unavailable")
+                ]));
+
+        Assert.True(updated.CreatedNewVersion);
+        Assert.Equal("1.0.1", updated.VersionLabel);
+        Assert.Equal(nameof(ArtifactReadinessState.Draft), updated.ReadinessState);
+        Assert.NotEqual(agent.VersionId, updated.VersionId);
+
+        using var detailRequest = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"/api/admin/agents/{agent.ArtifactId}/versions/{updated.VersionId}");
+        AgentExecutionTestSupport.AddTenantHeaders(detailRequest, packageContext.TenantId, packageContext.UserId);
+        var detailResponse = await client.SendAsync(detailRequest);
+        var detail = await detailResponse.Content.ReadFromJsonAsync<AgentDefinitionDetailResponse>();
+
+        Assert.True(detailResponse.StatusCode == HttpStatusCode.OK, await detailResponse.Content.ReadAsStringAsync());
+        Assert.NotNull(detail);
+        Assert.Equal("openai", detail.PrimaryModelProviderKey);
+        Assert.Equal("gpt-4o-mini", detail.PrimaryModelId);
+        Assert.Single(detail.FallbackModels);
+        Assert.Equal("openai-compatible", detail.FallbackModels.First().ProviderKey);
+    }
+
+    [Fact]
+    public async Task UpdateModelConfigOnDraftUpdatesInPlace()
+    {
+        await using var application = AgentExecutionTestSupport.CreateApplication();
+        using var client = application.CreateClient();
+        var packageContext = await ManufacturingModelPackageFixture.CreatePublishedPackageAsync(client);
+        var (agent, _) = await AgentExecutionTestSupport.PrepareDraftManufacturingAgentAsync(
+            client,
+            application,
+            packageContext.TenantId,
+            packageContext.UserId,
+            "model-config-draft-agent");
+
+        var updated = await AgentExecutionTestSupport.UpdateAgentModelConfigAsync(
+            client,
+            packageContext.TenantId,
+            packageContext.UserId,
+            agent.ArtifactId,
+            agent.VersionId,
+            new UpdateAgentModelConfigRequest("openai-compatible", "local-model", []));
+
+        Assert.False(updated.CreatedNewVersion);
+        Assert.Equal(agent.VersionId, updated.VersionId);
+        Assert.Equal("1.0.0", updated.VersionLabel);
+
+        using var detailRequest = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"/api/admin/agents/{agent.ArtifactId}/versions/{agent.VersionId}");
+        AgentExecutionTestSupport.AddTenantHeaders(detailRequest, packageContext.TenantId, packageContext.UserId);
+        var detail = await (await client.SendAsync(detailRequest)).Content.ReadFromJsonAsync<AgentDefinitionDetailResponse>();
+
+        Assert.NotNull(detail);
+        Assert.Equal("openai-compatible", detail.PrimaryModelProviderKey);
+        Assert.Equal("local-model", detail.PrimaryModelId);
+    }
+
+    [Fact]
+    public async Task UpdateModelConfigRejectsInvalidProvider()
+    {
+        await using var application = AgentExecutionTestSupport.CreateApplication();
+        using var client = application.CreateClient();
+        var packageContext = await ManufacturingModelPackageFixture.CreatePublishedPackageAsync(client);
+        var (agent, _) = await AgentExecutionTestSupport.PrepareDraftManufacturingAgentAsync(
+            client,
+            application,
+            packageContext.TenantId,
+            packageContext.UserId,
+            "model-config-invalid-provider");
+
+        using var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            $"/api/admin/agents/{agent.ArtifactId}/versions/{agent.VersionId}/model-config")
+        {
+            Content = JsonContent.Create(new UpdateAgentModelConfigRequest("unsupported-provider", "mock-v1", []))
+        };
+        AgentExecutionTestSupport.AddTenantHeaders(request, packageContext.TenantId, packageContext.UserId);
+
+        var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Contains("unsupported-provider", body, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task UpdateModelConfigThenMarkReadyAndPublishSucceeds()
+    {
+        await using var application = AgentExecutionTestSupport.CreateApplication();
+        using var client = application.CreateClient();
+        var packageContext = await ManufacturingModelPackageFixture.CreatePublishedPackageAsync(client);
+        var (agent, _) = await AgentExecutionTestSupport.PreparePublishedManufacturingAgentAsync(
+            client,
+            application,
+            packageContext.TenantId,
+            packageContext.UserId,
+            "model-config-publish-flow");
+
+        var updated = await AgentExecutionTestSupport.UpdateAgentModelConfigAsync(
+            client,
+            packageContext.TenantId,
+            packageContext.UserId,
+            agent.ArtifactId,
+            agent.VersionId,
+            new UpdateAgentModelConfigRequest("openai", "gpt-4o-mini", []));
+
+        await AgentExecutionTestSupport.MarkAgentReadyAsync(
+            client,
+            packageContext.TenantId,
+            packageContext.UserId,
+            updated.ArtifactId,
+            updated.VersionId);
+        var publish = await AgentExecutionTestSupport.PublishAgentAsync(
+            client,
+            packageContext.TenantId,
+            packageContext.UserId,
+            updated.ArtifactId,
+            updated.VersionId);
+
+        Assert.True(publish.Succeeded);
+        Assert.Equal(nameof(ArtifactReadinessState.Published), publish.ReadinessState);
+    }
 }

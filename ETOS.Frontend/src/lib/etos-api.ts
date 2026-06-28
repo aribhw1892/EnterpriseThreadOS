@@ -4251,6 +4251,85 @@ export async function postAgentFromPrompt(
   return await postApi<CreateAgentDefinitionResponse>("/api/admin/agents/from-prompt", request, tenantHeaders);
 }
 
+export type UpdateAgentModelConfigRequest = {
+  primaryModelProviderKey: string;
+  primaryModelId: string;
+  fallbackModels?: AgentFallbackModel[];
+};
+
+export type UpdateAgentModelConfigResponse = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  readinessState: string;
+  createdNewVersion: boolean;
+};
+
+export async function postAgentModelConfig(
+  artifactId: string,
+  versionId: string,
+  request: UpdateAgentModelConfigRequest,
+): Promise<ApiResult<UpdateAgentModelConfigResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<UpdateAgentModelConfigResponse>();
+  }
+
+  return await postApi<UpdateAgentModelConfigResponse>(
+    `/api/admin/agents/${artifactId}/versions/${versionId}/model-config`,
+    request,
+    tenantHeaders,
+  );
+}
+
+export async function markAgentDefinitionReady(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<MarkAgentDefinitionReadyResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<MarkAgentDefinitionReadyResponse>();
+  }
+
+  return await postApi<MarkAgentDefinitionReadyResponse>(
+    `/api/admin/agents/${artifactId}/versions/${versionId}/mark-ready`,
+    {},
+    tenantHeaders,
+  );
+}
+
+export type MarkAgentDefinitionReadyResponse = {
+  artifactId: string;
+  versionId: string;
+  readinessState: string;
+  validationNotes: string[];
+};
+
+export async function publishAgentDefinition(
+  artifactId: string,
+  versionId: string,
+  summary?: string,
+): Promise<ApiResult<PublishAgentDefinitionResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<PublishAgentDefinitionResponse>();
+  }
+
+  return await postApi<PublishAgentDefinitionResponse>(
+    `/api/admin/agents/${artifactId}/versions/${versionId}/publish`,
+    { summary: summary ?? null },
+    tenantHeaders,
+  );
+}
+
+export type PublishAgentDefinitionResponse = {
+  succeeded: boolean;
+  readinessState: string;
+  blockingReasons: string[];
+  artifactId: string;
+  versionId: string;
+};
+
 export async function postAgentPreview(
   artifactId: string,
   versionId: string,

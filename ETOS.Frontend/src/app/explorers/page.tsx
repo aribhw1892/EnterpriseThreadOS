@@ -15,6 +15,8 @@ const explorerCards = [
   { href: "/business-policies", title: "Business policies", description: "Layer 4 business constraint policies referencing published capabilities and packages." },
   { href: "/optimization-models", title: "Optimization models", description: "Layer 5 optimization objective metadata pinned to capabilities, policies, and packages." },
   { href: "/agent-templates", title: "Agent templates", description: "Layer 6 reusable agent patterns composing ontology, capability, policy, and retrieval references." },
+  { href: "/agents", title: "Agents", description: "Tenant AgentVersion records with model routing, safe mode, preview defaults, and configure/test-run flows." },
+  { href: "/agent-runs", title: "Agent runs", description: "Governed agent execution history with AI Trace and ToolRun cross-links." },
   { href: "/tools", title: "Tool registry", description: "Governed tools, skills, connectors, dry-run metadata, and ToolRun execution records." },
 ];
 

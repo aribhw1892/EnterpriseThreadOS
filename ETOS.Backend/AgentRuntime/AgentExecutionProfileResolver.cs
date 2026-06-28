@@ -123,6 +123,8 @@ public sealed class AgentExecutionProfileResolver(
             .Where(item => item.TenantId == tenantId
                 && item.ReadinessState == ArtifactReadinessState.Published
                 && item.Artifact!.NormalizedArtifactType == AgentDefinitionArtifactTypes.AgentVersion.ToUpperInvariant())
+            .OrderByDescending(item => item.PublishedAt ?? item.CreatedAt)
+            .ThenByDescending(item => item.CreatedAt)
             .ToListAsync(cancellationToken);
 
         foreach (var version in versions)
@@ -151,6 +153,8 @@ public sealed class AgentExecutionProfileResolver(
             .Where(item => item.TenantId == tenantId
                 && item.ReadinessState == ArtifactReadinessState.Published
                 && item.Artifact!.NormalizedArtifactType == AgentTemplateDefinitionArtifactTypes.AgentTemplate.ToUpperInvariant())
+            .OrderByDescending(item => item.PublishedAt ?? item.CreatedAt)
+            .ThenByDescending(item => item.CreatedAt)
             .ToListAsync(cancellationToken);
 
         foreach (var version in versions)

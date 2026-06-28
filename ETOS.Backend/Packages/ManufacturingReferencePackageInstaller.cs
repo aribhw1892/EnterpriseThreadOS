@@ -63,13 +63,14 @@ public sealed class ManufacturingReferencePackageInstaller(
         var existing = await ontologyService.GetActiveModelPackageAsync(loaded.Manifest.PackageKey, cancellationToken);
         if (existing is not null)
         {
+            await EnsureInstalledReferencePackageContinuityAsync(context, loaded, existing, cancellationToken);
             var artifacts = await LoadInstalledArtifactSummariesAsync(context.TenantId, cancellationToken);
             return new InstallReferencePackageResponse(
                 loaded.Manifest.PackageKey,
                 true,
                 existing,
                 artifacts,
-                $"Reference package '{loaded.Manifest.PackageKey}' is already published for this tenant.");
+                $"Reference package '{loaded.Manifest.PackageKey}' is already published for this tenant. Ensured missing reference artifacts and mapping assistant agent.");
         }
 
         var modelPackage = await InstallOntologyStackAsync(loaded, cancellationToken);
@@ -508,50 +509,354 @@ public sealed class ManufacturingReferencePackageInstaller(
 
         foreach (var template in loaded.AgentTemplates)
         {
-            Guid? optimizationVersionId = null;
-            if (template.ReferencedOptimizationModelKeys?.Count > 0)
+            if (await HasPublishedAgentTemplateAsync(context.TenantId, template.TemplateKey, cancellationToken))
             {
-                var optimizationKey = template.ReferencedOptimizationModelKeys.First();
-                optimizationVersionId = optimizationVersions
-                    .Select(version => new { version.Id, Key = ExtractPayloadKey(version.PayloadJson, "optimizationKey") })
-                    .FirstOrDefault(item => string.Equals(item.Key, optimizationKey, StringComparison.OrdinalIgnoreCase))
-                    ?.Id;
+                continue;
             }
 
-            var isMappingAssistant = string.Equals(
-                template.PatternCategory,
-                "mapping-assistant",
-                StringComparison.OrdinalIgnoreCase);
-
-            var created = await agentTemplateDefinitionService.CreateAsync(
-                new CreateAgentTemplateDefinitionRequest(
-                    template.Name,
-                    template.Description,
-                    template.TemplateKey,
-                    template.PatternCategory,
-                    template.PatternSummary,
-                    template.PreferredRuntimeAdapterKey ?? AgentRuntimeAdapterKeys.PydanticAi,
-                    [modelPackageVersionId],
-                    null,
-                    template.ReferencedCapabilityKeys.Select(key => capabilityVersions[key]).ToList(),
-                    null,
-                    optimizationVersionId is null ? null : [optimizationVersionId.Value],
-                    isMappingAssistant ? mappingArtifacts.PromptTemplate.VersionId : chatArtifacts.PromptTemplate.VersionId,
-                    isMappingAssistant ? mappingArtifacts.OutputSchema.VersionId : chatArtifacts.ChatAnswerSchema.VersionId,
-                    queryIntentId,
-                    retrievalStrategyId,
-                    template.ReferencedToolKeys?.Select(key => toolVersions[key]).ToList(),
-                    template.CompositionMetadata,
-                    template.FutureExtensionPlaceholders),
+            await InstallAgentTemplateAsync(
+                context,
+                loaded,
+                template,
+                modelPackageVersionId,
+                capabilityVersions,
+                toolVersions,
+                publish,
+                chatArtifacts,
+                mappingArtifacts,
+                queryIntentId,
+                retrievalStrategyId,
+                optimizationVersions,
+                installedArtifacts,
                 cancellationToken);
-            await agentTemplateDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
-            await agentTemplateDefinitionService.PublishAsync(created.ArtifactId, created.VersionId, publish, cancellationToken);
+        }
+    }
+
+    private async Task EnsureInstalledReferencePackageContinuityAsync(
+        ActiveTenantContext context,
+        LoadedReferencePackageManifest loaded,
+        ModelPackageVersionResponse existingPackage,
+        CancellationToken cancellationToken)
+    {
+        await EnsureAnalysisAgentTypeAsync(context, cancellationToken);
+
+        var installedArtifacts = new List<InstalledReferenceArtifactResponse>();
+        var capabilityVersions = await ResolvePublishedCapabilityVersionsAsync(context.TenantId, cancellationToken);
+        var publish = new PublishArtifactVersionRequest("Published by reference package installer.");
+
+        foreach (var capability in loaded.Capabilities)
+        {
+            if (capabilityVersions.ContainsKey(capability.CapabilityKey))
+            {
+                continue;
+            }
+
+            var created = await capabilityDefinitionService.CreateAsync(
+                new CreateCapabilityDefinitionRequest(
+                    capability.Name,
+                    capability.Description,
+                    capability.CapabilityKey,
+                    capability.OutcomeCategory,
+                    capability.OutcomeSummary,
+                    capability.OutcomeMetadata,
+                    [existingPackage.Id],
+                    null,
+                    capability.SuggestedQueryIntentRefs,
+                    capability.FutureExtensionPlaceholders),
+                cancellationToken);
+            await capabilityDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
+            await capabilityDefinitionService.PublishAsync(created.ArtifactId, created.VersionId, publish, cancellationToken);
+            capabilityVersions[capability.CapabilityKey] = created.VersionId;
             installedArtifacts.Add(new InstalledReferenceArtifactResponse(
-                "agent-template",
-                template.TemplateKey,
+                "capability",
+                capability.CapabilityKey,
                 created.ArtifactId,
                 created.VersionId));
         }
+
+        var connectorVersions = await ResolvePublishedConnectorVersionsAsync(context.TenantId, cancellationToken);
+        foreach (var connector in loaded.Connectors)
+        {
+            if (connectorVersions.ContainsKey(connector.ConnectorKey))
+            {
+                continue;
+            }
+
+            var created = await connectorDefinitionService.CreateAsync(
+                new CreateConnectorDefinitionRequest(
+                    connector.Name,
+                    connector.Description,
+                    connector.ConnectorKey,
+                    connector.ConnectorKind,
+                    connector.CallsExternalSystem,
+                    connector.WritesExternalSystem,
+                    connector.ExecutionEnabled,
+                    connector.DisabledReason,
+                    connector.CredentialScopeKey,
+                    connector.SecretReferenceKey,
+                    connector.SupportedOperations,
+                    connector.CompositionMetadata,
+                    connector.FutureExtensionPlaceholders),
+                cancellationToken);
+            await connectorDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
+            await connectorDefinitionService.PublishAsync(created.ArtifactId, created.VersionId, publish, cancellationToken);
+            connectorVersions[connector.ConnectorKey] = created.VersionId;
+        }
+
+        var toolVersions = await ResolvePublishedToolVersionsAsync(context.TenantId, cancellationToken);
+        foreach (var tool in loaded.Tools)
+        {
+            if (toolVersions.ContainsKey(tool.ToolKey))
+            {
+                continue;
+            }
+
+            Guid? connectorVersionId = null;
+            if (!string.IsNullOrWhiteSpace(tool.ReferencedConnectorKey))
+            {
+                connectorVersionId = connectorVersions[tool.ReferencedConnectorKey];
+            }
+
+            var created = await toolDefinitionService.CreateAsync(
+                new CreateToolDefinitionRequest(
+                    tool.Name,
+                    tool.Description,
+                    tool.ToolKey,
+                    tool.ToolCategory,
+                    tool.RiskLevel,
+                    tool.ReadOnly,
+                    tool.CreatesPlatformArtifact,
+                    tool.CreatesReviewTask,
+                    tool.CreatesDecision,
+                    tool.CallsExternalSystem,
+                    tool.WritesExternalSystem,
+                    tool.RequiresApproval,
+                    tool.SupportsDryRun,
+                    tool.RequiredPermissionKeys,
+                    tool.InputSchemaJson,
+                    tool.OutputSchemaJson,
+                    tool.InternalHandlerKey,
+                    null,
+                    connectorVersionId,
+                    [existingPackage.Id],
+                    null,
+                    tool.ReferencedCapabilityKeys.Select(key => capabilityVersions[key]).ToList(),
+                    null,
+                    tool.AllowedQueryIntentKeys,
+                    tool.CompositionMetadata,
+                    tool.FutureExtensionPlaceholders),
+                cancellationToken);
+            await toolDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
+            await toolDefinitionService.PublishAsync(created.ArtifactId, created.VersionId, publish, cancellationToken);
+            toolVersions[tool.ToolKey] = created.VersionId;
+        }
+
+        await InstallAgentTemplatesAsync(
+            context,
+            loaded,
+            existingPackage.Id,
+            capabilityVersions,
+            toolVersions,
+            installedArtifacts,
+            cancellationToken);
+        await EnsureMappingAssistantAgentAsync(context, loaded, cancellationToken);
+    }
+
+    private async Task InstallAgentTemplateAsync(
+        ActiveTenantContext context,
+        LoadedReferencePackageManifest loaded,
+        ReferenceAgentTemplateDocument template,
+        Guid modelPackageVersionId,
+        IReadOnlyDictionary<string, Guid> capabilityVersions,
+        IReadOnlyDictionary<string, Guid> toolVersions,
+        PublishArtifactVersionRequest publish,
+        GovernedChatPlatformArtifacts chatArtifacts,
+        ImportMappingPlatformArtifacts mappingArtifacts,
+        Guid queryIntentId,
+        Guid retrievalStrategyId,
+        IReadOnlyCollection<ArtifactVersion> optimizationVersions,
+        List<InstalledReferenceArtifactResponse> installedArtifacts,
+        CancellationToken cancellationToken)
+    {
+        Guid? optimizationVersionId = null;
+        if (template.ReferencedOptimizationModelKeys?.Count > 0)
+        {
+            var optimizationKey = template.ReferencedOptimizationModelKeys.First();
+            optimizationVersionId = optimizationVersions
+                .Select(version => new { version.Id, Key = ExtractPayloadKey(version.PayloadJson, "optimizationKey") })
+                .FirstOrDefault(item => string.Equals(item.Key, optimizationKey, StringComparison.OrdinalIgnoreCase))
+                ?.Id;
+        }
+
+        var isMappingAssistant = string.Equals(
+            template.PatternCategory,
+            "mapping-assistant",
+            StringComparison.OrdinalIgnoreCase);
+
+        var created = await agentTemplateDefinitionService.CreateAsync(
+            new CreateAgentTemplateDefinitionRequest(
+                template.Name,
+                template.Description,
+                template.TemplateKey,
+                template.PatternCategory,
+                template.PatternSummary,
+                template.PreferredRuntimeAdapterKey ?? AgentRuntimeAdapterKeys.PydanticAi,
+                [modelPackageVersionId],
+                null,
+                template.ReferencedCapabilityKeys.Select(key => capabilityVersions[key]).ToList(),
+                null,
+                optimizationVersionId is null ? null : [optimizationVersionId.Value],
+                isMappingAssistant ? mappingArtifacts.PromptTemplate.VersionId : chatArtifacts.PromptTemplate.VersionId,
+                isMappingAssistant ? mappingArtifacts.OutputSchema.VersionId : chatArtifacts.ChatAnswerSchema.VersionId,
+                queryIntentId,
+                retrievalStrategyId,
+                template.ReferencedToolKeys?.Select(key => toolVersions[key]).ToList(),
+                template.CompositionMetadata,
+                template.FutureExtensionPlaceholders),
+            cancellationToken);
+        await agentTemplateDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
+        await agentTemplateDefinitionService.PublishAsync(created.ArtifactId, created.VersionId, publish, cancellationToken);
+        installedArtifacts.Add(new InstalledReferenceArtifactResponse(
+            "agent-template",
+            template.TemplateKey,
+            created.ArtifactId,
+            created.VersionId));
+    }
+
+    private async Task EnsureAnalysisAgentTypeAsync(ActiveTenantContext context, CancellationToken cancellationToken)
+    {
+        if (await TryResolveDefaultAgentTypeVersionIdAsync(context.TenantId, cancellationToken) is not null)
+        {
+            return;
+        }
+
+        var payload = AgentTypeDefinitionPayloadParser.Create(
+            "analysis-agent",
+            "Governed analysis and investigation agents for local development.",
+            ["object-360-context", "bom-impact-context"],
+            "investigator",
+            ToolRiskLevels.Medium);
+
+        var artifact = new Artifact
+        {
+            Id = Guid.NewGuid(),
+            TenantId = context.TenantId,
+            ArtifactType = AgentTypeDefinitionArtifactTypes.AgentTypeDefinition,
+            NormalizedArtifactType = AgentTypeDefinitionArtifactTypes.AgentTypeDefinition.ToUpperInvariant(),
+            Name = "Analysis Agent Type",
+            Description = "Reference package agent type catalog entry.",
+            OwnerUserId = context.UserId,
+            LifecycleState = ArtifactLifecycleState.Active,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+
+        var version = new ArtifactVersion
+        {
+            Id = Guid.NewGuid(),
+            TenantId = context.TenantId,
+            ArtifactId = artifact.Id,
+            VersionLabel = "1.0.0",
+            NormalizedVersionLabel = "1.0.0",
+            Summary = "Reference package analysis agent type.",
+            PayloadJson = AgentTypeDefinitionPayloadParser.Serialize(payload),
+            ReadinessState = ArtifactReadinessState.Published,
+            CompatibilityStatus = ArtifactCompatibilityStatus.Compatible,
+            CompatibilitySummary = "Reference package publish.",
+            PolicyRiskStatus = ArtifactPolicyRiskStatus.Acceptable,
+            CreatedByUserId = context.UserId,
+            CreatedAt = DateTimeOffset.UtcNow,
+            PublishedByUserId = context.UserId,
+            PublishedAt = DateTimeOffset.UtcNow,
+            PublishSummary = "Reference package publish."
+        };
+
+        dbContext.Artifacts.Add(artifact);
+        dbContext.ArtifactVersions.Add(version);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<bool> HasPublishedAgentTemplateAsync(
+        Guid tenantId,
+        string templateKey,
+        CancellationToken cancellationToken)
+    {
+        var templateVersions = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .Where(item => item.TenantId == tenantId
+                && item.ReadinessState == ArtifactReadinessState.Published
+                && item.Artifact!.NormalizedArtifactType == AgentTemplateDefinitionArtifactTypes.AgentTemplate.ToUpperInvariant())
+            .ToListAsync(cancellationToken);
+
+        foreach (var version in templateVersions)
+        {
+            var templatePayload = AgentTemplateDefinitionPayloadParser.Deserialize(version.PayloadJson ?? "{}");
+            if (string.Equals(templatePayload.TemplateKey, templateKey, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private async Task<Dictionary<string, Guid>> ResolvePublishedCapabilityVersionsAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken)
+        => await ResolvePublishedArtifactVersionsAsync(
+            tenantId,
+            CapabilityDefinitionArtifactTypes.CapabilityDefinition,
+            "capabilityKey",
+            cancellationToken);
+
+    private async Task<Dictionary<string, Guid>> ResolvePublishedConnectorVersionsAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken)
+        => await ResolvePublishedArtifactVersionsAsync(
+            tenantId,
+            ConnectorDefinitionArtifactTypes.ConnectorDefinition,
+            "connectorKey",
+            cancellationToken);
+
+    private async Task<Dictionary<string, Guid>> ResolvePublishedToolVersionsAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken)
+        => await ResolvePublishedArtifactVersionsAsync(
+            tenantId,
+            ToolDefinitionArtifactTypes.ToolDefinition,
+            "toolKey",
+            cancellationToken);
+
+    private async Task<Dictionary<string, Guid>> ResolvePublishedArtifactVersionsAsync(
+        Guid tenantId,
+        string artifactType,
+        string payloadKeyProperty,
+        CancellationToken cancellationToken)
+    {
+        var normalizedType = artifactType.ToUpperInvariant();
+        var versions = await dbContext.Artifacts
+            .AsNoTracking()
+            .Where(item => item.TenantId == tenantId && item.NormalizedArtifactType == normalizedType)
+            .Join(
+                dbContext.ArtifactVersions.Where(version =>
+                    version.TenantId == tenantId && version.ReadinessState == ArtifactReadinessState.Published),
+                artifact => artifact.Id,
+                version => version.ArtifactId,
+                (artifact, version) => version)
+            .ToListAsync(cancellationToken);
+
+        var result = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+        foreach (var version in versions)
+        {
+            var key = ExtractPayloadKey(version.PayloadJson, payloadKeyProperty);
+            if (!string.IsNullOrWhiteSpace(key))
+            {
+                result[key] = version.Id;
+            }
+        }
+
+        return result;
     }
 
     private async Task EnsureMappingAssistantAgentAsync(

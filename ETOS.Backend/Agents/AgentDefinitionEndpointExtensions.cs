@@ -70,6 +70,14 @@ public static class AgentDefinitionEndpointExtensions
             CancellationToken cancellationToken) =>
             await ExecuteAsync(() => service.PublishAsync(artifactId, versionId, request, cancellationToken)));
 
+        group.MapPost("/{artifactId:guid}/versions/{versionId:guid}/model-config", async (
+            Guid artifactId,
+            Guid versionId,
+            UpdateAgentModelConfigRequest request,
+            IAgentDefinitionService service,
+            CancellationToken cancellationToken) =>
+            await ExecuteAsync(() => service.UpdateModelConfigAsync(artifactId, versionId, request, cancellationToken)));
+
         return endpoints;
     }
 

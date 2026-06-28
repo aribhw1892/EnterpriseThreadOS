@@ -3,6 +3,7 @@ using ETOS.Backend.Identity;
 using ETOS.Backend.Tests.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Net;
 
 namespace ETOS.Backend.Tests;
 
@@ -75,6 +76,48 @@ public sealed class AgentRuntimeAdapterTests
         Assert.NotNull(handler.LastRequest);
         Assert.Equal(HttpMethod.Post, handler.LastRequest!.Method);
         Assert.Contains("/v1/execute", handler.LastRequest.RequestUri?.AbsolutePath, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task PydanticAiHttpAdapterReturnsFailedExecutionResultOn422()
+    {
+        var handler = new MockAgentRuntimeHttpHandler();
+        handler.EnqueueResponse(
+            HttpStatusCode.UnprocessableEntity,
+            new
+            {
+                status = AgentRuntimeExecutionStatuses.Failed,
+                structuredOutputJson = (string?)null,
+                traceNotes = new[] { "Structured output missing required fields: columnSuggestions, lifecycleSuggestions." },
+                modelUsed = "openai-compatible:google/gemma-3-1b",
+                fallbackApplied = false
+            });
+        using var httpClient = new HttpClient(handler)
+        {
+            BaseAddress = new Uri("http://agent-runtime.test/")
+        };
+        var adapter = new PydanticAiRuntimeAdapter(
+            httpClient,
+            Options.Create(new AgentRuntimeOptions
+            {
+                BaseUrl = "http://agent-runtime.test",
+                TimeoutSeconds = 30
+            }));
+
+        var result = await adapter.ExecuteAsync(
+            new AgentRuntimeExecutionRequest(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                null,
+                "{}",
+                "{}",
+                PreviewMode: true,
+                AgentRuntimeAdapterKeys.PydanticAi),
+            CancellationToken.None);
+
+        Assert.Equal(AgentRuntimeExecutionStatuses.Failed, result.Status);
+        Assert.Contains("columnSuggestions", result.TraceNotes.First(), StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("openai-compatible:google/gemma-3-1b", result.ModelUsed);
     }
 
     [Fact]

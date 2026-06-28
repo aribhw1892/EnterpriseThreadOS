@@ -46,6 +46,7 @@ export default async function AgentsPage() {
               <ExplorerNavLink href="/agent-runs">Agent runs</ExplorerNavLink>
               <ExplorerNavLink href="/agent-templates">Templates</ExplorerNavLink>
               <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
+              <ExplorerNavLink href="/">Home</ExplorerNavLink>
             </div>
           </div>
         </section>

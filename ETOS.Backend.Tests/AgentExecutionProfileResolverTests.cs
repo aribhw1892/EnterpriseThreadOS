@@ -44,6 +44,49 @@ public sealed class AgentExecutionProfileResolverTests
     }
 
     [Fact]
+    public async Task ResolveByAgentKeyAsync_UsesLatestPublishedAgentVersion()
+    {
+        var tenantId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var promptVersionId = Guid.NewGuid();
+        var schemaVersionId = Guid.NewGuid();
+        var toolVersionId = Guid.NewGuid();
+
+        await using var dbContext = CreateDbContext();
+        SeedPublishedAgentVersion(
+            dbContext,
+            tenantId,
+            userId,
+            "import-mapping-assistant",
+            promptVersionId,
+            schemaVersionId,
+            toolVersionId,
+            versionLabel: "1.0.0",
+            primaryModelId: "local-model",
+            publishedAt: DateTimeOffset.UtcNow.AddHours(-2));
+        SeedPublishedAgentVersion(
+            dbContext,
+            tenantId,
+            userId,
+            "import-mapping-assistant",
+            promptVersionId,
+            schemaVersionId,
+            toolVersionId,
+            versionLabel: "1.0.2",
+            primaryModelId: "google/gemma-3-1b",
+            publishedAt: DateTimeOffset.UtcNow,
+            artifactId: dbContext.Artifacts.Single().Id);
+
+        var resolver = new AgentExecutionProfileResolver(
+            dbContext,
+            Options.Create(new MappingSuggestionOptions()));
+
+        var profile = await resolver.ResolveByAgentKeyAsync(tenantId, "import-mapping-assistant", CancellationToken.None);
+
+        Assert.Equal("google/gemma-3-1b", profile.PrimaryModelId);
+    }
+
+    [Fact]
     public async Task ResolveByAgentKeyAsync_FallsBackToPublishedTemplate()
     {
         var tenantId = Guid.NewGuid();
@@ -88,19 +131,50 @@ public sealed class AgentExecutionProfileResolverTests
         Guid promptVersionId,
         Guid schemaVersionId,
         Guid toolVersionId)
+        => SeedPublishedAgentVersion(
+            dbContext,
+            tenantId,
+            userId,
+            agentKey,
+            promptVersionId,
+            schemaVersionId,
+            toolVersionId,
+            versionLabel: "v1",
+            primaryModelId: "local-model",
+            publishedAt: DateTimeOffset.UtcNow);
+
+    private static void SeedPublishedAgentVersion(
+        EnterpriseThreadDbContext dbContext,
+        Guid tenantId,
+        Guid userId,
+        string agentKey,
+        Guid promptVersionId,
+        Guid schemaVersionId,
+        Guid toolVersionId,
+        string versionLabel,
+        string primaryModelId,
+        DateTimeOffset publishedAt,
+        Guid? artifactId = null)
     {
-        var artifact = new Artifact
+        var artifact = artifactId is Guid existingArtifactId
+            ? dbContext.Artifacts.Single(item => item.Id == existingArtifactId)
+            : new Artifact
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenantId,
+                ArtifactType = AgentDefinitionArtifactTypes.AgentVersion,
+                NormalizedArtifactType = AgentDefinitionArtifactTypes.AgentVersion.ToUpperInvariant(),
+                Name = agentKey,
+                OwnerUserId = userId,
+                LifecycleState = ArtifactLifecycleState.Active,
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
+        if (artifactId is null)
         {
-            Id = Guid.NewGuid(),
-            TenantId = tenantId,
-            ArtifactType = AgentDefinitionArtifactTypes.AgentVersion,
-            NormalizedArtifactType = AgentDefinitionArtifactTypes.AgentVersion.ToUpperInvariant(),
-            Name = agentKey,
-            OwnerUserId = userId,
-            LifecycleState = ArtifactLifecycleState.Active,
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
-        };
+            dbContext.Artifacts.Add(artifact);
+        }
+
         var payload = AgentDefinitionPayloadParser.Create(
             agentKey,
             "Mapping Assistant",
@@ -120,7 +194,7 @@ public sealed class AgentExecutionProfileResolverTests
             [toolVersionId],
             null,
             "openai-compatible",
-            "local-model",
+            primaryModelId,
             null,
             false,
             true,
@@ -134,14 +208,14 @@ public sealed class AgentExecutionProfileResolverTests
             Id = Guid.NewGuid(),
             TenantId = tenantId,
             ArtifactId = artifact.Id,
-            VersionLabel = "v1",
-            NormalizedVersionLabel = "V1",
+            VersionLabel = versionLabel,
+            NormalizedVersionLabel = versionLabel.ToUpperInvariant(),
             PayloadJson = AgentDefinitionPayloadParser.Serialize(payload),
             ReadinessState = ArtifactReadinessState.Published,
+            PublishedAt = publishedAt,
             CreatedByUserId = userId,
-            CreatedAt = DateTimeOffset.UtcNow
+            CreatedAt = publishedAt
         };
-        dbContext.Artifacts.Add(artifact);
         dbContext.ArtifactVersions.Add(version);
         dbContext.SaveChanges();
     }

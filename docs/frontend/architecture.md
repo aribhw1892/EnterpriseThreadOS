@@ -32,6 +32,7 @@ Read `ETOS.Frontend/AGENTS.md` before frontend edits. This project uses a newer 
 - `src/components/optimization-models/OptimizationModelDefinitionDetailView.tsx`: shared optimization model detail panel.
 - `src/app/agent-templates/page.tsx` and `src/app/agent-templates/[artifactId]/page.tsx`: agent template list and detail shells.
 - `src/components/agent-templates/AgentTemplateDefinitionDetailView.tsx`: shared agent template detail panel.
+- `src/app/agents/[agentKey]/configure/page.tsx` with `AgentModelConfigPanel`: tenant agent model routing (provider, primary model id, fallbacks) and lifecycle actions (save, mark ready, publish). Shows a recovery card with **Install / ensure reference package** when the tenant agent is missing after demo cleanup or partial artifact deletion.
 - `src/app/layout.tsx`: app layout and metadata.
 - `src/app/globals.css`: global Tailwind CSS entry.
 - `src/lib/etos-api.ts`: typed backend fetch helpers and local admin header configuration.
@@ -96,7 +97,7 @@ GET /api/admin/ontology/model-packages
 GET /api/admin/ontology/model-packages/active
 ```
 
-It also exposes a server action for **Create seed model package**, which calls `POST /api/admin/development/install-reference-package` with package key `etos-manufacturing-reference` to publish ontology layers, import/query profiles, and governed capability/policy/optimization/agent-template seeds from `packages/manufacturing-reference/`. Re-running the action is idempotent for the same tenant.
+It also exposes a server action for **Create seed model package**, which calls `POST /api/admin/development/install-reference-package` with package key `etos-manufacturing-reference` to publish ontology layers, import/query profiles, and governed capability/policy/optimization/agent-template seeds from `packages/manufacturing-reference/`. Re-running the action is safe for the same tenant: when the model package is already published, the backend ensures missing reference artifacts and the tenant mapping assistant agent without republishing the package.
 
 `src/app/imports/page.tsx` fetches:
 
