@@ -90,7 +90,7 @@ OPENAI_API_KEY=lm-studio
 OPENAI_BASE_URL=http://host.docker.internal:1234/v1
 ```
 
-Set the agent's **Primary model id** to the id LM Studio exposes (for example `google/gemma-3-1b`), not the package seed placeholder `local-model`. Full workflow: `docs/local-development.md` (LLM-assisted import mapping).
+Set the agent's **Primary model id** to the id LM Studio exposes (for example `google/gemma-3-1b`), not the package seed placeholder `local-model`. Full workflow and troubleshooting: [`docs/local-development.md`](docs/local-development.md) (LLM-assisted import mapping).
 
 ### When to rebuild vs restart
 
@@ -245,23 +245,26 @@ docker compose -f infra/local/docker-compose.yml config
 
 ## Current Scope
 
-Implemented or partially implemented through Issues 18 and 18.1–18.5:
+Implemented or partially implemented through Issues 18.5, 19, 22, and 23:
 
 - Local platform foundation: backend/frontend scaffolds, Docker Compose infrastructure, EF Core PostgreSQL, health endpoints, extension-point catalog.
 - Tenant identity/access, governance/audit, BaseArtifact registry, classification/policy, graph memory, ontology/model packages.
 - Package-driven import/mapping/staging, mapping provider contracts, mapping learning-signal inputs, identity resolution, data quality, document memory.
 - Governed query/context assembly, AI Trace, governed chat with chat-to-artifact drafting.
-- Explorers and 360° context views with governance flow foundation.
+- Explorers and 360° context views with governance flow foundation and live review-task nodes when tasks exist.
 - Dashboard/report artifacts (Issue 17) and recommendation artifacts with evidence rules (Issue 18).
 - Industry-neutral core cleanup with `ImportProfileJson` / `QueryIntentExtensionsJson` on published model packages (Issue 18.1).
 - Capability, business policy, optimization model, and agent template governed artifacts (Issues 18.2–18.4).
 - `IAgentRuntimeAdapter` contracts with live HTTP `PydanticAiRuntimeAdapter` (Issues 23 + import mapping preview reuse) and deferred Hermes/LangGraph adapters (Issue 18.4).
 - Manufacturing reference package extraction and installer (Issue 18.5).
+- Review task artifacts, templates, factories, prerequisite chains, escalation placeholders, and `/tasks` debug UI (Issue 19). Task completion returns `decisionCreationDeferred`; `DecisionArtifact` creation is Issue 20.
+- Tool registry with `ToolRun`, dry-run/execute, and disabled write connectors (Issue 22).
+- Tenant agents, agent runs, governed execute orchestration, and recommendation-only agent output (Issue 23).
 
 Planned by the PRD but not generally implemented yet:
 
-- Full review task, decision, outcome, and learning workflows (Issue 19+). Recommendation suggested-action `CONVERTED_TO_REVIEW_TASK` is status-only until Issue 19.
-- Tool registry, governed agent execution, and LLM-assisted import mapping preview (Issues 22–23 + mapping provider plan). Workflows, skill runtime composition, and multi-agent collaboration remain deferred (Issues 24–25).
+- Decision, outcome, and learning workflows (Issue 20+). Completed review tasks do not yet create `DecisionArtifact` records.
+- Workflows, skill runtime composition, and multi-agent collaboration (Issues 24–25).
 - Live governance KPI analytics (Issue 21), production secrets, CI/CD, Kubernetes, Keycloak, Temporal, live enterprise connectors, or source-system write-back.
 
 See `ARCHITECTURE.md` and `docs/local-development.md` for details.

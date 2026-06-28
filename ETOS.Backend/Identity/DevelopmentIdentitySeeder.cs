@@ -16,6 +16,7 @@ using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Recommendations;
+using ETOS.Backend.ReviewTasks;
 using ETOS.Backend.ToolRegistry;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -128,6 +129,15 @@ public sealed class DevelopmentIdentitySeeder(
         var agentsAdminPermission = await EnsurePermissionAsync(AgentPermissions.Admin, "Administer tenant agent records.", cancellationToken);
         var agentsTestPermission = await EnsurePermissionAsync(AgentPermissions.Test, "Test-run draft tenant agents.", cancellationToken);
         var agentsExecutePermission = await EnsurePermissionAsync(AgentPermissions.Execute, "Execute published tenant agents.", cancellationToken);
+        var reviewTaskReadPermission = await EnsurePermissionAsync(ReviewTaskPermissions.Read, "Read tenant review task artifacts.", cancellationToken);
+        var reviewTaskCreatePermission = await EnsurePermissionAsync(ReviewTaskPermissions.Create, "Create tenant review task artifacts.", cancellationToken);
+        var reviewTaskAssignPermission = await EnsurePermissionAsync(ReviewTaskPermissions.Assign, "Assign tenant review tasks.", cancellationToken);
+        var reviewTaskManagePermission = await EnsurePermissionAsync(ReviewTaskPermissions.Manage, "Manage tenant review task lifecycle.", cancellationToken);
+        var reviewTaskAdminPermission = await EnsurePermissionAsync(ReviewTaskPermissions.Admin, "Administer tenant review task records.", cancellationToken);
+        var reviewTaskTemplateReadPermission = await EnsurePermissionAsync(ReviewTaskTemplatePermissions.Read, "Read tenant review task template artifacts.", cancellationToken);
+        var reviewTaskTemplateCreatePermission = await EnsurePermissionAsync(ReviewTaskTemplatePermissions.Create, "Create tenant review task template artifacts.", cancellationToken);
+        var reviewTaskTemplateReadinessPermission = await EnsurePermissionAsync(ReviewTaskTemplatePermissions.Readiness, "Mark tenant review task template versions ready.", cancellationToken);
+        var reviewTaskTemplateAdminPermission = await EnsurePermissionAsync(ReviewTaskTemplatePermissions.Admin, "Administer tenant review task template records.", cancellationToken);
         var adminRole = await EnsureTenantRoleAsync(tenant.Id, cancellationToken);
         var chatRunnerRole = await EnsureChatRunnerRoleAsync(tenant.Id, cancellationToken);
         var chatRunner = await EnsureChatRunnerUserAsync(seedOptions, cancellationToken);
@@ -216,6 +226,15 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsAdminPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsTestPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsExecutePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskCreatePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskAssignPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskManagePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskTemplateReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskTemplateCreatePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskTemplateReadinessPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskTemplateAdminPermission.Id, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, chatRunner.Id, chatRunnerRole.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, governedChatRunPermission.Id, cancellationToken);
@@ -228,6 +247,7 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, recommendationCreatePermission.Id, cancellationToken);
 
         await EnsureAnalysisAgentTypeDefinitionAsync(tenant, admin, cancellationToken);
+        await ReviewTaskDevelopmentTemplateSeeder.SeedPublishedTemplatesAsync(dbContext, tenant.Id, admin.Id, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         await EnsureBootstrapAuditAsync(tenant.Id, admin.Id, tenant.Identifier, cancellationToken);
 

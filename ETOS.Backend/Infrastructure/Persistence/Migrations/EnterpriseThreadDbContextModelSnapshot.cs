@@ -4190,6 +4190,79 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.ToTable("semantic_relationship_definitions", (string)null);
                 });
 
+            modelBuilder.Entity("ETOS.Backend.ReviewTasks.ReviewTaskChainLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BlockedTaskArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BlockingCondition")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("BlockingTaskArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ChainReason")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "BlockedTaskArtifactId", "ResolvedAt");
+
+                    b.HasIndex("TenantId", "BlockingTaskArtifactId", "ResolvedAt");
+
+                    b.ToTable("review_task_chain_links", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.ReviewTasks.ReviewTaskComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AuthorUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TaskArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "TaskArtifactId", "CreatedAt");
+
+                    b.ToTable("review_task_comments", (string)null);
+                });
+
             modelBuilder.Entity("ETOS.Backend.Tenancy.TenantScopedSampleRecord", b =>
                 {
                     b.Property<Guid>("Id")

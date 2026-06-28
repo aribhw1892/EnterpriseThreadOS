@@ -7,6 +7,7 @@ import {
   getArtifactImpact,
   getArtifactReadiness,
   getArtifactVersions,
+  createReviewTaskFromRecommendationAction,
   getRecommendationArtifacts,
   getRecommendationPayload,
   markRecommendationReady,
@@ -15,6 +16,7 @@ import {
   updateRecommendationSuggestedActionStatus,
 } from "@/lib/etos-api";
 import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
+import { ReviewTaskRecommendationDebugActions } from "@/components/review-tasks/ReviewTaskRecommendationDebugActions";
 
 type RecommendationDetailProps = {
   artifactId: string;
@@ -62,6 +64,23 @@ async function publishAction(formData: FormData) {
 
   await publishArtifactVersion(artifactId, versionId, "Published from recommendation UI.");
   revalidatePath(`/recommendations/${artifactId}`);
+}
+
+async function createReviewTaskAction(formData: FormData) {
+  "use server";
+
+  const artifactId = formData.get("artifactId");
+  const versionId = formData.get("versionId");
+  const actionId = formData.get("actionId");
+  if (typeof artifactId !== "string" || typeof versionId !== "string" || typeof actionId !== "string") {
+    return;
+  }
+
+  const created = await createReviewTaskFromRecommendationAction(artifactId, versionId, actionId);
+  if (created.data?.artifactId) {
+    revalidatePath(`/recommendations/${artifactId}`);
+    revalidatePath(`/tasks/${created.data.artifactId}`);
+  }
 }
 
 async function selectActionForReviewAction(formData: FormData) {
@@ -130,6 +149,7 @@ export function RecommendationDetailView({
             </div>
             <div className="flex flex-wrap gap-3">
               <ExplorerNavLink href="/recommendations">Recommendations</ExplorerNavLink>
+              <ExplorerNavLink href="/tasks">Review tasks</ExplorerNavLink>
               <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
               <Link
                 href={`/artifacts/${artifactId}`}
@@ -214,14 +234,35 @@ export function RecommendationDetailView({
                     <td className="px-3 py-3">{action.riskScore}</td>
                     <td className="px-3 py-3">{action.status}</td>
                     <td className="px-3 py-3">
-                      <ActionForm
-                        action={selectActionForReviewAction}
-                        artifactId={artifactId}
-                        versionId={versionId}
-                        label="Select for review"
-                      >
-                        <input type="hidden" name="actionId" value={action.actionId} />
-                      </ActionForm>
+                      <div className="flex flex-wrap gap-2">
+                        <ActionForm
+                          action={selectActionForReviewAction}
+                          artifactId={artifactId}
+                          versionId={versionId}
+                          label="Select for review"
+                        >
+                          <input type="hidden" name="actionId" value={action.actionId} />
+                        </ActionForm>
+                        {action.status !== "convertedToReviewTask" ? (
+                          <ActionForm
+                            action={createReviewTaskAction}
+                            artifactId={artifactId}
+                            versionId={versionId}
+                            label="Create review task"
+                          >
+                            <input type="hidden" name="actionId" value={action.actionId} />
+                          </ActionForm>
+                        ) : (
+                          <span className="text-xs uppercase text-cyan-300">Task created</span>
+                        )}
+                        <ReviewTaskRecommendationDebugActions
+                          artifactId={artifactId}
+                          versionId={versionId}
+                          actionId={action.actionId}
+                          actionTitle={action.title}
+                          actionStatus={action.status}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -229,7 +270,7 @@ export function RecommendationDetailView({
             </table>
           </div>
           <p className="mt-4 text-xs text-slate-500">
-            Review task creation from suggested actions is deferred to Issue 19. Status transitions are audited.
+            Create review task from a suggested action to start Issue 19 workflow. Status transitions are audited.
           </p>
         </section>
       </div>

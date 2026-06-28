@@ -383,7 +383,7 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 **What to build**
 
 - Inbox: risk filters, trusted/blocked tabs, high-risk queue.
-- Detail: evidence chain, suggested actions, trace links, task creation readiness placeholder (Issue 19).
+- Detail: evidence chain, suggested actions, trace links, review task creation (Issue 19 — server action + debug buttons).
 
 ---
 

@@ -1,0 +1,188 @@
+{
+  "communities": {
+    "0": [
+      "backendarchitecture_agentruntimemodule",
+      "backendarchitecture_agenttemplatesmodule",
+      "backendarchitecture_aitracemodule",
+      "backendarchitecture_artifactmodule",
+      "backendarchitecture_businesspoliciesmodule",
+      "backendarchitecture_capabilitiesmodule",
+      "backendarchitecture_classificationmodule",
+      "backendarchitecture_dashboardsmodule",
+      "backendarchitecture_dataqualitymodule",
+      "backendarchitecture_documentmodule",
+      "backendarchitecture_enterprisethreadplatform",
+      "backendarchitecture_explorersmodule",
+      "backendarchitecture_governancemodule",
+      "backendarchitecture_governedchatmodule",
+      "backendarchitecture_governedquerymodule",
+      "backendarchitecture_graphmemorymodule",
+      "backendarchitecture_healthmodule",
+      "backendarchitecture_identitymodule",
+      "backendarchitecture_identityresolutionmodule",
+      "backendarchitecture_importmodule",
+      "backendarchitecture_ontologymodule",
+      "backendarchitecture_optimizationmodelsmodule",
+      "backendarchitecture_recommendationsmodule"
+    ],
+    "1": [
+      "adr_0002_artifact_lifecycle",
+      "adr_readme",
+      "ai_agent_workflow_guide",
+      "architecture_extension_points_doc",
+      "backend_architecture_doc",
+      "domain_packages_document",
+      "frontend_architecture_doc",
+      "local_development_guide"
+    ],
+    "2": [
+      "backendarchitecture_program",
+      "frontendarchitecture_frontend",
+      "localdevelopment_agentruntime",
+      "localdevelopment_backend",
+      "localdevelopment_frontend",
+      "localdevelopment_pydanticairuntimeadapter"
+    ],
+    "3": [
+      "ai_agent_workflow",
+      "architecture_extensionpoints_enterprisethreadosextensionpoints",
+      "backend_architecture",
+      "frontend_architecture",
+      "local_development"
+    ],
+    "4": [
+      "domainpackages_agenttemplateversion",
+      "domainpackages_businesspolicydefinitionversion",
+      "domainpackages_capabilitydefinitionversion",
+      "domainpackages_modelpackageversion",
+      "domainpackages_optimizationmodelversion"
+    ],
+    "5": [
+      "domainpackages_enterprisethreados",
+      "domainpackages_etos_backend",
+      "domainpackages_packages_manufacturing_reference",
+      "domainpackages_referencepackagemanifestloader"
+    ]
+  },
+  "cohesion": {
+    "0": 0.08695652173913043,
+    "1": 0.6071428571428571,
+    "2": 0.3333333333333333,
+    "3": 0.7,
+    "4": 0.6,
+    "5": 0.5
+  },
+  "gods": [
+    {
+      "id": "backendarchitecture_enterprisethreadplatform",
+      "label": "EnterpriseThreadPlatform",
+      "degree": 24
+    },
+    {
+      "id": "backend_architecture_doc",
+      "label": "Backend Architecture Document",
+      "degree": 6
+    },
+    {
+      "id": "ai_agent_workflow_guide",
+      "label": "AI Agent Workflow Guide",
+      "degree": 5
+    },
+    {
+      "id": "architecture_extension_points_doc",
+      "label": "EnterpriseThreadOS Extension Points Document",
+      "degree": 5
+    },
+    {
+      "id": "frontend_architecture_doc",
+      "label": "Frontend Architecture Document",
+      "degree": 5
+    },
+    {
+      "id": "localdevelopment_backend",
+      "label": "ETOS.Backend",
+      "degree": 5
+    },
+    {
+      "id": "local_development_guide",
+      "label": "Local Development Guide",
+      "degree": 4
+    },
+    {
+      "id": "backend_architecture",
+      "label": "Backend Architecture",
+      "degree": 4
+    },
+    {
+      "id": "domainpackages_capabilitydefinitionversion",
+      "label": "CapabilityDefinitionVersion",
+      "degree": 4
+    },
+    {
+      "id": "adr_0002_artifact_lifecycle",
+      "label": "ADR 0002: Artifact Lifecycle",
+      "degree": 3
+    }
+  ],
+  "surprises": [
+    {
+      "source": "ETOS.Frontend",
+      "target": "ETOS.Backend",
+      "source_files": [
+        "frontend/architecture.md",
+        "local-development.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `ETOS.Frontend` unexpectedly reaches hub `ETOS.Backend`"
+    },
+    {
+      "source": "ETOS.Backend",
+      "target": "EnterpriseThreadPlatform",
+      "source_files": [
+        "local-development.md",
+        "backend/architecture.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "implements",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "ETOS.Backend",
+      "target": "Program.cs",
+      "source_files": [
+        "local-development.md",
+        "backend/architecture.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "implements",
+      "why": "connects across different repos/directories; peripheral node `Program.cs` unexpectedly reaches hub `ETOS.Backend`"
+    },
+    {
+      "source": "ADR 0002: Artifact Lifecycle",
+      "target": "AI Agent Workflow Guide",
+      "source_files": [
+        "architecture/adr/0002-artifact-lifecycle.md",
+        "ai-agent-workflow.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "Architecture Decision Records README",
+      "target": "AI Agent Workflow Guide",
+      "source_files": [
+        "architecture/adr/README.md",
+        "ai-agent-workflow.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories"
+    }
+  ],
+  "tokens": {
+    "input": 10585,
+    "output": 3119
+  }
+}

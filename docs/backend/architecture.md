@@ -190,7 +190,7 @@ The data-quality module currently includes:
 - tenant-scoped `DataQualityIssue` records generated from import validation issues or explicit manual/security-event review hooks.
 - `DataQualityIssueSourceLink` records for import batches, validation issues, file evidence, mappings, staging runs, identity candidates, security events, graph ids, and generic platform contexts.
 - `DataQualityTrustImpact` records with deterministic severity penalties, resulting trust state, recommendation-exclusion metadata, and review priority.
-- security-event-to-quality-issue hooks that preserve safe summaries without creating full review tasks.
+- security-event-to-quality-issue hooks that preserve safe summaries; full review tasks from security events are created through Issue 19 factories when invoked explicitly.
 - disabled `MonitoringIssueTypeDefinition` placeholders for future monitoring agents that inspect already-created issue types only.
 - admin endpoints under `/api/admin/data-quality`.
 
@@ -245,7 +245,7 @@ The governed-chat module currently includes:
 The explorers module currently includes:
 
 - tenant-filtered read-only explorer APIs for artifacts, graph nodes, documents, context packages, and decision foundations.
-- generic 360° context views and governance flow projections with Milestone 4 review-chain placeholders for review tasks, decisions, outcomes, and learning signals.
+- generic 360° context views and governance flow projections with live review-task nodes and chain edges when tasks exist; decision/outcome/learning placeholders remain until Issues 20–21.
 - policy/trust-filtered graph browse.
 - admin endpoints under `/api/admin/explorers`.
 
@@ -269,7 +269,7 @@ The recommendation module (Issue 18) currently includes:
 - `RecommendationEvidenceResolver` for linked data-quality issues, BOM comparison runs, AI traces, and graph node existence checks (neutral secondary-side comparison summaries).
 - creation factories for manual create, data-quality issues, BOM comparison runs, governed chat drafts, and dashboard/report provenance (`RecommendationFactory`), using package import-profile templates where available.
 - idempotent factory keys for data-quality and BOM comparison sources; optional post-comparison hook in `ImportService` when drift counts are non-zero.
-- suggested-action status transitions with audit records (`CONVERTED_TO_REVIEW_TASK` is status-only until Issue 19).
+- suggested-action status transitions with audit records, including `CONVERTED_TO_REVIEW_TASK` when a review task is created from a suggested action (Issue 19 factory).
 - `creationSource: AGENT_DEFERRED` contract for deferred agent/workflow auto-creation (Milestone 5).
 - governance-flow integration: real recommendation artifact nodes replace the Issue 16 placeholder when anchored on a recommendation.
 - admin endpoints under `/api/admin/recommendations`:
@@ -284,6 +284,27 @@ The recommendation module (Issue 18) currently includes:
   - `PATCH /api/admin/recommendations/{artifactId}/versions/{versionId}/suggested-actions/{actionId}`
 
 Recommendation permissions: `recommendations.read`, `recommendations.create`, `recommendations.review`, `recommendations.readiness`, `recommendations.admin`.
+
+### Review Tasks (Issue 19)
+
+The review tasks module currently includes:
+
+- tenant-scoped `ReviewTaskTemplateVersion` and `ReviewTaskVersion` artifacts stored in the artifact registry via `PayloadJson`.
+- operational tables: `review_task_comments` (append-only) and `review_task_chain_links` (prerequisite blocking metadata).
+- `IReviewTaskFactory` creation from recommendation suggested actions, data quality issues, security events, access requests, and manual API create.
+- deterministic `IReviewTaskPriorityDeriver` (severity × trust × conflict × template weights).
+- `IReviewTaskChainService` prerequisite blocking and auto-unblock on accepted prerequisite completion.
+- internal tenant membership validation for assignees and participants.
+- template-gated escalation placeholder API (no SLA timers or notifications).
+- task completion sets `Completed` and returns `decisionCreationDeferred: true`; `IReviewTaskCompletionHandler` stub for Issue 20.
+- development seed of four published templates: `data-quality-review`, `business-action-review`, `governance-security-review`, `access-request-review`.
+- governance-flow integration: live review task nodes and chain edges when tasks link to recommendation anchors.
+- admin endpoints under `/api/admin/review-tasks` and `/api/admin/review-task-templates`.
+- frontend shells at `/tasks` and `/tasks/[artifactId]` with client debug harnesses for factory create, assign, status, comment, complete, and escalation smoke tests.
+
+Review task permissions: `review_tasks.read`, `review_tasks.create`, `review_tasks.assign`, `review_tasks.manage`, `review_tasks.admin`, `review_task_templates.read`, `review_task_templates.create`, `review_task_templates.readiness`, `review_task_templates.admin`.
+
+Issue 19 tests cover template resolution, factory creation paths, chain blocking/unblock, priority derivation, internal-only assignment, and completion deferral (`ReviewTaskTests`, `ReviewTaskChainTests`, `ReviewTaskPriorityDeriverTests`, `ReviewTaskTemplateTests`).
 
 ### Capability Definitions (Issue 18.2)
 
@@ -342,7 +363,7 @@ The agent-runtime module currently includes:
 - governed agent execute/preview/test endpoints via `IAgentExecutionService` (Issue 23).
 - reuse by `PydanticAiMappingProvider` for import mapping preview through the shared preview orchestrator (no `AgentRun`; preview mode only; agent config from published `AgentVersion` or template fallback).
 
-Local sidecar: `ETOS.AgentRuntime/` (FastAPI). Supports OpenAI cloud and `openai-compatible` providers (LM Studio via `OPENAI_BASE_URL`). Deterministic mock output when no API key/base URL is configured.
+Local sidecar: `ETOS.AgentRuntime/` (FastAPI). Supports OpenAI cloud and `openai-compatible` providers (LM Studio via `OPENAI_BASE_URL`). Deterministic mock output when no API key/base URL is configured. The sidecar runs in Docker Compose locally; rebuild the `agent-runtime` image after Python code changes (see [Rebuild vs restart](../local-development.md#rebuild-vs-restart-agent-runtime) in `docs/local-development.md`). Mapping preview resolves the latest published tenant `AgentVersion` for the mapping assistant agent key via `AgentExecutionProfileResolver`.
 
 ### Tool Registry (Issue 22)
 
@@ -473,8 +494,10 @@ Issue 22 tests cover tool/skill/connector registry CRUD/publish, schema compatib
 
 Issue 23 tests cover agent type and agent version CRUD/publish, from-template creation, derived capability/risk readiness, draft permission rules, preview/test/execute orchestration, safe-mode blocking, ToolRun parent links, recommendation and AI Trace creation, HTTP PydanticAI adapter behavior, and manufacturing-reference E2E execution (`AgentTypeDefinitionTests`, `AgentVersionTests`, `AgentRunTests`, `AgentExecutionE2ETests`, `AgentRuntimeAdapterTests`).
 
+Issue 19 tests cover review task/template factories, chain links, priority derivation, assignment guards, and deferred decision completion (`ReviewTaskTests`, `ReviewTaskChainTests`, `ReviewTaskPriorityDeriverTests`, `ReviewTaskTemplateTests`).
+
 ## Planned Backend Areas
 
-The PRD and issue backlog define later modules for review tasks, decisions, outcomes, governance analytics, workflows, and multi-agent collaboration.
+The PRD and issue backlog define later modules for decisions, outcomes, governance analytics, workflows, and multi-agent collaboration.
 
-Do not document or code these as implemented until the source code exists. Issue 23 (`AgentVersion`, live PydanticAI adapter, `AgentRun`) is the next agent-layer slice after Issue 22.
+Do not document or code these as implemented until the source code exists. Issue 20 (`DecisionArtifact` from completed review tasks) is the next Milestone 4 slice after Issue 19.

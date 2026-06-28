@@ -4,23 +4,27 @@ overview: Implement Issue 19 ReviewTaskArtifact and ReviewTaskTemplateVersion on
 todos:
   - id: phase1-core
     content: "Add ReviewTasks module scaffold: contracts, payload parsers, template + task services, EF migration (comments + chain links), permissions seeder, platform DI + endpoints"
-    status: pending
+    status: completed
   - id: phase2-factories
     content: Implement IReviewTaskFactory + IReviewTaskPriorityDeriver + template resolver; creation from recommendation action, DQ issue, security event, access request, manual; wire ConvertedToReviewTask
-    status: pending
+    status: completed
   - id: phase3-chains
     content: "Implement IReviewTaskChainService: prerequisite blocking, auto-unblock rules, audit on transitions; internal-only assignment validation"
-    status: pending
+    status: completed
   - id: phase4-escalation-governance
     content: Template-gated escalation placeholder API; update GovernanceFlowService live nodes; stub IReviewTaskCompletionHandler for Issue 20
-    status: pending
+    status: completed
   - id: phase5-ui-docs-tests
     content: Frontend /tasks inbox + detail + recommendation integration; ReviewTask* test suites; update ARCHITECTURE.md and docs/backend/architecture.md
-    status: pending
+    status: completed
 isProject: false
 ---
 
 # Issue 19: Review Tasks, Task Chains, and Escalation Placeholders
+
+## Status: Completed (2026-06-28)
+
+All five phases implemented. Backend module at `ETOS.Backend/ReviewTasks/`, EF migration `Issue19ReviewTasks`, 11 passing tests, frontend `/tasks` inbox + detail, recommendation "Create review task" action, architecture docs updated.
 
 ## Context and readiness
 

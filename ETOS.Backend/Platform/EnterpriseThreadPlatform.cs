@@ -26,6 +26,7 @@ using ETOS.Backend.Capabilities;
 using ETOS.Backend.OptimizationModels;
 using ETOS.Backend.Packages;
 using ETOS.Backend.Recommendations;
+using ETOS.Backend.ReviewTasks;
 using ETOS.Backend.ToolRegistry;
 using ETOS.Backend.Platform.JsonSchema;
 using ETOS.Backend.Imports.MappingSuggestions;
@@ -217,6 +218,13 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IRecommendationService, RecommendationService>();
         services.AddScoped<IRecommendationFactory, RecommendationFactory>();
         services.AddScoped<IRecommendationEvidenceResolver, RecommendationEvidenceResolver>();
+        services.AddScoped<IReviewTaskService, ReviewTaskService>();
+        services.AddScoped<IReviewTaskFactory, ReviewTaskFactory>();
+        services.AddScoped<IReviewTaskChainService, ReviewTaskChainService>();
+        services.AddScoped<IReviewTaskTemplateService, ReviewTaskTemplateService>();
+        services.AddScoped<IReviewTaskTemplateResolver, ReviewTaskTemplateResolver>();
+        services.AddScoped<IReviewTaskPriorityDeriver, ReviewTaskPriorityDeriver>();
+        services.AddScoped<IReviewTaskCompletionHandler, DeferredReviewTaskCompletionHandler>();
         services.AddScoped<DeterministicLlmCompletionService>();
         services.AddHttpClient<OpenAiLlmCompletionService>();
         services.AddScoped<ILlmCompletionService>(serviceProvider =>

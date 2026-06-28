@@ -11,6 +11,7 @@ const explorerCards = [
   { href: "/dashboards", title: "Dashboards", description: "Chat-generated dashboard templates with governed preview and export." },
   { href: "/reports", title: "Reports", description: "Chat-generated report templates with governed preview and export." },
   { href: "/recommendations", title: "Recommendations", description: "Evidence-backed recommendations with suggested actions and readiness workflow." },
+  { href: "/tasks", title: "Review tasks", description: "Governed review task inbox with factory debug harness, chains, assignment, and completion flows (Issue 19)." },
   { href: "/capabilities", title: "Capabilities", description: "Business outcome definitions pinned to published ontology and model packages." },
   { href: "/business-policies", title: "Business policies", description: "Layer 4 business constraint policies referencing published capabilities and packages." },
   { href: "/optimization-models", title: "Optimization models", description: "Layer 5 optimization objective metadata pinned to capabilities, policies, and packages." },
@@ -30,8 +31,8 @@ export default function ExplorersHubPage() {
               <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 16</p>
               <h1 className="mt-2 text-4xl font-semibold">Explorers</h1>
               <p className="mt-3 max-w-3xl text-slate-400">
-                Tenant-filtered explorer hub for artifacts, graph nodes, documents, context packages, AI traces, and
-                decision foundation records.
+                Tenant-filtered explorer hub for artifacts, graph nodes, documents, context packages, AI traces,
+                recommendations, review tasks, and decision foundation records.
               </p>
             </div>
             <ExplorerNavLink href="/">Home</ExplorerNavLink>

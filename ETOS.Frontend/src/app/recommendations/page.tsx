@@ -21,6 +21,7 @@ export default async function RecommendationsPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
+              <ExplorerNavLink href="/tasks">Review tasks</ExplorerNavLink>
               <ExplorerNavLink href="/chat">Governed Chat</ExplorerNavLink>
               <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
               <ExplorerNavLink href="/">Home</ExplorerNavLink>

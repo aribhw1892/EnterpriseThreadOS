@@ -5,6 +5,7 @@ using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Recommendations;
+using ETOS.Backend.ReviewTasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.Explorers;
@@ -223,6 +224,18 @@ public sealed class GovernanceFlowService(
                         GovernanceFlowEdgeKind.Dependency,
                         dependent.DependencyKind.ToString()));
                 }
+            }
+
+            if (artifact.ArtifactType.Equals(RecommendationArtifactTypes.Recommendation, StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(latestVersion.PayloadJson))
+            {
+                await AddLinkedReviewTasksAsync(
+                    context,
+                    artifactId,
+                    versionNodeId,
+                    nodes,
+                    edges,
+                    cancellationToken);
             }
         }
 
@@ -519,6 +532,9 @@ public sealed class GovernanceFlowService(
             node.Title.Contains("Recommendation", StringComparison.OrdinalIgnoreCase)
             || node.SafeSummary.Contains(RecommendationArtifactTypes.Recommendation, StringComparison.OrdinalIgnoreCase));
 
+        var hasReviewTaskNode = nodes.Any(node =>
+            node.LinkRoute?.StartsWith("/tasks/", StringComparison.OrdinalIgnoreCase) == true);
+
         var placeholders = new List<GovernanceFlowPlaceholderResponse>();
         if (!hasRecommendationNode)
         {
@@ -530,14 +546,18 @@ public sealed class GovernanceFlowService(
                 "Create a recommendation artifact from evidence to begin the review chain."));
         }
 
-        placeholders.AddRange(
-        [
-            new GovernanceFlowPlaceholderResponse(
+        if (!hasReviewTaskNode)
+        {
+            placeholders.Add(new GovernanceFlowPlaceholderResponse(
                 GovernanceFlowPlaceholderKind.ReviewTask,
                 "Review task",
-                "not_implemented",
-                "Milestone 4",
-                "Review task workflow is planned for Milestone 4."),
+                "available",
+                "Issue 19",
+                "Create a review task from a recommendation suggested action or governed source."));
+        }
+
+        placeholders.AddRange(
+        [
             new GovernanceFlowPlaceholderResponse(
                 GovernanceFlowPlaceholderKind.Decision,
                 "Decision",
@@ -559,6 +579,102 @@ public sealed class GovernanceFlowService(
         ]);
 
         return placeholders;
+    }
+
+    private async Task AddLinkedReviewTasksAsync(
+        ActiveTenantContext context,
+        Guid recommendationArtifactId,
+        string fromNodeId,
+        List<GovernanceFlowNodeResponse> nodes,
+        List<GovernanceFlowEdgeResponse> edges,
+        CancellationToken cancellationToken)
+    {
+        var normalizedTaskType = ReviewTaskArtifactTypes.ReviewTask.ToUpperInvariant();
+        var taskArtifacts = await dbContext.Artifacts
+            .AsNoTracking()
+            .Where(item => item.TenantId == context.TenantId && item.NormalizedArtifactType == normalizedTaskType)
+            .ToListAsync(cancellationToken);
+
+        foreach (var taskArtifact in taskArtifacts)
+        {
+            var latestVersion = await dbContext.ArtifactVersions
+                .AsNoTracking()
+                .Where(version => version.ArtifactId == taskArtifact.Id && version.TenantId == context.TenantId)
+                .OrderByDescending(version => version.CreatedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (latestVersion?.PayloadJson is null)
+            {
+                continue;
+            }
+
+            var payload = ReviewTaskPayloadParser.Deserialize(latestVersion.PayloadJson);
+            if (payload.RecommendationArtifactId != recommendationArtifactId)
+            {
+                continue;
+            }
+
+            var taskNodeId = taskArtifact.Id.ToString();
+            if (nodes.All(node => node.NodeId != taskNodeId))
+            {
+                nodes.Add(new GovernanceFlowNodeResponse(
+                    taskNodeId,
+                    GovernanceFlowNodeKind.Artifact,
+                    taskArtifact.Name,
+                    $"Review task {payload.Status} · priority {payload.Priority}.",
+                    payload.Status.ToString(),
+                    $"/tasks/{taskArtifact.Id}"));
+            }
+
+            edges.Add(new GovernanceFlowEdgeResponse(
+                Guid.NewGuid().ToString(),
+                fromNodeId,
+                taskNodeId,
+                GovernanceFlowEdgeKind.PlaceholderChain,
+                "review-task"));
+
+            var chainLinks = await dbContext.ReviewTaskChainLinks
+                .AsNoTracking()
+                .Where(link => link.TenantId == context.TenantId
+                    && (link.BlockedTaskArtifactId == taskArtifact.Id || link.BlockingTaskArtifactId == taskArtifact.Id))
+                .ToListAsync(cancellationToken);
+
+            foreach (var link in chainLinks)
+            {
+                var relatedTaskId = link.BlockedTaskArtifactId == taskArtifact.Id
+                    ? link.BlockingTaskArtifactId
+                    : link.BlockedTaskArtifactId;
+
+                var relatedArtifact = taskArtifacts.SingleOrDefault(item => item.Id == relatedTaskId)
+                    ?? await dbContext.Artifacts.AsNoTracking().SingleOrDefaultAsync(
+                        item => item.Id == relatedTaskId && item.TenantId == context.TenantId,
+                        cancellationToken);
+
+                if (relatedArtifact is null)
+                {
+                    continue;
+                }
+
+                var relatedNodeId = relatedArtifact.Id.ToString();
+                if (nodes.All(node => node.NodeId != relatedNodeId))
+                {
+                    nodes.Add(new GovernanceFlowNodeResponse(
+                        relatedNodeId,
+                        GovernanceFlowNodeKind.Artifact,
+                        relatedArtifact.Name,
+                        $"Related review task in chain ({link.ChainReason}).",
+                        link.ResolvedAt.HasValue ? "resolved" : "active",
+                        $"/tasks/{relatedArtifact.Id}"));
+                }
+
+                edges.Add(new GovernanceFlowEdgeResponse(
+                    link.Id.ToString(),
+                    link.BlockedTaskArtifactId.ToString(),
+                    link.BlockingTaskArtifactId.ToString(),
+                    GovernanceFlowEdgeKind.Dependency,
+                    link.ChainReason.ToString()));
+            }
+        }
     }
 
     private static GovernanceFlowNodeKind MapLinkKind(AiTraceArtifactLinkKind linkKind)

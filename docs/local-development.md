@@ -88,11 +88,37 @@ When running the Python sidecar **locally** (not in Docker) against host LM Stud
 
 The .NET backend reads `AgentRuntime:BaseUrl` (for example `http://localhost:8010`) for governed agent execution and LLM-assisted import mapping preview through `PydanticAiRuntimeAdapter`.
 
+The default local workflow runs the .NET backend with `dotnet run` (not in Docker) and the Python sidecar through Docker Compose as the `agent-runtime` service. LM Studio runs on the host.
+
+### Rebuild vs restart (`agent-runtime`)
+
+The sidecar Docker image bakes in Python code from `ETOS.AgentRuntime/` at build time. After pulling or editing sidecar code (for example `app/execute_service.py` or `app/model_router.py`), rebuild and recreate the container:
+
+```powershell
+docker compose --env-file .env -f infra/local/docker-compose.yml up -d --build agent-runtime
+```
+
+Restart only (no rebuild) when you change `.env` values such as `OPENAI_BASE_URL` or `OPENAI_API_KEY`:
+
+```powershell
+docker compose --env-file .env -f infra/local/docker-compose.yml up -d agent-runtime
+```
+
+| Change | Action |
+| --- | --- |
+| `ETOS.AgentRuntime/` Python code | Rebuild `agent-runtime` image + recreate container |
+| `.env` (`OPENAI_BASE_URL`, `OPENAI_API_KEY`) | Restart `agent-runtime` container |
+| `ETOS.Backend/` C# code | Restart `dotnet run` |
+| Published agent model routing (configure page) | Mark ready → Publish (no Docker) |
+| LM Studio model loaded in the UI | No ETOS rebuild; align agent **Primary model id** with LM Studio |
+
+See also the summary table in [`README.md`](../README.md#llm-mapping-lm-studio-and-agent-runtime-docker).
+
 ### LLM-assisted import mapping (local)
 
 Development defaults in `ETOS.Backend/appsettings.Development.json` enable `ImportMappingSuggestions` with provider `pydantic-ai-v1` and `FallbackToRuleBasedOnRuntimeFailure: true`. Production/base config in `appsettings.json` keeps `ImportMappingSuggestions:Enabled` false and default provider `rule-based-v1`.
 
-**Model routing is configured on the tenant mapping assistant agent**, not in appsettings. After installing the manufacturing reference package, open `/agents/import-mapping-assistant/configure` (or the agent key from the model package import profile). Use **Model routing** on that page to set `primaryModelProviderKey`, `primaryModelId`, and optional fallback models. Saving on a published version creates a new draft (for example `1.0.1`); use **Mark ready** then **Publish** to activate the change. No backend or Docker restart is required once the new version is published.
+**Model routing is configured on the tenant mapping assistant agent**, not in appsettings. After installing the manufacturing reference package, open `/agents/import-mapping-assistant/configure` (or the agent key from the model package import profile). Use **Model routing** on that page to set `primaryModelProviderKey`, `primaryModelId`, and optional fallback models. Saving on a published version creates a new draft (for example `1.0.1`); use **Mark ready** then **Publish** to activate the change. No backend or Docker restart is required for agent config changes once the new version is published. Rebuild the `agent-runtime` container when sidecar Python code changes (see [Rebuild vs restart](#rebuild-vs-restart-agent-runtime) above).
 
 Keep both real OpenAI credentials and LM Studio `OPENAI_BASE_URL` in `.env` when you switch between cloud and local models. Per-request routing uses the agent's `primaryModelProviderKey` (`openai` vs `openai-compatible`).
 
@@ -107,7 +133,7 @@ Set the agent's `primaryModelId` to the model id LM Studio exposes (for example 
 
 #### Default model id (`local-model`)
 
-A fresh reference-package install seeds the tenant `import-mapping-assistant` agent from [`packages/manufacturing-reference/artifacts/agent-templates.json`](../packages/manufacturing-reference/artifacts/agent-templates.json) with `primaryModelProviderKey: openai-compatible` and `primaryModelId: local-model`. The configure page displays whatever is stored on the published tenant `AgentVersion` payload—it does not read the model currently loaded in LM Studio. Loading `google/gemma-3-1b` in LM Studio only affects the local server reached through `OPENAI_BASE_URL`; ETOS still sends the agent's configured model id on each LLM call until you update **Primary model id** on the configure page and **Mark ready** → **Publish**. Use **Mapping Agent Debug** on `/imports` with diagnostics enabled to verify the resolved provider/model at runtime.
+A fresh reference-package install seeds the tenant `import-mapping-assistant` agent from [`packages/manufacturing-reference/artifacts/agent-templates.json`](../packages/manufacturing-reference/artifacts/agent-templates.json) with `primaryModelProviderKey: openai-compatible` and `primaryModelId: local-model`. The configure page displays whatever is stored on the published tenant `AgentVersion` payload—it does not read the model currently loaded in LM Studio. Loading `google/gemma-3-1b` in LM Studio only affects the local server reached through `OPENAI_BASE_URL`; ETOS still sends the agent's configured model id on each LLM call until you update **Primary model id** on the configure page and **Mark ready** → **Publish**. Mapping preview resolves the **latest published** agent version for a given `agentKey` (by `PublishedAt`, then `CreatedAt`). Use **Mapping Agent Debug** on `/imports` with diagnostics enabled to verify the resolved provider/model at runtime.
 
 #### Reference package reinstall and recovery
 
@@ -147,6 +173,18 @@ Open `http://localhost:3000/imports` and use the **Mapping Agent Debug** panel (
 - raw runtime structured output and final column/lifecycle suggestions with rationales
 
 Compare `pydantic-ai-v1` vs `rule-based-v1` on the same batch. After debug succeeds, **Create CAD/PDM draft batch** saves a mapping version; check **Mapping Versions** for `Suggestion provider: pydantic-ai-v1`.
+
+#### Troubleshooting mapping preview
+
+| Symptom | Likely cause | What to do |
+| --- | --- | --- |
+| `Config: .../local-model` after publishing a new model id | Older published agent version still in DB; or backend not restarted after resolver fix | Confirm latest version is **Published** on configure page; check debug **Config** pill; restart backend after pulling backend changes |
+| LM Studio shows traffic but debug shows **Runtime: Failed** + rule-based fallback | Sidecar rejected LLM JSON (common with small local models) | Expand **Runtime trace notes**; rebuild `agent-runtime` after pulling sidecar fixes; try a larger model or `openai` / `gpt-4o-mini` |
+| `Structured output missing required fields: columnSuggestions, lifecycleSuggestions` | Model returned a JSON Schema document or wrong shape instead of mapping data | Rebuild `agent-runtime` (sidecar now asks for data + example output, not schema echo); use a stronger model if it persists |
+| Sidecar changes not taking effect | Stale Docker image | `docker compose ... up -d --build agent-runtime` |
+| `.env` URL change ignored | Container not recreated with new env | `docker compose ... up -d agent-runtime` (restart) |
+
+The sidecar validates that the model returns a **data object** with required fields such as `columnSuggestions` and `lifecycleSuggestions`. Development config sets `FallbackToRuleBasedOnRuntimeFailure: true`, so preview still returns heuristic mappings when the LLM step fails.
 
 Run Python tests:
 
@@ -274,11 +312,36 @@ Open `http://localhost:3000/explorers` for explorer hubs, 360° context views, a
 
 Open `http://localhost:3000/dashboards` and `http://localhost:3000/reports` for dashboard/report list and detail shells linked from chat drafts.
 
-Open `http://localhost:3000/recommendations` to list recommendation drafts, create recommendations with evidence links and suggested actions, transition reviewed/ready states, and update suggested-action status.
+Open `http://localhost:3000/recommendations` to list recommendation drafts, create recommendations with evidence links and suggested actions, transition reviewed/ready states, update suggested-action status, and create review tasks from suggested actions.
+
+Open `http://localhost:3000/tasks` for the review task inbox and **Review Task Debug** harness. Use it to smoke-test Issue 19 factory endpoints:
+
+- Manual create and create-from-data-quality-issue / security-event / access-request paths
+- Seed an access request when none exist, then POST `/from-access-request`
+- Inspect published template list and last API response JSON
+- Open a created task at `/tasks/{artifactId}` and use the detail debug panel for assign, status PATCH, comment, complete (accepted/rejected), and escalation placeholder calls
+
+Recommendation detail (`/recommendations/{artifactId}`) also exposes per-action **Debug: create task** buttons with API response dumps and links to the new task.
+
+Review task admin APIs (dev headers required):
+
+- `GET http://localhost:5000/api/admin/review-tasks`
+- `POST http://localhost:5000/api/admin/review-tasks/manual`
+- `POST http://localhost:5000/api/admin/review-tasks/from-recommendation/{artifactId}/versions/{versionId}/actions/{actionId}`
+- `POST http://localhost:5000/api/admin/review-tasks/from-data-quality-issue/{issueId}`
+- `POST http://localhost:5000/api/admin/review-tasks/from-security-event/{eventId}`
+- `POST http://localhost:5000/api/admin/review-tasks/from-access-request/{requestId}`
+- `PATCH http://localhost:5000/api/admin/review-tasks/{artifactId}/versions/{versionId}/assign`
+- `PATCH http://localhost:5000/api/admin/review-tasks/{artifactId}/versions/{versionId}/status`
+- `POST http://localhost:5000/api/admin/review-tasks/{artifactId}/versions/{versionId}/comments`
+- `POST http://localhost:5000/api/admin/review-tasks/{artifactId}/versions/{versionId}/complete`
+- `POST http://localhost:5000/api/admin/review-tasks/{artifactId}/versions/{versionId}/escalation`
+
+Completed tasks return `decisionCreationDeferred: true` until Issue 20 lands `DecisionArtifact` creation.
 
 Open `http://localhost:3000/capabilities`, `/business-policies`, `/optimization-models`, and `/agent-templates` to list and inspect Layer 3–6 governed artifact definitions installed from the reference package or created through admin APIs.
 
-The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, tenant-filtered audit/security event lists, artifact registry lists, classification/policy lists, model artifact admin screens, import admin screens, governed chat, explorers, dashboards/reports, recommendations, and Layer 3–6 artifact shells from the backend.
+The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, tenant-filtered audit/security event lists, artifact registry lists, classification/policy lists, model artifact admin screens, import admin screens, governed chat, explorers, dashboards/reports, recommendations, review tasks, and Layer 3–6 artifact shells from the backend.
 
 Expected `/imports` identity-demo result:
 

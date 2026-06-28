@@ -1,8 +1,8 @@
-# Gap Analysis: Issues 1–18.5 and 22–23 vs Current Codebase
+# Gap Analysis: Issues 1–18.5, 19, and 22–23 vs Current Codebase
 
-**Scope:** `.docs/.prd/engineering-execution-issues.md` issues 1–18, Architectural Abstraction Sprint 18.1–18.5, and Milestone 5 agent-layer slices Issue 22 (tool registry) and Issue 23 (tenant agents). Issues 19–21 remain backlog-only (skipped in execution order after 18.5).  
-**Evidence base:** backend modules, EF migrations, `ETOS.Backend.Tests` (189 tests, all passing), `ETOS.AgentRuntime` pytest (5 tests, all passing), frontend pages, `ARCHITECTURE.md`, `docs/backend/architecture.md`, `packages/manufacturing-reference/`, `ETOS.AgentRuntime/`.  
-**Generated:** 2026-06-13 (updated through Issues 18.1–18.5 and 22–23, 2026-06-19)
+**Scope:** `.docs/.prd/engineering-execution-issues.md` issues 1–18, Architectural Abstraction Sprint 18.1–18.5, Milestone 4 review tasks (Issue 19), and Milestone 5 agent-layer slices Issue 22 (tool registry) and Issue 23 (tenant agents). Issues 20–21 remain backlog-only.  
+**Evidence base:** backend modules, EF migrations, `ETOS.Backend.Tests` (200+ tests; 11 Issue 19 review-task tests passing), `ETOS.AgentRuntime` pytest (5 tests, all passing), frontend pages, `ARCHITECTURE.md`, `docs/backend/architecture.md`, `packages/manufacturing-reference/`, `ETOS.AgentRuntime/`.  
+**Generated:** 2026-06-13 (updated through Issues 18.1–18.5, 19, 22–23, 2026-06-28)
 
 ---
 
@@ -28,6 +28,7 @@
 | 16 | Explorers & 360° Views | **Mostly complete** | Strong | `/explorers` hub + routes | Yes |
 | 17 | Dashboard & Reports | **Mostly complete** | Strong | `/dashboards` + `/reports` | Yes |
 | 18 | Recommendations | **Mostly complete** | Strong | `/recommendations` | Yes |
+| 19 | Review tasks, chains, escalation placeholders | **Mostly complete** | Strong | `/tasks` + debug harnesses | Yes |
 | 18.1 | Industry-neutral import/query cleanup | **Mostly complete** | Strong | — | Yes |
 | 18.2 | Capability definitions | **Mostly complete** | Strong | `/capabilities` | Yes |
 | 18.3 | Business policy definitions | **Mostly complete** | Strong | `/business-policies` | Yes |
@@ -36,7 +37,7 @@
 | 22 | Tool, skill, connector registry | **Mostly complete** | Strong | `/tools`, `/tool-runs`, connector detail | Yes |
 | 23 | Tenant agents and agent runs | **Mostly complete** | Strong | `/agents`, `/agent-runs` shells | Yes |
 
-**Bottom line:** Issues 1–6 foundation solid. 7–12 vertical data path wired backend-to-graph with package-driven import/query behavior from 18.1/18.5. Issues 13–18 AI/governance UX path landed backend + minimal but real UI shells. Issues 18.1–18.5 complete the Architectural Abstraction Sprint. Issues 22–23 land Milestone 5 foundation: governed tool registry with `ToolRun`, HTTP PydanticAI agent runtime sidecar, `AgentTypeDefinition`/`AgentVersion`/`AgentRun`, recommendation-only agent output, and E2E trace links. Issues 19–21 still deferred (review tasks, decisions, governance KPI analytics). Biggest remaining cross-cutting gaps: real auth/OIDC, MinIO/Qdrant live integrations, first-class `ObjectVersion` modeling, skill runtime composition, async tool queue, live ERP connectors, workflows (Issue 24+), and richer agent/tool UI beyond minimal shells.
+**Bottom line:** Issues 1–6 foundation solid. 7–12 vertical data path wired backend-to-graph with package-driven import/query behavior from 18.1/18.5. Issues 13–18 AI/governance UX path landed backend + minimal but real UI shells. Issues 18.1–18.5 complete the Architectural Abstraction Sprint. Issue 19 lands Milestone 4 review-task foundation: templates, factories, chains, internal assignment, escalation placeholders, and debug UI — decision creation deferred to Issue 20. Issues 22–23 land Milestone 5 agent-layer foundation. Issues 20–21 still deferred (decisions/outcomes, governance KPI analytics). Biggest remaining cross-cutting gaps: real auth/OIDC, MinIO/Qdrant live integrations, first-class `ObjectVersion` modeling, skill runtime composition, async tool queue, live ERP connectors, workflows (Issue 24+), and richer agent/tool UI beyond minimal shells.
 
 ---
 
@@ -248,7 +249,7 @@
 |---------------------|-----|
 | Manual creation from **chat, dashboards, explorers** | Chat/dashboard/report → recommendation drafts (Issue 15/18); no standalone DQ create from those UIs |
 | Standalone data-quality explorer page | None |
-| Assignment hooks | Metadata/review-task-ready flags; no task assignment (Issue 19) |
+| Assignment hooks | Review-task-ready metadata + Issue 19 factory from DQ issues; no standalone DQ explorer |
 
 ---
 
@@ -383,7 +384,7 @@
 | **Decision Explorer** full workflow | `/decisions` lists foundation/placeholder records until Issue 20 |
 | Governance Flow View in UI | API + context sections; no dedicated flow diagram page |
 | Graph canvas visualization | Text/list 360° sections only |
-| Review chain placeholders | Present in governance flow API; no live review tasks (Issue 19) |
+| Review chain in governance flow | Live review-task nodes and chain edges when tasks exist; decision/outcome placeholders until Issue 20 |
 
 ---
 
@@ -431,9 +432,41 @@
 | Acceptance criterion | Gap |
 |---------------------|-----|
 | Creation from **workflows** | Agent path live via `FromAgentRunAsync` (Issue 23); workflow path deferred (Issue 24) |
-| Convert suggested action → review task | Status transition only; Issue 19 |
-| Rich recommendation workflow UI | List + detail + mark reviewed/ready; no assignment/escalation |
+| Convert suggested action → review task | **Implemented** via Issue 19 factory + `CONVERTED_TO_REVIEW_TASK` status |
+| Rich recommendation workflow UI | List + detail + mark reviewed/ready + create review task; no assignment/escalation on recommendation page itself |
 | Publish/accept lifecycle beyond reviewed/ready | `Accepted`/`Rejected` in model; limited UI exposure |
+
+---
+
+### Issue 19: Review Tasks, Task Chains, and Escalation Placeholders — **~88%**
+
+**Implemented**
+
+- `ReviewTaskTemplateVersion` and `ReviewTaskVersion` artifacts via artifact registry `PayloadJson` (`ETOS.Backend/ReviewTasks/`)
+- EF migration `Issue19ReviewTasks`: append-only `review_task_comments`, operational `review_task_chain_links`
+- `IReviewTaskFactory` creation from recommendation suggested actions, data quality issues, security events, access requests, and manual API create
+- Deterministic `IReviewTaskPriorityDeriver` (severity × trust × conflict × template weights)
+- `IReviewTaskChainService`: prerequisite blocking, auto-unblock on accepted prerequisite completion, audit on transitions
+- Internal tenant membership validation for assignees and participants
+- Template-gated escalation placeholder API (no SLA timers or notifications)
+- `IReviewTaskCompletionHandler` stub: completion sets `Completed`, returns `decisionCreationDeferred: true` (Issue 20 boundary)
+- Development seed of four published templates: `data-quality-review`, `business-action-review`, `governance-security-review`, `access-request-review`
+- `GovernanceFlowService` live review-task nodes and chain edges when tasks link to recommendation anchors
+- Admin endpoints under `/api/admin/review-tasks` and `/api/admin/review-task-templates`
+- Frontend: `/tasks` inbox, `/tasks/[artifactId]` detail, `ReviewTaskCreateDebugPanel`, `ReviewTaskDetailDebugPanel`, recommendation debug actions
+- Home, explorers hub, recommendations, and decisions pages link to `/tasks`
+- Tests: 11 tests in `ReviewTaskTests.cs` (`ReviewTaskTests`, `ReviewTaskChainTests`, `ReviewTaskPriorityDeriverTests`, `ReviewTaskTemplateTests`)
+
+**Gaps**
+
+| Acceptance criterion | Gap |
+|---------------------|-----|
+| **`DecisionArtifact` on every completed task** | Deferred to Issue 20; completion handler stub only |
+| Review task template admin UI | API + dev seed; no frontend template CRUD shell |
+| Task explorer filters / search | Inbox list only; no risk/trusted/blocked tabs (UI backlog) |
+| Escalation SLA timers / notifications | Placeholder API only |
+| External assignees (supplier/customer) | Internal-only MVP by design |
+| Rich task workflow UX beyond debug harness | Assignment/complete on debug panel; no production task inbox UX |
 
 ---
 
@@ -592,14 +625,14 @@
 | **`ModelDefinitionVersion` / provider registry** | Inline model config in agent payload; full model artifact module deferred |
 | **Live Hermes / LangGraph** | Deferred stubs only (intentional) |
 | **Agent memory persistence** | No conversation/fact memory provider; Neo4j Agent Memory correctly absent |
-| **Review-task creation from agents** | Recommendation-only; `CreatesReviewTask` tool flags exist but Issue 19 workflows absent |
+| **Review-task creation from agents** | Recommendation-only agent output; manual review-task factory available; tool `CreatesReviewTask` metadata not auto-wired at agent execute |
 | **Rich agent UX** | Minimal list/configure/test-run shells; no inline publish wizard, risk visualization, or agent-types explorer |
 | **Home / explorers nav** | Agent and agent-run routes exist; not linked from home or explorers hub |
 | **Live OpenAI in CI** | Deterministic mock default in .NET tests and Python sidecar without `OPENAI_API_KEY` |
 
 ---
 
-## Cross-Cutting Gaps (Issues 1–18.5 and 22–23)
+## Cross-Cutting Gaps (Issues 1–18.5, 19, and 22–23)
 
 ```mermaid
 flowchart LR
@@ -616,6 +649,7 @@ flowchart LR
     I16[Explorers]
     I17[Dashboards Reports]
     I18[Recommendations]
+    I19[Review tasks]
     I181[18.1 Package-driven core]
     I182[18.2-18.4 Layer artifacts]
     I185[18.5 Reference package]
@@ -633,10 +667,13 @@ flowchart LR
     MinIO[MinIO object storage]
     Qdrant[Qdrant indexing]
     ObjVer[ObjectVersion model]
-    Tasks[Review tasks Issue 19]
+    Decisions[Decisions Issue 20]
     Workflows[Workflows Issue 24+]
     SkillRun[Skill runtime composition]
     Connectors[Live ERP connectors]
+  end
+  subgraph milestone4 [Issue 19 Foundation]
+    I19[Review tasks chains escalation]
   end
   subgraph agentLayer [Issue 22-23 Foundation]
     I22[Tool registry ToolRun]
@@ -645,6 +682,7 @@ flowchart LR
   done --> partial
   partial --> missing
   agentLayer --> partial
+  milestone4 --> partial
 ```
 
 | Theme | Present | Missing / deferred |
@@ -655,19 +693,19 @@ flowchart LR
 | **Observability** | Basic health | Serilog, OpenTelemetry |
 | **BOM compare** | Package-driven per import batch + package-driven `bom-impact-context` intent | On-demand trusted-graph BOM compare endpoint |
 | **Manufacturing semantics** | Extracted to `packages/manufacturing-reference/` + tool/skill/connector/agent-template seeds | Additional industry packages beyond reference demo |
-| **Review workflow** | Recommendation readiness + placeholders; agent/tool `CreatesReviewTask` metadata flags | Review tasks, decisions, outcomes (Issues 19–20) |
+| **Review workflow** | Review tasks (Issue 19), recommendation conversion, governance-flow live task nodes; agent/tool `CreatesReviewTask` metadata flags | `DecisionArtifact`, outcomes, learning evidence (Issues 20–21) |
 | **AI mapping** | `rule-based-v1` default + live `pydantic-ai-v1` (config-gated), optional `mapping-predictor-tool` prefetch, mapping preview diagnostics, Mapping Agent Debug UI | Hermes mapping provider; production opt-in defaults |
 | **Domain modeling** | Schema + graph instances + reference package under `packages/` | First-class `ObjectVersion` / BOM instances |
 | **Domain artifacts** | Capability, business policy, optimization model, agent template, tool/skill/connector, agent type/version CRUD + publish | Runtime enforcement beyond governed query + agent execute; optimization solver (Issue 24) |
 | **Agent automation** | `AgentVersion`/`AgentRun`, PydanticAI HTTP adapter, recommendation-from-agent, child `ToolRun` links | Skill runtime, Hermes/LangGraph, workflows, multi-agent teams (Issues 24–25) |
 | **Tool registry** | Versioned tools/skills/connectors, schema compat, dry-run/execute, disabled write contracts, one live internal handler | Async MassTransit queue, skill execution, live connector calls, additional handlers |
-| **Frontend coverage** | Home, explorers hub, artifacts, graph, documents, context-packages, ai-traces, chat, dashboards, reports, recommendations, capabilities, business-policies, optimization-models, agent-templates, tools, tool-runs, agents, agent-runs, decisions foundation, model-artifacts, imports (including Mapping Agent Debug) | Write forms for policy/classification; DQ/identity explorers; graph canvas; governance KPI charts; skills/connectors list pages; home nav for agent/tool surfaces |
+| **Frontend coverage** | Home, explorers hub, artifacts, graph, documents, context-packages, ai-traces, chat, dashboards, reports, recommendations, **review tasks (`/tasks` + debug harnesses)**, capabilities, business-policies, optimization-models, agent-templates, tools, tool-runs, agents, agent-runs, decisions foundation, model-artifacts, imports (including Mapping Agent Debug) | Write forms for policy/classification; DQ/identity explorers; graph canvas; governance KPI charts; skills/connectors list pages; production review-task inbox UX; home nav for some agent/tool surfaces |
 
 ---
 
 ## Recommended Closure Order
 
-### Within Issues 1–18.5 and 22–23 (residual)
+### Within Issues 1–18.5, 19, and 22–23 (residual)
 
 1. **Issue 12 + 8 storage** — swap `Local*FileStorage` for MinIO behind existing interfaces
 2. **Issue 12 Qdrant** — enable `IDocumentVectorIndexingService`; hook into Issue 13 retrieval fallback
@@ -679,34 +717,41 @@ flowchart LR
 8. **Issue 22 skills** — skill runtime composition or document as registry-only until Issue 24+
 9. **Issue 23 UI/nav** — explorers hub + home links for agents, agent-runs, tools; optional `/skills` and `/connectors` list pages
 
-### Skipped backlog (Issues 19–21) then Milestone 5 continuation
+### Skipped backlog (Issues 20–21) then Milestone 5 continuation
 
-1. **Issue 19** — review tasks; unlocks `CONVERTED_TO_REVIEW_TASK` from Issue 18 and tool/agent `CreatesReviewTask` flags
-2. **Issue 20** — decisions, votes, outcomes; replaces decision explorer placeholders
-3. **Issue 21** — live governance KPI analytics; extends Issue 17 placeholder catalog
-4. **Issue 24** — Dapr Workflow runtime, inherited risk/trust, safe-mode events, optimization-step hooks
-5. **Issues 25–26** — multi-agent teams, E2E MVP demo with Playwright smoke
+1. **Issue 20** — `DecisionArtifact` from completed review tasks; replaces decision explorer placeholders
+2. **Issue 21** — live governance KPI analytics; extends Issue 17 placeholder catalog
+3. **Issue 24** — Dapr Workflow runtime, inherited risk/trust, safe-mode events, optimization-step hooks
+4. **Issues 25–26** — multi-agent teams, E2E MVP demo with Playwright smoke
+
+### Issue 19 residual (optional polish)
+
+1. Review-task template admin UI shell
+2. Production task inbox UX (filters, assignment board) per UI backlog
+3. Auto-wire agent/tool `CreatesReviewTask` metadata at execute time
 
 ---
 
 ## Verification Snapshot
 
 ```text
-dotnet test EnterpriseThreadOS.sln → 189 passed, 0 failed
+dotnet test EnterpriseThreadOS.sln → 200+ passed (2 unrelated mapping-learning failures observed 2026-06-28; re-run after clean build)
+dotnet test --filter "FullyQualifiedName~ReviewTask" → 11 passed
 ETOS.AgentRuntime: pytest tests/test_execute.py → 5 passed (live OpenAI test skipped without OPENAI_API_KEY)
 ```
 
 | Area | Count / notes |
 |------|----------------|
-| Test files | 30+ files (incl. `ToolRegistryTests`, `AgentTypeDefinitionTests`, `AgentVersionTests`, `AgentRunTests`, `AgentExecutionE2ETests`, plus prior slice tests) |
+| Test files | 30+ files (incl. `ReviewTaskTests`, `ToolRegistryTests`, `AgentTypeDefinitionTests`, `AgentVersionTests`, `AgentRunTests`, `AgentExecutionE2ETests`, plus prior slice tests) |
+| EF migrations (19) | `Issue19ReviewTasks` |
 | EF migrations (22–23) | `Issue22ToolRuns`, `Issue23AgentRuns` |
 | EF migrations (18.1/18.5) | `Issue181IndustryNeutralPackageProfiles`, `Issue185NeutralBomComparisonSideCounts` |
-| Frontend routes | 41 `page.tsx` routes including `/tools`, `/tool-runs`, `/agents`, `/agents/new`, `/agents/[agentKey]/configure`, `/agents/[agentKey]/test-run`, `/agent-runs`, `/connectors/[artifactId]` |
+| Frontend routes | 43+ `page.tsx` routes including `/tasks`, `/tasks/[artifactId]`, `/tools`, `/tool-runs`, `/agents`, `/agents/new`, `/agents/[agentKey]/configure`, `/agents/[agentKey]/test-run`, `/agent-runs`, `/connectors/[artifactId]` |
 | Agent runtime sidecar | `ETOS.AgentRuntime/` FastAPI `/v1/execute`; `infra/local/docker-compose.yml` service `agent-runtime` |
 | Reference package | `packages/manufacturing-reference/` with tools, skills, connectors, `manufacturing-investigator` agent template |
-| Home nav links | explorers, artifacts, model-artifacts, imports, documents, ai-traces, chat, dashboards, reports, recommendations (agents/tools not on home yet) |
+| Home nav links | explorers, artifacts, model-artifacts, imports, documents, ai-traces, chat, dashboards, reports, recommendations, **review tasks** |
 
-Backend endpoint modules registered for slices 1–18, 18.1–18.5, 22, and 23. Milestone 3 (Issues 13–18) and the Architectural Abstraction Sprint (18.1–18.5) are implemented at foundation depth. Milestone 5 agent-layer foundation (Issues 22–23) is implemented at foundation depth with recommendation-only agent output. Milestone 4 (Issues 19–21) remains deferred; Issue 24 is the next agent-layer orchestration slice.
+Backend endpoint modules registered for slices 1–18, 18.1–18.5, 19, 22, and 23. Milestone 3 (Issues 13–18) and the Architectural Abstraction Sprint (18.1–18.5) are implemented at foundation depth. Issue 19 review-task foundation is implemented at foundation depth with debug UI. Milestone 5 agent-layer foundation (Issues 22–23) is implemented at foundation depth with recommendation-only agent output. Milestone 4 continues with Issue 20 (decisions); Issue 24 is the next agent-layer orchestration slice.
 
 ---
 
@@ -717,6 +762,6 @@ Backend endpoint modules registered for slices 1–18, 18.1–18.5, 22, and 23. 
 - Backend registration: `ETOS.Backend/Platform/EnterpriseThreadPlatform.cs`, `ETOS.Backend/Program.cs`
 - Test suite: `ETOS.Backend.Tests/`
 - Frontend shell: `ETOS.Frontend/src/app/`
-- Implementation plans: `.cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md`, `.cursor/plans/issue_16_explorers_context_views.plan.md`, `.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md`, `.cursor/plans/issue_18_recommendations_f30d3826.plan.md`, `.cursor/plans/issue_18.1_cleanup_e7dbd526.plan.md`, `.cursor/plans/issue_18.2_capabilities_3556da49.plan.md`, `.cursor/plans/issue_18.3_business_policies_05e07e22.plan.md`, `.cursor/plans/issue_18.4_optimization_agents_0c306932.plan.md`, `.cursor/plans/issue_18.5_package_1d585402.plan.md`, `.cursor/plans/issue_22_tool_registry_a7b0bb72.plan.md`, `.cursor/plans/issue_23_agents_6542739e.plan.md`
+- Implementation plans: `.cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md`, `.cursor/plans/issue_16_explorers_context_views.plan.md`, `.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md`, `.cursor/plans/issue_18_recommendations_f30d3826.plan.md`, `.cursor/plans/issue_19_review_tasks_75d7c87e.plan.md`, `.cursor/plans/issue_18.1_cleanup_e7dbd526.plan.md`, `.cursor/plans/issue_18.2_capabilities_3556da49.plan.md`, `.cursor/plans/issue_18.3_business_policies_05e07e22.plan.md`, `.cursor/plans/issue_18.4_optimization_agents_0c306932.plan.md`, `.cursor/plans/issue_18.5_package_1d585402.plan.md`, `.cursor/plans/issue_22_tool_registry_a7b0bb72.plan.md`, `.cursor/plans/issue_23_agents_6542739e.plan.md`
 - Agent runtime: `ETOS.AgentRuntime/`, `docs/local-development.md` (agent-runtime service)
 - Domain packages: `docs/architecture/domain-packages.md`, `packages/manufacturing-reference/`

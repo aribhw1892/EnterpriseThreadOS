@@ -15,6 +15,7 @@ using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Tenancy;
 using ETOS.Backend.ToolRegistry;
+using ETOS.Backend.ReviewTasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -163,6 +164,10 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
     public DbSet<ToolRun> ToolRuns => Set<ToolRun>();
 
     public DbSet<AgentRun> AgentRuns => Set<AgentRun>();
+
+    public DbSet<ReviewTaskComment> ReviewTaskComments => Set<ReviewTaskComment>();
+
+    public DbSet<ReviewTaskChainLink> ReviewTaskChainLinks => Set<ReviewTaskChainLink>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -549,6 +554,37 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
         ConfigureAgentRunTables(modelBuilder);
         ConfigureGovernedChatTables(modelBuilder);
         ConfigureDashboardReportTables(modelBuilder);
+        ConfigureReviewTaskTables(modelBuilder);
+    }
+
+    private static void ConfigureReviewTaskTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ReviewTaskComment>(entity =>
+        {
+            entity.ToTable("review_task_comments");
+            entity.HasKey(comment => comment.Id);
+            entity.Property(comment => comment.TenantId).IsRequired();
+            entity.Property(comment => comment.TaskArtifactId).IsRequired();
+            entity.Property(comment => comment.AuthorUserId).IsRequired();
+            entity.Property(comment => comment.Body).HasMaxLength(4000).IsRequired();
+            entity.Property(comment => comment.CreatedAt).IsRequired();
+            entity.HasIndex(comment => new { comment.TenantId, comment.TaskArtifactId, comment.CreatedAt });
+        });
+
+        modelBuilder.Entity<ReviewTaskChainLink>(entity =>
+        {
+            entity.ToTable("review_task_chain_links");
+            entity.HasKey(link => link.Id);
+            entity.Property(link => link.TenantId).IsRequired();
+            entity.Property(link => link.BlockedTaskArtifactId).IsRequired();
+            entity.Property(link => link.BlockingTaskArtifactId).IsRequired();
+            entity.Property(link => link.ChainReason).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(link => link.BlockingCondition).HasConversion<string>().HasMaxLength(64).IsRequired();
+            entity.Property(link => link.CreatedByUserId).IsRequired();
+            entity.Property(link => link.CreatedAt).IsRequired();
+            entity.HasIndex(link => new { link.TenantId, link.BlockedTaskArtifactId, link.ResolvedAt });
+            entity.HasIndex(link => new { link.TenantId, link.BlockingTaskArtifactId, link.ResolvedAt });
+        });
     }
 
     private static void ConfigureGovernedQueryTables(ModelBuilder modelBuilder)

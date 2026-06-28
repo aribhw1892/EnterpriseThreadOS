@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-`ETOS.Frontend` is the current Next.js frontend shell for EnterpriseThreadOS. It proves the frontend can reach the ASP.NET Core backend and display safe local platform health, tenant admin lists, governance records, artifact registry data, classification/policy records, model artifact administration, import/staging administration, identity-resolution review data, data-quality hooks, document memory records, governed chat, explorers, dashboard/report shells, recommendation shells, and Layer 3–6 governed artifact shells (capabilities, business policies, optimization models, agent templates).
+`ETOS.Frontend` is the current Next.js frontend shell for EnterpriseThreadOS. It proves the frontend can reach the ASP.NET Core backend and display safe local platform health, tenant admin lists, governance records, artifact registry data, classification/policy records, model artifact administration, import/staging administration, identity-resolution review data, data-quality hooks, document memory records, governed chat, explorers, dashboard/report shells, recommendation and review-task shells, and Layer 3–6 governed artifact shells (capabilities, business policies, optimization models, agent templates).
 
 ## Stack
 
@@ -19,11 +19,16 @@ Read `ETOS.Frontend/AGENTS.md` before frontend edits. This project uses a newer 
 - `src/app/imports/page.tsx`: server-rendered import admin page with demo import, mapping approval, validation, staging, identity candidate, trust-score actions, and **Mapping Agent Debug** (client panel via `src/components/imports/MappingAgentDebugPanel.tsx`).
 - `src/app/documents/page.tsx`: server-rendered document memory admin page with demo document creation, version metadata, object links, vector hook records, and CAD placeholder status.
 - `src/app/chat/page.tsx`: governed chat shell with evidence/confidence responses and chat-to-artifact drafting.
-- `src/app/explorers/page.tsx`: explorer hub with links to artifact, graph, document, context-package, decision, 360° context, and governance flow routes.
+- `src/app/explorers/page.tsx`: explorer hub with links to artifact, graph, document, context-package, decision, review-task, 360° context, and governance flow routes.
 - `src/app/dashboards/page.tsx` and `src/app/dashboards/[artifactId]/page.tsx`: dashboard list and detail shells.
 - `src/app/reports/page.tsx` and `src/app/reports/[artifactId]/page.tsx`: report list and detail shells.
-- `src/app/recommendations/page.tsx` and `src/app/recommendations/[artifactId]/page.tsx`: recommendation list and detail shells with evidence, suggested actions, and lifecycle transitions.
-- `src/components/recommendations/RecommendationDetailView.tsx`: shared recommendation detail panel.
+- `src/app/recommendations/page.tsx` and `src/app/recommendations/[artifactId]/page.tsx`: recommendation list and detail shells with evidence, suggested actions, lifecycle transitions, and review-task creation actions.
+- `src/app/tasks/page.tsx` and `src/app/tasks/[artifactId]/page.tsx`: review task inbox and detail shells with evidence, chain links, comments, and Issue 19 debug harnesses.
+- `src/components/review-tasks/ReviewTaskCreateDebugPanel.tsx`: client harness on `/tasks` for manual/factory create paths (data quality, security event, access request) and template/response JSON dumps.
+- `src/components/review-tasks/ReviewTaskDetailDebugPanel.tsx`: client harness on task detail for assign, status, comment, complete, and escalation smoke tests.
+- `src/components/review-tasks/ReviewTaskRecommendationDebugActions.tsx`: per-action client create helper on recommendation detail.
+- `src/components/review-tasks/review-task-debug-shared.tsx`: shared debug UI primitives for review-task panels.
+- `src/components/recommendations/RecommendationDetailView.tsx`: shared recommendation detail panel with server and client review-task creation actions.
 - `src/app/capabilities/page.tsx` and `src/app/capabilities/[artifactId]/page.tsx`: capability definition list and detail shells.
 - `src/components/capabilities/CapabilityDefinitionDetailView.tsx`: shared capability detail panel.
 - `src/app/business-policies/page.tsx` and `src/app/business-policies/[artifactId]/page.tsx`: business policy definition list and detail shells.
@@ -229,4 +234,4 @@ Pop-Location
 
 The PRD calls for future governance dashboard live KPI analytics, agent and workflow builders, and richer graph/workflow visualization.
 
-Explorers, 360° context views, AI Trace views, governed chat, dashboard/report shells, recommendation shells, and Layer 3–6 artifact shells are present as minimal Issue 14–18 and 18.2–18.4 slices. Add richer behavior only under their owning issue and keep them connected to governed backend APIs rather than direct storage access.
+Explorers, 360° context views, AI Trace views, governed chat, dashboard/report shells, recommendation shells, review-task shells with debug harnesses, and Layer 3–6 artifact shells are present as minimal Issue 14–19 and 18.2–18.4 slices. Add richer behavior only under their owning issue and keep them connected to governed backend APIs rather than direct storage access.

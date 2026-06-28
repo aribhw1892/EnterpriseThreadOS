@@ -38,6 +38,8 @@ export default async function DecisionsExplorerPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <ExplorerNavLink href="/tasks">Review tasks</ExplorerNavLink>
+              <ExplorerNavLink href="/recommendations">Recommendations</ExplorerNavLink>
               <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
               <ExplorerNavLink href="/">Home</ExplorerNavLink>
             </div>

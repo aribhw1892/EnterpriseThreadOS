@@ -3169,6 +3169,330 @@ export async function updateRecommendationSuggestedActionStatus(
   );
 }
 
+// --- Review tasks (Issue 19) ---
+
+export type ReviewTaskArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  status?: string | null;
+  priority?: string | null;
+  primaryOwnerUserId?: string | null;
+  sourceType?: string | null;
+  isBlocked: boolean;
+  updatedAt: string;
+};
+
+export type ReviewTaskPayload = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  title: string;
+  source: { sourceType: string; sourceReference: string };
+  reviewTaskType: string;
+  status: string;
+  primaryOwnerUserId?: string | null;
+  assignedRoleKey?: string | null;
+  participants: { userId: string; role: string }[];
+  priority: string;
+  severity: string;
+  trustState: string;
+  conflictState: string;
+  confidenceScore?: number | null;
+  evidenceReferences: {
+    linkId: string;
+    evidenceType: string;
+    sourceId: string;
+    safeSummary: string;
+    trustState: string;
+  }[];
+  reviewTemplateVersionId?: string | null;
+  recommendationArtifactId?: string | null;
+  recommendationVersionId?: string | null;
+  suggestedActionId?: string | null;
+  dataQualityIssueId?: string | null;
+  securityEventId?: string | null;
+  accessRequestId?: string | null;
+  aiTraceId?: string | null;
+  contextPackageId?: string | null;
+  dueDate?: string | null;
+  escalationPlaceholder?: {
+    enabled: boolean;
+    escalationTargetRoleKey?: string | null;
+    escalationPolicyId?: string | null;
+    slaPolicyVersion?: string | null;
+  } | null;
+  prerequisiteTaskIds: string[];
+  blockingReason?: string | null;
+  chainLinks: {
+    id: string;
+    blockedTaskArtifactId: string;
+    blockingTaskArtifactId: string;
+    chainReason: string;
+    blockingCondition: string;
+    createdAt: string;
+    resolvedAt?: string | null;
+  }[];
+  comments: { id: string; authorUserId: string; body: string; createdAt: string }[];
+  artifactReadinessState: string;
+};
+
+export async function getReviewTaskArtifacts(): Promise<ApiResult<ReviewTaskArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ReviewTaskArtifactSummary[]>();
+  }
+
+  return await fetchApi<ReviewTaskArtifactSummary[]>("/api/admin/review-tasks", tenantHeaders);
+}
+
+export async function getReviewTaskPayload(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<ReviewTaskPayload>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ReviewTaskPayload>();
+  }
+
+  return await fetchApi<ReviewTaskPayload>(
+    `/api/admin/review-tasks/${artifactId}/versions/${versionId}`,
+    tenantHeaders,
+  );
+}
+
+export async function createReviewTaskFromRecommendationAction(
+  artifactId: string,
+  versionId: string,
+  actionId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
+  }
+
+  return await postApi(
+    `/api/admin/review-tasks/from-recommendation/${artifactId}/versions/${versionId}/actions/${actionId}`,
+    {},
+    tenantHeaders,
+  );
+}
+
+export async function addReviewTaskComment(
+  artifactId: string,
+  versionId: string,
+  body: string,
+): Promise<ApiResult<unknown>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<unknown>();
+  }
+
+  return await postApi(`/api/admin/review-tasks/${artifactId}/versions/${versionId}/comments`, { body }, tenantHeaders);
+}
+
+export async function completeReviewTask(
+  artifactId: string,
+  versionId: string,
+  resolution: "accepted" | "rejected",
+  summary?: string,
+): Promise<
+  ApiResult<{
+    artifactId: string;
+    versionId: string;
+    status: string;
+    decisionCreationDeferred: boolean;
+    unblockedTaskArtifactIds: string[];
+  }>
+> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{
+      artifactId: string;
+      versionId: string;
+      status: string;
+      decisionCreationDeferred: boolean;
+      unblockedTaskArtifactIds: string[];
+    }>();
+  }
+
+  return await postApi(
+    `/api/admin/review-tasks/${artifactId}/versions/${versionId}/complete`,
+    { resolution, summary },
+    tenantHeaders,
+  );
+}
+
+export type ReviewTaskTemplateArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  templateKey?: string | null;
+  reviewTaskType?: string | null;
+  updatedAt: string;
+};
+
+export type ReviewTaskAccessRequest = {
+  id: string;
+  tenantId: string;
+  userId: string;
+  userName: string;
+  permissionKey: string;
+  reason: string;
+  status: string;
+  createdAt: string;
+};
+
+export async function listDataQualityIssues(): Promise<ApiResult<DataQualityIssue[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<DataQualityIssue[]>();
+  }
+
+  return await fetchApi<DataQualityIssue[]>("/api/admin/data-quality/issues", tenantHeaders);
+}
+
+export async function listSecurityEvents(limit = 25): Promise<ApiResult<SecurityEvent[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<SecurityEvent[]>();
+  }
+
+  return await fetchApi<SecurityEvent[]>(`/api/admin/governance/security-events?limit=${limit}`, tenantHeaders);
+}
+
+export async function listAccessRequests(): Promise<ApiResult<ReviewTaskAccessRequest[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ReviewTaskAccessRequest[]>();
+  }
+
+  return await fetchApi<ReviewTaskAccessRequest[]>("/api/admin/identity/access-requests", tenantHeaders);
+}
+
+export async function createAccessRequest(input: {
+  userId: string;
+  permissionKey: string;
+  reason: string;
+}): Promise<ApiResult<ReviewTaskAccessRequest>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ReviewTaskAccessRequest>();
+  }
+
+  return await postApi<ReviewTaskAccessRequest>("/api/admin/identity/access-requests", input, tenantHeaders);
+}
+
+export async function getReviewTaskTemplateArtifacts(): Promise<ApiResult<ReviewTaskTemplateArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<ReviewTaskTemplateArtifactSummary[]>();
+  }
+
+  return await fetchApi<ReviewTaskTemplateArtifactSummary[]>("/api/admin/review-task-templates", tenantHeaders);
+}
+
+export async function createManualReviewTask(input: {
+  title: string;
+  reviewTaskType: string;
+  sourceType: string;
+  sourceReference?: string;
+  primaryOwnerUserId?: string;
+  assignedRoleKey?: string;
+  severity?: string;
+  trustState?: string;
+  conflictState?: string;
+}): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
+  }
+
+  return await postApi("/api/admin/review-tasks", input, tenantHeaders);
+}
+
+export async function createReviewTaskFromDataQualityIssue(
+  issueId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
+  }
+
+  return await postApi(`/api/admin/review-tasks/from-data-quality-issue/${issueId}`, {}, tenantHeaders);
+}
+
+export async function createReviewTaskFromSecurityEvent(
+  eventId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
+  }
+
+  return await postApi(`/api/admin/review-tasks/from-security-event/${eventId}`, {}, tenantHeaders);
+}
+
+export async function createReviewTaskFromAccessRequest(
+  requestId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
+  }
+
+  return await postApi(`/api/admin/review-tasks/from-access-request/${requestId}`, {}, tenantHeaders);
+}
+
+export async function assignReviewTask(
+  artifactId: string,
+  versionId: string,
+  input: {
+    primaryOwnerUserId?: string | null;
+    assignedRoleKey?: string | null;
+  },
+): Promise<ApiResult<unknown>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<unknown>();
+  }
+
+  return await patchApi(`/api/admin/review-tasks/${artifactId}/versions/${versionId}/assign`, input, tenantHeaders);
+}
+
+export async function updateReviewTaskStatus(
+  artifactId: string,
+  versionId: string,
+  input: { status: string; blockingReason?: string | null },
+): Promise<ApiResult<unknown>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<unknown>();
+  }
+
+  return await patchApi(`/api/admin/review-tasks/${artifactId}/versions/${versionId}/status`, input, tenantHeaders);
+}
+
+export async function createReviewTaskEscalation(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
+  }
+
+  return await postApi(`/api/admin/review-tasks/${artifactId}/versions/${versionId}/escalation`, {}, tenantHeaders);
+}
+
 // --- Capability definition artifacts (Issue 18.2) ---
 
 export type CapabilityDefinitionArtifactSummary = {
