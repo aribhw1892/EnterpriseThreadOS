@@ -5,6 +5,7 @@ using ETOS.Backend.GovernedChat;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.ToolRegistry;
+using ETOS.Backend.WorkflowRuns;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.AiTrace;
@@ -18,6 +19,8 @@ public interface IAiTraceRecorder
     Task<Guid> CreateFromToolRunAsync(Guid toolRunId, Guid? auditRecordId, CancellationToken cancellationToken);
 
     Task<Guid> CreateFromAgentRunAsync(Guid agentRunId, Guid? auditRecordId, CancellationToken cancellationToken);
+
+    Task<Guid> CreateFromWorkflowRunAsync(Guid workflowRunId, Guid? auditRecordId, CancellationToken cancellationToken);
 }
 
 public sealed class AiTraceRecorder(EnterpriseThreadDbContext dbContext) : IAiTraceRecorder
@@ -301,6 +304,113 @@ public sealed class AiTraceRecorder(EnterpriseThreadDbContext dbContext) : IAiTr
         if (retrievalRun is not null && package is not null)
         {
             trace.ArtifactLinks.AddRange(BuildArtifactLinks(trace.TenantId, trace.Id, retrievalRun, package));
+        }
+
+        dbContext.AiTraceRecords.Add(trace);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return trace.Id;
+    }
+
+    public async Task<Guid> CreateFromWorkflowRunAsync(Guid workflowRunId, Guid? auditRecordId, CancellationToken cancellationToken)
+    {
+        var workflowRun = await dbContext.WorkflowRuns
+            .SingleOrDefaultAsync(item => item.Id == workflowRunId, cancellationToken)
+            ?? throw new InvalidOperationException("Workflow run was not found for AI Trace creation.");
+
+        var workflowVersion = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .SingleOrDefaultAsync(item => item.Id == workflowRun.WorkflowVersionId, cancellationToken);
+
+        var childAgentRuns = await dbContext.AgentRuns
+            .AsNoTracking()
+            .Where(item => item.ParentWorkflowRunId == workflowRunId)
+            .OrderBy(item => item.StartedAt)
+            .ToListAsync(cancellationToken);
+
+        var childToolRuns = await dbContext.ToolRuns
+            .AsNoTracking()
+            .Where(item => item.ParentWorkflowRunId == workflowRunId)
+            .OrderBy(item => item.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        var safeModeEvents = await dbContext.SafeModeEvents
+            .AsNoTracking()
+            .Where(item => item.WorkflowRunId == workflowRunId)
+            .OrderBy(item => item.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        var trace = new AiTraceRecord
+        {
+            Id = Guid.NewGuid(),
+            TenantId = workflowRun.TenantId,
+            WorkflowRunId = workflowRun.Id,
+            AuditRecordId = auditRecordId,
+            TraceKind = AiTraceKind.WorkflowRun,
+            IntentKey = workflowVersion?.Artifact?.Name ?? "workflow-run",
+            StrategyKey = workflowRun.IsPreview
+                ? "workflow-preview"
+                : "workflow-execute",
+            QueryText = workflowRun.InputSafeSummaryJson,
+            Status = workflowRun.Status,
+            SafeSummary = workflowRun.OutputSafeSummaryJson ?? $"Workflow run {workflowRun.Status}.",
+            SourcesSummaryJson = Serialize(new[]
+            {
+                new AiTraceSourceSummaryResponse(
+                    "WorkflowRun",
+                    1,
+                    [workflowRun.InputSafeSummaryJson])
+            }),
+            FilteredSummariesJson = Serialize(Array.Empty<TraceContextSummaryResponse>()),
+            DeniedSafeSummariesJson = "[]",
+            SensitiveDeniedReferencesJson = "[]",
+            ConfidenceImpactJson = Serialize(new AiTraceConfidenceImpactResponse(
+                childAgentRuns.Count + childToolRuns.Count,
+                safeModeEvents.Count,
+                0,
+                safeModeEvents.Count,
+                null,
+                "Workflow run trace with child agent/tool runs and safe mode events.")),
+            GeneratedOutputJson = workflowRun.OutputSafeSummaryJson ?? workflowRun.StepResultsJson,
+            RequestedByUserId = workflowRun.RequestedByUserId,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        trace.ArtifactLinks.Add(CreateLink(
+            workflowRun.TenantId,
+            trace.Id,
+            AiTraceArtifactLinkKind.WorkflowRun,
+            nameof(WorkflowRun),
+            workflowRun.Id.ToString()));
+
+        if (workflowVersion is not null)
+        {
+            trace.ArtifactLinks.Add(CreateLink(
+                workflowRun.TenantId,
+                trace.Id,
+                AiTraceArtifactLinkKind.WorkflowVersion,
+                nameof(ArtifactVersion),
+                workflowVersion.Id.ToString()));
+        }
+
+        foreach (var agentRun in childAgentRuns)
+        {
+            trace.ArtifactLinks.Add(CreateLink(
+                workflowRun.TenantId,
+                trace.Id,
+                AiTraceArtifactLinkKind.AgentRun,
+                nameof(AgentRun),
+                agentRun.Id.ToString()));
+        }
+
+        foreach (var toolRun in childToolRuns)
+        {
+            trace.ArtifactLinks.Add(CreateLink(
+                workflowRun.TenantId,
+                trace.Id,
+                AiTraceArtifactLinkKind.ToolRun,
+                nameof(ToolRun),
+                toolRun.Id.ToString()));
         }
 
         dbContext.AiTraceRecords.Add(trace);

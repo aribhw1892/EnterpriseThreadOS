@@ -710,6 +710,24 @@ Implement WorkflowVersion using Dapr Workflow, inherited risk/trust from agents 
 
 Issue 23.
 
+### Issue 24.1: Dapr Workflow Runtime Integration (closes Issue 24)
+
+Type: AFK (follow-on)
+Parent: Issue 24
+
+## What to build
+
+Replace the `dapr-v1` stub with real Dapr Workflow .NET SDK integration: `GovernedWorkflowOrchestrator`, `ExecuteGovernedWorkflowStepActivity`, shared `WorkflowOrchestrationCoordinator`, conditional `AddDaprWorkflow` host registration, local `daprd` components, and opt-in `appsettings.DaprWorkflow.json` overlay. Keep `in-process-v1` as CI/default path.
+
+## Acceptance criteria
+
+- `dapr-v1` schedules/waits via `DaprWorkflowClient` and maps orchestration output to `WorkflowRuntimeStartResult`.
+- Per-step tenant DB writes remain in activities via existing `IWorkflowStepExecutor`.
+- `EnableDaprHost=false` by default; misconfiguration fails closed with actionable errors.
+- Coordinator unit tests plus optional `[Category("Dapr")]` integration test; CI stays on `in-process-v1`.
+
+**Status: Implemented.**
+
 ## Issue 25: Multi-Agent Teams, Delegation, and Consensus
 
 Type: AFK

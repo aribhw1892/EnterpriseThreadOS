@@ -1,0 +1,55 @@
+[
+  {
+    "workflowKey": "bom-impact-review",
+    "name": "BOM Impact Review",
+    "description": "Governed read-only workflow for BOM impact investigation, optimization scoring, policy checks, and reviewable outputs.",
+    "workflowScope": "tenant",
+    "safeModeEnabled": false,
+    "previewModeDefault": false,
+    "allowPartialCompletion": true,
+    "defaultStepSafeModeBehavior": "skip",
+    "steps": [
+      {
+        "stepKey": "graph-query",
+        "stepType": "tool_execute",
+        "safeModeOnBlock": "skip",
+        "toolKey": "graph-query-tool"
+      },
+      {
+        "stepKey": "investigate",
+        "stepType": "agent_execute",
+        "safeModeOnBlock": "skip",
+        "agentTemplateKey": "manufacturing-investigator",
+        "dependsOnStepKeys": ["graph-query"]
+      },
+      {
+        "stepKey": "optimize",
+        "stepType": "optimization_evaluate",
+        "safeModeOnBlock": "skip",
+        "optimizationModelKey": "minimize-transport-distance",
+        "dependsOnStepKeys": ["investigate"]
+      },
+      {
+        "stepKey": "policy-check",
+        "stepType": "business_policy_check",
+        "safeModeOnBlock": "skip",
+        "policyKey": "min-maturity-85",
+        "dependsOnStepKeys": ["optimize"]
+      },
+      {
+        "stepKey": "recommend",
+        "stepType": "create_recommendation",
+        "safeModeOnBlock": "skip",
+        "sourceStepKey": "investigate",
+        "dependsOnStepKeys": ["policy-check"]
+      },
+      {
+        "stepKey": "review-task",
+        "stepType": "create_review_task",
+        "safeModeOnBlock": "skip",
+        "reviewTaskTemplateKey": "business-action-review",
+        "dependsOnStepKeys": ["recommend"]
+      }
+    ]
+  }
+]

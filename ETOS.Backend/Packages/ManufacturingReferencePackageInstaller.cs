@@ -15,7 +15,9 @@ using ETOS.Backend.Imports;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.OptimizationModels;
 using ETOS.Backend.Ontology;
+using ETOS.Backend.ReviewTasks;
 using ETOS.Backend.ToolRegistry;
+using ETOS.Backend.Workflows;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.Packages;
@@ -38,6 +40,7 @@ public sealed class ManufacturingReferencePackageInstaller(
     IGovernedChatArtifactSeeder governedChatArtifactSeeder,
     IImportMappingArtifactSeeder importMappingArtifactSeeder,
     IAgentDefinitionService agentDefinitionService,
+    IWorkflowDefinitionService workflowDefinitionService,
     EnterpriseThreadDbContext dbContext,
     ITenantContextResolver tenantContextResolver,
     IAccessPermissionService permissionService,
@@ -77,11 +80,12 @@ public sealed class ManufacturingReferencePackageInstaller(
         var installedArtifacts = new List<InstalledReferenceArtifactResponse>();
         var capabilityVersions = await InstallCapabilitiesAsync(loaded, modelPackage.Id, installedArtifacts, cancellationToken);
         var policyVersions = await InstallBusinessPoliciesAsync(loaded, modelPackage.Id, capabilityVersions, installedArtifacts, cancellationToken);
-        await InstallOptimizationModelsAsync(loaded, modelPackage.Id, capabilityVersions, policyVersions, installedArtifacts, cancellationToken);
+        var optimizationVersions = await InstallOptimizationModelsAsync(loaded, modelPackage.Id, capabilityVersions, policyVersions, installedArtifacts, cancellationToken);
         var connectorVersions = await InstallConnectorsAsync(loaded, installedArtifacts, cancellationToken);
         var toolVersions = await InstallToolsAsync(loaded, modelPackage.Id, capabilityVersions, connectorVersions, installedArtifacts, cancellationToken);
         await InstallSkillsAsync(loaded, toolVersions, installedArtifacts, cancellationToken);
         await InstallAgentTemplatesAsync(context, loaded, modelPackage.Id, capabilityVersions, toolVersions, installedArtifacts, cancellationToken);
+        await InstallWorkflowsAsync(context, loaded, modelPackage.Id, toolVersions, policyVersions, optimizationVersions, installedArtifacts, cancellationToken);
         await EnsureMappingAssistantAgentAsync(context, loaded, cancellationToken);
 
         await auditRecorder.RecordAsync(
@@ -294,7 +298,7 @@ public sealed class ManufacturingReferencePackageInstaller(
         return policyVersions;
     }
 
-    private async Task InstallOptimizationModelsAsync(
+    private async Task<Dictionary<string, Guid>> InstallOptimizationModelsAsync(
         LoadedReferencePackageManifest loaded,
         Guid modelPackageVersionId,
         IReadOnlyDictionary<string, Guid> capabilityVersions,
@@ -303,6 +307,7 @@ public sealed class ManufacturingReferencePackageInstaller(
         CancellationToken cancellationToken)
     {
         var publish = new PublishArtifactVersionRequest("Published by reference package installer.");
+        var optimizationVersions = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var optimization in loaded.OptimizationModels)
         {
@@ -324,12 +329,15 @@ public sealed class ManufacturingReferencePackageInstaller(
                 cancellationToken);
             await optimizationModelDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
             await optimizationModelDefinitionService.PublishAsync(created.ArtifactId, created.VersionId, publish, cancellationToken);
+            optimizationVersions[optimization.OptimizationKey] = created.VersionId;
             installedArtifacts.Add(new InstalledReferenceArtifactResponse(
                 "optimization-model",
                 optimization.OptimizationKey,
                 created.ArtifactId,
                 created.VersionId));
         }
+
+        return optimizationVersions;
     }
 
     private async Task<Dictionary<string, Guid>> InstallConnectorsAsync(
@@ -659,6 +667,18 @@ public sealed class ManufacturingReferencePackageInstaller(
             toolVersions,
             installedArtifacts,
             cancellationToken);
+
+        var policyVersions = await ResolvePublishedBusinessPolicyVersionsAsync(context.TenantId, cancellationToken);
+        var optimizationVersions = await ResolvePublishedOptimizationModelVersionsAsync(context.TenantId, cancellationToken);
+        await InstallWorkflowsAsync(
+            context,
+            loaded,
+            existingPackage.Id,
+            toolVersions,
+            policyVersions,
+            optimizationVersions,
+            installedArtifacts,
+            cancellationToken);
         await EnsureMappingAssistantAgentAsync(context, loaded, cancellationToken);
     }
 
@@ -858,6 +878,283 @@ public sealed class ManufacturingReferencePackageInstaller(
 
         return result;
     }
+
+    private async Task InstallWorkflowsAsync(
+        ActiveTenantContext context,
+        LoadedReferencePackageManifest loaded,
+        Guid modelPackageVersionId,
+        IReadOnlyDictionary<string, Guid> toolVersions,
+        IReadOnlyDictionary<string, Guid> policyVersions,
+        IReadOnlyDictionary<string, Guid> optimizationVersions,
+        List<InstalledReferenceArtifactResponse> installedArtifacts,
+        CancellationToken cancellationToken)
+    {
+        if (loaded.Workflows.Count == 0)
+        {
+            return;
+        }
+
+        await ReviewTaskDevelopmentTemplateSeeder.SeedPublishedTemplatesAsync(
+            dbContext,
+            context.TenantId,
+            context.UserId,
+            null,
+            cancellationToken);
+
+        var publish = new PublishArtifactVersionRequest("Published by reference package installer.");
+
+        foreach (var workflow in loaded.Workflows)
+        {
+            if (await HasPublishedWorkflowAsync(context.TenantId, workflow.WorkflowKey, cancellationToken))
+            {
+                continue;
+            }
+
+            var agentVersionIds = new List<Guid>();
+            var toolVersionIds = new List<Guid>();
+            var policyVersionIds = new List<Guid>();
+            var optimizationVersionIds = new List<Guid>();
+            var stepRequests = new List<WorkflowStepDefinitionRequest>();
+
+            foreach (var step in workflow.Steps)
+            {
+                Guid? agentVersionId = null;
+                Guid? toolVersionId = null;
+                Guid? policyVersionId = null;
+                Guid? optimizationVersionId = null;
+                Guid? reviewTaskTemplateVersionId = null;
+
+                if (!string.IsNullOrWhiteSpace(step.ToolKey))
+                {
+                    toolVersionId = toolVersions[step.ToolKey];
+                    toolVersionIds.Add(toolVersionId.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(step.AgentTemplateKey))
+                {
+                    agentVersionId = await EnsureWorkflowAgentVersionAsync(
+                        context,
+                        step.AgentTemplateKey,
+                        workflow.WorkflowKey,
+                        cancellationToken);
+                    agentVersionIds.Add(agentVersionId.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(step.PolicyKey))
+                {
+                    policyVersionId = policyVersions[step.PolicyKey];
+                    policyVersionIds.Add(policyVersionId.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(step.OptimizationModelKey))
+                {
+                    optimizationVersionId = optimizationVersions[step.OptimizationModelKey];
+                    optimizationVersionIds.Add(optimizationVersionId.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(step.ReviewTaskTemplateKey))
+                {
+                    reviewTaskTemplateVersionId = await ResolvePublishedReviewTaskTemplateVersionIdAsync(
+                        context.TenantId,
+                        step.ReviewTaskTemplateKey,
+                        cancellationToken);
+                }
+
+                stepRequests.Add(new WorkflowStepDefinitionRequest(
+                    step.StepKey,
+                    step.StepType,
+                    string.IsNullOrWhiteSpace(step.SafeModeOnBlock) ? WorkflowStepSafeModeBehaviors.Skip : step.SafeModeOnBlock,
+                    step.DependsOnStepKeys,
+                    agentVersionId,
+                    toolVersionId,
+                    policyVersionId,
+                    optimizationVersionId,
+                    step.SourceStepKey,
+                    reviewTaskTemplateVersionId));
+            }
+
+            var created = await workflowDefinitionService.CreateAsync(
+                new CreateWorkflowDefinitionRequest(
+                    workflow.Name,
+                    workflow.Description,
+                    workflow.WorkflowKey,
+                    workflow.Name,
+                    workflow.Description,
+                    workflow.WorkflowScope,
+                    stepRequests,
+                    null,
+                    null,
+                    agentVersionIds.Distinct().ToList(),
+                    toolVersionIds.Distinct().ToList(),
+                    policyVersionIds.Distinct().ToList(),
+                    optimizationVersionIds.Distinct().ToList(),
+                    [modelPackageVersionId],
+                    null,
+                    workflow.SafeModeEnabled,
+                    workflow.PreviewModeDefault,
+                    null,
+                    workflow.AllowPartialCompletion,
+                    string.IsNullOrWhiteSpace(workflow.DefaultStepSafeModeBehavior)
+                        ? WorkflowStepSafeModeBehaviors.Skip
+                        : workflow.DefaultStepSafeModeBehavior,
+                    new WorkflowTriggerConfigRequest(true, false, null, false, null),
+                    null,
+                    null,
+                    null),
+                cancellationToken);
+
+            await workflowDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
+            await workflowDefinitionService.PublishAsync(created.ArtifactId, created.VersionId, publish, cancellationToken);
+            installedArtifacts.Add(new InstalledReferenceArtifactResponse(
+                "workflow",
+                workflow.WorkflowKey,
+                created.ArtifactId,
+                created.VersionId));
+        }
+    }
+
+    private async Task<Guid> EnsureWorkflowAgentVersionAsync(
+        ActiveTenantContext context,
+        string agentTemplateKey,
+        string workflowKey,
+        CancellationToken cancellationToken)
+    {
+        var agentKey = $"{workflowKey}-agent";
+        var existingAgent = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .Where(item => item.TenantId == context.TenantId
+                && item.ReadinessState == ArtifactReadinessState.Published
+                && item.Artifact!.NormalizedArtifactType == AgentDefinitionArtifactTypes.AgentVersion.ToUpperInvariant())
+            .ToListAsync(cancellationToken);
+
+        foreach (var version in existingAgent)
+        {
+            var payload = AgentDefinitionPayloadParser.Deserialize(version.PayloadJson ?? "{}");
+            if (string.Equals(payload.AgentKey, agentKey, StringComparison.OrdinalIgnoreCase))
+            {
+                return version.Id;
+            }
+        }
+
+        var templateVersionId = await ResolvePublishedAgentTemplateVersionIdAsync(
+            context.TenantId,
+            agentTemplateKey,
+            cancellationToken);
+        var agentTypeVersionId = await TryResolveDefaultAgentTypeVersionIdAsync(context.TenantId, cancellationToken)
+            ?? throw new RequestValidationException($"Agent type definition is required before installing workflow agent '{agentKey}'.");
+
+        var created = await agentDefinitionService.CreateFromTemplateAsync(
+            new CreateAgentFromTemplateRequest(
+                templateVersionId,
+                agentKey,
+                $"{workflowKey} Agent",
+                $"Reference workflow agent for {workflowKey}.",
+                agentTypeVersionId,
+                "deterministic",
+                "mock-v1"),
+            cancellationToken);
+        await agentDefinitionService.MarkReadyAsync(created.ArtifactId, created.VersionId, cancellationToken);
+        await agentDefinitionService.PublishAsync(
+            created.ArtifactId,
+            created.VersionId,
+            new PublishArtifactVersionRequest("Published by reference package installer."),
+            cancellationToken);
+        return created.VersionId;
+    }
+
+    private async Task<Guid> ResolvePublishedAgentTemplateVersionIdAsync(
+        Guid tenantId,
+        string templateKey,
+        CancellationToken cancellationToken)
+    {
+        var templateVersions = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .Where(item => item.TenantId == tenantId
+                && item.ReadinessState == ArtifactReadinessState.Published
+                && item.Artifact!.NormalizedArtifactType == AgentTemplateDefinitionArtifactTypes.AgentTemplate.ToUpperInvariant())
+            .ToListAsync(cancellationToken);
+
+        foreach (var version in templateVersions)
+        {
+            var templatePayload = AgentTemplateDefinitionPayloadParser.Deserialize(version.PayloadJson ?? "{}");
+            if (string.Equals(templatePayload.TemplateKey, templateKey, StringComparison.OrdinalIgnoreCase))
+            {
+                return version.Id;
+            }
+        }
+
+        throw new RequestValidationException($"Published agent template '{templateKey}' was not found.");
+    }
+
+    private async Task<Guid> ResolvePublishedReviewTaskTemplateVersionIdAsync(
+        Guid tenantId,
+        string templateKey,
+        CancellationToken cancellationToken)
+    {
+        var templateVersions = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .Where(item => item.TenantId == tenantId
+                && item.ReadinessState == ArtifactReadinessState.Published
+                && item.Artifact!.NormalizedArtifactType == ReviewTaskTemplateArtifactTypes.ReviewTaskTemplate.ToUpperInvariant())
+            .ToListAsync(cancellationToken);
+
+        foreach (var version in templateVersions)
+        {
+            var templatePayload = ReviewTaskTemplatePayloadParser.Deserialize(version.PayloadJson ?? "{}");
+            if (string.Equals(templatePayload.TemplateKey, templateKey, StringComparison.OrdinalIgnoreCase))
+            {
+                return version.Id;
+            }
+        }
+
+        throw new RequestValidationException($"Published review task template '{templateKey}' was not found.");
+    }
+
+    private async Task<bool> HasPublishedWorkflowAsync(
+        Guid tenantId,
+        string workflowKey,
+        CancellationToken cancellationToken)
+    {
+        var workflowVersions = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .Where(item => item.TenantId == tenantId
+                && item.ReadinessState == ArtifactReadinessState.Published
+                && item.Artifact!.NormalizedArtifactType == WorkflowDefinitionArtifactTypes.WorkflowVersion.ToUpperInvariant())
+            .ToListAsync(cancellationToken);
+
+        foreach (var version in workflowVersions)
+        {
+            var payload = WorkflowDefinitionPayloadParser.Deserialize(version.PayloadJson ?? "{}");
+            if (string.Equals(payload.WorkflowKey, workflowKey, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private async Task<Dictionary<string, Guid>> ResolvePublishedBusinessPolicyVersionsAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken)
+        => await ResolvePublishedArtifactVersionsAsync(
+            tenantId,
+            BusinessPolicyDefinitionArtifactTypes.BusinessPolicyDefinition,
+            "policyKey",
+            cancellationToken);
+
+    private async Task<Dictionary<string, Guid>> ResolvePublishedOptimizationModelVersionsAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken)
+        => await ResolvePublishedArtifactVersionsAsync(
+            tenantId,
+            OptimizationModelDefinitionArtifactTypes.OptimizationModel,
+            "optimizationKey",
+            cancellationToken);
 
     private async Task EnsureMappingAssistantAgentAsync(
         ActiveTenantContext context,

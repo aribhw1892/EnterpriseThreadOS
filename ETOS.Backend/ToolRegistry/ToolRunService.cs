@@ -66,6 +66,7 @@ public sealed class ToolRunService(
             run.ToolDefinitionVersionId,
             run.ConnectorDefinitionVersionId,
             run.ParentAgentRunId,
+            run.ParentWorkflowRunId,
             run.Status,
             run.IsDryRun,
             run.InputSafeSummaryJson,

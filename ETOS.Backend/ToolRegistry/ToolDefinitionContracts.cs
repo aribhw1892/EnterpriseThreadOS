@@ -179,7 +179,10 @@ public sealed record ToolCompatibilityScanResponse(
     bool IsCompatible,
     IReadOnlyCollection<string> BlockingNotes);
 
-public sealed record ToolExecutionRequest(string InputJson, Guid? ParentAgentRunId = null);
+public sealed record ToolExecutionRequest(
+    string InputJson,
+    Guid? ParentAgentRunId = null,
+    Guid? ParentWorkflowRunId = null);
 
 public sealed record ToolExecutionResponse(
     Guid ToolRunId,

@@ -71,6 +71,9 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .HasMaxLength(16000)
                         .HasColumnType("character varying(16000)");
 
+                    b.Property<Guid?>("ParentWorkflowRunId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("RecommendationArtifactId")
                         .HasColumnType("uuid");
 
@@ -107,6 +110,8 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "StartedAt");
 
                     b.HasIndex("TenantId", "AgentVersionId", "StartedAt");
+
+                    b.HasIndex("TenantId", "ParentWorkflowRunId", "StartedAt");
 
                     b.ToTable("agent_runs", (string)null);
                 });
@@ -295,6 +300,9 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<Guid?>("WorkflowRunId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TenantId", "AgentRunId");
@@ -304,6 +312,8 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "RetrievalRunId");
 
                     b.HasIndex("TenantId", "ToolRunId");
+
+                    b.HasIndex("TenantId", "WorkflowRunId");
 
                     b.ToTable("ai_trace_records", (string)null);
                 });
@@ -1152,6 +1162,75 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("monitoring_issue_type_definitions", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Decisions.DecisionComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AuthorUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DecisionArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "DecisionArtifactId", "CreatedAt");
+
+                    b.ToTable("decision_comments", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.Decisions.DecisionVote", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<decimal?>("Confidence")
+                        .HasPrecision(5, 3)
+                        .HasColumnType("numeric(5,3)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DecisionArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Vote")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "DecisionArtifactId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("decision_votes", (string)null);
                 });
 
             modelBuilder.Entity("ETOS.Backend.Documents.DocumentArtifact", b =>
@@ -3449,6 +3528,48 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.ToTable("rejected_staging_summaries", (string)null);
                 });
 
+            modelBuilder.Entity("ETOS.Backend.Learning.DecisionLearningEvidence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DecisionArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EvidenceSummary")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("OutcomeKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("PatternKey")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "PatternKey", "CreatedAt");
+
+                    b.ToTable("decision_learning_evidence", (string)null);
+                });
+
             modelBuilder.Entity("ETOS.Backend.Ontology.AttributeDefinition", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4190,6 +4311,66 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.ToTable("semantic_relationship_definitions", (string)null);
                 });
 
+            modelBuilder.Entity("ETOS.Backend.Outcomes.OutcomeCheckRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActualOutcome")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("CheckType")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DecisionArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EvidenceSummary")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("ExpectedOutcome")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset>("MeasuredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal?>("OutcomeConfidence")
+                        .HasPrecision(5, 3)
+                        .HasColumnType("numeric(5,3)");
+
+                    b.Property<string>("OutcomeStatus")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<Guid?>("RecommendationArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RecordedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "DecisionArtifactId", "MeasuredAt");
+
+                    b.ToTable("outcome_check_runs", (string)null);
+                });
+
             modelBuilder.Entity("ETOS.Backend.ReviewTasks.ReviewTaskChainLink", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4335,6 +4516,9 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("ParentAgentRunId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("ParentWorkflowRunId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("RequestedByUserId")
                         .HasColumnType("uuid");
 
@@ -4360,9 +4544,146 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("TenantId", "CreatedAt");
 
+                    b.HasIndex("TenantId", "ParentWorkflowRunId", "CreatedAt");
+
                     b.HasIndex("TenantId", "ToolDefinitionVersionId", "CreatedAt");
 
                     b.ToTable("tool_runs", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.WorkflowRuns.SafeModeEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AgentRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BlockedAction")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EventKind")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("PolicyRuleKey")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid?>("ReviewTaskArtifactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StepKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ToolRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("WorkflowRunId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "StepKey", "CreatedAt");
+
+                    b.HasIndex("TenantId", "WorkflowRunId", "CreatedAt");
+
+                    b.ToTable("safe_mode_events", (string)null);
+                });
+
+            modelBuilder.Entity("ETOS.Backend.WorkflowRuns.WorkflowRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AiTraceRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuditRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("InheritedRiskSnapshotJson")
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.Property<string>("InputSafeSummaryJson")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.Property<bool>("IsPreview")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("OutputSafeSummaryJson")
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<bool>("PartialCompletion")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RecommendationArtifactIdsJson")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ReviewTaskArtifactIdsJson")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("RuntimeTrustRecalculationJson")
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)");
+
+                    b.Property<bool>("SafeModeApplied")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("StepResultsJson")
+                        .HasMaxLength(16000)
+                        .HasColumnType("character varying(16000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("WorkflowVersionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "StartedAt");
+
+                    b.HasIndex("TenantId", "WorkflowVersionId", "StartedAt");
+
+                    b.ToTable("workflow_runs", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

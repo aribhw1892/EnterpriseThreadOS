@@ -7,6 +7,7 @@ public sealed class AgentRun : ITenantScoped
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
     public Guid AgentVersionId { get; set; }
+    public Guid? ParentWorkflowRunId { get; set; }
     public Guid RequestedByUserId { get; set; }
     public required string Status { get; set; }
     public bool IsPreview { get; set; }
@@ -31,6 +32,7 @@ public sealed class AgentRun : ITenantScoped
 public sealed record AgentRunSummaryResponse(
     Guid Id,
     Guid AgentVersionId,
+    Guid? ParentWorkflowRunId,
     string Status,
     bool IsPreview,
     bool IsDryRun,
@@ -43,6 +45,7 @@ public sealed record AgentRunDetailResponse(
     Guid Id,
     Guid TenantId,
     Guid AgentVersionId,
+    Guid? ParentWorkflowRunId,
     string Status,
     bool IsPreview,
     bool IsDryRun,

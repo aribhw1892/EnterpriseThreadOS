@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ETOS.Backend.Decisions;
 using ETOS.Backend.Identity;
 
 namespace ETOS.Backend.ReviewTasks;
@@ -40,7 +41,13 @@ public static class ReviewTaskTemplatePayloadParser
                 document.EscalationPath?.Enabled ?? false,
                 document.EscalationPath?.EscalationTargetRoleKey,
                 document.EscalationPath?.EscalationPolicyId,
-                document.EscalationPath?.SlaPolicyVersion),
+                document.EscalationPath?.SlaPolicyVersion,
+                document.EscalationPath?.CanOverrideOriginalOutcome ?? true),
+            new ReviewTaskTemplateApprovalRuleResponse(
+                document.ApprovalRule?.Mode ?? DecisionApprovalRuleMode.SingleApprover,
+                document.ApprovalRule?.RequiredRoles ?? [],
+                document.ApprovalRule?.OutcomeTaxonomyVersionId,
+                document.ApprovalRule?.OutcomeTrackingRequired ?? false),
             document.ParticipantRoleDefaults ?? new Dictionary<string, string>(),
             document.AllowedOutcomeOptions ?? []);
     }
@@ -61,6 +68,7 @@ public static class ReviewTaskTemplatePayloadParser
         IReadOnlyCollection<ReviewTaskTemplatePriorityRuleDocument>? priorityRules,
         bool requiresDataQualityPrerequisite,
         ReviewTaskTemplateEscalationPathDocument? escalationPath,
+        ReviewTaskTemplateApprovalRuleDocument? approvalRule,
         IReadOnlyDictionary<string, string>? participantRoleDefaults,
         IReadOnlyCollection<string>? allowedOutcomeOptions)
         => Normalize(new ReviewTaskTemplatePayloadDocument
@@ -70,12 +78,21 @@ public static class ReviewTaskTemplatePayloadParser
             PriorityRules = priorityRules?.ToList() ?? DefaultPriorityRules(),
             RequiresDataQualityPrerequisite = requiresDataQualityPrerequisite,
             EscalationPath = escalationPath ?? new ReviewTaskTemplateEscalationPathDocument { Enabled = false },
+            ApprovalRule = approvalRule ?? DefaultApprovalRule(),
             ParticipantRoleDefaults = participantRoleDefaults?.ToDictionary(
                 pair => pair.Key.Trim(),
                 pair => pair.Value.Trim(),
                 StringComparer.OrdinalIgnoreCase) ?? new Dictionary<string, string>(),
             AllowedOutcomeOptions = allowedOutcomeOptions?.Select(item => item.Trim()).Where(item => item.Length > 0).ToList() ?? []
         });
+
+    public static ReviewTaskTemplateApprovalRuleDocument DefaultApprovalRule()
+        => new()
+        {
+            Mode = DecisionApprovalRuleMode.SingleApprover,
+            RequiredRoles = [],
+            OutcomeTrackingRequired = false
+        };
 
     public static void ValidateCore(ReviewTaskTemplatePayloadDocument document)
     {
@@ -120,6 +137,7 @@ public static class ReviewTaskTemplatePayloadParser
         document.ReviewTaskType = document.ReviewTaskType?.Trim() ?? string.Empty;
         document.PriorityRules ??= DefaultPriorityRules();
         document.EscalationPath ??= new ReviewTaskTemplateEscalationPathDocument { Enabled = false };
+        document.ApprovalRule ??= DefaultApprovalRule();
         document.ParticipantRoleDefaults ??= new Dictionary<string, string>();
         document.AllowedOutcomeOptions ??= [];
         return document;
@@ -132,6 +150,7 @@ public static class ReviewTaskTemplatePayloadParser
         public List<ReviewTaskTemplatePriorityRuleDocument>? PriorityRules { get; set; }
         public bool RequiresDataQualityPrerequisite { get; set; }
         public ReviewTaskTemplateEscalationPathDocument? EscalationPath { get; set; }
+        public ReviewTaskTemplateApprovalRuleDocument? ApprovalRule { get; set; }
         public Dictionary<string, string>? ParticipantRoleDefaults { get; set; }
         public List<string>? AllowedOutcomeOptions { get; set; }
     }
@@ -149,5 +168,14 @@ public static class ReviewTaskTemplatePayloadParser
         public string? EscalationTargetRoleKey { get; set; }
         public string? EscalationPolicyId { get; set; }
         public string? SlaPolicyVersion { get; set; }
+        public bool CanOverrideOriginalOutcome { get; set; } = true;
+    }
+
+    public sealed class ReviewTaskTemplateApprovalRuleDocument
+    {
+        public DecisionApprovalRuleMode Mode { get; set; } = DecisionApprovalRuleMode.SingleApprover;
+        public List<string>? RequiredRoles { get; set; }
+        public Guid? OutcomeTaxonomyVersionId { get; set; }
+        public bool OutcomeTrackingRequired { get; set; }
     }
 }

@@ -11,6 +11,7 @@ public sealed class AiTraceRecord : ITenantScoped
     public Guid? ContextPackageId { get; set; }
     public Guid? ToolRunId { get; set; }
     public Guid? AgentRunId { get; set; }
+    public Guid? WorkflowRunId { get; set; }
     public Guid? AuditRecordId { get; set; }
     public Guid? GovernedChatTurnId { get; set; }
     public AiTraceKind TraceKind { get; set; } = AiTraceKind.GovernedQuery;
@@ -65,7 +66,8 @@ public enum AiTraceKind
     GovernedQuery = 0,
     GovernedChat = 1,
     ToolRun = 2,
-    AgentRun = 3
+    AgentRun = 3,
+    WorkflowRun = 4
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -85,5 +87,7 @@ public enum AiTraceArtifactLinkKind
     ToolDefinition = 11,
     ConnectorDefinition = 12,
     AgentRun = 13,
-    AgentVersion = 14
+    AgentVersion = 14,
+    WorkflowRun = 15,
+    WorkflowVersion = 16
 }

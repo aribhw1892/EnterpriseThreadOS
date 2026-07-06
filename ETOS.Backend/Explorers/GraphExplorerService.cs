@@ -1,6 +1,8 @@
 using System.Text.Json;
 using ETOS.Backend.AiTrace;
 using ETOS.Backend.Artifacts;
+using ETOS.Backend.Decisions;
+using ETOS.Backend.GovernanceAnalytics;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
@@ -347,6 +349,10 @@ public interface IDecisionExplorerFoundationService
         string? status,
         string? participant,
         string? search,
+        string? conflict,
+        string? outcomeKey,
+        bool? hasOutcome,
+        int? minEvidenceCount,
         CancellationToken cancellationToken);
 }
 
@@ -367,14 +373,22 @@ public sealed class DecisionExplorerFoundationService(
 {
     private static readonly HashSet<string> DecisionTypes = new(StringComparer.OrdinalIgnoreCase)
     {
+        DecisionArtifactTypes.Decision.ToUpperInvariant(),
         "DECISION",
-        "DECISION-ARTIFACT"
+        "DECISION-ARTIFACT",
+        "DECISIONARTIFACT"
     };
+
+    private const int DecisionExplorerLimit = 500;
 
     public async Task<IReadOnlyCollection<DecisionExplorerItemResponse>> ListDecisionsAsync(
         string? status,
         string? participant,
         string? search,
+        string? conflict,
+        string? outcomeKey,
+        bool? hasOutcome,
+        int? minEvidenceCount,
         CancellationToken cancellationToken)
     {
         var context = await RequirePermissionAsync(
@@ -386,6 +400,7 @@ public sealed class DecisionExplorerFoundationService(
             .AsNoTracking()
             .Where(artifact => artifact.TenantId == context.TenantId && DecisionTypes.Contains(artifact.NormalizedArtifactType))
             .OrderByDescending(artifact => artifact.UpdatedAt)
+            .Take(DecisionExplorerLimit)
             .ToListAsync(cancellationToken);
 
         var artifactIds = artifacts.Select(artifact => artifact.Id).ToArray();
@@ -396,29 +411,41 @@ public sealed class DecisionExplorerFoundationService(
             .Select(group => group.OrderByDescending(version => version.CreatedAt).First())
             .ToListAsync(cancellationToken);
         var versionLookup = latestVersions.ToDictionary(version => version.ArtifactId);
+        var outcomeDecisionIds = await DecisionExplorerQueryHelper.LoadDecisionIdsWithOutcomeChecksAsync(
+            dbContext,
+            context.TenantId,
+            artifactIds,
+            cancellationToken);
+
+        var filter = new DecisionExplorerFilter(
+            status,
+            participant,
+            search,
+            conflict,
+            outcomeKey,
+            hasOutcome,
+            minEvidenceCount);
 
         var responses = new List<DecisionExplorerItemResponse>();
         foreach (var artifact in artifacts)
         {
-            versionLookup.TryGetValue(artifact.Id, out var version);
-            var payload = ParseDecisionPayload(version?.PayloadJson);
-            var itemStatus = payload.Status ?? "draft";
-            if (!string.IsNullOrWhiteSpace(status)
-                && !string.Equals(itemStatus, status.Trim(), StringComparison.OrdinalIgnoreCase))
+            if (!versionLookup.TryGetValue(artifact.Id, out var version))
             {
                 continue;
             }
 
-            if (!string.IsNullOrWhiteSpace(participant)
-                && !payload.ParticipantUserIds.Any(id => string.Equals(id, participant.Trim(), StringComparison.OrdinalIgnoreCase)))
+            DecisionPayloadParser.DecisionPayloadDocument payload;
+            try
+            {
+                payload = DecisionPayloadParser.Deserialize(version.PayloadJson ?? "{}");
+            }
+            catch (Exception)
             {
                 continue;
             }
 
-            var title = payload.Title ?? artifact.Name;
-            if (!string.IsNullOrWhiteSpace(search)
-                && title.Contains(search, StringComparison.OrdinalIgnoreCase) == false
-                && artifact.Name.Contains(search, StringComparison.OrdinalIgnoreCase) == false)
+            var hasOutcomeCheckRun = outcomeDecisionIds.Contains(artifact.Id);
+            if (!DecisionExplorerQueryHelper.MatchesFilter(payload, artifact.Name, filter, hasOutcomeCheckRun))
             {
                 continue;
             }
@@ -426,46 +453,59 @@ public sealed class DecisionExplorerFoundationService(
             responses.Add(new DecisionExplorerItemResponse(
                 artifact.Id,
                 artifact.ArtifactType,
-                title,
-                itemStatus,
-                payload.ParticipantUserIds,
-                payload.EvidenceCount,
-                payload.ConflictState ?? "unknown",
+                payload.Title ?? artifact.Name,
+                payload.Status.ToString(),
+                payload.ParticipantUserIds?.Select(id => id.ToString()).ToList() ?? [],
+                payload.EvidenceReferences?.Count ?? 0,
+                payload.ConflictState.ToString(),
                 payload.OutcomeSummary ?? "Outcome not recorded.",
-                $"/artifacts/{artifact.Id}"));
+                payload.OutcomeKey ?? string.Empty,
+                !string.IsNullOrWhiteSpace(payload.OutcomeKey) || hasOutcomeCheckRun,
+                $"/decisions/{artifact.Id}"));
         }
 
         return responses;
     }
 
-    private static DecisionPayload ParseDecisionPayload(string? payloadJson)
+    private static (string Title, string Status, IReadOnlyCollection<string> ParticipantUserIds, int EvidenceCount, string ConflictState, string OutcomeSummary) ParseDecisionPayload(string? payloadJson)
     {
         if (string.IsNullOrWhiteSpace(payloadJson))
         {
-            return DecisionPayload.Empty;
+            return ("Decision", "draft", [], 0, "unknown", "Outcome not recorded.");
         }
 
         try
         {
-            return JsonSerializer.Deserialize<DecisionPayload>(payloadJson, new JsonSerializerOptions(JsonSerializerDefaults.Web))
-                ?? DecisionPayload.Empty;
+            var payload = DecisionPayloadParser.Deserialize(payloadJson);
+            return (
+                payload.Title ?? "Decision",
+                payload.Status.ToString(),
+                payload.ParticipantUserIds?.Select(id => id.ToString()).ToList() ?? [],
+                payload.EvidenceReferences?.Count ?? 0,
+                payload.ConflictState.ToString(),
+                payload.OutcomeSummary ?? "Outcome not recorded.");
         }
-        catch (JsonException)
+        catch (Exception)
         {
-            return DecisionPayload.Empty;
+            try
+            {
+                using var document = JsonDocument.Parse(payloadJson);
+                var root = document.RootElement;
+                return (
+                    root.TryGetProperty("title", out var title) ? title.GetString() ?? "Decision" : "Decision",
+                    root.TryGetProperty("status", out var status) ? status.GetString() ?? "draft" : "draft",
+                    root.TryGetProperty("participantUserIds", out var participants)
+                        ? participants.EnumerateArray().Select(item => item.GetString() ?? string.Empty).Where(item => item.Length > 0).ToList()
+                        : [],
+                    root.TryGetProperty("evidenceCount", out var evidenceCount) ? evidenceCount.GetInt32() : 0,
+                    root.TryGetProperty("conflictState", out var conflict) ? conflict.GetString() ?? "unknown" : "unknown",
+                    root.TryGetProperty("outcomeSummary", out var outcome) ? outcome.GetString() ?? "Outcome not recorded." : "Outcome not recorded.");
+            }
+            catch (JsonException)
+            {
+                return ("Decision", "draft", [], 0, "unknown", "Outcome not recorded.");
+            }
         }
-    }
-
-    private sealed record DecisionPayload
-    {
-        public static DecisionPayload Empty { get; } = new();
-
-        public string? Title { get; init; }
-        public string? Status { get; init; }
-        public IReadOnlyCollection<string> ParticipantUserIds { get; init; } = [];
-        public int EvidenceCount { get; init; }
-        public string? ConflictState { get; init; }
-        public string? OutcomeSummary { get; init; }
     }
 
     private async Task<ActiveTenantContext> RequirePermissionAsync(

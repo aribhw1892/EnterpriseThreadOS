@@ -1,5 +1,7 @@
 namespace ETOS.Backend.ReviewTasks;
 
+using ETOS.Backend.Decisions;
+
 public sealed record ReviewTaskTemplatePriorityRuleResponse(
     string SeverityWeight,
     string TrustWeight,
@@ -9,7 +11,14 @@ public sealed record ReviewTaskTemplateEscalationPathResponse(
     bool Enabled,
     string? EscalationTargetRoleKey,
     string? EscalationPolicyId,
-    string? SlaPolicyVersion);
+    string? SlaPolicyVersion,
+    bool CanOverrideOriginalOutcome = true);
+
+public sealed record ReviewTaskTemplateApprovalRuleResponse(
+    DecisionApprovalRuleMode Mode,
+    IReadOnlyCollection<string> RequiredRoles,
+    Guid? OutcomeTaxonomyVersionId,
+    bool OutcomeTrackingRequired);
 
 public sealed record ReviewTaskTemplateDetailResponse(
     Guid ArtifactId,
@@ -23,6 +32,7 @@ public sealed record ReviewTaskTemplateDetailResponse(
     IReadOnlyCollection<ReviewTaskTemplatePriorityRuleResponse> PriorityRules,
     bool RequiresDataQualityPrerequisite,
     ReviewTaskTemplateEscalationPathResponse EscalationPath,
+    ReviewTaskTemplateApprovalRuleResponse ApprovalRule,
     IReadOnlyDictionary<string, string> ParticipantRoleDefaults,
     IReadOnlyCollection<string> AllowedOutcomeOptions);
 
@@ -46,6 +56,7 @@ public sealed record CreateReviewTaskTemplateRequest(
     IReadOnlyCollection<ReviewTaskTemplatePriorityRuleRequest>? PriorityRules,
     bool RequiresDataQualityPrerequisite,
     ReviewTaskTemplateEscalationPathRequest? EscalationPath,
+    ReviewTaskTemplateApprovalRuleRequest? ApprovalRule,
     IReadOnlyDictionary<string, string>? ParticipantRoleDefaults,
     IReadOnlyCollection<string>? AllowedOutcomeOptions);
 
@@ -57,6 +68,7 @@ public sealed record CreateReviewTaskTemplateVersionRequest(
     IReadOnlyCollection<ReviewTaskTemplatePriorityRuleRequest>? PriorityRules,
     bool RequiresDataQualityPrerequisite,
     ReviewTaskTemplateEscalationPathRequest? EscalationPath,
+    ReviewTaskTemplateApprovalRuleRequest? ApprovalRule,
     IReadOnlyDictionary<string, string>? ParticipantRoleDefaults,
     IReadOnlyCollection<string>? AllowedOutcomeOptions);
 
@@ -69,7 +81,14 @@ public sealed record ReviewTaskTemplateEscalationPathRequest(
     bool Enabled,
     string? EscalationTargetRoleKey,
     string? EscalationPolicyId,
-    string? SlaPolicyVersion);
+    string? SlaPolicyVersion,
+    bool CanOverrideOriginalOutcome = true);
+
+public sealed record ReviewTaskTemplateApprovalRuleRequest(
+    DecisionApprovalRuleMode Mode,
+    IReadOnlyCollection<string>? RequiredRoles,
+    Guid? OutcomeTaxonomyVersionId,
+    bool OutcomeTrackingRequired);
 
 public sealed record CreateReviewTaskTemplateResponse(
     Guid ArtifactId,

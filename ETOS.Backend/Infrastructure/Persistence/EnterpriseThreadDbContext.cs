@@ -15,7 +15,12 @@ using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Tenancy;
 using ETOS.Backend.ToolRegistry;
+using ETOS.Backend.Decisions;
+using ETOS.Backend.Learning;
+using ETOS.Backend.Outcomes;
 using ETOS.Backend.ReviewTasks;
+using ETOS.Backend.WorkflowRuns;
+using ETOS.Backend.Workflows;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -165,9 +170,21 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
 
     public DbSet<AgentRun> AgentRuns => Set<AgentRun>();
 
+    public DbSet<WorkflowRun> WorkflowRuns => Set<WorkflowRun>();
+
+    public DbSet<SafeModeEvent> SafeModeEvents => Set<SafeModeEvent>();
+
     public DbSet<ReviewTaskComment> ReviewTaskComments => Set<ReviewTaskComment>();
 
     public DbSet<ReviewTaskChainLink> ReviewTaskChainLinks => Set<ReviewTaskChainLink>();
+
+    public DbSet<DecisionVote> DecisionVotes => Set<DecisionVote>();
+
+    public DbSet<DecisionComment> DecisionComments => Set<DecisionComment>();
+
+    public DbSet<OutcomeCheckRun> OutcomeCheckRuns => Set<OutcomeCheckRun>();
+
+    public DbSet<DecisionLearningEvidence> DecisionLearningEvidence => Set<DecisionLearningEvidence>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -552,9 +569,70 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
         ConfigureAiTraceTables(modelBuilder);
         ConfigureToolRegistryTables(modelBuilder);
         ConfigureAgentRunTables(modelBuilder);
+        ConfigureWorkflowRunTables(modelBuilder);
         ConfigureGovernedChatTables(modelBuilder);
         ConfigureDashboardReportTables(modelBuilder);
         ConfigureReviewTaskTables(modelBuilder);
+        ConfigureDecisionTables(modelBuilder);
+    }
+
+    private static void ConfigureDecisionTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DecisionVote>(entity =>
+        {
+            entity.ToTable("decision_votes");
+            entity.HasKey(vote => vote.Id);
+            entity.Property(vote => vote.TenantId).IsRequired();
+            entity.Property(vote => vote.DecisionArtifactId).IsRequired();
+            entity.Property(vote => vote.UserId).IsRequired();
+            entity.Property(vote => vote.Vote).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(vote => vote.Comment).HasMaxLength(4000);
+            entity.Property(vote => vote.Confidence).HasPrecision(5, 3);
+            entity.Property(vote => vote.CreatedAt).IsRequired();
+            entity.HasIndex(vote => new { vote.TenantId, vote.DecisionArtifactId, vote.UserId }).IsUnique();
+        });
+
+        modelBuilder.Entity<DecisionComment>(entity =>
+        {
+            entity.ToTable("decision_comments");
+            entity.HasKey(comment => comment.Id);
+            entity.Property(comment => comment.TenantId).IsRequired();
+            entity.Property(comment => comment.DecisionArtifactId).IsRequired();
+            entity.Property(comment => comment.AuthorUserId).IsRequired();
+            entity.Property(comment => comment.Body).HasMaxLength(4000).IsRequired();
+            entity.Property(comment => comment.CreatedAt).IsRequired();
+            entity.HasIndex(comment => new { comment.TenantId, comment.DecisionArtifactId, comment.CreatedAt });
+        });
+
+        modelBuilder.Entity<OutcomeCheckRun>(entity =>
+        {
+            entity.ToTable("outcome_check_runs");
+            entity.HasKey(run => run.Id);
+            entity.Property(run => run.TenantId).IsRequired();
+            entity.Property(run => run.DecisionArtifactId).IsRequired();
+            entity.Property(run => run.CheckType).HasMaxLength(120).IsRequired();
+            entity.Property(run => run.ExpectedOutcome).HasMaxLength(500).IsRequired();
+            entity.Property(run => run.ActualOutcome).HasMaxLength(500).IsRequired();
+            entity.Property(run => run.OutcomeStatus).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(run => run.OutcomeConfidence).HasPrecision(5, 3);
+            entity.Property(run => run.EvidenceSummary).HasMaxLength(2000).IsRequired();
+            entity.Property(run => run.MeasuredAt).IsRequired();
+            entity.Property(run => run.CreatedAt).IsRequired();
+            entity.HasIndex(run => new { run.TenantId, run.DecisionArtifactId, run.MeasuredAt });
+        });
+
+        modelBuilder.Entity<DecisionLearningEvidence>(entity =>
+        {
+            entity.ToTable("decision_learning_evidence");
+            entity.HasKey(evidence => evidence.Id);
+            entity.Property(evidence => evidence.TenantId).IsRequired();
+            entity.Property(evidence => evidence.PatternKey).HasMaxLength(400).IsRequired();
+            entity.Property(evidence => evidence.SourceType).HasMaxLength(120).IsRequired();
+            entity.Property(evidence => evidence.OutcomeKey).HasMaxLength(120).IsRequired();
+            entity.Property(evidence => evidence.EvidenceSummary).HasMaxLength(2000).IsRequired();
+            entity.Property(evidence => evidence.CreatedAt).IsRequired();
+            entity.HasIndex(evidence => new { evidence.TenantId, evidence.PatternKey, evidence.CreatedAt });
+        });
     }
 
     private static void ConfigureReviewTaskTables(ModelBuilder modelBuilder)
@@ -711,11 +789,13 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.Property(trace => trace.GovernedChatTurnId);
             entity.Property(trace => trace.ToolRunId);
             entity.Property(trace => trace.AgentRunId);
+            entity.Property(trace => trace.WorkflowRunId);
             entity.Property(trace => trace.CreatedAt).IsRequired();
             entity.HasIndex(trace => new { trace.TenantId, trace.CreatedAt });
             entity.HasIndex(trace => new { trace.TenantId, trace.RetrievalRunId });
             entity.HasIndex(trace => new { trace.TenantId, trace.ToolRunId });
             entity.HasIndex(trace => new { trace.TenantId, trace.AgentRunId });
+            entity.HasIndex(trace => new { trace.TenantId, trace.WorkflowRunId });
         });
 
         modelBuilder.Entity<AiTraceArtifactLink>(entity =>
@@ -767,9 +847,11 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.Property(run => run.CompatibilityNotesJson).HasMaxLength(8000);
             entity.Property(run => run.ErrorSafeSummary).HasMaxLength(2000);
             entity.Property(run => run.ConnectorCredentialSafeSummaryJson).HasMaxLength(4000);
+            entity.Property(run => run.ParentWorkflowRunId);
             entity.Property(run => run.CreatedAt).IsRequired();
             entity.HasIndex(run => new { run.TenantId, run.CreatedAt });
             entity.HasIndex(run => new { run.TenantId, run.ToolDefinitionVersionId, run.CreatedAt });
+            entity.HasIndex(run => new { run.TenantId, run.ParentWorkflowRunId, run.CreatedAt });
         });
     }
 
@@ -791,9 +873,50 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.Property(run => run.ValidationResultJson).HasMaxLength(8000);
             entity.Property(run => run.ErrorSafeSummary).HasMaxLength(2000);
             entity.Property(run => run.GovernedContextSummaryJson).HasMaxLength(16000);
+            entity.Property(run => run.ParentWorkflowRunId);
             entity.Property(run => run.StartedAt).IsRequired();
             entity.HasIndex(run => new { run.TenantId, run.StartedAt });
             entity.HasIndex(run => new { run.TenantId, run.AgentVersionId, run.StartedAt });
+            entity.HasIndex(run => new { run.TenantId, run.ParentWorkflowRunId, run.StartedAt });
+        });
+    }
+
+    private static void ConfigureWorkflowRunTables(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<WorkflowRun>(entity =>
+        {
+            entity.ToTable("workflow_runs");
+            entity.HasKey(run => run.Id);
+            entity.Property(run => run.TenantId).IsRequired();
+            entity.Property(run => run.WorkflowVersionId).IsRequired();
+            entity.Property(run => run.RequestedByUserId).IsRequired();
+            entity.Property(run => run.Status).HasMaxLength(64).IsRequired();
+            entity.Property(run => run.InputSafeSummaryJson).HasMaxLength(8000).IsRequired();
+            entity.Property(run => run.OutputSafeSummaryJson).HasMaxLength(16000);
+            entity.Property(run => run.StepResultsJson).HasMaxLength(16000);
+            entity.Property(run => run.InheritedRiskSnapshotJson).HasMaxLength(8000);
+            entity.Property(run => run.RuntimeTrustRecalculationJson).HasMaxLength(8000);
+            entity.Property(run => run.RecommendationArtifactIdsJson).HasMaxLength(4000);
+            entity.Property(run => run.ReviewTaskArtifactIdsJson).HasMaxLength(4000);
+            entity.Property(run => run.StartedAt).IsRequired();
+            entity.HasIndex(run => new { run.TenantId, run.StartedAt });
+            entity.HasIndex(run => new { run.TenantId, run.WorkflowVersionId, run.StartedAt });
+        });
+
+        modelBuilder.Entity<SafeModeEvent>(entity =>
+        {
+            entity.ToTable("safe_mode_events");
+            entity.HasKey(evt => evt.Id);
+            entity.Property(evt => evt.TenantId).IsRequired();
+            entity.Property(evt => evt.WorkflowRunId).IsRequired();
+            entity.Property(evt => evt.StepKey).HasMaxLength(120).IsRequired();
+            entity.Property(evt => evt.EventKind).HasMaxLength(64).IsRequired();
+            entity.Property(evt => evt.Reason).HasMaxLength(2000).IsRequired();
+            entity.Property(evt => evt.PolicyRuleKey).HasMaxLength(120);
+            entity.Property(evt => evt.BlockedAction).HasMaxLength(200);
+            entity.Property(evt => evt.CreatedAt).IsRequired();
+            entity.HasIndex(evt => new { evt.TenantId, evt.WorkflowRunId, evt.CreatedAt });
+            entity.HasIndex(evt => new { evt.TenantId, evt.StepKey, evt.CreatedAt });
         });
     }
 

@@ -105,6 +105,7 @@ public sealed class ToolGatewayService(
                 exception.Message,
                 action,
                 request.ParentAgentRunId,
+                request.ParentWorkflowRunId,
                 cancellationToken);
         }
 
@@ -125,6 +126,7 @@ public sealed class ToolGatewayService(
                     connectorDocument.DisabledReason ?? "Connector execution is disabled in MVP.",
                     action,
                     request.ParentAgentRunId,
+                    request.ParentWorkflowRunId,
                     cancellationToken);
             }
 
@@ -148,6 +150,7 @@ public sealed class ToolGatewayService(
                 "Write-capable tools are disabled in MVP.",
                 action,
                 request.ParentAgentRunId,
+                request.ParentWorkflowRunId,
                 cancellationToken);
         }
 
@@ -164,6 +167,7 @@ public sealed class ToolGatewayService(
                 "Tool handler is not available.",
                 action,
                 request.ParentAgentRunId,
+                request.ParentWorkflowRunId,
                 cancellationToken);
         }
 
@@ -190,6 +194,7 @@ public sealed class ToolGatewayService(
                 connectorCredentialSafeSummaryJson ?? simulation.ConnectorCredentialSafeSummaryJson,
                 null,
                 request.ParentAgentRunId,
+                request.ParentWorkflowRunId,
                 cancellationToken);
 
             var auditId = await RecordAuditAsync(context, action, toolRun.Id, "Tool dry-run completed.", cancellationToken);
@@ -222,6 +227,7 @@ public sealed class ToolGatewayService(
                     result.ErrorSafeSummary ?? "Tool execution failed.",
                     action,
                     request.ParentAgentRunId,
+                    request.ParentWorkflowRunId,
                     cancellationToken);
             }
 
@@ -240,6 +246,7 @@ public sealed class ToolGatewayService(
                 connectorCredentialSafeSummaryJson,
                 result.RetrievalRunId,
                 request.ParentAgentRunId,
+                request.ParentWorkflowRunId,
                 cancellationToken);
 
             var successAuditId = await RecordAuditAsync(context, action, succeededRun.Id, "Tool execution completed.", cancellationToken);
@@ -268,6 +275,7 @@ public sealed class ToolGatewayService(
                 exception.Message,
                 action,
                 request.ParentAgentRunId,
+                request.ParentWorkflowRunId,
                 cancellationToken);
         }
         catch (Exception exception)
@@ -285,6 +293,7 @@ public sealed class ToolGatewayService(
                 connectorCredentialSafeSummaryJson,
                 null,
                 request.ParentAgentRunId,
+                request.ParentWorkflowRunId,
                 cancellationToken);
             var failedAuditId = await RecordAuditAsync(context, action, failedRun.Id, "Tool execution failed.", cancellationToken);
             failedRun.AuditRecordId = failedAuditId;
@@ -310,6 +319,7 @@ public sealed class ToolGatewayService(
         string errorSafeSummary,
         string action,
         Guid? parentAgentRunId,
+        Guid? parentWorkflowRunId,
         CancellationToken cancellationToken)
     {
         var run = await PersistRunAsync(
@@ -325,6 +335,7 @@ public sealed class ToolGatewayService(
             null,
             null,
             parentAgentRunId,
+            parentWorkflowRunId,
             cancellationToken);
         var auditId = await RecordAuditAsync(context, action, run.Id, errorSafeSummary, cancellationToken);
         run.AuditRecordId = auditId;
@@ -345,6 +356,7 @@ public sealed class ToolGatewayService(
         string? connectorCredentialSafeSummaryJson,
         Guid? retrievalRunId,
         Guid? parentAgentRunId,
+        Guid? parentWorkflowRunId,
         CancellationToken cancellationToken)
     {
         var run = new ToolRun
@@ -354,6 +366,7 @@ public sealed class ToolGatewayService(
             ToolDefinitionVersionId = toolVersionId,
             ConnectorDefinitionVersionId = connectorVersionId,
             ParentAgentRunId = parentAgentRunId,
+            ParentWorkflowRunId = parentWorkflowRunId,
             RequestedByUserId = context.UserId,
             Status = status,
             IsDryRun = isDryRun,

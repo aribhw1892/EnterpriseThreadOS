@@ -128,6 +128,14 @@ services:
       timeout: 5s
       retries: 5
 
+  dapr-placement:
+    profiles: ["dapr-workflow"]
+    image: daprio/dapr:1.14.4
+    container_name: etos-dapr-placement
+    command: ["./placement", "-port", "50005", "-log-level", "info"]
+    ports:
+      - "50005:50005"
+
 volumes:
   postgres-data:
   neo4j-data:

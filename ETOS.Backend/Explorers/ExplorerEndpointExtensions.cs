@@ -66,9 +66,21 @@ public static class ExplorerEndpointExtensions
             string? status,
             string? participant,
             string? search,
+            string? conflict,
+            string? outcomeKey,
+            bool? hasOutcome,
+            int? minEvidenceCount,
             IDecisionExplorerFoundationService service,
             CancellationToken cancellationToken) =>
-            await ExecuteAsync(() => service.ListDecisionsAsync(status, participant, search, cancellationToken)));
+            await ExecuteAsync(() => service.ListDecisionsAsync(
+                status,
+                participant,
+                search,
+                conflict,
+                outcomeKey,
+                hasOutcome,
+                minEvidenceCount,
+                cancellationToken)));
 
         group.MapGet("/artifacts", async (
             string? artifactType,

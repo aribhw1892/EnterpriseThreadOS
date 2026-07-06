@@ -4,7 +4,8 @@ public sealed record AgentExecutionRequest(
     string? StructuredInputJson,
     string? QueryText,
     Guid? StartGraphNodeId = null,
-    Guid? DocumentArtifactId = null);
+    Guid? DocumentArtifactId = null,
+    Guid? ParentWorkflowRunId = null);
 
 public sealed record AgentExecutionResponse(
     Guid AgentRunId,

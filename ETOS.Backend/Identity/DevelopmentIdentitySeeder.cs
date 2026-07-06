@@ -15,9 +15,14 @@ using ETOS.Backend.GovernedChat;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.IdentityResolution;
+using ETOS.Backend.Decisions;
+using ETOS.Backend.GovernanceAnalytics;
+using ETOS.Backend.Learning;
+using ETOS.Backend.Outcomes;
 using ETOS.Backend.Recommendations;
 using ETOS.Backend.ReviewTasks;
 using ETOS.Backend.ToolRegistry;
+using ETOS.Backend.Workflows;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -129,6 +134,13 @@ public sealed class DevelopmentIdentitySeeder(
         var agentsAdminPermission = await EnsurePermissionAsync(AgentPermissions.Admin, "Administer tenant agent records.", cancellationToken);
         var agentsTestPermission = await EnsurePermissionAsync(AgentPermissions.Test, "Test-run draft tenant agents.", cancellationToken);
         var agentsExecutePermission = await EnsurePermissionAsync(AgentPermissions.Execute, "Execute published tenant agents.", cancellationToken);
+        var workflowsReadPermission = await EnsurePermissionAsync(WorkflowPermissions.Read, "Read tenant workflow version artifacts.", cancellationToken);
+        var workflowsCreatePermission = await EnsurePermissionAsync(WorkflowPermissions.Create, "Create tenant workflow version artifacts.", cancellationToken);
+        var workflowsReadinessPermission = await EnsurePermissionAsync(WorkflowPermissions.Readiness, "Mark tenant workflow versions ready.", cancellationToken);
+        var workflowsAdminPermission = await EnsurePermissionAsync(WorkflowPermissions.Admin, "Administer tenant workflow records.", cancellationToken);
+        var workflowsPreviewPermission = await EnsurePermissionAsync(WorkflowPermissions.Preview, "Preview and test-run draft tenant workflows.", cancellationToken);
+        var workflowsExecutePermission = await EnsurePermissionAsync(WorkflowPermissions.Execute, "Execute published tenant workflows.", cancellationToken);
+        var workflowRunsReadPermission = await EnsurePermissionAsync(WorkflowRunPermissions.Read, "Read tenant workflow run records.", cancellationToken);
         var reviewTaskReadPermission = await EnsurePermissionAsync(ReviewTaskPermissions.Read, "Read tenant review task artifacts.", cancellationToken);
         var reviewTaskCreatePermission = await EnsurePermissionAsync(ReviewTaskPermissions.Create, "Create tenant review task artifacts.", cancellationToken);
         var reviewTaskAssignPermission = await EnsurePermissionAsync(ReviewTaskPermissions.Assign, "Assign tenant review tasks.", cancellationToken);
@@ -138,6 +150,19 @@ public sealed class DevelopmentIdentitySeeder(
         var reviewTaskTemplateCreatePermission = await EnsurePermissionAsync(ReviewTaskTemplatePermissions.Create, "Create tenant review task template artifacts.", cancellationToken);
         var reviewTaskTemplateReadinessPermission = await EnsurePermissionAsync(ReviewTaskTemplatePermissions.Readiness, "Mark tenant review task template versions ready.", cancellationToken);
         var reviewTaskTemplateAdminPermission = await EnsurePermissionAsync(ReviewTaskTemplatePermissions.Admin, "Administer tenant review task template records.", cancellationToken);
+        var decisionReadPermission = await EnsurePermissionAsync(DecisionPermissions.Read, "Read tenant decision artifacts.", cancellationToken);
+        var decisionVotePermission = await EnsurePermissionAsync(DecisionPermissions.Vote, "Vote on tenant decision artifacts.", cancellationToken);
+        var decisionManagePermission = await EnsurePermissionAsync(DecisionPermissions.Manage, "Manage tenant decision lifecycle.", cancellationToken);
+        var decisionAdminPermission = await EnsurePermissionAsync(DecisionPermissions.Admin, "Administer tenant decision records.", cancellationToken);
+        var outcomeReadPermission = await EnsurePermissionAsync(OutcomePermissions.Read, "Read tenant outcome taxonomy artifacts.", cancellationToken);
+        var outcomeRecordPermission = await EnsurePermissionAsync(OutcomePermissions.Record, "Record manual decision outcomes.", cancellationToken);
+        var outcomeAdminPermission = await EnsurePermissionAsync(OutcomePermissions.Admin, "Administer tenant outcome records.", cancellationToken);
+        var learningReadPermission = await EnsurePermissionAsync(LearningPermissions.Read, "Read tenant learning signal artifacts.", cancellationToken);
+        var learningAdminPermission = await EnsurePermissionAsync(LearningPermissions.Admin, "Administer tenant learning records.", cancellationToken);
+        var governanceAnalyticsReadPermission = await EnsurePermissionAsync(
+            GovernanceAnalyticsPermissions.Read,
+            "Read tenant governance analytics and KPI dashboards.",
+            cancellationToken);
         var adminRole = await EnsureTenantRoleAsync(tenant.Id, cancellationToken);
         var chatRunnerRole = await EnsureChatRunnerRoleAsync(tenant.Id, cancellationToken);
         var chatRunner = await EnsureChatRunnerUserAsync(seedOptions, cancellationToken);
@@ -226,6 +251,13 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsAdminPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsTestPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, agentsExecutePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, workflowsReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, workflowsCreatePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, workflowsReadinessPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, workflowsAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, workflowsPreviewPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, workflowsExecutePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, workflowRunsReadPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskReadPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskCreatePermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskAssignPermission.Id, cancellationToken);
@@ -235,6 +267,16 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskTemplateCreatePermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskTemplateReadinessPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, reviewTaskTemplateAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, decisionReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, decisionVotePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, decisionManagePermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, decisionAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, outcomeReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, outcomeRecordPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, outcomeAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, learningReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, learningAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governanceAnalyticsReadPermission.Id, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, chatRunner.Id, chatRunnerRole.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, governedChatRunPermission.Id, cancellationToken);
@@ -247,7 +289,14 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, chatRunnerRole.Id, recommendationCreatePermission.Id, cancellationToken);
 
         await EnsureAnalysisAgentTypeDefinitionAsync(tenant, admin, cancellationToken);
-        await ReviewTaskDevelopmentTemplateSeeder.SeedPublishedTemplatesAsync(dbContext, tenant.Id, admin.Id, cancellationToken);
+        var outcomeSeed = await OutcomeTaxonomyDevelopmentSeeder.SeedPublishedTaxonomyAsync(dbContext, tenant.Id, admin.Id, cancellationToken);
+        await ReviewTaskDevelopmentTemplateSeeder.SeedPublishedTemplatesAsync(
+            dbContext,
+            tenant.Id,
+            admin.Id,
+            outcomeSeed?.TaxonomyVersionId,
+            cancellationToken);
+        await LearningDevelopmentSeeder.SeedPlaceholderArtifactsAsync(dbContext, tenant.Id, admin.Id, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         await EnsureBootstrapAuditAsync(tenant.Id, admin.Id, tenant.Identifier, cancellationToken);
 

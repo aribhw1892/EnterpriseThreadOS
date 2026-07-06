@@ -34,7 +34,10 @@
 - `Agents/`: tenant `AgentVersion` artifacts, from-template/from-prompt creation, readiness/publish with derived capability/risk, and minimal API endpoint mapping.
 - `AgentRuns/`: runtime `AgentRun` records with list/get APIs.
 - `AgentRuntime/`: `IAgentRuntimeAdapter` contracts, HTTP `PydanticAiRuntimeAdapter`, deferred Hermes/LangGraph adapters, shared `AgentExecutionProfile` / `IAgentExecutionProfileResolver` / `IAgentRuntimePreviewOrchestrator` kernel, `IAgentExecutionService` orchestration, and preview/test/execute endpoints under `/api/admin/agents`. Import mapping reuses the preview orchestrator without persisting `AgentRun`.
-- `Packages/`: reference package manifest loading, manufacturing reference package installer, and development install endpoint.
+- `ReviewTasks/`: tenant review task/template artifacts, chain links, comments, factories, completion handler, and minimal API endpoint mapping.
+- `Decisions/`: `DecisionArtifact` lifecycle from completed review tasks, votes, comments, conflict resolution, escalation, and minimal API endpoint mapping.
+- `Outcomes/`: `OutcomeTaxonomyVersion` artifacts, `OutcomeCheckRun` manual outcome records, and minimal API endpoint mapping.
+- `Learning/`: `DecisionLearningEvidence`, rollup to `LearningSignalArtifact`, placeholder policy/model artifacts, and minimal API endpoint mapping.
 - `Platform/Development/`: development-only endpoints including reference package install.
 - `Platform/Extensions/`: architecture-honest extension point catalog for deferred capabilities.
 
@@ -244,8 +247,8 @@ The governed-chat module currently includes:
 
 The explorers module currently includes:
 
-- tenant-filtered read-only explorer APIs for artifacts, graph nodes, documents, context packages, and decision foundations.
-- generic 360° context views and governance flow projections with live review-task nodes and chain edges when tasks exist; decision/outcome/learning placeholders remain until Issues 20–21.
+- tenant-filtered read-only explorer APIs for artifacts, graph nodes, documents, context packages, and live decision artifacts.
+- generic 360° context views and governance flow projections with live review-task and decision nodes when linked; outcome and learning placeholders when no runtime records exist yet.
 - policy/trust-filtered graph browse.
 - admin endpoints under `/api/admin/explorers`.
 
@@ -296,7 +299,8 @@ The review tasks module currently includes:
 - `IReviewTaskChainService` prerequisite blocking and auto-unblock on accepted prerequisite completion.
 - internal tenant membership validation for assignees and participants.
 - template-gated escalation placeholder API (no SLA timers or notifications).
-- task completion sets `Completed` and returns `decisionCreationDeferred: true`; `IReviewTaskCompletionHandler` stub for Issue 20.
+- template `approvalRule` snapshot (mode, required roles, outcome taxonomy ref, outcome tracking flag) on published templates.
+- task completion sets `Completed`, invokes `DecisionReviewTaskCompletionHandler`, and returns `decisionArtifactId` when creation succeeds (`decisionCreationDeferred: false`).
 - development seed of four published templates: `data-quality-review`, `business-action-review`, `governance-security-review`, `access-request-review`.
 - governance-flow integration: live review task nodes and chain edges when tasks link to recommendation anchors.
 - admin endpoints under `/api/admin/review-tasks` and `/api/admin/review-task-templates`.
@@ -304,7 +308,38 @@ The review tasks module currently includes:
 
 Review task permissions: `review_tasks.read`, `review_tasks.create`, `review_tasks.assign`, `review_tasks.manage`, `review_tasks.admin`, `review_task_templates.read`, `review_task_templates.create`, `review_task_templates.readiness`, `review_task_templates.admin`.
 
-Issue 19 tests cover template resolution, factory creation paths, chain blocking/unblock, priority derivation, internal-only assignment, and completion deferral (`ReviewTaskTests`, `ReviewTaskChainTests`, `ReviewTaskPriorityDeriverTests`, `ReviewTaskTemplateTests`).
+Issue 19 tests cover template resolution, factory creation paths, chain blocking/unblock, priority derivation, internal-only assignment, and decision creation on completion (`ReviewTaskTests`, `ReviewTaskChainTests`, `ReviewTaskPriorityDeriverTests`, `ReviewTaskTemplateTests`).
+
+### Decisions, Outcomes, And Learning (Issue 20)
+
+The decisions module currently includes:
+
+- tenant-scoped `DecisionArtifact` versions created on every completed review task (accept, reject, and explicit no-action outcome keys).
+- operational tables: `decision_votes`, `decision_comments`.
+- `IDecisionFactory` copies template approval-rule snapshot, participants, and source links from the completed task.
+- `IDecisionVoteService` and `IDecisionConflictResolver` for multi-participant votes (`single_approver`, `all_required`, `majority`, `any_one`, `role_based`).
+- template-gated escalation from `BlockedConflict` decisions back into review tasks.
+- admin endpoints under `/api/admin/decisions` (list, get, vote, comment, finalize, escalation, manual outcome on decision version).
+
+Decision permissions: `decisions.read`, `decisions.vote`, `decisions.manage`, `decisions.admin`.
+
+The outcomes module currently includes:
+
+- tenant-scoped `OutcomeTaxonomyVersion` artifacts with published taxonomy categories.
+- operational `outcome_check_runs` for manual outcome recording linked to decisions.
+- admin endpoints under `/api/admin/outcome-taxonomies` and `POST .../decisions/{artifactId}/versions/{versionId}/outcomes`.
+
+Outcome permissions: `outcomes.read`, `outcomes.record`, `outcomes.admin`.
+
+The learning module currently includes:
+
+- operational `decision_learning_evidence` rows on finalize, vote, and manual outcome events.
+- `ILearningSignalRollupService` rollup to `LearningSignalArtifact` when `LearningSignals:Rollup` threshold is met (default min 3 occurrences / 30 days).
+- placeholder draft `LearningPolicyVersion` and `LearningModelVersion` artifacts for explorer visibility (no execution).
+
+Learning permissions: `learning_signals.read`, `learning.admin`.
+
+Issue 20 tests cover decision creation on task completion, conflict resolution, manual outcomes, learning evidence, rollup idempotency, and explorer/governance-flow integration (`DecisionTests`, updated `ReviewTaskTests`, `ExplorersTests`).
 
 ### Capability Definitions (Issue 18.2)
 
@@ -364,6 +399,17 @@ The agent-runtime module currently includes:
 - reuse by `PydanticAiMappingProvider` for import mapping preview through the shared preview orchestrator (no `AgentRun`; preview mode only; agent config from published `AgentVersion` or template fallback).
 
 Local sidecar: `ETOS.AgentRuntime/` (FastAPI). Supports OpenAI cloud and `openai-compatible` providers (LM Studio via `OPENAI_BASE_URL`). Deterministic mock output when no API key/base URL is configured. The sidecar runs in Docker Compose locally; rebuild the `agent-runtime` image after Python code changes (see [Rebuild vs restart](../local-development.md#rebuild-vs-restart-agent-runtime) in `docs/local-development.md`). Mapping preview resolves the latest published tenant `AgentVersion` for the mapping assistant agent key via `AgentExecutionProfileResolver`.
+
+### Workflow Runtime (Issue 24)
+
+The workflow modules currently include:
+
+- `Workflows/`: governed `WorkflowVersion` BaseArtifact CRUD, JSON-canonical step definitions (`agent_execute`, `tool_execute`, `business_policy_check`, `optimization_evaluate`, `create_recommendation`, `create_review_task`), inherited risk/trust derivation on publish, readiness/publish workflow, and admin endpoints under `/api/admin/workflows`.
+- `WorkflowRuns/`: `WorkflowRun` and `SafeModeEvent` runtime records with list/get under `/api/admin/workflow-runs`.
+- `WorkflowRuntime/`: `IWorkflowRuntimeAdapter` with `in-process-v1` default (CI/tests) and `dapr-v1` real Dapr Workflow runtime; shared `WorkflowOrchestrationCoordinator`; `GovernedWorkflowOrchestrator` + `ExecuteGovernedWorkflowStepActivity` registered when `EnableDaprHost=true`; `WorkflowStepExecutor` orchestrating governed agent/tool calls with `ParentWorkflowRunId` linkage; deterministic business-policy and optimization step evaluators (no LLM solver); preview/test/execute via `IWorkflowExecutionService`; partial safe mode with auditable skipped/blocked steps; recommendation and review-task outputs only (no decisions, no enterprise writes).
+- manufacturing reference package seeds `bom-impact-review` workflow via `packages/manufacturing-reference/artifacts/workflows.json`.
+
+Permissions: `workflows.read`, `workflows.create`, `workflows.readiness`, `workflows.admin`, `workflows.preview`, `workflows.execute`, `workflow-runs.read`.
 
 ### Tool Registry (Issue 22)
 
@@ -494,10 +540,14 @@ Issue 22 tests cover tool/skill/connector registry CRUD/publish, schema compatib
 
 Issue 23 tests cover agent type and agent version CRUD/publish, from-template creation, derived capability/risk readiness, draft permission rules, preview/test/execute orchestration, safe-mode blocking, ToolRun parent links, recommendation and AI Trace creation, HTTP PydanticAI adapter behavior, and manufacturing-reference E2E execution (`AgentTypeDefinitionTests`, `AgentVersionTests`, `AgentRunTests`, `AgentExecutionE2ETests`, `AgentRuntimeAdapterTests`).
 
-Issue 19 tests cover review task/template factories, chain links, priority derivation, assignment guards, and deferred decision completion (`ReviewTaskTests`, `ReviewTaskChainTests`, `ReviewTaskPriorityDeriverTests`, `ReviewTaskTemplateTests`).
+Issue 24 tests cover workflow definition CRUD/publish, inherited risk derivation, manual execute/preview, tenant isolation, partial safe mode with `SafeModeEvent` persistence, read-only constraints, manufacturing-reference workflow E2E, and shared orchestration coordinator unit tests (`WorkflowDefinitionTests`, `WorkflowRunTests`, `WorkflowSafeModeTests`, `WorkflowExecutionE2ETests`, `WorkflowReadOnlyConstraintTests`, `WorkflowOrchestrationCoordinatorTests`). Optional Dapr integration tests run with `ETOS_DAPR_INTEGRATION=1` when a local sidecar is available.
+
+Issue 19 tests cover review task/template factories, chain links, priority derivation, assignment guards, and decision creation on completion (`ReviewTaskTests`, `ReviewTaskChainTests`, `ReviewTaskPriorityDeriverTests`, `ReviewTaskTemplateTests`).
+
+Issue 20 tests cover decision artifacts, votes/conflicts, manual outcomes, learning evidence rollup, and governance-flow decision nodes (`DecisionTests`, `ExplorersTests`).
 
 ## Planned Backend Areas
 
-The PRD and issue backlog define later modules for decisions, outcomes, governance analytics, workflows, and multi-agent collaboration.
+The PRD and issue backlog define later modules for scheduled/event-driven workflow triggers, LangGraph multi-agent teams, skill runtime composition, scheduled outcome checks, learning-model execution, and enterprise write actions.
 
-Do not document or code these as implemented until the source code exists. Issue 20 (`DecisionArtifact` from completed review tasks) is the next Milestone 4 slice after Issue 19.
+Do not document or code these as implemented until the source code exists. Issue 21 (governance dashboard KPIs and advanced decision explorer filters) is the next Milestone 4 slice after Issue 20.

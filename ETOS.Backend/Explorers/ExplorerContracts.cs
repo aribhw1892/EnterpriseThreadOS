@@ -185,6 +185,8 @@ public sealed record DecisionExplorerItemResponse(
     int EvidenceCount,
     string ConflictState,
     string OutcomeSummary,
+    string OutcomeKey,
+    bool HasOutcome,
     string ContextViewRoute);
 
 public sealed record ArtifactExplorerSummaryResponse(

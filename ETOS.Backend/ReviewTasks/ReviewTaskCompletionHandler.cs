@@ -5,23 +5,31 @@ namespace ETOS.Backend.ReviewTasks;
 /// </summary>
 public interface IReviewTaskCompletionHandler
 {
-    Task HandleCompletedAsync(
+    Task<DecisionCompletionHandleResult?> HandleCompletedAsync(
         Guid tenantId,
         Guid userId,
         Guid taskArtifactId,
         Guid taskVersionId,
         ReviewTaskCompletionResolution resolution,
+        string? outcomeKey,
+        string? summary,
         CancellationToken cancellationToken);
 }
 
+public sealed record DecisionCompletionHandleResult(
+    Guid DecisionArtifactId,
+    Guid DecisionVersionId);
+
 public sealed class DeferredReviewTaskCompletionHandler : IReviewTaskCompletionHandler
 {
-    public Task HandleCompletedAsync(
+    public Task<DecisionCompletionHandleResult?> HandleCompletedAsync(
         Guid tenantId,
         Guid userId,
         Guid taskArtifactId,
         Guid taskVersionId,
         ReviewTaskCompletionResolution resolution,
+        string? outcomeKey,
+        string? summary,
         CancellationToken cancellationToken)
-        => Task.CompletedTask;
+        => Task.FromResult<DecisionCompletionHandleResult?>(null);
 }

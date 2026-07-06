@@ -4,6 +4,7 @@ using ETOS.Backend.Documents;
 using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.Decisions;
 using ETOS.Backend.Recommendations;
 using ETOS.Backend.ReviewTasks;
 using Microsoft.EntityFrameworkCore;
@@ -535,6 +536,9 @@ public sealed class GovernanceFlowService(
         var hasReviewTaskNode = nodes.Any(node =>
             node.LinkRoute?.StartsWith("/tasks/", StringComparison.OrdinalIgnoreCase) == true);
 
+        var hasDecisionNode = nodes.Any(node =>
+            node.LinkRoute?.StartsWith("/decisions/", StringComparison.OrdinalIgnoreCase) == true);
+
         var placeholders = new List<GovernanceFlowPlaceholderResponse>();
         if (!hasRecommendationNode)
         {
@@ -556,26 +560,30 @@ public sealed class GovernanceFlowService(
                 "Create a review task from a recommendation suggested action or governed source."));
         }
 
+        if (!hasDecisionNode)
+        {
+            placeholders.Add(new GovernanceFlowPlaceholderResponse(
+                GovernanceFlowPlaceholderKind.Decision,
+                "Decision",
+                hasReviewTaskNode ? "available" : "not_implemented",
+                "Issue 20",
+                "Complete a review task to create a decision artifact."));
+        }
+
         placeholders.AddRange(
         [
             new GovernanceFlowPlaceholderResponse(
-                GovernanceFlowPlaceholderKind.Decision,
-                "Decision",
-                "not_implemented",
-                "Milestone 4",
-                "Decision artifact lifecycle is planned for Milestone 4."),
-            new GovernanceFlowPlaceholderResponse(
                 GovernanceFlowPlaceholderKind.OutcomeCheck,
                 "Outcome check",
-                "not_implemented",
-                "Milestone 4",
-                "Outcome verification is planned for Milestone 4."),
+                hasDecisionNode ? "available" : "not_implemented",
+                "Issue 20",
+                "Record manual outcomes on finalized decisions."),
             new GovernanceFlowPlaceholderResponse(
                 GovernanceFlowPlaceholderKind.LearningSignal,
                 "Learning signal",
                 "not_implemented",
-                "Milestone 4",
-                "Learning signal capture is planned for Milestone 4.")
+                "Issue 20",
+                "Learning signals roll up from repeated decision evidence patterns.")
         ]);
 
         return placeholders;
@@ -674,6 +682,62 @@ public sealed class GovernanceFlowService(
                     GovernanceFlowEdgeKind.Dependency,
                     link.ChainReason.ToString()));
             }
+
+            await AddLinkedDecisionForTaskAsync(context, taskArtifact.Id, taskNodeId, nodes, edges, cancellationToken);
+        }
+    }
+
+    private async Task AddLinkedDecisionForTaskAsync(
+        ActiveTenantContext context,
+        Guid taskArtifactId,
+        string taskNodeId,
+        List<GovernanceFlowNodeResponse> nodes,
+        List<GovernanceFlowEdgeResponse> edges,
+        CancellationToken cancellationToken)
+    {
+        var normalizedDecisionType = DecisionArtifactTypes.Decision.ToUpperInvariant();
+        var decisionArtifacts = await dbContext.Artifacts
+            .AsNoTracking()
+            .Where(item => item.TenantId == context.TenantId && item.NormalizedArtifactType == normalizedDecisionType)
+            .ToListAsync(cancellationToken);
+
+        foreach (var decisionArtifact in decisionArtifacts)
+        {
+            var latestVersion = await dbContext.ArtifactVersions
+                .AsNoTracking()
+                .Where(version => version.ArtifactId == decisionArtifact.Id && version.TenantId == context.TenantId)
+                .OrderByDescending(version => version.CreatedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (latestVersion?.PayloadJson is null)
+            {
+                continue;
+            }
+
+            var payload = DecisionPayloadParser.Deserialize(latestVersion.PayloadJson);
+            if (payload.ReviewTaskArtifactId != taskArtifactId)
+            {
+                continue;
+            }
+
+            var decisionNodeId = decisionArtifact.Id.ToString();
+            if (nodes.All(node => node.NodeId != decisionNodeId))
+            {
+                nodes.Add(new GovernanceFlowNodeResponse(
+                    decisionNodeId,
+                    GovernanceFlowNodeKind.Artifact,
+                    payload.Title ?? decisionArtifact.Name,
+                    $"Decision {payload.Status} · outcome {payload.OutcomeKey}.",
+                    payload.Status.ToString(),
+                    $"/decisions/{decisionArtifact.Id}"));
+            }
+
+            edges.Add(new GovernanceFlowEdgeResponse(
+                Guid.NewGuid().ToString(),
+                taskNodeId,
+                decisionNodeId,
+                GovernanceFlowEdgeKind.PlaceholderChain,
+                "decision"));
         }
     }
 

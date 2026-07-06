@@ -5,6 +5,7 @@ using ETOS.Backend.Classification;
 using ETOS.Backend.Dashboards;
 using ETOS.Backend.Documents;
 using ETOS.Backend.Governance;
+using ETOS.Backend.GovernanceAnalytics;
 using ETOS.Backend.GovernedChat;
 using ETOS.Backend.GovernedChat.Llm;
 using ETOS.Backend.GovernedQuery;
@@ -395,7 +396,14 @@ public sealed class DashboardReportTests
             new RecordingDenialRecorder(),
             audit,
             governedQueryService,
-            policyService ?? new AllowAllPolicyService());
+            policyService ?? new AllowAllPolicyService(),
+            new GovernanceAnalyticsService(
+                new StaticTenantContextResolver(context),
+                permissions,
+                new RecordingDenialRecorder(),
+                new SqlGovernanceMetricsProvider(dbContext),
+                new GraphGovernanceMetricsProvider(dbContext),
+                Microsoft.Extensions.Options.Options.Create(new GovernanceAnalyticsOptions())));
     }
 
     private static GovernedChatService CreateChatService(

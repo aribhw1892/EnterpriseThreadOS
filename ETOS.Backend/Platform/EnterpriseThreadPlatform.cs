@@ -11,6 +11,7 @@ using ETOS.Backend.GovernedChat.Llm;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Health;
 using ETOS.Backend.Governance;
+using ETOS.Backend.GovernanceAnalytics;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Imports;
 using ETOS.Backend.IdentityResolution;
@@ -26,8 +27,14 @@ using ETOS.Backend.Capabilities;
 using ETOS.Backend.OptimizationModels;
 using ETOS.Backend.Packages;
 using ETOS.Backend.Recommendations;
+using ETOS.Backend.Decisions;
+using ETOS.Backend.Learning;
+using ETOS.Backend.Outcomes;
 using ETOS.Backend.ReviewTasks;
 using ETOS.Backend.ToolRegistry;
+using ETOS.Backend.WorkflowRuns;
+using ETOS.Backend.Workflows;
+using ETOS.Backend.WorkflowRuntime;
 using ETOS.Backend.Platform.JsonSchema;
 using ETOS.Backend.Imports.MappingSuggestions;
 using ETOS.Backend.Ontology;
@@ -83,6 +90,11 @@ public static class EnterpriseThreadPlatform
 
         services.AddOptions<AgentRuntimeOptions>()
             .Bind(configuration.GetSection(AgentRuntimeOptions.SectionName));
+
+        services.AddOptions<WorkflowRuntimeOptions>()
+            .Bind(configuration.GetSection(WorkflowRuntimeOptions.SectionName));
+
+        services.AddEnterpriseThreadDaprWorkflow(configuration);
 
         services.AddEnterpriseThreadGraphMemory(configuration);
 
@@ -187,6 +199,18 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<ISkillDefinitionService, SkillDefinitionService>();
         services.AddScoped<IToolRunService, ToolRunService>();
         services.AddScoped<IAgentRunService, AgentRunService>();
+        services.AddScoped<IWorkflowDefinitionService, WorkflowDefinitionService>();
+        services.AddScoped<IWorkflowRunService, WorkflowRunService>();
+        services.AddScoped<IBusinessPolicyWorkflowEvaluator, BusinessPolicyWorkflowEvaluator>();
+        services.AddScoped<IGovernedOptimizationEvaluationService, GovernedOptimizationEvaluationService>();
+        services.AddScoped<IWorkflowStepExecutor, WorkflowStepExecutor>();
+        services.AddScoped<WorkflowOrchestrationCoordinator>();
+        services.AddScoped<InProcessWorkflowRuntimeAdapter>();
+        services.AddScoped<DaprWorkflowRuntimeAdapter>();
+        services.AddScoped<IWorkflowRuntimeAdapter>(sp => sp.GetRequiredService<InProcessWorkflowRuntimeAdapter>());
+        services.AddScoped<IWorkflowRuntimeAdapter>(sp => sp.GetRequiredService<DaprWorkflowRuntimeAdapter>());
+        services.AddScoped<IWorkflowRuntimeAdapterSelector, WorkflowRuntimeAdapterSelector>();
+        services.AddScoped<IWorkflowExecutionService, WorkflowExecutionService>();
         services.AddScoped<IAgentExecutionService, AgentExecutionService>();
         services.AddScoped<ITenantSecretProvider, DevelopmentTenantSecretProvider>();
         services.AddScoped<IToolExecutionQueue, DisabledToolExecutionQueue>();
@@ -224,7 +248,19 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IReviewTaskTemplateService, ReviewTaskTemplateService>();
         services.AddScoped<IReviewTaskTemplateResolver, ReviewTaskTemplateResolver>();
         services.AddScoped<IReviewTaskPriorityDeriver, ReviewTaskPriorityDeriver>();
-        services.AddScoped<IReviewTaskCompletionHandler, DeferredReviewTaskCompletionHandler>();
+        services.AddScoped<IReviewTaskCompletionHandler, DecisionReviewTaskCompletionHandler>();
+        services.AddScoped<IDecisionFactory, DecisionFactory>();
+        services.AddScoped<IDecisionConflictResolver, DecisionConflictResolver>();
+        services.AddScoped<IDecisionService, DecisionService>();
+        services.AddScoped<IOutcomeTaxonomyService, OutcomeTaxonomyService>();
+        services.AddScoped<IOutcomeService, OutcomeService>();
+        services.AddScoped<ILearningEvidenceEmitter, LearningEvidenceEmitter>();
+        services.AddScoped<ILearningSignalRollupService, LearningSignalRollupService>();
+        services.Configure<LearningSignalRollupOptions>(configuration.GetSection(LearningSignalRollupOptions.SectionName));
+        services.AddScoped<ISqlGovernanceMetricsProvider, SqlGovernanceMetricsProvider>();
+        services.AddScoped<IGraphGovernanceMetricsProvider, GraphGovernanceMetricsProvider>();
+        services.AddScoped<IGovernanceAnalyticsService, GovernanceAnalyticsService>();
+        services.Configure<GovernanceAnalyticsOptions>(configuration.GetSection(GovernanceAnalyticsOptions.SectionName));
         services.AddScoped<DeterministicLlmCompletionService>();
         services.AddHttpClient<OpenAiLlmCompletionService>();
         services.AddScoped<ILlmCompletionService>(serviceProvider =>

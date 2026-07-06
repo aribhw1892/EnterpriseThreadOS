@@ -119,6 +119,7 @@ public sealed class AgentExecutionService(
             Id = Guid.NewGuid(),
             TenantId = context.TenantId,
             AgentVersionId = version.Id,
+            ParentWorkflowRunId = request.ParentWorkflowRunId,
             RequestedByUserId = context.UserId,
             Status = AgentRunStatuses.Running,
             IsPreview = isPreview,

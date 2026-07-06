@@ -5,6 +5,8 @@ using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Recommendations;
+using ETOS.Backend.Decisions;
+using ETOS.Backend.Learning;
 using ETOS.Backend.ReviewTasks;
 using Microsoft.EntityFrameworkCore;
 
@@ -139,10 +141,11 @@ public sealed class ReviewTaskTests
         var completed = await CreateReviewTaskService(dbContext, context).CompleteAsync(
             created.ArtifactId,
             created.VersionId,
-            new CompleteReviewTaskRequest(ReviewTaskCompletionResolution.Accepted, "Accepted resolution."),
+            new CompleteReviewTaskRequest(ReviewTaskCompletionResolution.Accepted, "Accepted resolution.", null),
             CancellationToken.None);
 
-        Assert.True(completed.DecisionCreationDeferred);
+        Assert.False(completed.DecisionCreationDeferred);
+        Assert.NotNull(completed.DecisionArtifactId);
         Assert.Equal(ReviewTaskStatus.Completed, completed.Status);
     }
 
@@ -220,7 +223,7 @@ public sealed class ReviewTaskTests
             new RecordingDenialRecorder(),
             new RecordingAuditRecorder(),
             new ReviewTaskChainService(dbContext, new RecordingAuditRecorder()),
-            new DeferredReviewTaskCompletionHandler());
+            CreateDecisionCompletionHandler(dbContext));
 
     private static async Task SeedPublishedTemplateAsync(
         EnterpriseThreadDbContext dbContext,
@@ -239,6 +242,7 @@ public sealed class ReviewTaskTests
                 Enabled = escalationEnabled,
                 EscalationTargetRoleKey = escalationEnabled ? "tenant-admin" : null
             },
+            null,
             null,
             ["accept", "reject"]);
 
@@ -423,6 +427,16 @@ public sealed class ReviewTaskTests
         return context;
     }
 
+    private static DecisionReviewTaskCompletionHandler CreateDecisionCompletionHandler(EnterpriseThreadDbContext dbContext)
+    {
+        var rollupOptions = Microsoft.Extensions.Options.Options.Create(new LearningSignalRollupOptions());
+        return new DecisionReviewTaskCompletionHandler(new DecisionFactory(
+            dbContext,
+            new DecisionConflictResolver(),
+            new LearningEvidenceEmitter(dbContext),
+            new LearningSignalRollupService(dbContext, rollupOptions)));
+    }
+
     private static EnterpriseThreadDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<EnterpriseThreadDbContext>()
@@ -524,7 +538,7 @@ public sealed class ReviewTaskChainTests
         var completed = await service.CompleteAsync(
             dqTaskId,
             dqVersion.Id,
-            new CompleteReviewTaskRequest(ReviewTaskCompletionResolution.Accepted, "DQ accepted."),
+            new CompleteReviewTaskRequest(ReviewTaskCompletionResolution.Accepted, "DQ accepted.", null),
             CancellationToken.None);
 
         Assert.Contains(businessTask.ArtifactId, completed.UnblockedTaskArtifactIds);
@@ -539,7 +553,7 @@ public sealed class ReviewTaskChainTests
         string templateKey,
         bool requiresDq)
     {
-        var payload = ReviewTaskTemplatePayloadParser.Create(templateKey, templateKey, null, requiresDq, null, null, ["accept"]);
+        var payload = ReviewTaskTemplatePayloadParser.Create(templateKey, templateKey, null, requiresDq, null, null, null, ["accept"]);
         var artifactId = Guid.NewGuid();
         dbContext.Artifacts.Add(new Artifact
         {
@@ -680,7 +694,17 @@ public sealed class ReviewTaskChainTests
             new RecordingDenialRecorder(),
             new RecordingAuditRecorder(),
             new ReviewTaskChainService(dbContext, new RecordingAuditRecorder()),
-            new DeferredReviewTaskCompletionHandler());
+            CreateDecisionCompletionHandler(dbContext));
+
+    private static DecisionReviewTaskCompletionHandler CreateDecisionCompletionHandler(EnterpriseThreadDbContext dbContext)
+    {
+        var rollupOptions = Microsoft.Extensions.Options.Options.Create(new LearningSignalRollupOptions());
+        return new DecisionReviewTaskCompletionHandler(new DecisionFactory(
+            dbContext,
+            new DecisionConflictResolver(),
+            new LearningEvidenceEmitter(dbContext),
+            new LearningSignalRollupService(dbContext, rollupOptions)));
+    }
 
     private static EnterpriseThreadDbContext CreateDbContext()
     {

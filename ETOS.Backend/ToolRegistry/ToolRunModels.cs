@@ -9,6 +9,7 @@ public sealed class ToolRun : ITenantScoped
     public Guid ToolDefinitionVersionId { get; set; }
     public Guid? ConnectorDefinitionVersionId { get; set; }
     public Guid? ParentAgentRunId { get; set; }
+    public Guid? ParentWorkflowRunId { get; set; }
     public Guid RequestedByUserId { get; set; }
     public required string Status { get; set; }
     public bool IsDryRun { get; set; }
@@ -41,6 +42,7 @@ public sealed record ToolRunDetailResponse(
     Guid ToolDefinitionVersionId,
     Guid? ConnectorDefinitionVersionId,
     Guid? ParentAgentRunId,
+    Guid? ParentWorkflowRunId,
     string Status,
     bool IsDryRun,
     string InputSafeSummaryJson,

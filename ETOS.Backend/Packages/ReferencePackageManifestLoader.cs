@@ -28,7 +28,8 @@ public sealed record LoadedReferencePackageManifest(
     IReadOnlyList<ReferenceAgentTemplateDocument> AgentTemplates,
     IReadOnlyList<ReferenceConnectorDocument> Connectors,
     IReadOnlyList<ReferenceToolDocument> Tools,
-    IReadOnlyList<ReferenceSkillDocument> Skills);
+    IReadOnlyList<ReferenceSkillDocument> Skills,
+    IReadOnlyList<ReferenceWorkflowDocument> Workflows);
 
 public sealed class ReferencePackageManifestLoader(
     IWebHostEnvironment environment,
@@ -73,7 +74,8 @@ public sealed class ReferencePackageManifestLoader(
             DeserializeRelative<ReferenceAgentTemplateDocument[]>(packageDirectory, manifest.Artifacts.AgentTemplatesFile),
             DeserializeRelative<ReferenceConnectorDocument[]>(packageDirectory, manifest.Artifacts.ConnectorsFile),
             DeserializeRelative<ReferenceToolDocument[]>(packageDirectory, manifest.Artifacts.ToolsFile),
-            DeserializeRelative<ReferenceSkillDocument[]>(packageDirectory, manifest.Artifacts.SkillsFile));
+            DeserializeRelative<ReferenceSkillDocument[]>(packageDirectory, manifest.Artifacts.SkillsFile),
+            DeserializeRelative<ReferenceWorkflowDocument[]>(packageDirectory, manifest.Artifacts.WorkflowsFile));
     }
 
     public string ReadPackageFile(string packageKey, string relativePath)
@@ -200,6 +202,7 @@ public sealed class ReferenceArtifactsManifestSection
     public required string ToolsFile { get; init; }
     public required string ConnectorsFile { get; init; }
     public required string SkillsFile { get; init; }
+    public required string WorkflowsFile { get; init; }
 }
 
 public sealed class ReferenceObjectTypeDocument
@@ -376,6 +379,33 @@ public sealed class ReferenceToolDocument
     public IReadOnlyCollection<string>? AllowedQueryIntentKeys { get; init; }
     public IReadOnlyDictionary<string, string>? CompositionMetadata { get; init; }
     public IReadOnlyCollection<string>? FutureExtensionPlaceholders { get; init; }
+}
+
+public sealed class ReferenceWorkflowDocument
+{
+    public required string WorkflowKey { get; init; }
+    public required string Name { get; init; }
+    public string? Description { get; init; }
+    public required string WorkflowScope { get; init; }
+    public bool SafeModeEnabled { get; init; }
+    public bool PreviewModeDefault { get; init; }
+    public bool AllowPartialCompletion { get; init; } = true;
+    public string? DefaultStepSafeModeBehavior { get; init; }
+    public required IReadOnlyList<ReferenceWorkflowStepDocument> Steps { get; init; }
+}
+
+public sealed class ReferenceWorkflowStepDocument
+{
+    public required string StepKey { get; init; }
+    public required string StepType { get; init; }
+    public string? SafeModeOnBlock { get; init; }
+    public IReadOnlyCollection<string>? DependsOnStepKeys { get; init; }
+    public string? ToolKey { get; init; }
+    public string? AgentTemplateKey { get; init; }
+    public string? PolicyKey { get; init; }
+    public string? OptimizationModelKey { get; init; }
+    public string? SourceStepKey { get; init; }
+    public string? ReviewTaskTemplateKey { get; init; }
 }
 
 public sealed class ReferenceSkillDocument

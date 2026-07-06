@@ -28,7 +28,7 @@
     "compositionMetadata": {
       "mode": "import-mapping",
       "primaryModelProviderKey": "openai-compatible",
-      "primaryModelId": "google/gemma-3-1b"
+      "primaryModelId": "zai-org/glm-4.6v-flash"
     },
     "futureExtensionPlaceholders": []
   }

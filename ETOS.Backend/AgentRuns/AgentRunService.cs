@@ -29,6 +29,7 @@ public sealed class AgentRunService(
             .Select(item => new AgentRunSummaryResponse(
                 item.Id,
                 item.AgentVersionId,
+                item.ParentWorkflowRunId,
                 item.Status,
                 item.IsPreview,
                 item.IsDryRun,
@@ -65,6 +66,7 @@ public sealed class AgentRunService(
             run.Id,
             run.TenantId,
             run.AgentVersionId,
+            run.ParentWorkflowRunId,
             run.Status,
             run.IsPreview,
             run.IsDryRun,

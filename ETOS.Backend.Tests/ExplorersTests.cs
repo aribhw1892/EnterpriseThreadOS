@@ -1,10 +1,12 @@
 using ETOS.Backend.AiTrace;
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
+using ETOS.Backend.Decisions;
 using ETOS.Backend.Documents;
 using ETOS.Backend.Explorers;
 using ETOS.Backend.Governance;
 using ETOS.Backend.GovernedQuery;
+using ETOS.Backend.ReviewTasks;
 using ETOS.Backend.Tests.Fixtures;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
@@ -154,8 +156,14 @@ public sealed class ExplorersTests
             flow.FutureChainPlaceholders,
             placeholder => placeholder.Kind == GovernanceFlowPlaceholderKind.Recommendation);
         Assert.Equal("available", recommendationPlaceholder.Status);
+        var reviewTaskPlaceholder = Assert.Single(
+            flow.FutureChainPlaceholders,
+            placeholder => placeholder.Kind == GovernanceFlowPlaceholderKind.ReviewTask);
+        Assert.Equal("available", reviewTaskPlaceholder.Status);
         Assert.All(
-            flow.FutureChainPlaceholders.Where(placeholder => placeholder.Kind != GovernanceFlowPlaceholderKind.Recommendation),
+            flow.FutureChainPlaceholders.Where(placeholder =>
+                placeholder.Kind is not GovernanceFlowPlaceholderKind.Recommendation
+                    and not GovernanceFlowPlaceholderKind.ReviewTask),
             placeholder => Assert.Equal("not_implemented", placeholder.Status));
     }
 
@@ -183,10 +191,18 @@ public sealed class ExplorersTests
         var context = SeedDecisionArtifacts(dbContext);
         var service = CreateDecisionExplorerService(dbContext, context);
 
-        var decisions = await service.ListDecisionsAsync(null, null, null, CancellationToken.None);
+        var decisions = await service.ListDecisionsAsync(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            CancellationToken.None);
 
         Assert.Single(decisions);
-        Assert.Equal("decision", decisions.First().ArtifactType, StringComparer.OrdinalIgnoreCase);
+        Assert.Equal(DecisionArtifactTypes.Decision, decisions.First().ArtifactType, StringComparer.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -416,11 +432,51 @@ public sealed class ExplorersTests
             UpdatedAt = DateTimeOffset.UtcNow
         });
         var decisionArtifactId = Guid.NewGuid();
+        var payload = DecisionPayloadParser.CreateFromReviewTask(
+            new ReviewTaskPayloadParser.ReviewTaskPayloadDocument
+            {
+                Title = "Approve pump change",
+                SourceType = ReviewTaskSourceType.Manual,
+                SourceReference = "manual",
+                ReviewTaskType = "business-action-review",
+                Participants =
+                [
+                    new ReviewTaskPayloadParser.ReviewTaskParticipantDocument
+                    {
+                        UserId = context.UserId,
+                        Role = ReviewTaskParticipantRole.Approver
+                    }
+                ]
+            },
+            "accept",
+            "Pending review",
+            "reason",
+            DecisionPayloadParser.DefaultApprovalRule(),
+            DecisionStatus.PendingVotes,
+            DecisionConflictState.None);
+        payload.ParticipantUserIds = [context.UserId];
+        payload.EvidenceReferences =
+        [
+            new DecisionPayloadParser.DecisionEvidenceReferenceDocument
+            {
+                LinkId = Guid.NewGuid(),
+                EvidenceType = "GraphNode",
+                SourceId = context.GraphNodeId,
+                SafeSummary = "Evidence"
+            },
+            new DecisionPayloadParser.DecisionEvidenceReferenceDocument
+            {
+                LinkId = Guid.NewGuid(),
+                EvidenceType = "GraphNode",
+                SourceId = Guid.NewGuid(),
+                SafeSummary = "Evidence"
+            }
+        ];
         dbContext.Artifacts.Add(new Artifact
         {
             Id = decisionArtifactId,
             TenantId = context.TenantId,
-            ArtifactType = "decision",
+            ArtifactType = DecisionArtifactTypes.Decision,
             NormalizedArtifactType = "DECISION",
             Name = "Approve pump change",
             OwnerUserId = context.UserId,
@@ -435,7 +491,7 @@ public sealed class ExplorersTests
             ArtifactId = decisionArtifactId,
             VersionLabel = "v1",
             NormalizedVersionLabel = "V1",
-            PayloadJson = """{"title":"Approve pump change","status":"draft","participantUserIds":["11111111-1111-1111-1111-111111111111"],"evidenceCount":2,"conflictState":"none","outcomeSummary":"Pending review"}""",
+            PayloadJson = DecisionPayloadParser.Serialize(payload),
             ReadinessState = ArtifactReadinessState.Draft,
             CompatibilityStatus = ArtifactCompatibilityStatus.Compatible,
             PolicyRiskStatus = ArtifactPolicyRiskStatus.Acceptable,
@@ -649,6 +705,7 @@ public sealed class ExplorersTests
         public Task<Guid> CreateFromChatTurnAsync(Guid chatTurnId, Guid? auditRecordId, CancellationToken cancellationToken) => Task.FromResult(Guid.NewGuid());
         public Task<Guid> CreateFromToolRunAsync(Guid toolRunId, Guid? auditRecordId, CancellationToken cancellationToken) => Task.FromResult(Guid.NewGuid());
         public Task<Guid> CreateFromAgentRunAsync(Guid agentRunId, Guid? auditRecordId, CancellationToken cancellationToken) => Task.FromResult(Guid.NewGuid());
+        public Task<Guid> CreateFromWorkflowRunAsync(Guid workflowRunId, Guid? auditRecordId, CancellationToken cancellationToken) => Task.FromResult(Guid.NewGuid());
     }
 
     private sealed class NoOpDocumentFileStorage : IDocumentFileStorage

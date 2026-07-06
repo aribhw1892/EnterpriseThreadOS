@@ -260,12 +260,14 @@ public sealed class ReviewTaskService(
             request.Resolution,
             cancellationToken);
 
-        await completionHandler.HandleCompletedAsync(
+        var decisionResult = await completionHandler.HandleCompletedAsync(
             context.TenantId,
             context.UserId,
             artifactId,
             versionId,
             request.Resolution,
+            request.OutcomeKey,
+            request.Summary,
             cancellationToken);
 
         await auditRecorder.RecordAsync(
@@ -285,7 +287,9 @@ public sealed class ReviewTaskService(
             artifactId,
             versionId,
             ReviewTaskStatus.Completed,
-            DecisionCreationDeferred: true,
+            DecisionCreationDeferred: decisionResult is null,
+            decisionResult?.DecisionArtifactId,
+            decisionResult?.DecisionVersionId,
             unblocked);
     }
 

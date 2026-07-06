@@ -5,6 +5,7 @@ using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Recommendations;
+using ETOS.Backend.WorkflowRuns;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.ReviewTasks;
@@ -20,6 +21,12 @@ public interface IReviewTaskFactory
     Task<CreateReviewTaskResponse> FromDataQualityIssueAsync(Guid issueId, CancellationToken cancellationToken);
     Task<CreateReviewTaskResponse> FromSecurityEventAsync(Guid eventId, CancellationToken cancellationToken);
     Task<CreateReviewTaskResponse> FromAccessRequestAsync(Guid requestId, CancellationToken cancellationToken);
+    Task<CreateReviewTaskResponse> FromWorkflowOutputAsync(
+        Guid workflowRunId,
+        string stepKey,
+        string? title,
+        CancellationToken cancellationToken);
+    Task<CreateReviewTaskResponse> FromSafeModeEventAsync(Guid safeModeEventId, CancellationToken cancellationToken);
 }
 
 public sealed class ReviewTaskFactory(
@@ -383,6 +390,193 @@ public sealed class ReviewTaskFactory(
                 : null,
             ReviewTaskStatus.Open,
             cancellationToken);
+    }
+
+    public async Task<CreateReviewTaskResponse> FromWorkflowOutputAsync(
+        Guid workflowRunId,
+        string stepKey,
+        string? title,
+        CancellationToken cancellationToken)
+    {
+        var context = await RequireCreatePermissionAsync(cancellationToken);
+        var workflowRun = await dbContext.WorkflowRuns
+            .SingleOrDefaultAsync(item => item.Id == workflowRunId && item.TenantId == context.TenantId, cancellationToken)
+            ?? throw new RequestValidationException("Workflow run was not found.");
+
+        var templateVersionId = await ResolveWorkflowReviewTaskTemplateVersionIdAsync(
+            workflowRun.WorkflowVersionId,
+            stepKey,
+            cancellationToken);
+
+        var template = templateVersionId is Guid versionId
+            ? await templateResolver.ResolvePublishedTemplateAsync(
+                context.TenantId,
+                ReviewTaskSourceType.Workflow,
+                stepKey,
+                null,
+                cancellationToken)
+            : null;
+
+        var taskTitle = string.IsNullOrWhiteSpace(title)
+            ? $"Review workflow output: {stepKey}"
+            : title.Trim();
+
+        var priority = priorityDeriver.Derive(
+            RecommendationRiskState.Medium,
+            TrustState.Provisional,
+            RecommendationConflictState.None,
+            template?.Template);
+
+        var evidence = new List<ReviewTaskPayloadParser.ReviewTaskEvidenceReferenceDocument>
+        {
+            new()
+            {
+                LinkId = Guid.NewGuid(),
+                EvidenceType = EvidenceLinkType.WorkflowRun,
+                SourceId = workflowRun.Id,
+                SafeSummary = workflowRun.OutputSafeSummaryJson ?? $"Workflow run {workflowRun.Status}.",
+                TrustState = TrustState.Provisional
+            }
+        };
+
+        return await PersistTaskAsync(
+            context,
+            taskTitle,
+            template?.Template.ReviewTaskType ?? "workflow-output-review",
+            ReviewTaskSourceType.Workflow,
+            $"{workflowRunId}:{stepKey}",
+            context.UserId,
+            null,
+            null,
+            priority,
+            RecommendationRiskState.Medium,
+            TrustState.Provisional,
+            RecommendationConflictState.None,
+            null,
+            evidence,
+            templateVersionId ?? template?.VersionId,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            workflowRun.AiTraceRecordId,
+            null,
+            null,
+            template?.Template.EscalationPath is { Enabled: true } escalation
+                ? new ReviewTaskPayloadParser.ReviewTaskEscalationPlaceholderDocument
+                {
+                    Enabled = true,
+                    EscalationTargetRoleKey = escalation.EscalationTargetRoleKey,
+                    EscalationPolicyId = escalation.EscalationPolicyId,
+                    SlaPolicyVersion = escalation.SlaPolicyVersion
+                }
+                : null,
+            ReviewTaskStatus.Open,
+            cancellationToken);
+    }
+
+    public async Task<CreateReviewTaskResponse> FromSafeModeEventAsync(
+        Guid safeModeEventId,
+        CancellationToken cancellationToken)
+    {
+        var context = await RequireCreatePermissionAsync(cancellationToken);
+        var safeModeEvent = await dbContext.SafeModeEvents
+            .SingleOrDefaultAsync(item => item.Id == safeModeEventId && item.TenantId == context.TenantId, cancellationToken)
+            ?? throw new RequestValidationException("Safe mode event was not found.");
+
+        var workflowRun = await dbContext.WorkflowRuns
+            .AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Id == safeModeEvent.WorkflowRunId, cancellationToken)
+            ?? throw new RequestValidationException("Workflow run was not found.");
+
+        var template = await templateResolver.ResolvePublishedTemplateAsync(
+            context.TenantId,
+            ReviewTaskSourceType.Workflow,
+            "safe-mode-warning",
+            RecommendationType.Policy,
+            cancellationToken);
+
+        var priority = priorityDeriver.Derive(
+            RecommendationRiskState.High,
+            TrustState.Provisional,
+            RecommendationConflictState.None,
+            template?.Template);
+
+        var created = await PersistTaskAsync(
+            context,
+            $"Review safe mode skip: {safeModeEvent.StepKey}",
+            template?.Template.ReviewTaskType ?? "workflow-safe-mode-review",
+            ReviewTaskSourceType.Workflow,
+            safeModeEvent.Id.ToString(),
+            context.UserId,
+            null,
+            null,
+            priority,
+            RecommendationRiskState.High,
+            TrustState.Provisional,
+            RecommendationConflictState.None,
+            null,
+            [
+                new ReviewTaskPayloadParser.ReviewTaskEvidenceReferenceDocument
+                {
+                    LinkId = Guid.NewGuid(),
+                    EvidenceType = EvidenceLinkType.WorkflowRun,
+                    SourceId = workflowRun.Id,
+                    SafeSummary = safeModeEvent.Reason,
+                    TrustState = TrustState.Provisional
+                }
+            ],
+            template?.VersionId,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            workflowRun.AiTraceRecordId,
+            null,
+            null,
+            template?.Template.EscalationPath is { Enabled: true } escalation
+                ? new ReviewTaskPayloadParser.ReviewTaskEscalationPlaceholderDocument
+                {
+                    Enabled = true,
+                    EscalationTargetRoleKey = escalation.EscalationTargetRoleKey,
+                    EscalationPolicyId = escalation.EscalationPolicyId,
+                    SlaPolicyVersion = escalation.SlaPolicyVersion
+                }
+                : null,
+            ReviewTaskStatus.Open,
+            cancellationToken);
+
+        safeModeEvent.ReviewTaskArtifactId = created.ArtifactId;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return created;
+    }
+
+    private async Task<Guid?> ResolveWorkflowReviewTaskTemplateVersionIdAsync(
+        Guid workflowVersionId,
+        string stepKey,
+        CancellationToken cancellationToken)
+    {
+        var payloadJson = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Where(item => item.Id == workflowVersionId)
+            .Select(item => item.PayloadJson)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (string.IsNullOrWhiteSpace(payloadJson))
+        {
+            return null;
+        }
+
+        var payload = Workflows.WorkflowDefinitionPayloadParser.Deserialize(payloadJson);
+        var step = Workflows.WorkflowDefinitionPayloadParser
+            .DeserializeWorkflowDefinitionJson(payload.WorkflowDefinitionJson ?? "[]")
+            .FirstOrDefault(item => item.StepKey?.Equals(stepKey, StringComparison.OrdinalIgnoreCase) == true);
+
+        return step?.ReviewTaskTemplateVersionId;
     }
 
     private async Task<CreateReviewTaskResponse> FromDataQualityIssueInternalAsync(

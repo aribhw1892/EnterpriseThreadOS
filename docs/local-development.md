@@ -112,6 +112,56 @@ docker compose --env-file .env -f infra/local/docker-compose.yml up -d agent-run
 | Published agent model routing (configure page) | Mark ready → Publish (no Docker) |
 | LM Studio model loaded in the UI | No ETOS rebuild; align agent **Primary model id** with LM Studio |
 
+## Workflow runtime (Issue 24 / 24.1)
+
+Governed workflow orchestration uses `WorkflowRuntime:AdapterKey` in `ETOS.Backend/appsettings.json`.
+
+- Default local/CI: `in-process-v1` with `EnableDaprHost=false` (sequential step execution in the .NET host; no Dapr sidecar required).
+- Dapr path (opt-in): set `AdapterKey` to `dapr-v1` and `EnableDaprHost=true`, then run the backend under `dapr run` with local workflow components.
+
+### Dapr workflow local run
+
+Start infrastructure including Redis and Dapr placement:
+
+```powershell
+docker compose --env-file .env -f infra/local/docker-compose.yml --profile dapr-workflow up -d
+```
+
+Run the backend under Dapr (host process, IDE-friendly):
+
+```powershell
+dapr run --app-id etos-backend --app-port 5000 --dapr-grpc-port 50001 `
+  --resources-path infra/local/dapr/components --placement-host-address localhost:50005 `
+  -- dotnet run --project ETOS.Backend/ETOS.Backend.csproj --urls http://localhost:5000 `
+  --environment DaprWorkflow
+```
+
+Or merge the overlay manually:
+
+```powershell
+$env:ASPNETCORE_ENVIRONMENT = "DaprWorkflow"
+# WorkflowRuntime:AdapterKey=dapr-v1 and EnableDaprHost=true from appsettings.DaprWorkflow.json
+```
+
+Dapr components live under `infra/local/dapr/components/` (`statestore.yaml` → Redis, `workflow.yaml` → Dapr workflow backend).
+
+Optional integration test (requires running sidecar):
+
+```powershell
+$env:ETOS_DAPR_INTEGRATION = "1"
+dotnet test EnterpriseThreadOS.sln --filter "Category=Dapr"
+```
+
+Manual workflow execution endpoints:
+
+- `POST /api/admin/workflows/{artifactId}/versions/{versionId}/preview`
+- `POST /api/admin/workflows/{artifactId}/versions/{versionId}/test-run`
+- `POST /api/admin/workflows/{artifactId}/versions/{versionId}/execute`
+
+Frontend shells: `/workflows`, `/workflow-runs/{runId}`.
+
+Install the manufacturing reference package to seed the `bom-impact-review` sample workflow.
+
 See also the summary table in [`README.md`](../README.md#llm-mapping-lm-studio-and-agent-runtime-docker).
 
 ### LLM-assisted import mapping (local)
@@ -337,7 +387,7 @@ Review task admin APIs (dev headers required):
 - `POST http://localhost:5000/api/admin/review-tasks/{artifactId}/versions/{versionId}/complete`
 - `POST http://localhost:5000/api/admin/review-tasks/{artifactId}/versions/{versionId}/escalation`
 
-Completed tasks return `decisionCreationDeferred: true` until Issue 20 lands `DecisionArtifact` creation.
+Completed review tasks create a `DecisionArtifact` via `POST .../complete` and return `decisionArtifactId` when creation succeeds.
 
 Open `http://localhost:3000/capabilities`, `/business-policies`, `/optimization-models`, and `/agent-templates` to list and inspect Layer 3–6 governed artifact definitions installed from the reference package or created through admin APIs.
 

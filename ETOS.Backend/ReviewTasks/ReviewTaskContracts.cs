@@ -50,7 +50,8 @@ public enum ReviewTaskSourceType
     Recommendation = 1,
     DataQuality = 2,
     SecurityEvent = 3,
-    AccessRequest = 4
+    AccessRequest = 4,
+    Workflow = 5
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -244,13 +245,16 @@ public sealed record AddReviewTaskCommentResponse(
 
 public sealed record CompleteReviewTaskRequest(
     ReviewTaskCompletionResolution Resolution,
-    string? Summary);
+    string? Summary,
+    string? OutcomeKey);
 
 public sealed record CompleteReviewTaskResponse(
     Guid ArtifactId,
     Guid VersionId,
     ReviewTaskStatus Status,
     bool DecisionCreationDeferred,
+    Guid? DecisionArtifactId,
+    Guid? DecisionVersionId,
     IReadOnlyCollection<Guid> UnblockedTaskArtifactIds);
 
 public sealed record CreateEscalationReviewTaskResponse(

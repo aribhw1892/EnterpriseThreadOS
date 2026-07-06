@@ -1,5 +1,7 @@
 using ETOS.Backend.Artifacts;
+using ETOS.Backend.Decisions;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.Outcomes;
 using Microsoft.EntityFrameworkCore;
 
 namespace ETOS.Backend.ReviewTasks;
@@ -10,6 +12,7 @@ public static class ReviewTaskDevelopmentTemplateSeeder
         EnterpriseThreadDbContext dbContext,
         Guid tenantId,
         Guid ownerUserId,
+        Guid? outcomeTaxonomyVersionId,
         CancellationToken cancellationToken)
     {
         var normalizedType = ReviewTaskTemplateArtifactTypes.ReviewTaskTemplate.ToUpperInvariant();
@@ -24,13 +27,13 @@ public static class ReviewTaskDevelopmentTemplateSeeder
 
         var seeds = new[]
         {
-            ("Data Quality Review Template", "data-quality-review", "data-quality-review", false, false),
-            ("Business Action Review Template", "business-action-review", "business-action-review", true, true),
-            ("Governance Security Review Template", "governance-security-review", "governance-security-review", false, true),
-            ("Access Request Review Template", "access-request-review", "access-request-review", false, false)
+            ("Data Quality Review Template", "data-quality-review", "data-quality-review", false, false, DecisionApprovalRuleMode.SingleApprover),
+            ("Business Action Review Template", "business-action-review", "business-action-review", true, true, DecisionApprovalRuleMode.AllRequired),
+            ("Governance Security Review Template", "governance-security-review", "governance-security-review", false, true, DecisionApprovalRuleMode.AllRequired),
+            ("Access Request Review Template", "access-request-review", "access-request-review", false, false, DecisionApprovalRuleMode.SingleApprover)
         };
 
-        foreach (var (name, templateKey, reviewTaskType, requiresDq, escalationEnabled) in seeds)
+        foreach (var (name, templateKey, reviewTaskType, requiresDq, escalationEnabled, approvalMode) in seeds)
         {
             var payload = ReviewTaskTemplatePayloadParser.Create(
                 templateKey,
@@ -42,10 +45,20 @@ public static class ReviewTaskDevelopmentTemplateSeeder
                     Enabled = escalationEnabled,
                     EscalationTargetRoleKey = escalationEnabled ? "tenant-admin" : null,
                     EscalationPolicyId = escalationEnabled ? "governance-escalation-v1" : null,
-                    SlaPolicyVersion = escalationEnabled ? "placeholder-sla-v1" : null
+                    SlaPolicyVersion = escalationEnabled ? "placeholder-sla-v1" : null,
+                    CanOverrideOriginalOutcome = true
+                },
+                new ReviewTaskTemplatePayloadParser.ReviewTaskTemplateApprovalRuleDocument
+                {
+                    Mode = approvalMode,
+                    RequiredRoles = approvalMode == DecisionApprovalRuleMode.AllRequired
+                        ? ["approver", "reviewer"]
+                        : [],
+                    OutcomeTaxonomyVersionId = outcomeTaxonomyVersionId,
+                    OutcomeTrackingRequired = approvalMode != DecisionApprovalRuleMode.SingleApprover
                 },
                 new Dictionary<string, string> { ["primaryOwner"] = "tenant-admin" },
-                ["accept", "reject", "defer"]);
+                ["accept", "reject", "defer", "no_action", "duplicate", "known_exception"]);
 
             var artifact = new Artifact
             {

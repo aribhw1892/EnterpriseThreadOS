@@ -269,10 +269,29 @@ public sealed class ReviewTaskTemplateService(
                     Enabled = request.EscalationPath.Enabled,
                     EscalationTargetRoleKey = request.EscalationPath.EscalationTargetRoleKey,
                     EscalationPolicyId = request.EscalationPath.EscalationPolicyId,
-                    SlaPolicyVersion = request.EscalationPath.SlaPolicyVersion
+                    SlaPolicyVersion = request.EscalationPath.SlaPolicyVersion,
+                    CanOverrideOriginalOutcome = request.EscalationPath.CanOverrideOriginalOutcome
                 },
+            ToApprovalRuleDocument(request.ApprovalRule),
             request.ParticipantRoleDefaults,
             request.AllowedOutcomeOptions);
+
+    private static ReviewTaskTemplatePayloadParser.ReviewTaskTemplateApprovalRuleDocument? ToApprovalRuleDocument(
+        ReviewTaskTemplateApprovalRuleRequest? request)
+    {
+        if (request is null)
+        {
+            return null;
+        }
+
+        return new ReviewTaskTemplatePayloadParser.ReviewTaskTemplateApprovalRuleDocument
+        {
+            Mode = request.Mode,
+            RequiredRoles = request.RequiredRoles?.Select(item => item.Trim()).Where(item => item.Length > 0).ToList() ?? [],
+            OutcomeTaxonomyVersionId = request.OutcomeTaxonomyVersionId,
+            OutcomeTrackingRequired = request.OutcomeTrackingRequired
+        };
+    }
 
     private static ReviewTaskTemplatePayloadParser.ReviewTaskTemplatePayloadDocument BuildPayload(
         CreateReviewTaskTemplateVersionRequest request)
@@ -293,8 +312,10 @@ public sealed class ReviewTaskTemplateService(
                     Enabled = request.EscalationPath.Enabled,
                     EscalationTargetRoleKey = request.EscalationPath.EscalationTargetRoleKey,
                     EscalationPolicyId = request.EscalationPath.EscalationPolicyId,
-                    SlaPolicyVersion = request.EscalationPath.SlaPolicyVersion
+                    SlaPolicyVersion = request.EscalationPath.SlaPolicyVersion,
+                    CanOverrideOriginalOutcome = request.EscalationPath.CanOverrideOriginalOutcome
                 },
+            ToApprovalRuleDocument(request.ApprovalRule),
             request.ParticipantRoleDefaults,
             request.AllowedOutcomeOptions);
 

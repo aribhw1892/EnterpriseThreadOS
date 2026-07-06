@@ -1,6 +1,7 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.Governance;
+using ETOS.Backend.GovernanceAnalytics;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
@@ -26,10 +27,11 @@ public sealed class DashboardReportService(
     IAccessDenialRecorder denialRecorder,
     IAuditRecorder auditRecorder,
     IGovernedQueryService governedQueryService,
-    IClassificationPolicyService classificationPolicyService) : IDashboardReportService
+    IClassificationPolicyService classificationPolicyService,
+    IGovernanceAnalyticsService governanceAnalyticsService) : IDashboardReportService
 {
     public Task<IReadOnlyCollection<GovernanceKpiPlaceholderResponse>> ListKpiPlaceholdersAsync(CancellationToken cancellationToken)
-        => Task.FromResult(PlatformGovernanceKpiPlaceholders.Catalog);
+        => governanceAnalyticsService.ListKpiPlaceholdersAsync(cancellationToken);
 
     public async Task<IReadOnlyCollection<DashboardReportArtifactSummaryResponse>> ListDashboardArtifactsAsync(CancellationToken cancellationToken)
         => await ListArtifactsByTypeAsync(DashboardReportArtifactTypes.Dashboard, cancellationToken);
@@ -214,7 +216,7 @@ public sealed class DashboardReportService(
                     allowedTotal += queryBlock.AllowedCount;
                     break;
                 case DashboardReportBlockKinds.GovernanceKpiPlaceholder:
-                    blocks.Add(BuildKpiPlaceholderBlock(block));
+                    blocks.Add(await BuildKpiPlaceholderBlockAsync(block, cancellationToken));
                     break;
                 case DashboardReportBlockKinds.StaticText:
                     blocks.Add(new PreviewBlockResponse(
@@ -288,21 +290,42 @@ public sealed class DashboardReportService(
             run.Status.Equals("completed", StringComparison.OrdinalIgnoreCase) ? "ready" : run.Status);
     }
 
-    private static PreviewBlockResponse BuildKpiPlaceholderBlock(TemplateBlockResponse block)
+    private async Task<PreviewBlockResponse> BuildKpiPlaceholderBlockAsync(
+        TemplateBlockResponse block,
+        CancellationToken cancellationToken)
     {
         var placeholder = PlatformGovernanceKpiPlaceholders.Catalog
             .Single(item => item.KpiKey.Equals(block.KpiKey, StringComparison.OrdinalIgnoreCase));
+
+        if (placeholder.KpiKey.Equals(PlatformGovernanceKpiKeys.TenantCustomKpi, StringComparison.OrdinalIgnoreCase))
+        {
+            return new PreviewBlockResponse(
+                block.BlockId,
+                block.Title,
+                block.Kind,
+                $"{placeholder.Title}: {placeholder.Notes}",
+                0,
+                0,
+                null,
+                placeholder.KpiKey,
+                "deferred");
+        }
+
+        var kpiValue = await governanceAnalyticsService.GetKpiValueAsync(placeholder.KpiKey, null, cancellationToken);
+        var summary = kpiValue?.FormattedValue is null
+            ? $"{placeholder.Title}: unavailable"
+            : $"{placeholder.Title}: {kpiValue.FormattedValue}";
 
         return new PreviewBlockResponse(
             block.BlockId,
             block.Title,
             block.Kind,
-            $"{placeholder.Title}: {placeholder.Notes}",
+            summary,
             0,
             0,
             null,
             placeholder.KpiKey,
-            "deferred");
+            kpiValue?.Status ?? "ready");
     }
 
     private async Task<IReadOnlyCollection<DashboardReportArtifactSummaryResponse>> ListArtifactsByTypeAsync(

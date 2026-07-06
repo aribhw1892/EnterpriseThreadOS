@@ -3,6 +3,7 @@ using ETOS.Backend.Governance;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Imports;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.WorkflowRuns;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Neo4j.Driver;
@@ -63,10 +64,22 @@ public sealed class DevelopmentDemoDataCleaner(
 
         deletedCounts[nameof(dbContext.AiTraceExportRecords)] =
             await DeleteTenantRowsAsync(dbContext.AiTraceExportRecords, context.TenantId, cancellationToken);
+        deletedCounts[nameof(dbContext.DecisionLearningEvidence)] =
+            await DeleteTenantRowsAsync(dbContext.DecisionLearningEvidence, context.TenantId, cancellationToken);
+        deletedCounts[nameof(dbContext.OutcomeCheckRuns)] =
+            await DeleteTenantRowsAsync(dbContext.OutcomeCheckRuns, context.TenantId, cancellationToken);
+        deletedCounts[nameof(dbContext.DecisionComments)] =
+            await DeleteTenantRowsAsync(dbContext.DecisionComments, context.TenantId, cancellationToken);
+        deletedCounts[nameof(dbContext.DecisionVotes)] =
+            await DeleteTenantRowsAsync(dbContext.DecisionVotes, context.TenantId, cancellationToken);
+        deletedCounts[nameof(dbContext.SafeModeEvents)] =
+            await DeleteTenantRowsAsync(dbContext.SafeModeEvents, context.TenantId, cancellationToken);
         deletedCounts[nameof(dbContext.ToolRuns)] =
             await DeleteTenantRowsAsync(dbContext.ToolRuns, context.TenantId, cancellationToken);
         deletedCounts[nameof(dbContext.AgentRuns)] =
             await DeleteTenantRowsAsync(dbContext.AgentRuns, context.TenantId, cancellationToken);
+        deletedCounts[nameof(dbContext.WorkflowRuns)] =
+            await DeleteTenantRowsAsync(dbContext.WorkflowRuns, context.TenantId, cancellationToken);
         deletedCounts[nameof(dbContext.AiTraceArtifactLinks)] =
             await DeleteTenantRowsAsync(dbContext.AiTraceArtifactLinks, context.TenantId, cancellationToken);
         deletedCounts[nameof(dbContext.AiTraceRecords)] =

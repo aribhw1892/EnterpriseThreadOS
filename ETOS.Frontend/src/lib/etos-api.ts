@@ -1341,8 +1341,127 @@ export type DecisionExplorerItem = {
   evidenceCount: number;
   conflictState: string;
   outcomeSummary: string;
+  outcomeKey: string;
+  hasOutcome: boolean;
   contextViewRoute: string;
 };
+
+export type GovernanceKpiValue = {
+  kpiKey: string;
+  title: string;
+  source: string;
+  value?: number | null;
+  unit?: string | null;
+  formattedValue?: string | null;
+  status: string;
+};
+
+export type HighRiskRecommendationSummary = {
+  artifactId: string;
+  title: string;
+  riskState: string;
+  lifecycleStatus: string;
+  contextViewRoute: string;
+};
+
+export type GovernanceGraphSupplement = {
+  maxDecisionChainDepth: number;
+  unresolvedUpstreamReviewCount: number;
+};
+
+export type GovernanceDashboard = {
+  kpis: GovernanceKpiValue[];
+  highRiskRecommendations: HighRiskRecommendationSummary[];
+  graphSupplements?: GovernanceGraphSupplement | null;
+  windowDays: number;
+  generatedAt: string;
+};
+
+export type GovernanceKpiTrendPoint = {
+  bucketStart: string;
+  value: number;
+};
+
+export type GovernanceKpiTrend = {
+  kpiKey: string;
+  windowDays: number;
+  bucket: string;
+  points: GovernanceKpiTrendPoint[];
+};
+
+export type DecisionExplorerFilters = {
+  status?: string;
+  participant?: string;
+  search?: string;
+  conflict?: string;
+  outcomeKey?: string;
+  hasOutcome?: boolean;
+  minEvidenceCount?: number;
+};
+
+export type DecisionVoteKind = "approve" | "reject" | "abstain" | "dissent";
+
+export type DecisionVote = {
+  id: string;
+  userId: string;
+  vote: DecisionVoteKind;
+  comment?: string | null;
+  confidence?: number | null;
+  createdAt: string;
+};
+
+export type DecisionComment = {
+  id: string;
+  authorUserId: string;
+  body: string;
+  createdAt: string;
+};
+
+export type DecisionDetail = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  name: string;
+  title: string;
+  status: string;
+  outcomeKey: string;
+  outcomeSummary: string;
+  decisionReason?: string | null;
+  conflictState: string;
+  reviewTaskArtifactId: string;
+  reviewTaskVersionId: string;
+  reviewTemplateVersionId?: string | null;
+  recommendationArtifactId?: string | null;
+  dataQualityIssueId?: string | null;
+  securityEventId?: string | null;
+  accessRequestId?: string | null;
+  aiTraceId?: string | null;
+  contextPackageId?: string | null;
+  parentDecisionArtifactId?: string | null;
+  approvalRuleSnapshot: {
+    mode: string;
+    requiredRoles: string[];
+    outcomeTaxonomyVersionId?: string | null;
+    outcomeTrackingRequired: boolean;
+  };
+  participantUserIds: string[];
+  evidenceReferences: Array<{
+    linkId: string;
+    evidenceType: string;
+    sourceId: string;
+    safeSummary: string;
+    trustState: string;
+  }>;
+  outcomeTrackingRequired: boolean;
+  outcomeTaxonomyVersionId?: string | null;
+  finalizedAt?: string | null;
+  finalizedByUserId?: string | null;
+  votes: DecisionVote[];
+  comments: DecisionComment[];
+  contextViewRoute: string;
+};
+
+export type OutcomeCheckStatus = "pending" | "successful" | "failed" | "partial";
 
 export type ArtifactExplorerSummary = {
   id: string;
@@ -1449,6 +1568,52 @@ export async function getGovernanceLists() {
     auditRecords,
     securityEvents,
   };
+}
+
+export async function getGovernanceDashboard(windowDays?: number): Promise<ApiResult<GovernanceDashboard>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<GovernanceDashboard>();
+  }
+
+  const query = windowDays ? `?windowDays=${windowDays}` : "";
+  return await fetchApi<GovernanceDashboard>(`/api/admin/governance-analytics/dashboard${query}`, tenantHeaders);
+}
+
+export async function getGovernanceKpiTrends(
+  kpiKey: string,
+  windowDays?: number,
+): Promise<ApiResult<GovernanceKpiTrend>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<GovernanceKpiTrend>();
+  }
+
+  const query = new URLSearchParams();
+  if (windowDays) {
+    query.set("windowDays", String(windowDays));
+  }
+
+  const suffix = query.size > 0 ? `?${query.toString()}` : "";
+  return await fetchApi<GovernanceKpiTrend>(
+    `/api/admin/governance-analytics/kpis/${encodeURIComponent(kpiKey)}/trends${suffix}`,
+    tenantHeaders,
+  );
+}
+
+export async function getHighRiskRecommendations(
+  limit?: number,
+): Promise<ApiResult<HighRiskRecommendationSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<HighRiskRecommendationSummary[]>();
+  }
+
+  const query = limit ? `?limit=${limit}` : "";
+  return await fetchApi<HighRiskRecommendationSummary[]>(
+    `/api/admin/governance-analytics/high-risk-recommendations${query}`,
+    tenantHeaders,
+  );
 }
 
 /** Artifact registry page: artifacts plus first artifact's versions, relationships, dependencies. */
@@ -2836,13 +3001,25 @@ export async function getContextPackageExplorerDetail(
   );
 }
 
-export async function getDecisionExplorerList(): Promise<ApiResult<DecisionExplorerItem[]>> {
+export async function getDecisionExplorerList(
+  filters: DecisionExplorerFilters = {},
+): Promise<ApiResult<DecisionExplorerItem[]>> {
   const tenantHeaders = tenantHeadersOrNull();
   if (!tenantHeaders) {
     return missingContext<DecisionExplorerItem[]>();
   }
 
-  return await fetchApi<DecisionExplorerItem[]>("/api/admin/explorers/decisions", tenantHeaders);
+  const query = new URLSearchParams();
+  if (filters.status) query.set("status", filters.status);
+  if (filters.participant) query.set("participant", filters.participant);
+  if (filters.search) query.set("search", filters.search);
+  if (filters.conflict) query.set("conflict", filters.conflict);
+  if (filters.outcomeKey) query.set("outcomeKey", filters.outcomeKey);
+  if (filters.hasOutcome !== undefined) query.set("hasOutcome", String(filters.hasOutcome));
+  if (filters.minEvidenceCount !== undefined) query.set("minEvidenceCount", String(filters.minEvidenceCount));
+
+  const suffix = query.size > 0 ? `?${query.toString()}` : "";
+  return await fetchApi<DecisionExplorerItem[]>(`/api/admin/explorers/decisions${suffix}`, tenantHeaders);
 }
 
 // --- Dashboard and report artifact APIs ---
@@ -3300,12 +3477,15 @@ export async function completeReviewTask(
   versionId: string,
   resolution: "accepted" | "rejected",
   summary?: string,
+  outcomeKey?: string,
 ): Promise<
   ApiResult<{
     artifactId: string;
     versionId: string;
     status: string;
     decisionCreationDeferred: boolean;
+    decisionArtifactId?: string | null;
+    decisionVersionId?: string | null;
     unblockedTaskArtifactIds: string[];
   }>
 > {
@@ -3316,15 +3496,86 @@ export async function completeReviewTask(
       versionId: string;
       status: string;
       decisionCreationDeferred: boolean;
+      decisionArtifactId?: string | null;
+      decisionVersionId?: string | null;
       unblockedTaskArtifactIds: string[];
     }>();
   }
 
   return await postApi(
     `/api/admin/review-tasks/${artifactId}/versions/${versionId}/complete`,
-    { resolution, summary },
+    { resolution, summary, outcomeKey },
     tenantHeaders,
   );
+}
+
+export async function listDecisions(): Promise<ApiResult<DecisionExplorerItem[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<DecisionExplorerItem[]>();
+  }
+
+  return await fetchApi<DecisionExplorerItem[]>("/api/admin/decisions", tenantHeaders);
+}
+
+export async function getDecisionDetail(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<DecisionDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<DecisionDetail>();
+  }
+
+  return await fetchApi<DecisionDetail>(`/api/admin/decisions/${artifactId}/versions/${versionId}`, tenantHeaders);
+}
+
+export async function castDecisionVote(
+  artifactId: string,
+  versionId: string,
+  vote: DecisionVoteKind,
+  comment?: string,
+): Promise<ApiResult<unknown>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<unknown>();
+  }
+
+  return await postApi(`/api/admin/decisions/${artifactId}/versions/${versionId}/votes`, { vote, comment }, tenantHeaders);
+}
+
+export async function addDecisionComment(
+  artifactId: string,
+  versionId: string,
+  body: string,
+): Promise<ApiResult<unknown>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<unknown>();
+  }
+
+  return await postApi(`/api/admin/decisions/${artifactId}/versions/${versionId}/comments`, { body }, tenantHeaders);
+}
+
+export async function recordManualOutcome(
+  artifactId: string,
+  versionId: string,
+  request: {
+    checkType: string;
+    expectedOutcome: string;
+    actualOutcome: string;
+    outcomeStatus: OutcomeCheckStatus;
+    outcomeConfidence?: number;
+    evidenceSummary?: string;
+    recommendationArtifactId?: string;
+  },
+): Promise<ApiResult<unknown>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<unknown>();
+  }
+
+  return await postApi(`/api/admin/decisions/${artifactId}/versions/${versionId}/outcomes`, request, tenantHeaders);
 }
 
 export type ReviewTaskTemplateArtifactSummary = {
@@ -4721,6 +4972,431 @@ export async function getAgentRunDetail(runId: string): Promise<ApiResult<AgentR
   }
 
   return await fetchApi<AgentRunDetail>(`/api/admin/agent-runs/${runId}`, tenantHeaders);
+}
+
+// --- Workflow version definitions (Issue 24) ---
+
+export type WorkflowVersionArtifactSummary = {
+  id: string;
+  tenantId: string;
+  artifactType: string;
+  name: string;
+  description?: string | null;
+  latestVersionLabel?: string | null;
+  readinessState?: string | null;
+  workflowKey?: string | null;
+  displayName?: string | null;
+  workflowScope?: string | null;
+  updatedAt: string;
+};
+
+export type WorkflowAgentReference = {
+  agentVersionId: string;
+  agentArtifactId: string;
+  agentArtifactName: string;
+  agentKey: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type WorkflowToolReference = {
+  toolDefinitionVersionId: string;
+  toolArtifactId: string;
+  toolArtifactName: string;
+  versionLabel: string;
+  readinessState: string;
+  riskLevel: string;
+};
+
+export type WorkflowBusinessPolicyReference = {
+  businessPolicyDefinitionVersionId: string;
+  businessPolicyArtifactId: string;
+  businessPolicyArtifactName: string;
+  policyKey: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type WorkflowOptimizationModelReference = {
+  optimizationModelVersionId: string;
+  optimizationModelArtifactId: string;
+  optimizationModelArtifactName: string;
+  optimizationKey: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type WorkflowArtifactVersionReference = {
+  versionId: string;
+  artifactId: string;
+  artifactType: string;
+  artifactName: string;
+  versionLabel: string;
+  readinessState: string;
+};
+
+export type WorkflowDerivedCapabilityRisk = {
+  effectiveRiskLevel: string;
+  toolRiskContributions: { toolDefinitionVersionId: string; riskLevel: string }[];
+  permissionCeiling: string;
+};
+
+export type WorkflowStepDefinition = {
+  stepKey: string;
+  stepType: string;
+  safeModeOnBlock: string;
+  dependsOnStepKeys: string[];
+  agentVersionId?: string | null;
+  toolDefinitionVersionId?: string | null;
+  businessPolicyDefinitionVersionId?: string | null;
+  optimizationModelVersionId?: string | null;
+  sourceStepKey?: string | null;
+  reviewTaskTemplateVersionId?: string | null;
+};
+
+export type WorkflowTriggerConfig = {
+  manualEnabled: boolean;
+  scheduledEnabled: boolean;
+  scheduledPlaceholder?: string | null;
+  eventDrivenEnabled: boolean;
+  eventDrivenPlaceholder?: string | null;
+};
+
+export type WorkflowVersionDetail = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  name: string;
+  description?: string | null;
+  artifactReadinessState: string;
+  workflowKey: string;
+  displayName: string;
+  workflowDescription?: string | null;
+  workflowScope: string;
+  steps: WorkflowStepDefinition[];
+  inputSchema?: WorkflowArtifactVersionReference | null;
+  outputSchema?: WorkflowArtifactVersionReference | null;
+  referencedAgents: WorkflowAgentReference[];
+  referencedTools: WorkflowToolReference[];
+  referencedBusinessPolicies: WorkflowBusinessPolicyReference[];
+  referencedOptimizationModels: WorkflowOptimizationModelReference[];
+  compatibleModelPackages: { modelPackageVersionId: string; key: string; name: string; versionLabel: string; state: string }[];
+  compatibleOntologies: { ontologyVersionId: string; key: string; versionLabel: string; state: string }[];
+  safeModeEnabled: boolean;
+  previewModeDefault: boolean;
+  blockedModeMessage?: string | null;
+  allowPartialCompletion: boolean;
+  defaultStepSafeModeBehavior: string;
+  triggerConfig: WorkflowTriggerConfig;
+  approvalRequirements: string[];
+  compatibilityTestNotes: string[];
+  compatibilityFixtureKeys: string[];
+  derivedCapabilityRisk?: WorkflowDerivedCapabilityRisk | null;
+  createdByUserId: string;
+};
+
+export type WorkflowExecutionRequest = {
+  structuredInputJson?: string | null;
+};
+
+export type WorkflowExecutionResponse = {
+  workflowRunId: string;
+  status: string;
+  isPreview: boolean;
+  safeModeApplied: boolean;
+  partialCompletion: boolean;
+  outputSafeSummaryJson?: string | null;
+  aiTraceRecordId?: string | null;
+  auditRecordId?: string | null;
+  recommendationArtifactIds: string[];
+  reviewTaskArtifactIds: string[];
+  validationNotes: string[];
+};
+
+export type WorkflowRunSummary = {
+  id: string;
+  workflowVersionId: string;
+  status: string;
+  isPreview: boolean;
+  safeModeApplied: boolean;
+  inputSafeSummary: string;
+  requestedByUserId: string;
+  aiTraceRecordId?: string | null;
+  startedAt: string;
+};
+
+export type SafeModeEventSummary = {
+  id: string;
+  stepKey: string;
+  eventKind: string;
+  reason: string;
+  policyRuleKey?: string | null;
+  blockedAction?: string | null;
+  agentRunId?: string | null;
+  toolRunId?: string | null;
+  reviewTaskArtifactId?: string | null;
+  createdAt: string;
+};
+
+export type WorkflowRunDetail = {
+  id: string;
+  tenantId: string;
+  workflowVersionId: string;
+  status: string;
+  isPreview: boolean;
+  safeModeApplied: boolean;
+  partialCompletion: boolean;
+  inputSafeSummaryJson: string;
+  outputSafeSummaryJson?: string | null;
+  stepResultsJson?: string | null;
+  inheritedRiskSnapshotJson?: string | null;
+  runtimeTrustRecalculationJson?: string | null;
+  recommendationArtifactIdsJson?: string | null;
+  reviewTaskArtifactIdsJson?: string | null;
+  auditRecordId?: string | null;
+  aiTraceRecordId?: string | null;
+  requestedByUserId: string;
+  startedAt: string;
+  completedAt?: string | null;
+  safeModeEvents: SafeModeEventSummary[];
+  childAgentRunIds: string[];
+  childToolRunIds: string[];
+};
+
+export type CreateWorkflowDefinitionRequest = {
+  name: string;
+  description?: string | null;
+  workflowKey: string;
+  displayName: string;
+  workflowDescription?: string | null;
+  workflowScope: string;
+  steps?: WorkflowStepDefinition[] | null;
+  inputSchemaVersionId?: string | null;
+  outputSchemaVersionId?: string | null;
+  referencedAgentVersionIds?: string[] | null;
+  referencedToolDefinitionVersionIds?: string[] | null;
+  referencedBusinessPolicyDefinitionVersionIds?: string[] | null;
+  referencedOptimizationModelVersionIds?: string[] | null;
+  compatibleModelPackageVersionIds?: string[] | null;
+  compatibleOntologyVersionIds?: string[] | null;
+  safeModeEnabled: boolean;
+  previewModeDefault: boolean;
+  blockedModeMessage?: string | null;
+  allowPartialCompletion: boolean;
+  defaultStepSafeModeBehavior: string;
+  triggerConfig?: WorkflowTriggerConfig | null;
+  approvalRequirements?: string[] | null;
+  compatibilityTestNotes?: string[] | null;
+  compatibilityFixtureKeys?: string[] | null;
+};
+
+export type CreateWorkflowDefinitionResponse = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+};
+
+export type MarkWorkflowDefinitionReadyResponse = {
+  artifactId: string;
+  versionId: string;
+  readinessState: string;
+  validationNotes: string[];
+  derivedCapabilityRisk?: WorkflowDerivedCapabilityRisk | null;
+};
+
+export type PublishWorkflowDefinitionResponse = {
+  succeeded: boolean;
+  readinessState: string;
+  blockingReasons: string[];
+  artifactId: string;
+  versionId: string;
+};
+
+export async function getWorkflowDefinitionArtifacts(): Promise<ApiResult<WorkflowVersionArtifactSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<WorkflowVersionArtifactSummary[]>();
+  }
+
+  return await fetchApi<WorkflowVersionArtifactSummary[]>("/api/admin/workflows", tenantHeaders);
+}
+
+export async function getWorkflowDefinitionDetail(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<WorkflowVersionDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<WorkflowVersionDetail>();
+  }
+
+  return await fetchApi<WorkflowVersionDetail>(
+    `/api/admin/workflows/${artifactId}/versions/${versionId}`,
+    tenantHeaders,
+  );
+}
+
+export async function loadWorkflowVersionByKey(
+  workflowKey: string,
+  versionId?: string,
+): Promise<
+  ApiResult<{
+    artifactId: string;
+    versionId: string;
+    artifactName: string;
+    detail: WorkflowVersionDetail;
+    readiness: ArtifactReadiness;
+  }>
+> {
+  const list = await getWorkflowDefinitionArtifacts();
+  if (!list.data) {
+    return { data: null, error: list.error };
+  }
+
+  const artifact = list.data.find((item) => item.workflowKey === workflowKey);
+  if (!artifact) {
+    return { data: null, error: `Workflow '${workflowKey}' was not found.` };
+  }
+
+  const versions = await getArtifactVersions(artifact.id);
+  if (!versions.data || versions.data.length === 0) {
+    return { data: null, error: versions.error ?? "No workflow versions found." };
+  }
+
+  const selectedVersionId = versionId ?? versions.data[0].id;
+  const detail = await getWorkflowDefinitionDetail(artifact.id, selectedVersionId);
+  if (!detail.data) {
+    return { data: null, error: detail.error };
+  }
+
+  const readiness = await getArtifactReadiness(artifact.id, selectedVersionId);
+  if (!readiness.data) {
+    return { data: null, error: readiness.error };
+  }
+
+  return {
+    data: {
+      artifactId: artifact.id,
+      versionId: selectedVersionId,
+      artifactName: artifact.name,
+      detail: detail.data,
+      readiness: readiness.data,
+    },
+    error: null,
+  };
+}
+
+export async function postWorkflowDefinition(
+  request: CreateWorkflowDefinitionRequest,
+): Promise<ApiResult<CreateWorkflowDefinitionResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<CreateWorkflowDefinitionResponse>();
+  }
+
+  return await postApi<CreateWorkflowDefinitionResponse>("/api/admin/workflows", request, tenantHeaders);
+}
+
+export async function postWorkflowMarkReady(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<MarkWorkflowDefinitionReadyResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<MarkWorkflowDefinitionReadyResponse>();
+  }
+
+  return await postApi<MarkWorkflowDefinitionReadyResponse>(
+    `/api/admin/workflows/${artifactId}/versions/${versionId}/mark-ready`,
+    {},
+    tenantHeaders,
+  );
+}
+
+export async function postWorkflowPublish(
+  artifactId: string,
+  versionId: string,
+  summary?: string,
+): Promise<ApiResult<PublishWorkflowDefinitionResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<PublishWorkflowDefinitionResponse>();
+  }
+
+  return await postApi<PublishWorkflowDefinitionResponse>(
+    `/api/admin/workflows/${artifactId}/versions/${versionId}/publish`,
+    { summary: summary ?? null },
+    tenantHeaders,
+  );
+}
+
+export async function postWorkflowPreview(
+  artifactId: string,
+  versionId: string,
+  request: WorkflowExecutionRequest,
+): Promise<ApiResult<WorkflowExecutionResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<WorkflowExecutionResponse>();
+  }
+
+  return await postApi<WorkflowExecutionResponse>(
+    `/api/admin/workflows/${artifactId}/versions/${versionId}/preview`,
+    request,
+    tenantHeaders,
+  );
+}
+
+export async function postWorkflowTestRun(
+  artifactId: string,
+  versionId: string,
+  request: WorkflowExecutionRequest,
+): Promise<ApiResult<WorkflowExecutionResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<WorkflowExecutionResponse>();
+  }
+
+  return await postApi<WorkflowExecutionResponse>(
+    `/api/admin/workflows/${artifactId}/versions/${versionId}/test-run`,
+    request,
+    tenantHeaders,
+  );
+}
+
+export async function postWorkflowExecute(
+  artifactId: string,
+  versionId: string,
+  request: WorkflowExecutionRequest,
+): Promise<ApiResult<WorkflowExecutionResponse>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<WorkflowExecutionResponse>();
+  }
+
+  return await postApi<WorkflowExecutionResponse>(
+    `/api/admin/workflows/${artifactId}/versions/${versionId}/execute`,
+    request,
+    tenantHeaders,
+  );
+}
+
+export async function getWorkflowRuns(): Promise<ApiResult<WorkflowRunSummary[]>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<WorkflowRunSummary[]>();
+  }
+
+  return await fetchApi<WorkflowRunSummary[]>("/api/admin/workflow-runs", tenantHeaders);
+}
+
+export async function getWorkflowRunDetail(runId: string): Promise<ApiResult<WorkflowRunDetail>> {
+  const tenantHeaders = tenantHeadersOrNull();
+  if (!tenantHeaders) {
+    return missingContext<WorkflowRunDetail>();
+  }
+
+  return await fetchApi<WorkflowRunDetail>(`/api/admin/workflow-runs/${runId}`, tenantHeaders);
 }
 
 // --- HTTP transport layer ---

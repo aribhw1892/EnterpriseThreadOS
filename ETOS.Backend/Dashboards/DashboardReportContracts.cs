@@ -1,5 +1,7 @@
 namespace ETOS.Backend.Dashboards;
 
+using ETOS.Backend.GovernanceAnalytics;
+
 public static class DashboardReportPermissions
 {
     public const string Preview = "dashboards_reports.preview";
@@ -23,18 +25,7 @@ public static class DashboardReportBlockKinds
 
 public static class PlatformGovernanceKpiPlaceholders
 {
-    public static readonly IReadOnlyCollection<GovernanceKpiPlaceholderResponse> Catalog =
-    [
-        new("open_reviews", "Open Reviews", "Milestone 4 governance analytics.", "platform_defined"),
-        new("pending_decisions", "Pending Decisions", "Milestone 4 governance analytics.", "platform_defined"),
-        new("blocked_decisions", "Blocked Decisions", "Milestone 4 governance analytics.", "platform_defined"),
-        new("escalations", "Escalations", "Milestone 4 governance analytics.", "platform_defined"),
-        new("decision_throughput", "Decision Throughput", "Milestone 4 governance analytics.", "platform_defined"),
-        new("outcome_verification_rate", "Outcome Verification Rate", "Milestone 4 governance analytics.", "platform_defined"),
-        new("learning_signal_rate", "Learning Signal Rate", "Milestone 4 governance analytics.", "platform_defined"),
-        new("high_risk_recommendations", "High-Risk Recommendations", "Milestone 4 governance analytics.", "platform_defined"),
-        new("tenant_custom_kpi", "Custom KPI (future)", "Tenant-defined KPI definitions deferred.", "tenant_custom_deferred")
-    ];
+    public static IReadOnlyCollection<GovernanceKpiPlaceholderResponse> Catalog => GovernanceAnalytics.PlatformGovernanceKpiPlaceholders.Catalog;
 
     public static readonly IReadOnlySet<string> AllowedIntentKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
@@ -43,12 +34,6 @@ public static class PlatformGovernanceKpiPlaceholders
         "document-evidence-context"
     };
 }
-
-public sealed record GovernanceKpiPlaceholderResponse(
-    string KpiKey,
-    string Title,
-    string Notes,
-    string Source);
 
 public sealed record DashboardReportArtifactSummaryResponse(
     Guid Id,

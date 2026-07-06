@@ -41,6 +41,7 @@
     "agentTemplatesFile": "artifacts/agent-templates.json",
     "toolsFile": "artifacts/tools.json",
     "connectorsFile": "artifacts/connectors.json",
-    "skillsFile": "artifacts/skills.json"
+    "skillsFile": "artifacts/skills.json",
+    "workflowsFile": "artifacts/workflows.json"
   }
 }

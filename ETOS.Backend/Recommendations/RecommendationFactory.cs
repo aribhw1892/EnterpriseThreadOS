@@ -31,6 +31,7 @@ public interface IRecommendationFactory
         Guid versionId,
         CancellationToken cancellationToken);
     Task<CreateRecommendationResponse> FromAgentRunAsync(Guid agentRunId, CancellationToken cancellationToken);
+    Task<CreateRecommendationResponse> FromWorkflowRunAsync(Guid workflowRunId, CancellationToken cancellationToken);
 }
 
 public sealed class RecommendationFactory(
@@ -401,6 +402,144 @@ public sealed class RecommendationFactory(
             [],
             explainability,
             new RecommendationPayloadParser.RecommendationSourceReferenceDocument("agent_run", agentRun.Id),
+            uniqueSourceKey,
+            cancellationToken);
+    }
+
+    public async Task<CreateRecommendationResponse> FromWorkflowRunAsync(Guid workflowRunId, CancellationToken cancellationToken)
+    {
+        var context = await RequireCreatePermissionAsync(cancellationToken);
+        var workflowRun = await dbContext.WorkflowRuns
+            .SingleOrDefaultAsync(item => item.Id == workflowRunId && item.TenantId == context.TenantId, cancellationToken)
+            ?? throw new RequestValidationException("Workflow run was not found.");
+
+        var uniqueSourceKey = $"workflow:{workflowRun.Id}";
+        var existing = await FindByUniqueSourceKeyAsync(context.TenantId, uniqueSourceKey, cancellationToken);
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var childAgentRuns = await dbContext.AgentRuns
+            .AsNoTracking()
+            .Where(item => item.ParentWorkflowRunId == workflowRun.Id && item.TenantId == context.TenantId)
+            .OrderBy(item => item.StartedAt)
+            .ToListAsync(cancellationToken);
+
+        var childToolRuns = await dbContext.ToolRuns
+            .AsNoTracking()
+            .Where(item => item.ParentWorkflowRunId == workflowRun.Id && item.TenantId == context.TenantId)
+            .OrderBy(item => item.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        if (childAgentRuns.Count == 0 && childToolRuns.Count == 0)
+        {
+            throw new RequestValidationException("Workflow run does not contain child agent or tool runs for recommendation creation.");
+        }
+
+        foreach (var agentRun in childAgentRuns.Where(item => !string.IsNullOrWhiteSpace(item.StructuredOutputJson)))
+        {
+            GuardStructuredOutputAgainstDecisionCreation(agentRun.StructuredOutputJson!);
+        }
+
+        var evidence = new List<RecommendationPayloadParser.RecommendationEvidenceLinkDocument>();
+        foreach (var agentRun in childAgentRuns)
+        {
+            evidence.Add(new RecommendationPayloadParser.RecommendationEvidenceLinkDocument(
+                Guid.NewGuid(),
+                EvidenceLinkType.AgentRun,
+                agentRun.Id,
+                agentRun.OutputSafeSummaryJson ?? $"Agent run {agentRun.Status}.",
+                TrustState.Provisional,
+                false));
+
+            if (agentRun.AiTraceRecordId is Guid aiTraceId)
+            {
+                evidence.Add(new RecommendationPayloadParser.RecommendationEvidenceLinkDocument(
+                    Guid.NewGuid(),
+                    EvidenceLinkType.AiTrace,
+                    aiTraceId,
+                    "AI trace evidence from workflow child agent run.",
+                    TrustState.Provisional,
+                    false));
+            }
+        }
+
+        foreach (var toolRun in childToolRuns)
+        {
+            evidence.Add(new RecommendationPayloadParser.RecommendationEvidenceLinkDocument(
+                Guid.NewGuid(),
+                EvidenceLinkType.ToolRun,
+                toolRun.Id,
+                toolRun.OutputSafeSummaryJson ?? $"Tool run {toolRun.Status}.",
+                TrustState.Provisional,
+                false));
+        }
+
+        evidence.Add(new RecommendationPayloadParser.RecommendationEvidenceLinkDocument(
+            Guid.NewGuid(),
+            EvidenceLinkType.WorkflowRun,
+            workflowRun.Id,
+            workflowRun.OutputSafeSummaryJson ?? $"Workflow run {workflowRun.Status}.",
+            TrustState.Provisional,
+            false));
+
+        if (workflowRun.AiTraceRecordId is Guid workflowTraceId)
+        {
+            evidence.Add(new RecommendationPayloadParser.RecommendationEvidenceLinkDocument(
+                Guid.NewGuid(),
+                EvidenceLinkType.AiTrace,
+                workflowTraceId,
+                "AI trace evidence from workflow execution.",
+                TrustState.Provisional,
+                false));
+        }
+
+        var title = $"Workflow recommendation: {workflowRun.Id}";
+        var summary = workflowRun.OutputSafeSummaryJson
+            ?? childAgentRuns.FirstOrDefault(item => !string.IsNullOrWhiteSpace(item.OutputSafeSummaryJson))?.OutputSafeSummaryJson
+            ?? "Recommendation created from governed workflow execution.";
+
+        var suggestedActions = childAgentRuns
+            .Where(item => !string.IsNullOrWhiteSpace(item.StructuredOutputJson))
+            .SelectMany(item =>
+            {
+                try
+                {
+                    using var document = JsonDocument.Parse(item.StructuredOutputJson!);
+                    return BuildSuggestedActionsFromOutput(document.RootElement, summary);
+                }
+                catch (JsonException)
+                {
+                    return Array.Empty<RecommendationPayloadParser.RecommendationSuggestedActionDocument>();
+                }
+            })
+            .Take(5)
+            .ToList();
+
+        if (suggestedActions.Count == 0)
+        {
+            suggestedActions = BuildSuggestedActionsFromOutput(JsonDocument.Parse("{}").RootElement, summary).ToList();
+        }
+
+        var explainability = new RecommendationPayloadParser.RecommendationExplainabilityDocument(
+            workflowRun.AiTraceRecordId,
+            null,
+            childAgentRuns.FirstOrDefault(item => item.RetrievalRunId is not null)?.RetrievalRunId);
+
+        return await CreateArtifactAsync(
+            context,
+            title,
+            summary,
+            RecommendationType.Policy,
+            RecommendationCreationSource.AgentDeferred,
+            RecommendationRiskState.Medium,
+            RecommendationCapabilityState.ReviewRequired,
+            evidence,
+            suggestedActions,
+            [],
+            explainability,
+            new RecommendationPayloadParser.RecommendationSourceReferenceDocument("workflow_run", workflowRun.Id),
             uniqueSourceKey,
             cancellationToken);
     }

@@ -225,7 +225,19 @@ export function ReviewTaskDetailDebugPanel({
               Complete (rejected)
             </DebugButton>
           </div>
-          <p className="text-xs text-slate-500">Accepted completion may unblock chained tasks. Decision deferred (Issue 20).</p>
+          <p className="text-xs text-slate-500">Completion creates a decision artifact when Issue 20 handler is active.</p>
+          {(lastRaw &&
+          typeof lastRaw === "object" &&
+          lastRaw !== null &&
+          "completeResult" in lastRaw &&
+          (lastRaw as { completeResult?: { decisionArtifactId?: string | null } }).completeResult?.decisionArtifactId) ? (
+            <Link
+              href={`/decisions/${String((lastRaw as { completeResult: { decisionArtifactId: string } }).completeResult.decisionArtifactId)}`}
+              className="inline-block text-sm text-cyan-300 hover:underline"
+            >
+              Open created decision
+            </Link>
+          ) : null}
         </div>
 
         <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-950 p-4 lg:col-span-2">
