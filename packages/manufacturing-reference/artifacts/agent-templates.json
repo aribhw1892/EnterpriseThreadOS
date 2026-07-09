@@ -28,7 +28,7 @@
     "compositionMetadata": {
       "mode": "import-mapping",
       "primaryModelProviderKey": "openai-compatible",
-      "primaryModelId": "zai-org/glm-4.6v-flash"
+      "primaryModelId": "qwen/qwen3-1.7b"
     },
     "futureExtensionPlaceholders": []
   }

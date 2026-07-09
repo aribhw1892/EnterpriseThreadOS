@@ -64,7 +64,9 @@ public sealed class ImportMappingLearningSignalTests
                     {
                         ["OperationalStore:ConnectionString"] = "Host=localhost;Database=test;Username=test;Password=test",
                         ["ImportFileStorage:RootPath"] = storageRoot,
-                        ["GraphMemory:Neo4j:BootstrapOnStartup"] = "false"
+                        ["GraphMemory:Neo4j:BootstrapOnStartup"] = "false",
+                        ["ImportMappingSuggestions:DefaultProviderKey"] = "rule-based-v1",
+                        ["ImportMappingSuggestions:Enabled"] = "false"
                     });
                 });
                 builder.ConfigureServices(services =>

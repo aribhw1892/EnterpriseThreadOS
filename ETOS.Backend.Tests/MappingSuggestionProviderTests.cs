@@ -122,6 +122,50 @@ public sealed class MappingSuggestionProviderTests
     }
 
     [Fact]
+    public async Task PydanticAiProviderFallsBackToRuleBasedWhenOutputIncomplete()
+    {
+        var resolved = CreateResolvedContext();
+        var incompleteOutput = """
+            {
+              "columnSuggestions": [
+                {
+                  "sourceColumn": "partNumber",
+                  "canonicalObjectType": "part",
+                  "isIdentityField": false,
+                  "isRequired": true,
+                  "confidence": 0.85,
+                  "rationale": "Missing canonical attribute key."
+                }
+              ],
+              "lifecycleSuggestions": [
+                {
+                  "sourceValue": "released",
+                  "canonicalLifecycleKey": "released",
+                  "confidence": 0.9,
+                  "rationale": "Direct lifecycle match."
+                }
+              ]
+            }
+            """;
+        var provider = CreatePydanticAiProvider(
+            new RecordingAgentRuntimeAdapter(incompleteOutput),
+            enabled: true,
+            fallbackToRuleBased: true);
+
+        var result = await provider.SuggestAsync(
+            new ImportMappingSuggestionRequest(
+                ["partNumber", "lifecycle"],
+                [new Dictionary<string, string?> { ["partNumber"] = "P-1", ["lifecycle"] = "released" }],
+                resolved),
+            CancellationToken.None);
+
+        Assert.Equal(MappingSuggestionProviderKeys.PydanticAi, result.ProviderKey);
+        var column = Assert.Single(result.ColumnSuggestions, item => item.SourceColumn == "partNumber");
+        Assert.Equal("partNumber", column.CanonicalAttributeKey);
+        Assert.True(column.IsIdentityField);
+    }
+
+    [Fact]
     public async Task PydanticAiProviderIncludesPrefetchToolOutputInRuntimeRequest()
     {
         var resolved = CreateResolvedContext();
@@ -183,7 +227,8 @@ public sealed class MappingSuggestionProviderTests
         IAgentRuntimeAdapter runtimeAdapter,
         bool enabled,
         IToolGateway? toolGateway = null,
-        AgentExecutionProfile? profile = null)
+        AgentExecutionProfile? profile = null,
+        bool fallbackToRuleBased = false)
     {
         var tenantId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -195,7 +240,7 @@ public sealed class MappingSuggestionProviderTests
             {
                 Enabled = enabled,
                 MappingAssistantAgentKey = executionProfile.AgentKey,
-                FallbackToRuleBasedOnRuntimeFailure = false
+                FallbackToRuleBasedOnRuntimeFailure = fallbackToRuleBased
             }),
             Options.Create(new AgentRuntimeOptions { BaseUrl = "http://localhost:8010", TimeoutSeconds = 30 }),
             new StubTenantContextResolver(new ActiveTenantContext(tenantId, "local", "Local", userId)),

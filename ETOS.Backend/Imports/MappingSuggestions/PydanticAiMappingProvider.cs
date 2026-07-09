@@ -272,6 +272,20 @@ public sealed class PydanticAiMappingProvider(
 
         var parsed = ParseRuntimeOutput(structuredOutputJson);
 
+        if (options.FallbackToRuleBasedOnRuntimeFailure
+            && !MappingSuggestionOutputQuality.HasUsableColumnSuggestions(parsed.ColumnSuggestions))
+        {
+            diagnosticsBuilder?.SetRuntimeFailure(
+                "Structured mapping output did not include usable column attribute keys.",
+                usedRuleBasedFallback: true);
+            var fallback = await ruleBasedMappingProvider.SuggestAsync(request, cancellationToken);
+            return fallback with
+            {
+                ProviderKey = ProviderKey,
+                Diagnostics = diagnosticsBuilder?.Build()
+            };
+        }
+
         MappingSuggestionOntologyValidator.Validate(
 
             parsed.ColumnSuggestions,

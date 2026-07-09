@@ -175,7 +175,7 @@ public sealed class ImportMappingLearningSignalEmitter(EnterpriseThreadDbContext
                     kind = "column",
                     sourceColumn = suggestion.SourceColumn,
                     suggested = suggestion,
-                    actual
+                    actual = ProjectColumnMapping(actual)
                 });
             }
         }
@@ -192,11 +192,32 @@ public sealed class ImportMappingLearningSignalEmitter(EnterpriseThreadDbContext
                     kind = "lifecycle",
                     sourceValue = suggestion.SourceValue,
                     suggested = suggestion,
-                    actual
+                    actual = ProjectLifecycleMapping(actual)
                 });
             }
         }
 
         return JsonSerializer.Serialize(new { mode, changes }, JsonOptions);
     }
+
+    private static object? ProjectColumnMapping(ImportColumnMapping? mapping) =>
+        mapping is null
+            ? null
+            : new
+            {
+                mapping.SourceColumn,
+                mapping.CanonicalObjectType,
+                mapping.CanonicalAttributeKey,
+                mapping.IsIdentityField,
+                mapping.IsRequired
+            };
+
+    private static object? ProjectLifecycleMapping(ImportLifecycleMapping? mapping) =>
+        mapping is null
+            ? null
+            : new
+            {
+                mapping.SourceValue,
+                mapping.CanonicalLifecycleKey
+            };
 }

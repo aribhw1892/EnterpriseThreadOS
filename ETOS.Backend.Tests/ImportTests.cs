@@ -10,6 +10,8 @@ using ETOS.Backend.Imports;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Ontology;
 using ETOS.Backend.Tests.Fixtures;
+using ImportFlowContext = ETOS.Backend.Tests.Fixtures.ImportFlowTestSupport.ImportFlowContext;
+using RecordingGraphMemoryService = ETOS.Backend.Tests.Fixtures.ImportFlowTestSupport.RecordingGraphMemoryService;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -317,42 +319,49 @@ public sealed class ImportTests
     }
 
     private static WebApplicationFactory<Program> CreateApplication(RecordingGraphMemoryService? graphMemory = null)
-    {
-        var databaseName = Guid.NewGuid().ToString();
-        var storageRoot = Path.Combine(Path.GetTempPath(), "etos-import-tests", Guid.NewGuid().ToString("N"));
+        => ImportFlowTestSupport.CreateApplication(graphMemory);
 
-        return new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureAppConfiguration((_, configuration) =>
-                {
-                    configuration.AddInMemoryCollection(new Dictionary<string, string?>
-                    {
-                        ["ImportFileStorage:RootPath"] = storageRoot,
-                        ["GraphMemory:Neo4j:BootstrapOnStartup"] = "false",
-                        ["ImportMappingSuggestions:DefaultProviderKey"] = "rule-based-v1"
-                    });
-                });
-                builder.ConfigureServices(services =>
-                {
-                    services.RemoveAll<DbContextOptions<EnterpriseThreadDbContext>>();
-                    services.RemoveAll<IDbContextOptionsConfiguration<EnterpriseThreadDbContext>>();
-                    services.AddDbContext<EnterpriseThreadDbContext>(options =>
-                        options.UseInMemoryDatabase(databaseName));
-                    services.RemoveAll<IGraphMemoryService>();
-                    services.AddSingleton<IGraphMemoryService>(graphMemory ?? new RecordingGraphMemoryService());
-                });
-            });
-    }
-
-    private static async Task<TestContext> CreatePublishedModelContextAsync(
+    private static async Task<ImportFlowContext> CreatePublishedModelContextAsync(
         HttpClient client,
         string tenantIdentifier = "tenant-a",
         string email = "admin@example.test")
-    {
-        var packageContext = await ManufacturingModelPackageFixture.CreatePublishedPackageAsync(client, tenantIdentifier, email);
-        return new TestContext(packageContext.TenantId, packageContext.UserId);
-    }
+        => await ImportFlowTestSupport.CreatePublishedModelContextAsync(client, tenantIdentifier, email);
+
+    private static Task<ImportBatchResponse> CreateImportBatchAsync(HttpClient client, ImportFlowContext context)
+        => ImportFlowTestSupport.CreateImportBatchAsync(client, context, "demo-pdm");
+
+    private static Task<UploadImportFileResponse> UploadCsvAsync(HttpClient client, ImportFlowContext context, Guid batchId, string csv)
+        => ImportFlowTestSupport.UploadCsvAsync(client, context, batchId, csv);
+
+    private static Task<ImportMappingVersionResponse> CreateMappingAsync(HttpClient client, ImportFlowContext context, Guid batchId, IReadOnlyCollection<string> lifecycleValues)
+        => ImportFlowTestSupport.CreateMappingAsync(client, context, batchId, lifecycleValues);
+
+    private static Task<ImportMappingVersionResponse> ApproveMappingAsync(HttpClient client, ImportFlowContext context, Guid mappingId)
+        => ImportFlowTestSupport.ApproveMappingAsync(client, context, mappingId);
+
+    private static Task<ImportValidationResponse> ValidateBatchAsync(HttpClient client, ImportFlowContext context, Guid batchId)
+        => ImportFlowTestSupport.ValidateBatchAsync(client, context, batchId);
+
+    private static Task<ImportStagingGraphRunResponse> StageBatchAsync(HttpClient client, ImportFlowContext context, Guid batchId)
+        => ImportFlowTestSupport.StageBatchAsync(client, context, batchId);
+
+    private static Task<ImportPromotionRunResponse> PromoteBatchAsync(HttpClient client, ImportFlowContext context, Guid batchId)
+        => ImportFlowTestSupport.PromoteBatchAsync(client, context, batchId);
+
+    private static Task<RejectedStagingSummaryResponse> RejectStagingAsync(HttpClient client, ImportFlowContext context, Guid batchId)
+        => ImportFlowTestSupport.RejectStagingAsync(client, context, batchId);
+
+    private static Task<BomComparisonRunResponse> CreateBomComparisonAsync(HttpClient client, ImportFlowContext context, Guid batchId)
+        => ImportFlowTestSupport.CreateBomComparisonAsync(client, context, batchId);
+
+    private static Task<GraphSnapshotContract> CaptureSnapshotAsync(HttpClient client, ImportFlowContext context, GraphSpace graphSpace)
+        => ImportFlowTestSupport.CaptureSnapshotAsync(client, context, graphSpace);
+
+    private static Task<GraphDiffContract> CreateGraphDiffAsync(HttpClient client, ImportFlowContext context, Guid fromSnapshotId, Guid toSnapshotId)
+        => ImportFlowTestSupport.CreateGraphDiffAsync(client, context, fromSnapshotId, toSnapshotId);
+
+    private static void AddTenantHeaders(HttpRequestMessage request, Guid tenantId, Guid userId)
+        => ImportFlowTestSupport.AddTenantHeaders(request, tenantId, userId);
 
     private static async Task CreateUserAsync(HttpClient client, Guid actorUserId, Guid userId, string email)
     {
@@ -507,324 +516,9 @@ public sealed class ImportTests
         return published;
     }
 
-    private static async Task<ImportBatchResponse> CreateImportBatchAsync(HttpClient client, TestContext context)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/admin/imports/batches")
-        {
-            Content = JsonContent.Create(new CreateImportBatchRequest("demo-pdm", "Demo import batch.", null))
-        };
-        AddTenantHeaders(request, context.TenantId, context.UserId);
-        var response = await client.SendAsync(request);
-        var batch = await response.Content.ReadFromJsonAsync<ImportBatchResponse>();
-        Assert.True(response.StatusCode == HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
-        Assert.NotNull(batch);
-        return batch;
-    }
-
-    private static async Task<UploadImportFileResponse> UploadCsvAsync(HttpClient client, TestContext context, Guid batchId, string csv)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/batches/{batchId}/files");
-        AddTenantHeaders(request, context.TenantId, context.UserId);
-        using var content = new MultipartFormDataContent();
-        var fileContent = new ByteArrayContent(Encoding.UTF8.GetBytes(csv));
-        fileContent.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
-        content.Add(fileContent, "file", "import.csv");
-        request.Content = content;
-
-        var response = await client.SendAsync(request);
-        var body = await response.Content.ReadAsStringAsync();
-        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
-        var upload = System.Text.Json.JsonSerializer.Deserialize<UploadImportFileResponse>(
-            body,
-            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-        Assert.NotNull(upload);
-        return upload;
-    }
-
-    private static async Task<ImportMappingVersionResponse> CreateMappingAsync(
-        HttpClient client,
-        TestContext context,
-        Guid batchId,
-        IReadOnlyCollection<string> lifecycleValues)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/admin/imports/mappings")
-        {
-            Content = JsonContent.Create(new CreateImportMappingVersionRequest(
-                batchId,
-                "1.0.0",
-                "Test mapping.",
-                [
-                    new CreateImportColumnMappingRequest("partNumber", "part", "partNumber", true, true),
-                    new CreateImportColumnMappingRequest("cost", "part", "cost", false, false)
-                ],
-                lifecycleValues.Select(value => new CreateImportLifecycleMappingRequest(value, "released")).ToList()))
-        };
-        AddTenantHeaders(request, context.TenantId, context.UserId);
-        var response = await client.SendAsync(request);
-        var body = await response.Content.ReadAsStringAsync();
-        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
-        var mapping = System.Text.Json.JsonSerializer.Deserialize<ImportMappingVersionResponse>(
-            body,
-            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-        Assert.NotNull(mapping);
-        return mapping;
-    }
-
-    private static async Task<ImportMappingVersionResponse> ApproveMappingAsync(HttpClient client, TestContext context, Guid mappingId)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/mappings/{mappingId}/approve")
-        {
-            Content = JsonContent.Create(new ApproveImportMappingRequest("Approved by test."))
-        };
-        AddTenantHeaders(request, context.TenantId, context.UserId);
-        var response = await client.SendAsync(request);
-        var mapping = await response.Content.ReadFromJsonAsync<ImportMappingVersionResponse>();
-        Assert.True(response.StatusCode == HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
-        Assert.NotNull(mapping);
-        return mapping;
-    }
-
-    private static async Task<ImportValidationResponse> ValidateBatchAsync(HttpClient client, TestContext context, Guid batchId)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/batches/{batchId}/validate")
-        {
-            Content = JsonContent.Create(new { })
-        };
-        AddTenantHeaders(request, context.TenantId, context.UserId);
-        var response = await client.SendAsync(request);
-        var body = await response.Content.ReadAsStringAsync();
-        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
-        var validation = System.Text.Json.JsonSerializer.Deserialize<ImportValidationResponse>(
-            body,
-            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-        Assert.NotNull(validation);
-        return validation;
-    }
-
-    private static async Task<ImportStagingGraphRunResponse> StageBatchAsync(HttpClient client, TestContext context, Guid batchId)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/batches/{batchId}/stage")
-        {
-            Content = JsonContent.Create(new { })
-        };
-        AddTenantHeaders(request, context.TenantId, context.UserId);
-        var response = await client.SendAsync(request);
-        var body = await response.Content.ReadAsStringAsync();
-        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
-        var run = System.Text.Json.JsonSerializer.Deserialize<ImportStagingGraphRunResponse>(
-            body,
-            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-        Assert.NotNull(run);
-        return run;
-    }
-
-    private static async Task<ImportPromotionRunResponse> PromoteBatchAsync(HttpClient client, TestContext context, Guid batchId)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/batches/{batchId}/promote")
-        {
-            Content = JsonContent.Create(new { })
-        };
-        AddTenantHeaders(request, context.TenantId, context.UserId);
-        var response = await client.SendAsync(request);
-        var body = await response.Content.ReadAsStringAsync();
-        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
-        var run = System.Text.Json.JsonSerializer.Deserialize<ImportPromotionRunResponse>(
-            body,
-            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-        Assert.NotNull(run);
-        return run;
-    }
-
-    private static async Task<RejectedStagingSummaryResponse> RejectStagingAsync(HttpClient client, TestContext context, Guid batchId)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/batches/{batchId}/reject-staging")
-        {
-            Content = JsonContent.Create(new { })
-        };
-        AddTenantHeaders(request, context.TenantId, context.UserId);
-        var response = await client.SendAsync(request);
-        var body = await response.Content.ReadAsStringAsync();
-        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
-        var summary = System.Text.Json.JsonSerializer.Deserialize<RejectedStagingSummaryResponse>(
-            body,
-            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-        Assert.NotNull(summary);
-        return summary;
-    }
-
-    private static async Task<BomComparisonRunResponse> CreateBomComparisonAsync(HttpClient client, TestContext context, Guid batchId)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/batches/{batchId}/bom-comparison")
-        {
-            Content = JsonContent.Create(new { })
-        };
-        AddTenantHeaders(request, context.TenantId, context.UserId);
-        var response = await client.SendAsync(request);
-        var body = await response.Content.ReadAsStringAsync();
-        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
-        var comparison = System.Text.Json.JsonSerializer.Deserialize<BomComparisonRunResponse>(
-            body,
-            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-        Assert.NotNull(comparison);
-        return comparison;
-    }
-
-    private static async Task<GraphSnapshotContract> CaptureSnapshotAsync(HttpClient client, TestContext context, GraphSpace graphSpace)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/admin/graph/snapshots")
-        {
-            Content = JsonContent.Create(new CaptureGraphSnapshotRequest(graphSpace))
-        };
-        AddTenantHeaders(request, context.TenantId, context.UserId);
-        var response = await client.SendAsync(request);
-        var body = await response.Content.ReadAsStringAsync();
-        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
-        var snapshot = System.Text.Json.JsonSerializer.Deserialize<GraphSnapshotContract>(
-            body,
-            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-        Assert.NotNull(snapshot);
-        return snapshot;
-    }
-
-    private static async Task<GraphDiffContract> CreateGraphDiffAsync(HttpClient client, TestContext context, Guid fromSnapshotId, Guid toSnapshotId)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/admin/graph/diffs")
-        {
-            Content = JsonContent.Create(new CreateGraphDiffRequest(fromSnapshotId, toSnapshotId))
-        };
-        AddTenantHeaders(request, context.TenantId, context.UserId);
-        var response = await client.SendAsync(request);
-        var body = await response.Content.ReadAsStringAsync();
-        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
-        var diff = System.Text.Json.JsonSerializer.Deserialize<GraphDiffContract>(
-            body,
-            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-        Assert.NotNull(diff);
-        return diff;
-    }
-
-    private static void AddTenantHeaders(HttpRequestMessage request, Guid tenantId, Guid userId)
-    {
-        request.Headers.Add(TenantHeaderNames.UserId, userId.ToString());
-        request.Headers.Add(TenantHeaderNames.TenantId, tenantId.ToString());
-    }
-
     private static string Sha256(string value)
     {
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(value));
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
-
-    private sealed record TestContext(Guid TenantId, Guid UserId);
-
-    private sealed class RecordingGraphMemoryService : IGraphMemoryService
-    {
-        public List<CreateGraphNodeRequest> CreatedNodeRequests { get; } = [];
-        public List<CreateGraphRelationshipRequest> CreatedRelationshipRequests { get; } = [];
-        public List<BaseNode> Nodes { get; } = [];
-        public List<BaseRelationship> Relationships { get; } = [];
-
-        public Task<BaseNode> CreateNodeAsync(CreateGraphNodeRequest request, CancellationToken cancellationToken)
-        {
-            CreatedNodeRequests.Add(request);
-            var now = DateTimeOffset.UtcNow;
-            var node = new BaseNode(
-                Guid.NewGuid(),
-                request.TenantId,
-                request.GraphSpace,
-                request.ObjectType,
-                request.TrustState,
-                request.Attributes ?? new Dictionary<string, string?>(),
-                request.SourceReference,
-                now,
-                now);
-            Nodes.Add(node);
-            return Task.FromResult(node);
-        }
-
-        public Task<BaseNode?> GetNodeAsync(Guid tenantId, Guid nodeId, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(Nodes.SingleOrDefault(node => node.TenantId == tenantId && node.NodeId == nodeId));
-        }
-
-        public Task<BaseNode> UpdateNodeAsync(UpdateGraphNodeRequest request, CancellationToken cancellationToken)
-        {
-            throw new NotSupportedException();
-        }
-
-        public Task<BaseRelationship> CreateRelationshipAsync(CreateGraphRelationshipRequest request, CancellationToken cancellationToken)
-        {
-            CreatedRelationshipRequests.Add(request);
-            var now = DateTimeOffset.UtcNow;
-            var relationship = new BaseRelationship(
-                Guid.NewGuid(),
-                request.TenantId,
-                request.FromNodeId,
-                request.ToNodeId,
-                request.RelationshipType,
-                request.TrustState,
-                request.Attributes ?? new Dictionary<string, string?>(),
-                request.SourceReference,
-                now,
-                now);
-            Relationships.Add(relationship);
-            return Task.FromResult(relationship);
-        }
-
-        public Task<GraphTraversalResult> TraverseAsync(TraverseGraphRequest request, CancellationToken cancellationToken)
-        {
-            throw new NotSupportedException();
-        }
-
-        public Task<GraphReadModel> ListGraphAsync(
-            Guid tenantId,
-            GraphSpace? graphSpace,
-            string? sourceBatchId,
-            IReadOnlyCollection<Guid>? nodeIds,
-            IReadOnlyCollection<Guid>? relationshipIds,
-            CancellationToken cancellationToken)
-        {
-            var nodes = Nodes
-                .Where(node => node.TenantId == tenantId
-                    && (graphSpace is null || node.GraphSpace == graphSpace)
-                    && (sourceBatchId is null || node.SourceReference?.SourceBatchId == sourceBatchId)
-                    && (nodeIds is null || nodeIds.Count == 0 || nodeIds.Contains(node.NodeId)))
-                .ToList();
-            var relationships = Relationships
-                .Where(relationship => relationship.TenantId == tenantId
-                    && (sourceBatchId is null || relationship.SourceReference?.SourceBatchId == sourceBatchId)
-                    && (relationshipIds is null || relationshipIds.Count == 0 || relationshipIds.Contains(relationship.RelationshipId)))
-                .ToList();
-            return Task.FromResult(new GraphReadModel(nodes, relationships));
-        }
-
-        public async Task<GraphPromotionCopyResult> PromoteStagingAsync(
-            Guid tenantId,
-            IReadOnlyCollection<Guid> stagingNodeIds,
-            IReadOnlyCollection<Guid> stagingRelationshipIds,
-            CancellationToken cancellationToken)
-        {
-            var staging = await ListGraphAsync(tenantId, GraphSpace.Staging, null, stagingNodeIds, stagingRelationshipIds, cancellationToken);
-            var nodeMap = new Dictionary<Guid, Guid>();
-            foreach (var node in staging.Nodes)
-            {
-                var promoted = await CreateNodeAsync(new CreateGraphNodeRequest(tenantId, GraphSpace.Trusted, node.ObjectType, TrustState.Trusted, node.Attributes, node.SourceReference), cancellationToken);
-                nodeMap[node.NodeId] = promoted.NodeId;
-            }
-
-            var promotedRelationshipIds = new List<Guid>();
-            foreach (var relationship in staging.Relationships)
-            {
-                if (!nodeMap.TryGetValue(relationship.FromNodeId, out var fromNodeId) || !nodeMap.TryGetValue(relationship.ToNodeId, out var toNodeId))
-                {
-                    continue;
-                }
-
-                var promoted = await CreateRelationshipAsync(new CreateGraphRelationshipRequest(tenantId, fromNodeId, toNodeId, relationship.RelationshipType, TrustState.Trusted, relationship.Attributes, relationship.SourceReference), cancellationToken);
-                promotedRelationshipIds.Add(promoted.RelationshipId);
-            }
-
-            return new GraphPromotionCopyResult(nodeMap.Values.ToList(), promotedRelationshipIds);
-        }
-    }
-}
+}

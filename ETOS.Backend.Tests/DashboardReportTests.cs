@@ -115,7 +115,8 @@ public sealed class DashboardReportTests
                 DashboardReportPermissions.Readiness,
                 ArtifactPermissions.Read,
                 GovernedQueryPermissions.Run,
-                GovernedQueryPermissions.Read
+                GovernedQueryPermissions.Read,
+                GovernanceAnalyticsPermissions.Read
             ]),
             auditRecorder: auditRecorder);
 
@@ -208,7 +209,7 @@ public sealed class DashboardReportTests
     }
 
     [Fact]
-    public async Task KpiPlaceholderBlockReturnsDeferredCatalogMetadata()
+    public async Task KpiPlaceholderBlockReturnsLiveCatalogMetadata()
     {
         await using var dbContext = CreateDbContext();
         var context = SeedTenantUserAndDocument(dbContext);
@@ -223,10 +224,11 @@ public sealed class DashboardReportTests
             CancellationToken.None);
 
         var kpiBlock = preview.Blocks.Single(block => block.Kind == DashboardReportBlockKinds.GovernanceKpiPlaceholder);
-        Assert.Equal("deferred", kpiBlock.Status);
+        Assert.Equal("ready", kpiBlock.Status);
         Assert.Equal("open_reviews", kpiBlock.KpiKey);
-        Assert.Contains("Milestone 4", kpiBlock.SafeSummary, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("count", kpiBlock.SafeSummary, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Open Reviews", kpiBlock.SafeSummary, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("0", kpiBlock.SafeSummary, StringComparison.Ordinal);
+        Assert.DoesNotContain("Milestone 4", kpiBlock.SafeSummary, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

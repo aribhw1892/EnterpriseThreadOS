@@ -312,3 +312,19 @@ This validates Issue 18 story **18**: conflicted or unverified evidence blocks t
 - `.docs/.prd/engineering-execution-issues.md` — issue backlog through Issue 18.5
 - `.cursor/plans/issue_18_recommendations_f30d3826.plan.md` — Issue 18 implementation plan
 - `.cursor/plans/issue_18.1_cleanup_e7dbd526.plan.md` through `issue_18.5_package_1d585402.plan.md` — Abstraction Sprint plans
+
+---
+
+## Part 2: Issues 19–24 + MVP demo finale (Issue 26)
+
+After completing Part 1, use the Issue 26 operator path for the governance loop, custom agent, workflow, and audit proof:
+
+```powershell
+powershell -File scripts/run-mvp-demo.ps1
+```
+
+Browser checklist: home page **MVP demonstration checklist** → `/imports` (identity demo, promote, snapshot, BOM compare, recommendation) → `/chat` → `/recommendations` → `/tasks` → `/decisions` → `/agents` → `/workflows/bom-impact-review/publish` (execute) → `/ai-traces`.
+
+Full step/API map: [docs/mvp-demonstration-flow.md](../../docs/mvp-demonstration-flow.md).
+
+Denied-path proof is automated only (`MvpDemonstrationFlowTests.DeniedPath_RestrictedContextFailsClosed`); no dedicated UI surface required.

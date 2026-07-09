@@ -18,6 +18,9 @@ import {
   createDemoComparisonImportFlow,
   createDemoImportFlow,
   createManualDataQualityIssueForLatestBatch,
+  createBomComparisonForLatestStagedBatch,
+  createRecommendationFromLatestBomComparison,
+  captureTrustedGraphSnapshot,
   generateDataQualityIssuesForLatestImport,
   generateLatestIdentityCandidates,
   getImportLists,
@@ -40,88 +43,127 @@ import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
 
+function redirectOnImportActionError(result: { error: string | null }) {
+  if (result.error) {
+    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
+  }
+}
+
 async function createDemoImport() {
   "use server";
 
-  await createDemoImportFlow();
+  const result = await createDemoImportFlow();
+  if (result.error) {
+    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
+  }
+
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function createComparisonImport() {
   "use server";
 
-  await createDemoComparisonImportFlow();
+  const result = await createDemoComparisonImportFlow();
+  if (result.error) {
+    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
+  }
+
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function runIdentityDemo() {
   "use server";
 
-  await runIdentityResolutionDemoFlow();
+  const result = await runIdentityResolutionDemoFlow();
+  if (result.error) {
+    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
+  }
+
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function approveDraftMapping() {
   "use server";
 
-  await approveLatestImportMapping();
+  const result = await approveLatestImportMapping();
+  redirectOnImportActionError(result);
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function validateBatch() {
   "use server";
 
-  await validateLatestImportBatch();
+  const result = await validateLatestImportBatch();
+  redirectOnImportActionError(result);
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function stageBatch() {
   "use server";
 
-  await stageLatestImportBatch();
+  const result = await stageLatestImportBatch();
+  redirectOnImportActionError(result);
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function generateIdentityCandidates() {
   "use server";
 
-  await generateLatestIdentityCandidates();
+  const result = await generateLatestIdentityCandidates();
+  redirectOnImportActionError(result);
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function approveIdentityCandidate() {
   "use server";
 
-  await approveLatestIdentityCandidate();
+  const result = await approveLatestIdentityCandidate();
+  redirectOnImportActionError(result);
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function markIdentityCandidateConflicted() {
   "use server";
 
-  await markLatestIdentityCandidateConflicted();
+  const result = await markLatestIdentityCandidateConflicted();
+  redirectOnImportActionError(result);
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function generateDataQualityIssues() {
   "use server";
 
-  await generateDataQualityIssuesForLatestImport();
+  const result = await generateDataQualityIssuesForLatestImport();
+  redirectOnImportActionError(result);
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function createManualDataQualityIssue() {
   "use server";
 
-  await createManualDataQualityIssueForLatestBatch();
+  const result = await createManualDataQualityIssueForLatestBatch();
+  redirectOnImportActionError(result);
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function createSecurityEventDataQualityIssue() {
   "use server";
 
-  await createDataQualityIssueFromLatestSecurityEvent();
+  const result = await createDataQualityIssueFromLatestSecurityEvent();
+  redirectOnImportActionError(result);
   revalidatePath("/imports");
+  redirect("/imports");
 }
 
 async function promoteStagedBatch() {
@@ -134,6 +176,43 @@ async function promoteStagedBatch() {
 
   revalidatePath("/imports");
   redirect("/imports");
+}
+
+async function captureTrustedSnapshot() {
+  "use server";
+
+  const result = await captureTrustedGraphSnapshot();
+  if (result.error) {
+    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
+  }
+
+  revalidatePath("/imports");
+  redirect("/imports");
+}
+
+async function runBomComparison() {
+  "use server";
+
+  const result = await createBomComparisonForLatestStagedBatch();
+  if (result.error) {
+    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
+  }
+
+  revalidatePath("/imports");
+  redirect("/imports");
+}
+
+async function createBomRecommendation() {
+  "use server";
+
+  const result = await createRecommendationFromLatestBomComparison();
+  if (result.error) {
+    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
+  }
+
+  revalidatePath("/imports");
+  revalidatePath("/recommendations");
+  redirect("/recommendations");
 }
 
 async function rejectStagedBatch() {
@@ -569,7 +648,7 @@ function FirstBatchDetail({
       />
       <ListSection
         title="Mapping Versions"
-        description="Draft and approved import mappings generated from deterministic preview suggestions."
+        description="Draft and approved import mappings generated from AI mapping preview suggestions."
         items={result.data.mappingVersions}
         emptyMessage="No import mappings have been created."
         renderItem={MappingCard}
@@ -662,7 +741,7 @@ export default async function ImportsPage({ searchParams }: PageProps) {
             <div>
               <h1 className="text-4xl font-bold tracking-tight">Import Mapping and Staging</h1>
               <p className="mt-3 max-w-3xl text-slate-300">
-                Upload evidence through the imports API, approve deterministic mapping versions, validate CSV rows,
+                Upload evidence through the imports API, approve AI-assisted mapping versions, validate CSV rows,
                 and create untrusted staging graph records before later review slices promote trust.
               </p>
             </div>
@@ -685,6 +764,9 @@ export default async function ImportsPage({ searchParams }: PageProps) {
               <ActionButton action={approveIdentityCandidate}>Approve first reviewable candidate</ActionButton>
               <ActionButton action={markIdentityCandidateConflicted}>Mark first candidate conflicted</ActionButton>
               <ActionButton action={promoteStagedBatch}>Promote ready staged batch to trusted graph</ActionButton>
+              <ActionButton action={captureTrustedSnapshot}>Capture trusted graph snapshot</ActionButton>
+              <ActionButton action={runBomComparison}>Run BOM comparison on staged ERP batch</ActionButton>
+              <ActionButton action={createBomRecommendation}>Create recommendation from BOM comparison</ActionButton>
               <ActionButton action={rejectStagedBatch}>Reject latest staged batch</ActionButton>
               <ActionButton action={generateDataQualityIssues}>Generate quality issues</ActionButton>
             </ButtonGroup>

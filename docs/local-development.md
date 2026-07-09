@@ -160,6 +160,22 @@ Manual workflow execution endpoints:
 
 Frontend shells: `/workflows`, `/workflow-runs/{runId}`.
 
+## MVP demonstration flow (Issue 26)
+
+Primary proof is backend integration tests orchestrated by `MvpDemonstrationFlowSupport`:
+
+```powershell
+dotnet test EnterpriseThreadOS.sln --filter "FullyQualifiedName~MvpDemonstrationFlow"
+```
+
+Operator script (cleans demo data, installs reference package, runs tests, prints links):
+
+```powershell
+powershell -File scripts/run-mvp-demo.ps1
+```
+
+See [mvp-demonstration-flow.md](./mvp-demonstration-flow.md) for the full PRD step map, denied-path notes, and optional Playwright smoke (`npm run test:e2e` in `ETOS.Frontend`).
+
 Install the manufacturing reference package to seed the `bom-impact-review` sample workflow.
 
 See also the summary table in [`README.md`](../README.md#llm-mapping-lm-studio-and-agent-runtime-docker).

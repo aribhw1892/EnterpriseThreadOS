@@ -4,7 +4,7 @@ Source PRD: `engineering-execution-prd.md`
 
 This backlog breaks the PRD into independently grabbable vertical slices. Each issue is intended to deliver a narrow, verifiable path across the necessary domain model, persistence, API, UI, tests, and governance boundaries. Issues are ordered in dependency order so blockers can be created first in an issue tracker.
 
-Recommended execution note: complete Issue 18, then run Issues 19-21 and the Architectural Abstraction Sprint (Issues 18.1-18.5) in parallel where team capacity allows. Do not start Issue 22 until both Issue 21 and Issue 18.5 are complete.
+Recommended execution note: complete Issue 18, then run Issues 19-21 and the Architectural Abstraction Sprint (Issues 18.1-18.5) in parallel where team capacity allows. Do not start Issue 22 until both Issue 21 and Issue 18.5 are complete. After Issue 24, proceed to **Issue 26** (end-to-end MVP demo) before **Issue 25** (multi-agent teams). Issue 25 remains Milestone 5 scope but is not a technical prerequisite for the PRD MVP Demonstration Flow, which validates single custom agents and manually triggered workflows only.
 
 Label for all issues: `needs-triage`
 
@@ -732,6 +732,7 @@ Replace the `dapr-v1` stub with real Dapr Workflow .NET SDK integration: `Govern
 
 Type: AFK
 Blocked by: Issue 24
+Deferred after: Issue 26 (MVP demo does not require agent teams; see PRD `MVP Demonstration Flow`)
 User stories covered: 106, 107, 108, 109, 110, 111, 112, 113
 
 ## What to build
@@ -755,8 +756,10 @@ Issue 24.
 
 ## Issue 26: End-to-End MVP Demonstration Flow
 
+**Status: Implemented**
+
 Type: AFK
-Blocked by: Issue 25
+Blocked by: Issue 24
 User stories covered: 1-120
 
 ## What to build
@@ -771,10 +774,11 @@ Build the scripted and UI-verifiable MVP demonstration flow from tenant creation
 - The user can create, test, approve, publish, and run a custom agent and manually triggered workflow.
 - The demo proves no enterprise source-system write action executes and all important actions are audited.
 - End-to-end smoke tests cover the full happy path and at least one denied/restricted-context path.
+- Agent-team, delegation, and consensus flows (Issue 25) are out of scope for this slice; the demo stops at single custom-agent and manually triggered workflow execution per PRD `MVP Demonstration Flow` steps 17-20.
 
 ## Blocked by
 
-Issue 25.
+Issue 24. Issues 19-23 remain required upstream slices for the governance loop, custom agent, and workflow portions of the demo.
 
 ## Issue 27: ADRs for Critical Architecture Boundaries
 

@@ -85,6 +85,7 @@ public sealed class ManufacturingReferencePackageInstaller(
         var toolVersions = await InstallToolsAsync(loaded, modelPackage.Id, capabilityVersions, connectorVersions, installedArtifacts, cancellationToken);
         await InstallSkillsAsync(loaded, toolVersions, installedArtifacts, cancellationToken);
         await InstallAgentTemplatesAsync(context, loaded, modelPackage.Id, capabilityVersions, toolVersions, installedArtifacts, cancellationToken);
+        await EnsureAnalysisAgentTypeAsync(context, cancellationToken);
         await InstallWorkflowsAsync(context, loaded, modelPackage.Id, toolVersions, policyVersions, optimizationVersions, installedArtifacts, cancellationToken);
         await EnsureMappingAssistantAgentAsync(context, loaded, cancellationToken);
 

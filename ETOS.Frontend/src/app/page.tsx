@@ -557,6 +557,45 @@ export default async function Home() {
           </div>
         </section>
 
+        <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
+          <h2 className="text-2xl font-semibold">MVP demonstration checklist</h2>
+          <p className="mt-2 text-sm text-slate-300">
+            Issue 26 end-to-end flow. Run <code>scripts/run-mvp-demo.ps1</code> for backend proof, then use these
+            pages for browser verification.
+          </p>
+          <ol className="mt-4 grid gap-2 text-sm text-slate-200 md:grid-cols-2">
+            <li>
+              1–2 Model package: <Link href="/model-artifacts">/model-artifacts</Link>
+            </li>
+            <li>
+              3–8 Import + identity + promote: <Link href="/imports">/imports</Link>
+            </li>
+            <li>
+              9–11 Governed chat + drafts: <Link href="/chat">/chat</Link>
+            </li>
+            <li>
+              12–14 Recommendations + tasks: <Link href="/recommendations">/recommendations</Link>,{" "}
+              <Link href="/tasks">/tasks</Link>
+            </li>
+            <li>
+              15–16 Decisions + outcomes: <Link href="/decisions">/decisions</Link>
+            </li>
+            <li>
+              17–18 Custom agent: <Link href="/agents">/agents</Link>
+            </li>
+            <li>
+              19 Workflow execute:{" "}
+              <Link href="/workflows/bom-impact-review/publish">/workflows/bom-impact-review/publish</Link>
+            </li>
+            <li>
+              20 Audit proof: <Link href="/ai-traces">/ai-traces</Link>, governance lists below
+            </li>
+          </ol>
+          <p className="mt-4 text-xs text-slate-500">
+            Backend acceptance: <code>dotnet test --filter FullyQualifiedName~MvpDemonstrationFlow</code>
+          </p>
+        </section>
+
         <section className="grid gap-4 lg:grid-cols-2">
           <ListSection
             title="Tenants"

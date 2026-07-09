@@ -14,6 +14,7 @@ public static class MappingSuggestionOutputSchema
                 "required": [
                   "sourceColumn",
                   "canonicalObjectType",
+                  "canonicalAttributeKey",
                   "isIdentityField",
                   "isRequired",
                   "confidence",

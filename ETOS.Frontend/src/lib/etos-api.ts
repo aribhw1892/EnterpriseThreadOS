@@ -471,6 +471,36 @@ export type ImportPromotionRun = {
   completedAt?: string | null;
 };
 
+export type BomComparisonRun = {
+  id: string;
+  tenantId: string;
+  importBatchId: string;
+  missingInPrimarySideCount: number;
+  missingInSecondarySideCount: number;
+  quantityMismatchCount: number;
+  usageReferenceMismatchCount: number;
+  auditRecordId?: string | null;
+  createdAt: string;
+};
+
+export type GraphSnapshot = {
+  snapshotId: string;
+  tenantId: string;
+  graphSpace: string;
+  nodeCount: number;
+  relationshipCount: number;
+  checksumSha256: string;
+  safeSummary: string;
+  capturedAt: string;
+};
+
+export type CreateRecommendationResult = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+  lifecycleStatus: string;
+};
+
 export type ImportBatchDetail = {
   batch: ImportBatch;
   evidence: ImportFileEvidence[];
@@ -2447,6 +2477,69 @@ export async function runIdentityResolutionDemoFlow(): Promise<ApiResult<Identit
   );
 }
 
+type DraftImportMappingPayload = {
+  importBatchId: string;
+  versionLabel: string;
+  summary: string;
+  columnMappings: Array<{
+    sourceColumn: string;
+    canonicalObjectType: string;
+    canonicalAttributeKey?: string | null;
+    isIdentityField: boolean;
+    isRequired: boolean;
+  }>;
+  lifecycleMappings: Array<{
+    sourceValue: string;
+    canonicalLifecycleKey: string;
+  }>;
+};
+
+function buildDraftImportMappingPayloadFromPreview(
+  preview: ImportPreview,
+  batchId: string,
+  versionLabel: string,
+  summary: string,
+): ApiResult<DraftImportMappingPayload> {
+  const columnMappings = preview.columnSuggestions
+    .filter((suggestion) => suggestion.canonicalAttributeKey || suggestion.isIdentityField)
+    .map((suggestion) => ({
+      sourceColumn: suggestion.sourceColumn,
+      canonicalObjectType: suggestion.canonicalObjectType,
+      canonicalAttributeKey: suggestion.canonicalAttributeKey,
+      isIdentityField: suggestion.isIdentityField,
+      isRequired: suggestion.isRequired,
+    }));
+
+  if (columnMappings.length === 0) {
+    return {
+      data: null,
+      error:
+        "AI mapping preview returned no mappable columns. Run mapping preview debug and confirm the mapping assistant agent is configured.",
+    };
+  }
+
+  const lifecycleMappings = preview.lifecycleSuggestions
+    .filter(
+      (suggestion) =>
+        Boolean(suggestion.sourceValue?.trim()) && Boolean(suggestion.canonicalLifecycleKey?.trim()),
+    )
+    .map((suggestion) => ({
+      sourceValue: suggestion.sourceValue.trim(),
+      canonicalLifecycleKey: suggestion.canonicalLifecycleKey.trim(),
+    }));
+
+  return {
+    data: {
+      importBatchId: batchId,
+      versionLabel,
+      summary,
+      columnMappings,
+      lifecycleMappings,
+    },
+    error: null,
+  };
+}
+
 // Minimal demo import flow.
 // Creates batch -> uploads CSV evidence -> asks backend for mapping suggestions -> saves mapping version.
 async function createDemoImportForSource(
@@ -2499,29 +2592,19 @@ async function createDemoImportForSource(
     return { data: null, error: preview.error };
   }
 
-  /** Save the mapping suggestions as a draft mapping version. */
-  return await postApi<ImportMappingVersion>(
-    "/api/admin/imports/mappings",
-    {
-      importBatchId: batch.data.id,
-      versionLabel: `demo-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`,
-      summary: "Demo deterministic mapping generated from preview suggestions.",
-      columnMappings: preview.data.columnSuggestions
-        .filter((suggestion) => suggestion.canonicalAttributeKey || suggestion.isIdentityField)
-        .map((suggestion) => ({
-          sourceColumn: suggestion.sourceColumn,
-          canonicalObjectType: suggestion.canonicalObjectType,
-          canonicalAttributeKey: suggestion.canonicalAttributeKey,
-          isIdentityField: suggestion.isIdentityField,
-          isRequired: suggestion.isRequired,
-        })),
-      lifecycleMappings: preview.data.lifecycleSuggestions.map((suggestion) => ({
-        sourceValue: suggestion.sourceValue,
-        canonicalLifecycleKey: suggestion.canonicalLifecycleKey,
-      })),
-    },
-    tenantHeaders,
+  const versionLabel = `demo-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}-${sourceSystem}`;
+  const draftMapping = buildDraftImportMappingPayloadFromPreview(
+    preview.data,
+    batch.data.id,
+    versionLabel,
+    "Demo mapping generated from AI preview suggestions.",
   );
+  if (!draftMapping.data) {
+    return { data: null, error: draftMapping.error };
+  }
+
+  /** Save the mapping suggestions as a draft mapping version. */
+  return await postApi<ImportMappingVersion>("/api/admin/imports/mappings", draftMapping.data, tenantHeaders);
 }
 
 // Full prepared import flow used by later demos.
@@ -2568,28 +2651,17 @@ async function createPreparedDemoImportForSource(
     return { data: null, error: preview.error };
   }
 
-  const mapping = await postApi<ImportMappingVersion>(
-    "/api/admin/imports/mappings",
-    {
-      importBatchId: batch.data.id,
-      versionLabel: `demo-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}-${sourceSystem}`,
-      summary: "Prepared demo mapping for identity resolution.",
-      columnMappings: preview.data.columnSuggestions
-        .filter((suggestion) => suggestion.canonicalAttributeKey || suggestion.isIdentityField)
-        .map((suggestion) => ({
-          sourceColumn: suggestion.sourceColumn,
-          canonicalObjectType: suggestion.canonicalObjectType,
-          canonicalAttributeKey: suggestion.canonicalAttributeKey,
-          isIdentityField: suggestion.isIdentityField,
-          isRequired: suggestion.isRequired,
-        })),
-      lifecycleMappings: preview.data.lifecycleSuggestions.map((suggestion) => ({
-        sourceValue: suggestion.sourceValue,
-        canonicalLifecycleKey: suggestion.canonicalLifecycleKey,
-      })),
-    },
-    tenantHeaders,
+  const draftMapping = buildDraftImportMappingPayloadFromPreview(
+    preview.data,
+    batch.data.id,
+    `demo-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}-${sourceSystem}`,
+    "Prepared demo mapping for identity resolution.",
   );
+  if (!draftMapping.data) {
+    return { data: null, error: draftMapping.error };
+  }
+
+  const mapping = await postApi<ImportMappingVersion>("/api/admin/imports/mappings", draftMapping.data, tenantHeaders);
   if (!mapping.data) {
     return { data: null, error: mapping.error };
   }
@@ -2630,7 +2702,11 @@ export async function approveLatestImportMapping(): Promise<ApiResult<ImportMapp
   const lists = await getImportLists();
   const mapping = lists.firstBatchDetail.data?.mappingVersions.find((item) => item.state === "Draft");
   if (!mapping) {
-    return { data: null, error: "No draft import mapping is available to approve." };
+    return {
+      data: null,
+      error:
+        "No draft import mapping on the latest batch. Create a demo batch first and wait for AI mapping preview to finish.",
+    };
   }
 
   return await postApi<ImportMappingVersion>(
@@ -2761,6 +2837,86 @@ export async function rejectLatestStagedImportBatch(): Promise<ApiResult<{ id: s
     {},
     tenantHeaders,
   );
+}
+
+/** Capture a trusted graph snapshot for MVP demo verification. */
+export async function captureTrustedGraphSnapshot(): Promise<ApiResult<GraphSnapshot>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<GraphSnapshot>();
+  }
+
+  return await postApi<GraphSnapshot>(
+    "/api/admin/graph/snapshots",
+    { graphSpace: "Trusted" },
+    tenantHeaders,
+  );
+}
+
+/** Run BOM comparison on the newest staged ERP batch. */
+export async function createBomComparisonForLatestStagedBatch(): Promise<ApiResult<BomComparisonRun>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<BomComparisonRun>();
+  }
+
+  const lists = await getImportLists();
+  const batch =
+    lists.batches.data?.find((item) => item.sourceSystem === "demo-erp" && item.status === "Staged") ??
+    lists.batches.data?.find((item) => item.status === "Staged");
+  if (!batch) {
+    return { data: null, error: "No staged import batch is available for BOM comparison." };
+  }
+
+  return await postApi<BomComparisonRun>(`/api/admin/imports/batches/${batch.id}/bom-comparison`, {}, tenantHeaders);
+}
+
+/** Create a recommendation artifact from the latest BOM comparison run. */
+export async function createRecommendationFromLatestBomComparison(): Promise<ApiResult<CreateRecommendationResult>> {
+  const tenantHeaders =
+    adminUserId && selectedTenantId
+      ? { userId: adminUserId, tenantId: selectedTenantId }
+      : undefined;
+  if (!tenantHeaders) {
+    return missingContext<CreateRecommendationResult>();
+  }
+
+  const comparison = await createBomComparisonForLatestStagedBatch();
+  if (!comparison.data) {
+    return { data: null, error: comparison.error };
+  }
+
+  return await postApi<CreateRecommendationResult>(
+    `/api/admin/recommendations/from-bom-comparison/${comparison.data.id}`,
+    {},
+    tenantHeaders,
+  );
+}
+
+/** Execute a published workflow by workflow key. */
+export async function executePublishedWorkflowByKey(
+  workflowKey: string,
+  structuredInputJson?: string,
+): Promise<ApiResult<WorkflowExecutionResponse>> {
+  const loaded = await loadWorkflowVersionByKey(workflowKey);
+  if (!loaded.data) {
+    return { data: null, error: loaded.error };
+  }
+
+  const readinessState = loaded.data.detail.artifactReadinessState?.toLowerCase() ?? "";
+  if (!readinessState.includes("publish")) {
+    return { data: null, error: `Workflow '${workflowKey}' is not published yet.` };
+  }
+
+  return await postWorkflowExecute(loaded.data.artifactId, loaded.data.versionId, {
+    structuredInputJson: structuredInputJson ?? null,
+  });
 }
 
 /** Generate identity candidates for the latest import batch. */

@@ -5,6 +5,7 @@ import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
 import {
   getArtifactVersions,
   loadWorkflowVersionByKey,
+  postWorkflowExecute,
   postWorkflowMarkReady,
   postWorkflowPublish,
 } from "@/lib/etos-api";
@@ -84,6 +85,40 @@ async function publishAction(formData: FormData) {
 
   revalidatePath("/workflows");
   redirect(`/workflows/${encodeURIComponent(workflowKey)}/edit?versionId=${encodeURIComponent(versionId)}`);
+}
+
+async function executeAction(formData: FormData) {
+  "use server";
+
+  const artifactId = formData.get("artifactId");
+  const versionId = formData.get("versionId");
+  const workflowKey = formData.get("workflowKey");
+  const structuredInputJson = formData.get("structuredInputJson");
+
+  if (
+    typeof artifactId !== "string" ||
+    typeof versionId !== "string" ||
+    typeof workflowKey !== "string" ||
+    artifactId.length === 0 ||
+    versionId.length === 0
+  ) {
+    redirect("/workflows?error=Workflow%20context%20was%20missing.");
+  }
+
+  const result = await postWorkflowExecute(artifactId, versionId, {
+    structuredInputJson:
+      typeof structuredInputJson === "string" && structuredInputJson.trim().length > 0
+        ? structuredInputJson.trim()
+        : null,
+  });
+  if (result.error || !result.data) {
+    redirect(
+      `/workflows/${encodeURIComponent(workflowKey)}/publish?versionId=${encodeURIComponent(versionId)}&error=${encodeURIComponent(result.error ?? "Workflow execute failed.")}`,
+    );
+  }
+
+  revalidatePath("/workflows");
+  redirect(`/workflow-runs/${result.data.workflowRunId}`);
 }
 
 export default async function WorkflowPublishPage({ params, searchParams }: PageProps) {
@@ -275,6 +310,36 @@ export default async function WorkflowPublishPage({ params, searchParams }: Page
             </form>
           </div>
         </section>
+
+        {detail.artifactReadinessState.toLowerCase().includes("publish") ? (
+          <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
+            <h2 className="text-2xl font-semibold">Execute published workflow</h2>
+            <p className="mt-2 text-sm text-slate-300">
+              Manual MVP demo execution for <code>{detail.workflowKey}</code>. Uses governed in-process workflow
+              runtime and links to the workflow run detail page.
+            </p>
+            <form action={executeAction} className="mt-6 space-y-4">
+              <input type="hidden" name="artifactId" value={artifactId} />
+              <input type="hidden" name="versionId" value={selectedVersionId} />
+              <input type="hidden" name="workflowKey" value={detail.workflowKey} />
+              <label className="block text-sm">
+                <span className="font-semibold text-slate-300">Structured input JSON (optional)</span>
+                <textarea
+                  name="structuredInputJson"
+                  rows={4}
+                  defaultValue={`{"intentKey":"bom-impact-context","queryText":"Investigate BOM impact for assembly A-100."}`}
+                  className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 font-mono text-xs text-slate-100"
+                />
+              </label>
+              <button
+                type="submit"
+                className="rounded-2xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300"
+              >
+                Execute workflow
+              </button>
+            </form>
+          </section>
+        ) : null}
       </div>
     </main>
   );

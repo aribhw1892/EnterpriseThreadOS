@@ -52,7 +52,7 @@ Legend: ✅ API ready · ⚠️ partial · 🚫 no API — placeholder only
 | — | AI Trace list | `/ai-traces` | ✅ | `getAiTraceLists`, `runDemoGovernedQueryFlow`, `exportAiTrace` |
 | 37 | Governance dashboard | `/governance` | ⚠️ | `getGovernanceLists` (audit + security events); KPI charts 🚫 aggregate client-side from lists |
 | — | Decisions | `/decisions` | ⚠️ | `getDecisionExplorerList` |
-| — | Tasks | `/tasks` | 🚫 | Placeholder — Issue 19 |
+| — | Tasks | `/tasks` | ⚠️ | Minimal shell — Issue 19; list/detail via `getReviewTask*` helpers |
 | — | Explorers hub | `/explorers` | ✅ | Static cards linking to routes |
 
 ---
@@ -78,7 +78,7 @@ Legend: ✅ API ready · ⚠️ partial · 🚫 no API — placeholder only
 | 25 | Tool editor | `/tools/[artifactId]/edit` | ⚠️ | `getToolDefinitionDetail` — editor UI only; save via existing publish/mark if exposed, else read-only |
 | 26 | Connector detail | `/connectors/[artifactId]` | ✅ | `getConnectorDefinitionDetail` |
 | 27 | Tool run trace | `/tool-runs/[runId]` | ✅ | `getToolRuns`, `getToolRunDetail` |
-| 28–36 | Agents, workflows, teams | `/agents/*`, `/workflows/*`, `/agent-teams/*`, `/agent-runs/*`, `/workflow-runs/*`, `/agent-team-runs/*` | 🚫 | **Placeholder only** — Issues 23–25; use `ui-fixtures/` for preview layout if needed |
+| 28–36 | Agents, workflows, teams | `/agents/*`, `/workflows/*`, `/agent-teams/*`, `/agent-runs/*`, `/workflow-runs/*`, `/agent-team-runs/*` | ⚠️ | **Issues 23–24 implemented shells** (create/publish/execute for agents/workflows); agent teams remain placeholder — Issue 25 |
 | 38–40 | Digital thread timeline | `/digital-thread/timeline` | 🚫 | **Placeholder or UI-fixture canvas** — Issue 16.1 backend API not in repo; do not implement `DigitalThreadProjectionService` in backend |
 
 ---

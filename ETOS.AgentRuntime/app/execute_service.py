@@ -4,7 +4,7 @@ import json
 import re
 from typing import Any
 
-from pydantic_ai import Agent
+from pydantic_ai import Agent, NativeOutput, StructuredDict, ToolOutput
 
 from app.contracts import ExecuteRequest, ExecuteResponse
 from app.model_router import (
@@ -18,6 +18,15 @@ from app.model_router import (
 
 EXECUTION_STATUS_SUCCEEDED = "Succeeded"
 EXECUTION_STATUS_FAILED = "Failed"
+
+_STRING_MOCKS = {
+    "sourceColumn": "partNumber",
+    "canonicalObjectType": "part",
+    "canonicalAttributeKey": "partNumber",
+    "sourceValue": "released",
+    "canonicalLifecycleKey": "released",
+    "rationale": "Example mapping rationale.",
+}
 
 
 def _parse_json_object(raw: str | None, field_name: str) -> dict[str, Any]:
@@ -99,12 +108,16 @@ def _mock_value_for_property(name: str, prop_schema: dict[str, Any]) -> Any:
         prop_type = next((item for item in prop_type if item != "null"), prop_type[0])
 
     if prop_type == "string":
-        return f"mock-{name}"
+        return _STRING_MOCKS.get(name, f"mock-{name}")
     if prop_type == "integer":
         return 0
     if prop_type == "number":
         return 0.0
     if prop_type == "boolean":
+        if name == "isIdentityField":
+            return True
+        if name == "isRequired":
+            return True
         return False
     if prop_type == "array":
         item_schema = prop_schema.get("items", {"type": "string"})
@@ -199,6 +212,94 @@ def _validate_required_fields(output: dict[str, Any], schema: dict[str, Any]) ->
         )
 
 
+def _validate_value_against_schema(value: Any, schema: dict[str, Any], path: str) -> None:
+    schema_type = schema.get("type")
+    if isinstance(schema_type, list):
+        schema_type = next((item for item in schema_type if item != "null"), schema_type[0])
+
+    if schema_type == "object":
+        if not isinstance(value, dict):
+            raise ValueError(f"{path} must be a JSON object.")
+        properties = schema.get("properties", {})
+        required = schema.get("required", [])
+        missing = [name for name in required if name not in value]
+        if missing:
+            joined = ", ".join(missing)
+            raise ValueError(f"{path} missing required fields: {joined}.")
+        for name, prop_schema in properties.items():
+            if name in value:
+                _validate_value_against_schema(value[name], prop_schema, f"{path}.{name}")
+        return
+
+    if schema_type == "array":
+        if not isinstance(value, list):
+            raise ValueError(f"{path} must be a JSON array.")
+        item_schema = schema.get("items")
+        if item_schema:
+            for index, item in enumerate(value):
+                _validate_value_against_schema(item, item_schema, f"{path}[{index}]")
+        return
+
+    if schema_type == "string" and not isinstance(value, str):
+        raise ValueError(f"{path} must be a string.")
+    if schema_type in {"number", "integer"} and not isinstance(value, (int, float)):
+        raise ValueError(f"{path} must be a number.")
+    if schema_type == "boolean" and not isinstance(value, bool):
+        raise ValueError(f"{path} must be a boolean.")
+
+
+def _validate_schema_output(output: dict[str, Any], schema: dict[str, Any]) -> None:
+    _validate_required_fields(output, schema)
+    _validate_value_against_schema(output, schema, "output")
+
+
+def _coerce_structured_output(raw_output: Any) -> dict[str, Any]:
+    if isinstance(raw_output, dict):
+        return dict(raw_output)
+    return _extract_json_object(str(raw_output))
+
+
+def _build_structured_output_type(schema: dict[str, Any], *, native: bool):
+    structured = StructuredDict(schema, name="AgentStructuredOutput")
+    return NativeOutput(structured) if native else ToolOutput(structured)
+
+
+def _build_structured_user_prompt(
+    prompt: str,
+    schema: dict[str, Any],
+    structured_input: dict[str, Any],
+) -> str:
+    example_output = _generate_deterministic_output(schema, structured_input)
+    example_json = json.dumps(example_output, indent=2, sort_keys=True)
+    return (
+        f"{prompt}\n\n"
+        "Return one structured JSON object that satisfies the output schema.\n"
+        "Every column suggestion must include canonicalAttributeKey.\n"
+        "Set isIdentityField=true when the source column is the primary identifier.\n\n"
+        "Example complete response shape:\n"
+        f"{example_json}"
+    )
+
+
+async def _run_structured_agent(
+    model,
+    output_type,
+    user_prompt: str,
+) -> dict[str, Any]:
+    agent = Agent(
+        model,
+        output_type=output_type,
+        system_prompt=(
+            "You are a governed EnterpriseThreadOS agent. "
+            "Respond with structured task DATA only. "
+            "Never return a JSON Schema document. "
+            "Do not execute tools or access databases."
+        ),
+    )
+    result = await agent.run(user_prompt)
+    return _coerce_structured_output(result.output)
+
+
 async def _run_with_model(
     candidate: ModelCandidate,
     prompt: str,
@@ -212,35 +313,30 @@ async def _run_with_model(
             "Deterministic mock output generated because no API key is configured "
             f"for provider '{candidate.provider_key}'."
         )
-        return _generate_deterministic_output(schema, structured_input), trace_notes
+        output = _generate_deterministic_output(schema, structured_input)
+        _validate_schema_output(output, schema)
+        return output, trace_notes
 
     model = create_pydantic_ai_model(candidate)
-    agent = Agent(
-        model,
-        system_prompt=(
-            "You are a governed EnterpriseThreadOS agent. "
-            "Respond with one JSON object containing task DATA values only. "
-            "Never return a JSON Schema document (no root-level properties, type, or required). "
-            "Do not execute tools or access databases."
-        ),
-    )
-    example_output = _generate_deterministic_output(schema, structured_input)
-    example_json = json.dumps(example_output, indent=2, sort_keys=True)
-    schema_instruction = json.dumps(schema, indent=2, sort_keys=True)
-    user_prompt = (
-        f"{prompt}\n\n"
-        "Return ONE JSON object with your analysis as DATA values.\n"
-        "Do NOT return the JSON Schema. Do NOT wrap the answer in markdown code fences.\n\n"
-        "Example response shape (replace mock values with your analysis):\n"
-        f"{example_json}\n\n"
-        "Field definitions (reference only — do not return this schema document):\n"
-        f"{schema_instruction}"
-    )
-    result = await agent.run(user_prompt)
-    output = _extract_json_object(str(result.output))
-    _validate_required_fields(output, schema)
-    trace_notes.append("Structured output produced by PydanticAI agent.")
-    return output, trace_notes
+    user_prompt = _build_structured_user_prompt(prompt, schema, structured_input)
+    last_error: Exception | None = None
+
+    for native in (True, False):
+        mode = "native" if native else "tool"
+        try:
+            output = await _run_structured_agent(
+                model,
+                _build_structured_output_type(schema, native=native),
+                user_prompt,
+            )
+            _validate_schema_output(output, schema)
+            trace_notes.append(f"Structured output produced by PydanticAI {mode} output mode.")
+            return output, trace_notes
+        except Exception as exc:
+            last_error = exc
+            trace_notes.append(f"PydanticAI {mode} structured output failed: {exc}")
+
+    raise last_error or ValueError("Structured output generation failed.")
 
 
 async def execute_request(request: ExecuteRequest) -> ExecuteResponse:
