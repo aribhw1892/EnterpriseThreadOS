@@ -1,0 +1,480 @@
+documentId,fileName,isLatest,pdmVersionKey,projectPath,revision,lifecycleState,workflow
+2,210868.sldprt,FALSE,2-1,\PROJECTS\,1,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-2,\PROJECTS\,2,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-3,\PROJECTS\,3,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-4,\PROJECTS\,4,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-5,\PROJECTS\,5,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-6,\PROJECTS\,6,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-19,\PROJECTS\,19,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-20,\PROJECTS\,20,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-21,\PROJECTS\,21,MFG,Alligator CAD
+2,210868.sldprt,TRUE,2-22,\PROJECTS\,22,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-13,\PROJECTS\,13,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-14,\PROJECTS\,14,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-15,\PROJECTS\,15,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-16,\PROJECTS\,16,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-17,\PROJECTS\,17,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-18,\PROJECTS\,18,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-7,\PROJECTS\,7,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-8,\PROJECTS\,8,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-9,\PROJECTS\,9,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-10,\PROJECTS\,10,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-11,\PROJECTS\,11,MFG,Alligator CAD
+2,210868.sldprt,FALSE,2-12,\PROJECTS\,12,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-1,\PROJECTS\,1,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-2,\PROJECTS\,2,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-3,\PROJECTS\,3,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-4,\PROJECTS\,4,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-5,\PROJECTS\,5,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-6,\PROJECTS\,6,MFG,Alligator CAD
+3,200046.sldprt,TRUE,3-13,\PROJECTS\,13,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-7,\PROJECTS\,7,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-8,\PROJECTS\,8,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-9,\PROJECTS\,9,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-10,\PROJECTS\,10,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-11,\PROJECTS\,11,MFG,Alligator CAD
+3,200046.sldprt,FALSE,3-12,\PROJECTS\,12,MFG,Alligator CAD
+4,Temp570307.sldprt,FALSE,4-1,\PROJECTS\,1,ECN waiting for Approval,Alligator CAD
+4,Temp570307.sldprt,FALSE,4-2,\PROJECTS\,2,ECN waiting for Approval,Alligator CAD
+4,Temp570307.sldprt,FALSE,4-3,\PROJECTS\,3,ECN waiting for Approval,Alligator CAD
+4,Temp570307.sldprt,TRUE,4-4,\PROJECTS\,4,ECN waiting for Approval,Alligator CAD
+5,Temp566662.SLDPRT,FALSE,5-1,\PROJECTS\,1,ECN waiting for Approval,Alligator CAD
+5,Temp566662.SLDPRT,FALSE,5-2,\PROJECTS\,2,ECN waiting for Approval,Alligator CAD
+5,Temp566662.SLDPRT,FALSE,5-3,\PROJECTS\,3,ECN waiting for Approval,Alligator CAD
+5,Temp566662.SLDPRT,FALSE,5-4,\PROJECTS\,4,ECN waiting for Approval,Alligator CAD
+5,Temp566662.SLDPRT,FALSE,5-5,\PROJECTS\,5,ECN waiting for Approval,Alligator CAD
+5,Temp566662.SLDPRT,FALSE,5-6,\PROJECTS\,6,ECN waiting for Approval,Alligator CAD
+5,Temp566662.SLDPRT,FALSE,5-7,\PROJECTS\,7,ECN waiting for Approval,Alligator CAD
+5,Temp566662.SLDPRT,TRUE,5-8,\PROJECTS\,8,ECN waiting for Approval,Alligator CAD
+6,Temp497181.sldprt,FALSE,6-1,\PROJECTS\,1,Concept Approved,Alligator CAD
+6,Temp497181.sldprt,FALSE,6-2,\PROJECTS\,2,Concept Approved,Alligator CAD
+6,Temp497181.sldprt,FALSE,6-3,\PROJECTS\,3,Concept Approved,Alligator CAD
+6,Temp497181.sldprt,FALSE,6-4,\PROJECTS\,4,Concept Approved,Alligator CAD
+6,Temp497181.sldprt,FALSE,6-5,\PROJECTS\,5,Concept Approved,Alligator CAD
+6,Temp497181.sldprt,TRUE,6-6,\PROJECTS\,6,Concept Approved,Alligator CAD
+7,Temp248872.sldprt,FALSE,7-1,\PROJECTS\,1,ECN waiting for Approval,Alligator CAD
+7,Temp248872.sldprt,FALSE,7-2,\PROJECTS\,2,ECN waiting for Approval,Alligator CAD
+7,Temp248872.sldprt,FALSE,7-3,\PROJECTS\,3,ECN waiting for Approval,Alligator CAD
+7,Temp248872.sldprt,TRUE,7-4,\PROJECTS\,4,ECN waiting for Approval,Alligator CAD
+8,Temp171669.sldprt,FALSE,8-1,\PROJECTS\,1,Concept Approved,Alligator CAD
+8,Temp171669.sldprt,FALSE,8-2,\PROJECTS\,2,Concept Approved,Alligator CAD
+8,Temp171669.sldprt,FALSE,8-3,\PROJECTS\,3,Concept Approved,Alligator CAD
+8,Temp171669.sldprt,FALSE,8-4,\PROJECTS\,4,Concept Approved,Alligator CAD
+8,Temp171669.sldprt,TRUE,8-5,\PROJECTS\,5,Concept Approved,Alligator CAD
+9,Temp160360.sldprt,FALSE,9-1,\PROJECTS\,1,Concept Approved,Alligator CAD
+9,Temp160360.sldprt,FALSE,9-2,\PROJECTS\,2,Concept Approved,Alligator CAD
+9,Temp160360.sldprt,FALSE,9-3,\PROJECTS\,3,Concept Approved,Alligator CAD
+9,Temp160360.sldprt,FALSE,9-4,\PROJECTS\,4,Concept Approved,Alligator CAD
+9,Temp160360.sldprt,TRUE,9-5,\PROJECTS\,5,Concept Approved,Alligator CAD
+10,Temp154255.sldprt,FALSE,10-1,\PROJECTS\,1,Concept Approved,Alligator CAD
+10,Temp154255.sldprt,FALSE,10-2,\PROJECTS\,2,Concept Approved,Alligator CAD
+10,Temp154255.sldprt,FALSE,10-3,\PROJECTS\,3,Concept Approved,Alligator CAD
+10,Temp154255.sldprt,FALSE,10-4,\PROJECTS\,4,Concept Approved,Alligator CAD
+10,Temp154255.sldprt,FALSE,10-5,\PROJECTS\,5,Concept Approved,Alligator CAD
+10,Temp154255.sldprt,FALSE,10-6,\PROJECTS\,6,Concept Approved,Alligator CAD
+10,Temp154255.sldprt,FALSE,10-7,\PROJECTS\,7,Concept Approved,Alligator CAD
+10,Temp154255.sldprt,TRUE,10-8,\PROJECTS\,8,Concept Approved,Alligator CAD
+11,Temp79360.sldprt,FALSE,11-1,\PROJECTS\,1,ECN waiting for Approval,Alligator CAD
+11,Temp79360.sldprt,FALSE,11-2,\PROJECTS\,2,ECN waiting for Approval,Alligator CAD
+11,Temp79360.sldprt,FALSE,11-3,\PROJECTS\,3,ECN waiting for Approval,Alligator CAD
+11,Temp79360.sldprt,TRUE,11-4,\PROJECTS\,4,ECN waiting for Approval,Alligator CAD
+12,Temp75793.sldprt,FALSE,12-1,\PROJECTS\,1,Concept Approved,Alligator CAD
+12,Temp75793.sldprt,FALSE,12-2,\PROJECTS\,2,Concept Approved,Alligator CAD
+12,Temp75793.sldprt,FALSE,12-3,\PROJECTS\,3,Concept Approved,Alligator CAD
+12,Temp75793.sldprt,FALSE,12-4,\PROJECTS\,4,Concept Approved,Alligator CAD
+12,Temp75793.sldprt,FALSE,12-5,\PROJECTS\,5,Concept Approved,Alligator CAD
+12,Temp75793.sldprt,TRUE,12-6,\PROJECTS\,6,Concept Approved,Alligator CAD
+13,hex nut gradec_iso.sldprt,FALSE,13-1,\PROJECTS\,1,MFG,Alligator CAD
+13,hex nut gradec_iso.sldprt,FALSE,13-2,\PROJECTS\,2,MFG,Alligator CAD
+13,hex nut gradec_iso.sldprt,FALSE,13-3,\PROJECTS\,3,MFG,Alligator CAD
+13,hex nut gradec_iso.sldprt,FALSE,13-4,\PROJECTS\,4,MFG,Alligator CAD
+13,hex nut gradec_iso.sldprt,FALSE,13-5,\PROJECTS\,5,MFG,Alligator CAD
+13,hex nut gradec_iso.sldprt,FALSE,13-6,\PROJECTS\,6,MFG,Alligator CAD
+13,hex nut gradec_iso.sldprt,FALSE,13-7,\PROJECTS\,7,MFG,Alligator CAD
+13,hex nut gradec_iso.sldprt,FALSE,13-8,\PROJECTS\,8,MFG,Alligator CAD
+13,hex nut gradec_iso.sldprt,FALSE,13-9,\PROJECTS\,9,MFG,Alligator CAD
+13,hex nut gradec_iso.sldprt,TRUE,13-10,\PROJECTS\,10,MFG,Alligator CAD
+14,200104.SLDASM,FALSE,14-1,\PROJECTS\,1,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-2,\PROJECTS\,2,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-3,\PROJECTS\,3,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-4,\PROJECTS\,4,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-5,\PROJECTS\,5,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-6,\PROJECTS\,6,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-25,\PROJECTS\,25,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,TRUE,14-26,\PROJECTS\,26,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-19,\PROJECTS\,19,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-20,\PROJECTS\,20,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-21,\PROJECTS\,21,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-22,\PROJECTS\,22,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-23,\PROJECTS\,23,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-24,\PROJECTS\,24,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-13,\PROJECTS\,13,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-14,\PROJECTS\,14,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-15,\PROJECTS\,15,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-16,\PROJECTS\,16,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-17,\PROJECTS\,17,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-18,\PROJECTS\,18,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-7,\PROJECTS\,7,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-8,\PROJECTS\,8,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-9,\PROJECTS\,9,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-10,\PROJECTS\,10,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-11,\PROJECTS\,11,ECN waiting for Approval,Alligator CAD
+14,200104.SLDASM,FALSE,14-12,\PROJECTS\,12,ECN waiting for Approval,Alligator CAD
+15,200069.SLDASM,FALSE,15-1,\PROJECTS\,1,Concept Approved,Alligator CAD
+15,200069.SLDASM,TRUE,15-32,\PROJECTS\,32,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-26,\PROJECTS\,26,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-27,\PROJECTS\,27,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-28,\PROJECTS\,28,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-29,\PROJECTS\,29,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-30,\PROJECTS\,30,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-31,\PROJECTS\,31,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-20,\PROJECTS\,20,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-21,\PROJECTS\,21,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-22,\PROJECTS\,22,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-23,\PROJECTS\,23,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-24,\PROJECTS\,24,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-25,\PROJECTS\,25,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-14,\PROJECTS\,14,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-15,\PROJECTS\,15,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-16,\PROJECTS\,16,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-17,\PROJECTS\,17,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-18,\PROJECTS\,18,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-19,\PROJECTS\,19,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-8,\PROJECTS\,8,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-9,\PROJECTS\,9,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-10,\PROJECTS\,10,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-11,\PROJECTS\,11,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-12,\PROJECTS\,12,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-13,\PROJECTS\,13,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-2,\PROJECTS\,2,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-3,\PROJECTS\,3,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-4,\PROJECTS\,4,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-5,\PROJECTS\,5,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-6,\PROJECTS\,6,Concept Approved,Alligator CAD
+15,200069.SLDASM,FALSE,15-7,\PROJECTS\,7,Concept Approved,Alligator CAD
+1022,200081.SLDASM,FALSE,1022-1,\PROJECTS\,1,MFG,Alligator CAD
+1022,200081.SLDASM,TRUE,1022-2,\PROJECTS\,2,MFG,Alligator CAD
+1023,200108.SLDASM,FALSE,1023-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+1023,200108.SLDASM,FALSE,1023-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+1023,200108.SLDASM,FALSE,1023-3,\PROJECTS\,3,Under Detailing,Alligator CAD
+1023,200108.SLDASM,TRUE,1023-4,\PROJECTS\,4,Under Detailing,Alligator CAD
+1024,Copy of 200080.SLDASM,TRUE,1024-1,\PROJECTS\,1,Waiting for Approval,Alligator CAD
+1025,200106.SLDASM,FALSE,1025-1,\PROJECTS\,1,MFG,Alligator CAD
+1025,200106.SLDASM,FALSE,1025-2,\PROJECTS\,2,MFG,Alligator CAD
+1025,200106.SLDASM,FALSE,1025-3,\PROJECTS\,3,MFG,Alligator CAD
+1025,200106.SLDASM,FALSE,1025-4,\PROJECTS\,4,MFG,Alligator CAD
+1025,200106.SLDASM,FALSE,1025-5,\PROJECTS\,5,MFG,Alligator CAD
+1025,200106.SLDASM,TRUE,1025-6,\PROJECTS\,6,MFG,Alligator CAD
+1027,Copy of Temp581055.sldprt,FALSE,1027-1,\PROJECTS\,1,Project Under Design,Alligator CAD
+1027,Copy of Temp581055.sldprt,TRUE,1027-2,\PROJECTS\,2,Project Under Design,Alligator CAD
+1029,test.sldprt,FALSE,1029-1,\PROJECTS\,1,Project Under Design,Alligator CAD
+1029,test.sldprt,FALSE,1029-2,\PROJECTS\,2,Project Under Design,Alligator CAD
+1029,test.sldprt,FALSE,1029-3,\PROJECTS\,3,Project Under Design,Alligator CAD
+1029,test.sldprt,TRUE,1029-4,\PROJECTS\,4,Project Under Design,Alligator CAD
+1030,Copy of test.sldprt,FALSE,1030-1,\PROJECTS\,1,MFG,Alligator CAD
+1030,Copy of test.sldprt,FALSE,1030-2,\PROJECTS\,2,MFG,Alligator CAD
+1030,Copy of test.sldprt,TRUE,1030-3,\PROJECTS\,3,MFG,Alligator CAD
+1031,Copy of Copy of test.sldprt,FALSE,1031-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+1031,Copy of Copy of test.sldprt,FALSE,1031-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+1031,Copy of Copy of test.sldprt,TRUE,1031-3,\PROJECTS\,3,Under Detailing,Alligator CAD
+1032,210875.sldprt,FALSE,1032-1,\PROJECTS\,1,MFG,Alligator CAD
+1032,210875.sldprt,FALSE,1032-2,\PROJECTS\,2,MFG,Alligator CAD
+1032,210875.sldprt,FALSE,1032-3,\PROJECTS\,3,MFG,Alligator CAD
+1032,210875.sldprt,FALSE,1032-4,\PROJECTS\,4,MFG,Alligator CAD
+1032,210875.sldprt,FALSE,1032-5,\PROJECTS\,5,MFG,Alligator CAD
+1032,210875.sldprt,FALSE,1032-6,\PROJECTS\,6,MFG,Alligator CAD
+1032,210875.sldprt,TRUE,1032-7,\PROJECTS\,7,MFG,Alligator CAD
+1033,Copy of Copy (2) of Copy of test.sldprt,FALSE,1033-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+1033,Copy of Copy (2) of Copy of test.sldprt,FALSE,1033-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+1033,Copy of Copy (2) of Copy of test.sldprt,TRUE,1033-3,\PROJECTS\,3,Under Detailing,Alligator CAD
+1034,Copy of Copy of Copy (2) of Copy of test.sldprt,FALSE,1034-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+1034,Copy of Copy of Copy (2) of Copy of test.sldprt,FALSE,1034-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+1034,Copy of Copy of Copy (2) of Copy of test.sldprt,TRUE,1034-3,\PROJECTS\,3,Under Detailing,Alligator CAD
+1035,Copy of Copy of Copy of Copy (2) of Copy of test.sldprt,FALSE,1035-1,\PROJECTS\,1,Waiting for Approval,Alligator CAD
+1035,Copy of Copy of Copy of Copy (2) of Copy of test.sldprt,FALSE,1035-2,\PROJECTS\,2,Waiting for Approval,Alligator CAD
+1035,Copy of Copy of Copy of Copy (2) of Copy of test.sldprt,TRUE,1035-3,\PROJECTS\,3,Waiting for Approval,Alligator CAD
+1036,Copy (2) of Temp581055.sldprt,FALSE,1036-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+1036,Copy (2) of Temp581055.sldprt,FALSE,1036-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+1036,Copy (2) of Temp581055.sldprt,FALSE,1036-3,\PROJECTS\,3,Under Detailing,Alligator CAD
+1036,Copy (2) of Temp581055.sldprt,FALSE,1036-4,\PROJECTS\,4,Under Detailing,Alligator CAD
+1036,Copy (2) of Temp581055.sldprt,FALSE,1036-5,\PROJECTS\,5,Under Detailing,Alligator CAD
+1036,Copy (2) of Temp581055.sldprt,TRUE,1036-6,\PROJECTS\,6,Under Detailing,Alligator CAD
+1038,Copy (2) of Copy of Copy of Copy (2) of Copy of test.sldprt,FALSE,1038-1,\PROJECTS\,1,Project Under Design,Alligator CAD
+1038,Copy (2) of Copy of Copy of Copy (2) of Copy of test.sldprt,TRUE,1038-2,\PROJECTS\,2,Project Under Design,Alligator CAD
+1039,Copy (2) of Copy (2) of Copy of test.sldprt,FALSE,1039-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+1039,Copy (2) of Copy (2) of Copy of test.sldprt,FALSE,1039-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+1039,Copy (2) of Copy (2) of Copy of test.sldprt,TRUE,1039-3,\PROJECTS\,3,Under Detailing,Alligator CAD
+1040,Copy of 200108.SLDASM,FALSE,1040-1,\PROJECTS\,1,Waiting for Detailing Approval,Alligator CAD
+1040,Copy of 200108.SLDASM,FALSE,1040-2,\PROJECTS\,2,Waiting for Detailing Approval,Alligator CAD
+1040,Copy of 200108.SLDASM,TRUE,1040-3,\PROJECTS\,3,Waiting for Detailing Approval,Alligator CAD
+1041,Copy (2) of 200108.SLDASM,FALSE,1041-1,\PROJECTS\,1,Project Under Design,Alligator CAD
+1041,Copy (2) of 200108.SLDASM,FALSE,1041-2,\PROJECTS\,2,Project Under Design,Alligator CAD
+1041,Copy (2) of 200108.SLDASM,FALSE,1041-3,\PROJECTS\,3,Project Under Design,Alligator CAD
+1041,Copy (2) of 200108.SLDASM,FALSE,1041-4,\PROJECTS\,4,Project Under Design,Alligator CAD
+1041,Copy (2) of 200108.SLDASM,TRUE,1041-5,\PROJECTS\,5,Project Under Design,Alligator CAD
+1042,200186.SLDASM,FALSE,1042-1,\PROJECTS\,1,Waiting for Detailing Approval,Alligator CAD
+1042,200186.SLDASM,FALSE,1042-2,\PROJECTS\,2,Waiting for Detailing Approval,Alligator CAD
+1042,200186.SLDASM,TRUE,1042-3,\PROJECTS\,3,Waiting for Detailing Approval,Alligator CAD
+1043,Copy of 200106.SLDASM,TRUE,1043-1,\PROJECTS\,1,Project Under Design,Alligator CAD
+1044,200187.SLDASM,FALSE,1044-1,\PROJECTS\,1,Waiting for Detailing Approval,Alligator CAD
+1044,200187.SLDASM,FALSE,1044-2,\PROJECTS\,2,Waiting for Detailing Approval,Alligator CAD
+1044,200187.SLDASM,TRUE,1044-3,\PROJECTS\,3,Waiting for Detailing Approval,Alligator CAD
+2043,210873.sldprt,FALSE,2043-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-3,\PROJECTS\,3,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-4,\PROJECTS\,4,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-5,\PROJECTS\,5,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-6,\PROJECTS\,6,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-19,\PROJECTS\,19,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-20,\PROJECTS\,20,Under Detailing,Alligator CAD
+2043,210873.sldprt,TRUE,2043-21,\PROJECTS\,21,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-13,\PROJECTS\,13,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-14,\PROJECTS\,14,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-15,\PROJECTS\,15,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-16,\PROJECTS\,16,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-17,\PROJECTS\,17,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-18,\PROJECTS\,18,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-7,\PROJECTS\,7,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-8,\PROJECTS\,8,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-9,\PROJECTS\,9,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-10,\PROJECTS\,10,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-11,\PROJECTS\,11,Under Detailing,Alligator CAD
+2043,210873.sldprt,FALSE,2043-12,\PROJECTS\,12,Under Detailing,Alligator CAD
+2060,210877.sldprt,FALSE,2060-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2060,210877.sldprt,FALSE,2060-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2060,210877.sldprt,TRUE,2060-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2061,210878.sldprt,FALSE,2061-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2061,210878.sldprt,FALSE,2061-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2061,210878.sldprt,FALSE,2061-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2061,210878.sldprt,FALSE,2061-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2061,210878.sldprt,FALSE,2061-5,\PROJECTS\1.ATest'\,5,MFG,Alligator CAD
+2061,210878.sldprt,TRUE,2061-6,\PROJECTS\1.ATest'\,6,MFG,Alligator CAD
+2062,210876.sldprt,FALSE,2062-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2062,210876.sldprt,FALSE,2062-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2062,210876.sldprt,FALSE,2062-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2062,210876.sldprt,TRUE,2062-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-1,\PROJECTS\1.ATest'\,1,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-2,\PROJECTS\1.ATest'\,2,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-3,\PROJECTS\1.ATest'\,3,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-4,\PROJECTS\1.ATest'\,4,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-5,\PROJECTS\1.ATest'\,5,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-6,\PROJECTS\1.ATest'\,6,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-13,\PROJECTS\1.ATest'\,13,Under Detailing,Alligator CAD
+2063,219052.SLDASM,TRUE,2063-14,\PROJECTS\1.ATest'\,14,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-7,\PROJECTS\1.ATest'\,7,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-8,\PROJECTS\1.ATest'\,8,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-9,\PROJECTS\1.ATest'\,9,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-10,\PROJECTS\1.ATest'\,10,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-11,\PROJECTS\1.ATest'\,11,Under Detailing,Alligator CAD
+2063,219052.SLDASM,FALSE,2063-12,\PROJECTS\1.ATest'\,12,Under Detailing,Alligator CAD
+2069,Temp566999.SLDPRT,FALSE,2069-1,\PROJECTS\,1,Waiting for Approval,Alligator CAD
+2069,Temp566999.SLDPRT,TRUE,2069-2,\PROJECTS\,2,Waiting for Approval,Alligator CAD
+2070,Copy of Temp566999.SLDPRT,TRUE,2070-1,\PROJECTS\,1,Project Under Design,
+2071,Copy (2) of Temp566999.SLDPRT,TRUE,2071-1,\PROJECTS\,1,Project Under Design,Alligator CAD
+2072,Copy (3) of Temp566999.SLDPRT,TRUE,2072-1,\PROJECTS\,1,Project Under Design,
+2073,Copy of Temp566662.SLDPRT,TRUE,2073-1,\PROJECTS\,1,Project Under Design,
+2074,Virtual document.sldprt.cvd,TRUE,2074-1,\PROJECTS\,1,Project Under Design,
+2075,New Microsoft Excel Worksheet.xlsx,TRUE,2075-1,\PROJECTS\,1,Project Under Design,
+2076,Copy (2) of Temp566662.SLDPRT,TRUE,2076-1,\PROJECTS\,1,Project Under Design,
+2077,Copy (3) of Temp566662.SLDPRT,TRUE,2077-1,\PROJECTS\,1,Project Under Design,
+2078,Copy of 200046.sldprt,TRUE,2078-1,\PROJECTS\,1,Project Under Design,
+2079,Copy of Copy of 200046.sldprt,TRUE,2079-1,\PROJECTS\,1,Project Under Design,
+2080,Copy (2) of 200046.sldprt,TRUE,2080-1,\PROJECTS\,1,Project Under Design,Alligator CAD
+2083,Copy (3) of 200046.sldprt,FALSE,2083-1,\PROJECTS\,1,Project Under Design,Alligator CAD
+2083,Copy (3) of 200046.sldprt,TRUE,2083-2,\PROJECTS\,2,Project Under Design,Alligator CAD
+2086,Copy (4) of 200046.sldprt,TRUE,2086-1,\PROJECTS\,1,Project Under Design,
+2087,New Microsoft Excel Worksheet (2).xlsx,TRUE,2087-1,\PROJECTS\,1,Project Under Design,
+2088,Copy (5) of 200046.sldprt,TRUE,2088-1,\PROJECTS\,1,Project Under Design,
+2089,Copy (6) of 200046.sldprt,TRUE,2089-1,\PROJECTS\,1,Project Under Design,
+2090,212919.sldprt,FALSE,2090-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2090,212919.sldprt,FALSE,2090-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2090,212919.sldprt,FALSE,2090-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2090,212919.sldprt,FALSE,2090-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2090,212919.sldprt,TRUE,2090-5,\PROJECTS\1.ATest'\,5,MFG,Alligator CAD
+2093,212928.SLDASM,FALSE,2093-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2093,212928.SLDASM,FALSE,2093-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2093,212928.SLDASM,FALSE,2093-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2093,212928.SLDASM,FALSE,2093-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2093,212928.SLDASM,FALSE,2093-5,\PROJECTS\1.ATest'\,5,MFG,Alligator CAD
+2093,212928.SLDASM,FALSE,2093-6,\PROJECTS\1.ATest'\,6,MFG,Alligator CAD
+2093,212928.SLDASM,FALSE,2093-7,\PROJECTS\1.ATest'\,7,MFG,Alligator CAD
+2093,212928.SLDASM,FALSE,2093-8,\PROJECTS\1.ATest'\,8,MFG,Alligator CAD
+2093,212928.SLDASM,FALSE,2093-9,\PROJECTS\1.ATest'\,9,MFG,Alligator CAD
+2093,212928.SLDASM,FALSE,2093-10,\PROJECTS\1.ATest'\,10,MFG,Alligator CAD
+2093,212928.SLDASM,TRUE,2093-11,\PROJECTS\1.ATest'\,11,MFG,Alligator CAD
+2095,212929.SLDASM,FALSE,2095-1,\PROJECTS\1.ATest'\,1,Under Detailing,Alligator CAD
+2095,212929.SLDASM,FALSE,2095-2,\PROJECTS\1.ATest'\,2,Under Detailing,Alligator CAD
+2095,212929.SLDASM,FALSE,2095-3,\PROJECTS\1.ATest'\,3,Under Detailing,Alligator CAD
+2095,212929.SLDASM,FALSE,2095-4,\PROJECTS\1.ATest'\,4,Under Detailing,Alligator CAD
+2095,212929.SLDASM,TRUE,2095-5,\PROJECTS\1.ATest'\,5,Under Detailing,Alligator CAD
+2097,212930.sldprt,FALSE,2097-1,\PROJECTS\1.ATest'\,1,Under Detailing,Alligator CAD
+2097,212930.sldprt,FALSE,2097-2,\PROJECTS\1.ATest'\,2,Under Detailing,Alligator CAD
+2097,212930.sldprt,FALSE,2097-3,\PROJECTS\1.ATest'\,3,Under Detailing,Alligator CAD
+2097,212930.sldprt,TRUE,2097-4,\PROJECTS\1.ATest'\,4,Under Detailing,Alligator CAD
+2100,212939.sldprt,FALSE,2100-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2100,212939.sldprt,FALSE,2100-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2100,212939.sldprt,FALSE,2100-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2100,212939.sldprt,FALSE,2100-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2100,212939.sldprt,TRUE,2100-5,\PROJECTS\1.ATest'\,5,MFG,Alligator CAD
+2103,Part1.SLDPRT,FALSE,2103-1,\PROJECTS\1.ATest'\,1,Under Detailing,Alligator CAD
+2103,Part1.SLDPRT,FALSE,2103-2,\PROJECTS\1.ATest'\,2,Under Detailing,Alligator CAD
+2103,Part1.SLDPRT,FALSE,2103-3,\PROJECTS\1.ATest'\,3,Under Detailing,Alligator CAD
+2103,Part1.SLDPRT,FALSE,2103-4,\PROJECTS\1.ATest'\,4,Under Detailing,Alligator CAD
+2103,Part1.SLDPRT,TRUE,2103-5,\PROJECTS\1.ATest'\,5,Under Detailing,Alligator CAD
+2104,23232323232323.sldprt,FALSE,2104-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2104,23232323232323.sldprt,FALSE,2104-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2104,23232323232323.sldprt,FALSE,2104-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2104,23232323232323.sldprt,FALSE,2104-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2104,23232323232323.sldprt,TRUE,2104-5,\PROJECTS\1.ATest'\,5,MFG,Alligator CAD
+2107,Copy of 212931.sldprt,FALSE,2107-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2107,Copy of 212931.sldprt,FALSE,2107-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2107,Copy of 212931.sldprt,FALSE,2107-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2107,Copy of 212931.sldprt,TRUE,2107-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2110,212933.SLDASM,FALSE,2110-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2110,212933.SLDASM,FALSE,2110-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2110,212933.SLDASM,TRUE,2110-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2112,212934.SLDASM,FALSE,2112-1,\PROJECTS\1.ATest'\,1,Under Detailing,Alligator CAD
+2112,212934.SLDASM,FALSE,2112-2,\PROJECTS\1.ATest'\,2,Under Detailing,Alligator CAD
+2112,212934.SLDASM,FALSE,2112-3,\PROJECTS\1.ATest'\,3,Under Detailing,Alligator CAD
+2112,212934.SLDASM,TRUE,2112-4,\PROJECTS\1.ATest'\,4,Under Detailing,Alligator CAD
+2114,212935.SLDASM,FALSE,2114-1,\PROJECTS\1.ATest'\,1,Under Detailing,Alligator CAD
+2114,212935.SLDASM,FALSE,2114-2,\PROJECTS\1.ATest'\,2,Under Detailing,Alligator CAD
+2114,212935.SLDASM,TRUE,2114-3,\PROJECTS\1.ATest'\,3,Under Detailing,Alligator CAD
+2116,Copy (2) of 212930.sldprt,FALSE,2116-1,\PROJECTS\1.ATest'\,1,Project Under Design,Alligator CAD
+2116,Copy (2) of 212930.sldprt,TRUE,2116-2,\PROJECTS\1.ATest'\,2,Project Under Design,Alligator CAD
+2117,212936.sldprt,FALSE,2117-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2117,212936.sldprt,FALSE,2117-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2117,212936.sldprt,TRUE,2117-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2118,212937.sldprt,FALSE,2118-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2118,212937.sldprt,FALSE,2118-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2118,212937.sldprt,FALSE,2118-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2118,212937.sldprt,TRUE,2118-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2119,212940.sldprt,FALSE,2119-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2119,212940.sldprt,FALSE,2119-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2119,212940.sldprt,FALSE,2119-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2119,212940.sldprt,FALSE,2119-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2119,212940.sldprt,TRUE,2119-5,\PROJECTS\1.ATest'\,5,MFG,Alligator CAD
+2120,212938.sldprt,FALSE,2120-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2120,212938.sldprt,FALSE,2120-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2120,212938.sldprt,FALSE,2120-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2120,212938.sldprt,TRUE,2120-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2128,212941.sldprt,FALSE,2128-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2128,212941.sldprt,FALSE,2128-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2128,212941.sldprt,FALSE,2128-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2128,212941.sldprt,FALSE,2128-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2128,212941.sldprt,TRUE,2128-5,\PROJECTS\1.ATest'\,5,MFG,Alligator CAD
+2130,Copy of 212940.sldprt,FALSE,2130-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2130,Copy of 212940.sldprt,FALSE,2130-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2130,Copy of 212940.sldprt,FALSE,2130-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2130,Copy of 212940.sldprt,TRUE,2130-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2131,212943.sldprt,FALSE,2131-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2131,212943.sldprt,FALSE,2131-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2131,212943.sldprt,TRUE,2131-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2132,212942.sldprt,FALSE,2132-1,\PROJECTS\1.ATest'\,1,Concept Approved,Alligator CAD
+2132,212942.sldprt,FALSE,2132-2,\PROJECTS\1.ATest'\,2,Concept Approved,Alligator CAD
+2132,212942.sldprt,FALSE,2132-3,\PROJECTS\1.ATest'\,3,Concept Approved,Alligator CAD
+2132,212942.sldprt,TRUE,2132-4,\PROJECTS\1.ATest'\,4,Concept Approved,Alligator CAD
+2136,212945.sldprt,FALSE,2136-1,\PROJECTS\1.ATest'\,1,Under Detailing,Alligator CAD
+2136,212945.sldprt,FALSE,2136-2,\PROJECTS\1.ATest'\,2,Under Detailing,Alligator CAD
+2136,212945.sldprt,FALSE,2136-3,\PROJECTS\1.ATest'\,3,Under Detailing,Alligator CAD
+2136,212945.sldprt,FALSE,2136-4,\PROJECTS\1.ATest'\,4,Under Detailing,Alligator CAD
+2136,212945.sldprt,TRUE,2136-5,\PROJECTS\1.ATest'\,5,Under Detailing,Alligator CAD
+2138,212946.SLDASM,FALSE,2138-1,\PROJECTS\1.ATest'\,1,Under Detailing,Alligator CAD
+2138,212946.SLDASM,FALSE,2138-2,\PROJECTS\1.ATest'\,2,Under Detailing,Alligator CAD
+2138,212946.SLDASM,FALSE,2138-3,\PROJECTS\1.ATest'\,3,Under Detailing,Alligator CAD
+2138,212946.SLDASM,TRUE,2138-4,\PROJECTS\1.ATest'\,4,Under Detailing,Alligator CAD
+2140,212947.SLDASM,FALSE,2140-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2140,212947.SLDASM,FALSE,2140-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2140,212947.SLDASM,FALSE,2140-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2140,212947.SLDASM,FALSE,2140-4,\PROJECTS\1.ATest'\,4,MFG,Alligator CAD
+2140,212947.SLDASM,TRUE,2140-5,\PROJECTS\1.ATest'\,5,MFG,Alligator CAD
+2142,212948.SLDASM,FALSE,2142-1,\PROJECTS\1.ATest'\,1,Under Detailing,Alligator CAD
+2142,212948.SLDASM,FALSE,2142-2,\PROJECTS\1.ATest'\,2,Under Detailing,Alligator CAD
+2142,212948.SLDASM,TRUE,2142-3,\PROJECTS\1.ATest'\,3,Under Detailing,Alligator CAD
+2144,212951.SLDASM,FALSE,2144-1,\PROJECTS\1.ATest'\,1,MFG,Alligator CAD
+2144,212951.SLDASM,FALSE,2144-2,\PROJECTS\1.ATest'\,2,MFG,Alligator CAD
+2144,212951.SLDASM,TRUE,2144-3,\PROJECTS\1.ATest'\,3,MFG,Alligator CAD
+2146,21545459044.sldprt,FALSE,2146-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+2146,21545459044.sldprt,FALSE,2146-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+2146,21545459044.sldprt,FALSE,2146-3,\PROJECTS\,3,Under Detailing,Alligator CAD
+2146,21545459044.sldprt,FALSE,2146-4,\PROJECTS\,4,Under Detailing,Alligator CAD
+2146,21545459044.sldprt,FALSE,2146-5,\PROJECTS\,5,Under Detailing,Alligator CAD
+2146,21545459044.sldprt,TRUE,2146-6,\PROJECTS\,6,Under Detailing,Alligator CAD
+2147,Pneumatic 200080.SLDASM,FALSE,2147-1,\PROJECTS\,1,Project Under Design,Alligator CAD
+2147,Pneumatic 200080.SLDASM,FALSE,2147-2,\PROJECTS\,2,Project Under Design,Alligator CAD
+2147,Pneumatic 200080.SLDASM,FALSE,2147-3,\PROJECTS\,3,Project Under Design,Alligator CAD
+2147,Pneumatic 200080.SLDASM,TRUE,2147-4,\PROJECTS\,4,Project Under Design,Alligator CAD
+2148,Copy of 200080.SLDASM,FALSE,2148-1,\PROJECTS\1.ATest'\,1,Under Detailing,Alligator CAD
+2148,Copy of 200080.SLDASM,FALSE,2148-2,\PROJECTS\1.ATest'\,2,Under Detailing,Alligator CAD
+2148,Copy of 200080.SLDASM,FALSE,2148-3,\PROJECTS\1.ATest'\,3,Under Detailing,Alligator CAD
+2148,Copy of 200080.SLDASM,FALSE,2148-4,\PROJECTS\1.ATest'\,4,Under Detailing,Alligator CAD
+2148,Copy of 200080.SLDASM,FALSE,2148-5,\PROJECTS\1.ATest'\,5,Under Detailing,Alligator CAD
+2148,Copy of 200080.SLDASM,FALSE,2148-6,\PROJECTS\1.ATest'\,6,Under Detailing,Alligator CAD
+2148,Copy of 200080.SLDASM,FALSE,2148-7,\PROJECTS\1.ATest'\,7,Under Detailing,Alligator CAD
+2148,Copy of 200080.SLDASM,TRUE,2148-8,\PROJECTS\1.ATest'\,8,Under Detailing,Alligator CAD
+2149,Copy of 212919.sldprt,TRUE,2149-1,\PROJECTS\1.ATest'\,1,Project Under Design,
+2150,MultipleTestFile.sldprt,FALSE,2150-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+2150,MultipleTestFile.sldprt,FALSE,2150-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+2150,MultipleTestFile.sldprt,FALSE,2150-3,\PROJECTS\,3,Under Detailing,Alligator CAD
+2150,MultipleTestFile.sldprt,TRUE,2150-4,\PROJECTS\,4,Under Detailing,Alligator CAD
+2153,Copy of MultipleTestFile.sldprt,FALSE,2153-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+2153,Copy of MultipleTestFile.sldprt,TRUE,2153-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+2154,Copy (2) of MultipleTestFile.sldprt,FALSE,2154-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+2154,Copy (2) of MultipleTestFile.sldprt,TRUE,2154-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+2155,219055.sldprt,FALSE,2155-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+2155,219055.sldprt,FALSE,2155-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+2155,219055.sldprt,TRUE,2155-3,\PROJECTS\,3,Under Detailing,Alligator CAD
+2156,Copy (4) of MultipleTestFile.sldprt,FALSE,2156-1,\PROJECTS\,1,Under Detailing,Alligator CAD
+2156,Copy (4) of MultipleTestFile.sldprt,TRUE,2156-2,\PROJECTS\,2,Under Detailing,Alligator CAD
+2165,219056.sldprt,FALSE,2165-1,\PROJECTS\New Folder\,1,Under Detailing,Alligator CAD
+2165,219056.sldprt,FALSE,2165-2,\PROJECTS\New Folder\,2,Under Detailing,Alligator CAD
+2165,219056.sldprt,TRUE,2165-3,\PROJECTS\New Folder\,3,Under Detailing,Alligator CAD
+2166,219069.sldprt,TRUE,2166-3,\PROJECTS\New Folder\,3,MFG,Alligator CAD
+2166,219069.sldprt,FALSE,2166-1,\PROJECTS\New Folder\,1,MFG,Alligator CAD
+2166,219069.sldprt,FALSE,2166-2,\PROJECTS\New Folder\,2,MFG,Alligator CAD
+2167,219064.sldprt,FALSE,2167-1,\PROJECTS\New Folder\,1,Under Detailing,Alligator CAD
+2167,219064.sldprt,FALSE,2167-2,\PROJECTS\New Folder\,2,Under Detailing,Alligator CAD
+2167,219064.sldprt,TRUE,2167-3,\PROJECTS\New Folder\,3,Under Detailing,Alligator CAD
+2168,Copy (3) of MultipleTestFile.sldprt,FALSE,2168-1,\PROJECTS\New Folder\,1,Under Detailing,Alligator CAD
+2168,Copy (3) of MultipleTestFile.sldprt,TRUE,2168-2,\PROJECTS\New Folder\,2,Under Detailing,Alligator CAD
+2173,219059.SLDASM,FALSE,2173-1,\PROJECTS\1.ATest'\,1,Project Under Design,Alligator CAD
+2173,219059.SLDASM,FALSE,2173-2,\PROJECTS\1.ATest'\,2,Project Under Design,Alligator CAD
+2173,219059.SLDASM,TRUE,2173-3,\PROJECTS\1.ATest'\,3,Project Under Design,Alligator CAD
+2175,Copy of 200081.SLDASM,FALSE,2175-1,\PROJECTS\,1,Project Under Design,Alligator CAD
+2175,Copy of 200081.SLDASM,FALSE,2175-2,\PROJECTS\,2,Project Under Design,Alligator CAD
+2175,Copy of 200081.SLDASM,TRUE,2175-3,\PROJECTS\,3,Project Under Design,Alligator CAD
+2176,Copy of Copy of 200081.SLDASM,FALSE,2176-1,\PROJECTS\,1,Project Under Design,Alligator CAD
+2176,Copy of Copy of 200081.SLDASM,FALSE,2176-2,\PROJECTS\,2,Project Under Design,Alligator CAD
+2176,Copy of Copy of 200081.SLDASM,TRUE,2176-3,\PROJECTS\,3,Project Under Design,Alligator CAD
+2181,219066.sldprt,FALSE,2181-1,\PROJECTS\New Folder\,1,Under Detailing,Alligator CAD
+2181,219066.sldprt,FALSE,2181-2,\PROJECTS\New Folder\,2,Under Detailing,Alligator CAD
+2181,219066.sldprt,TRUE,2181-3,\PROJECTS\New Folder\,3,Under Detailing,Alligator CAD
+2184,219065.sldprt,FALSE,2184-1,\PROJECTS\New Folder\,1,Under Detailing,Alligator CAD
+2184,219065.sldprt,FALSE,2184-2,\PROJECTS\New Folder\,2,Under Detailing,Alligator CAD
+2184,219065.sldprt,TRUE,2184-3,\PROJECTS\New Folder\,3,Under Detailing,Alligator CAD
+2187,219068.sldprt,FALSE,2187-1,\PROJECTS\New Folder\,1,Under Detailing,Alligator CAD
+2187,219068.sldprt,FALSE,2187-2,\PROJECTS\New Folder\,2,Under Detailing,Alligator CAD
+2187,219068.sldprt,TRUE,2187-3,\PROJECTS\New Folder\,3,Under Detailing,Alligator CAD
+2188,219067.sldprt,FALSE,2188-1,\PROJECTS\New Folder\,1,Under Detailing,Alligator CAD
+2188,219067.sldprt,FALSE,2188-2,\PROJECTS\New Folder\,2,Under Detailing,Alligator CAD
+2188,219067.sldprt,TRUE,2188-3,\PROJECTS\New Folder\,3,Under Detailing,Alligator CAD
+2193,Copy of 219067.sldprt,FALSE,2193-1,\PROJECTS\New Folder\,1,Project Under Design,Alligator CAD
+2193,Copy of 219067.sldprt,TRUE,2193-2,\PROJECTS\New Folder\,2,Project Under Design,Alligator CAD
+2196,Copy of 219068.sldprt,TRUE,2196-1,\PROJECTS\New Folder\,1,Project Under Design,
+2197,209876543.SLDASM,FALSE,2197-1,\PROJECTS\1.ATest'\,1,Changes in 3D Model,Alligator CAD
+2197,209876543.SLDASM,FALSE,2197-2,\PROJECTS\1.ATest'\,2,Changes in 3D Model,Alligator CAD
+2197,209876543.SLDASM,TRUE,2197-3,\PROJECTS\1.ATest'\,3,Changes in 3D Model,Alligator CAD
+2199,Copy of Part1.SLDPRT,FALSE,2199-1,\PROJECTS\1.ATest'\,1,Project Under Design,Alligator CAD
+2199,Copy of Part1.SLDPRT,TRUE,2199-2,\PROJECTS\1.ATest'\,2,Project Under Design,Alligator CAD
+2200,Copy of 210876.sldprt,FALSE,2200-1,\PROJECTS\1.ATest'\,1,Changes in 3D Model,Alligator CAD
+2200,Copy of 210876.sldprt,FALSE,2200-2,\PROJECTS\1.ATest'\,2,Changes in 3D Model,Alligator CAD
+2200,Copy of 210876.sldprt,FALSE,2200-3,\PROJECTS\1.ATest'\,3,Changes in 3D Model,Alligator CAD
+2200,Copy of 210876.sldprt,FALSE,2200-4,\PROJECTS\1.ATest'\,4,Changes in 3D Model,Alligator CAD
+2200,Copy of 210876.sldprt,FALSE,2200-5,\PROJECTS\1.ATest'\,5,Changes in 3D Model,Alligator CAD
+2200,Copy of 210876.sldprt,TRUE,2200-6,\PROJECTS\1.ATest'\,6,Changes in 3D Model,Alligator CAD
+3197,223735.SLDASM,FALSE,3197-1,\PROJECTS\1.ATest'\,1,Under Detailing,Alligator CAD
+3197,223735.SLDASM,FALSE,3197-2,\PROJECTS\1.ATest'\,2,Under Detailing,Alligator CAD
+3197,223735.SLDASM,FALSE,3197-3,\PROJECTS\1.ATest'\,3,Under Detailing,Alligator CAD
+3197,223735.SLDASM,FALSE,3197-4,\PROJECTS\1.ATest'\,4,Under Detailing,Alligator CAD
+3197,223735.SLDASM,FALSE,3197-5,\PROJECTS\1.ATest'\,5,Under Detailing,Alligator CAD
+3197,223735.SLDASM,TRUE,3197-6,\PROJECTS\1.ATest'\,6,Under Detailing,Alligator CAD

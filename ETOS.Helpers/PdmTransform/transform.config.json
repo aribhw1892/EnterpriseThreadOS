@@ -1,0 +1,14 @@
+{
+  "sourceSystem": "SOLIDWORKS-PDM",
+  "versionFilter": "all",
+  "variablePivot": {
+    "enabled": true,
+    "columns": ["Description", "Material", "Vendor", "Cost"]
+  },
+  "outputs": {
+    "parts": "parts.csv",
+    "partVersions": "part-versions.csv",
+    "hasVersion": "has-version.csv",
+    "versionBom": "version-bom.csv"
+  }
+}

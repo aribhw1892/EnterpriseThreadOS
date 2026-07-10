@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import type { ApiResult } from "@/lib/etos-api";
 
 export function ExplorerListShell<T>({
@@ -8,12 +8,14 @@ export function ExplorerListShell<T>({
   result,
   emptyMessage,
   renderItem,
+  getItemKey,
 }: {
   title: string;
   description: string;
   result: ApiResult<T[]>;
   emptyMessage: string;
   renderItem: (item: T) => ReactNode;
+  getItemKey: (item: T) => string;
 }) {
   return (
     <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
@@ -27,7 +29,11 @@ export function ExplorerListShell<T>({
           {result.error}
         </div>
       ) : result.data && result.data.length > 0 ? (
-        <div className="grid gap-3">{result.data.map(renderItem)}</div>
+        <div className="grid gap-3">
+          {result.data.map((item) => (
+            <Fragment key={getItemKey(item)}>{renderItem(item)}</Fragment>
+          ))}
+        </div>
       ) : (
         <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4 text-sm text-slate-400">
           {emptyMessage}

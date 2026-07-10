@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-07-10T17:42:46.033120+00:00",
+  "sourceSystem": "SOLIDWORKS-PDM",
+  "inputDir": "..\\PdmExtractor\\pdm_export",
+  "outputs": {
+    "parts.csv": 107,
+    "part-versions.csv": 479,
+    "has-version.csv": 479,
+    "version-bom.csv": 719
+  }
+}

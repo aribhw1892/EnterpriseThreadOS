@@ -124,7 +124,8 @@ public sealed record CreateImportMappingVersionRequest(
     string VersionLabel,
     string? Summary,
     IReadOnlyCollection<CreateImportColumnMappingRequest> ColumnMappings,
-    IReadOnlyCollection<CreateImportLifecycleMappingRequest> LifecycleMappings);
+    IReadOnlyCollection<CreateImportLifecycleMappingRequest> LifecycleMappings,
+    string? StructuralRelationshipType = null);
 
 public sealed record CreateImportColumnMappingRequest(
     string SourceColumn,
@@ -137,7 +138,7 @@ public sealed record CreateImportLifecycleMappingRequest(
     string SourceValue,
     string CanonicalLifecycleKey);
 
-public sealed record ApproveImportMappingRequest(string? Summary);
+public sealed record ApproveImportMappingRequest(string? Summary, string? StructuralRelationshipType = null);
 
 public sealed record RejectImportMappingRequest(string? Summary, string? Reason);
 
@@ -158,6 +159,7 @@ public sealed record ImportMappingVersionResponse(
     DateTimeOffset? ApprovedAt,
     Guid? RejectedByUserId,
     DateTimeOffset? RejectedAt,
+    string? StructuralRelationshipType,
     IReadOnlyCollection<ImportColumnMappingResponse> ColumnMappings,
     IReadOnlyCollection<ImportLifecycleMappingResponse> LifecycleMappings);
 

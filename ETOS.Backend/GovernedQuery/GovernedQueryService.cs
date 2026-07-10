@@ -17,6 +17,9 @@ public interface IGovernedQueryService
     Task<IReadOnlyCollection<RetrievalRunSummaryResponse>> ListRunsAsync(CancellationToken cancellationToken);
     Task<RetrievalRunResponse> GetRunAsync(Guid runId, CancellationToken cancellationToken);
     Task<ContextPackageResponse> GetContextPackageAsync(Guid packageId, CancellationToken cancellationToken);
+    Task<PlatformFixedIntentVersionResponse> EnsurePlatformFixedIntentVersionsAsync(
+        string intentKey,
+        CancellationToken cancellationToken);
 }
 
 public sealed class GovernedQueryService(
@@ -31,6 +34,15 @@ public sealed class GovernedQueryService(
     IModelPackageContextResolver modelPackageContextResolver) : IGovernedQueryService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
+    public async Task<PlatformFixedIntentVersionResponse> EnsurePlatformFixedIntentVersionsAsync(
+        string intentKey,
+        CancellationToken cancellationToken)
+    {
+        var context = await RequirePermissionAsync("governed_query.ensure_intent", GovernedQueryPermissions.Run, cancellationToken);
+        var (intent, strategy) = await EnsureFixedIntentAsync(context, NormalizeKey(intentKey), cancellationToken);
+        return new PlatformFixedIntentVersionResponse(intent.Id, strategy.Id);
+    }
 
     public async Task<RetrievalRunResponse> RunAsync(RunGovernedQueryRequest request, CancellationToken cancellationToken)
     {
@@ -350,6 +362,11 @@ public sealed class GovernedQueryService(
         int maxDepth,
         CancellationToken cancellationToken)
     {
+        if (intent.IntentKind == QueryIntentKind.DirectResponse)
+        {
+            return BuildDirectResponseCandidates(request);
+        }
+
         var candidates = new List<RetrievedContextCandidate>();
         if (request.StartGraphNodeId is not null)
         {
@@ -554,6 +571,16 @@ public sealed class GovernedQueryService(
 
     private static void ValidateRunRequest(QueryIntentVersion intent, RunGovernedQueryRequest request)
     {
+        if (intent.IntentKind == QueryIntentKind.DirectResponse)
+        {
+            if (string.IsNullOrWhiteSpace(request.QueryText))
+            {
+                throw new RequestValidationException("direct-response-v1 requires queryText.");
+            }
+
+            return;
+        }
+
         if (intent.IntentKind is QueryIntentKind.Object360Context or QueryIntentKind.BomImpactContext && request.StartGraphNodeId is null)
         {
             throw new RequestValidationException("This query intent requires StartGraphNodeId.");
@@ -563,6 +590,27 @@ public sealed class GovernedQueryService(
         {
             throw new RequestValidationException("Document evidence context requires StartGraphNodeId or DocumentArtifactId.");
         }
+    }
+
+    private static IReadOnlyCollection<RetrievedContextCandidate> BuildDirectResponseCandidates(RunGovernedQueryRequest request)
+    {
+        var queryText = TrimToMax(request.QueryText, 1000)
+            ?? throw new RequestValidationException("direct-response-v1 requires queryText.");
+
+        return
+        [
+            new RetrievedContextCandidate(
+                $"direct-response:{Guid.NewGuid():N}",
+                "UserPrompt",
+                "internal",
+                null,
+                null,
+                "DirectResponse",
+                0,
+                null,
+                TrustState.Trusted,
+                queryText)
+        ];
     }
 
     private static RetrievalRunResponse ToRunResponse(RetrievalRun run)
@@ -717,6 +765,16 @@ public sealed class GovernedQueryService(
             "Assembles trusted graph-linked document metadata evidence.",
             QueryIntentKind.DocumentEvidenceContext,
             ["DOCUMENT_LINK", "RELATED_TO", "PART_OF"],
+            false),
+        new(
+            "direct-response-v1",
+            "DIRECT-RESPONSE-V1",
+            "direct-response-v1",
+            "DIRECT-RESPONSE-V1",
+            "Direct response",
+            "Uses queryText only for LLM-visible context without graph or document retrieval.",
+            QueryIntentKind.DirectResponse,
+            [],
             false)
     ];
 }

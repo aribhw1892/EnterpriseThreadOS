@@ -158,6 +158,7 @@ export default async function DecisionsExplorerPage({ searchParams }: DecisionsE
           result={decisions}
           emptyMessage="No decision-shaped artifacts are available yet."
           renderItem={DecisionCard}
+          getItemKey={(item) => item.artifactId}
         />
       </div>
     </main>

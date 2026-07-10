@@ -438,6 +438,8 @@ function MappingCard(mapping: ImportMappingVersion) {
 }
 
 function IssueCard(issue: ImportValidationIssue) {
+  const blocksPromotion = issue.severity === "Error";
+
   return (
     <article key={issue.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
       <div className="flex items-center justify-between gap-3">
@@ -447,6 +449,11 @@ function IssueCard(issue: ImportValidationIssue) {
       <p className="mt-2 text-sm text-slate-300">{issue.message}</p>
       <p className="mt-2 text-xs text-slate-500">
         Row {issue.rowNumber ?? "n/a"} {issue.sourceColumn ? `- ${issue.sourceColumn}` : ""}
+      </p>
+      <p className={`mt-2 text-xs ${blocksPromotion ? "text-amber-300" : "text-slate-500"}`}>
+        {blocksPromotion
+          ? "Blocks promotion until fixed and the batch is re-validated."
+          : "Advisory warning only — does not block promotion."}
       </p>
     </article>
   );
@@ -807,8 +814,20 @@ export default async function ImportsPage({ searchParams }: PageProps) {
           </div>
           <p className="mt-3 text-xs text-slate-500">
             After identity demo, promote the ready source batch first. ERP comparison batches stay blocked until all
-            identity candidates are approved or rejected.
+            identity candidates are approved or rejected. Validation warnings are advisory; only validation errors block
+            promotion.
           </p>
+        </section>
+
+        <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
+          <h2 className="text-2xl font-semibold">PDM Import Wizard</h2>
+          <p className="mt-2 text-sm text-slate-300">
+            Issue 29 extract → transform → load flow for SolidWorks PDM. Import four CSV batches with package preset
+            mappings and optional AI mapping review.
+          </p>
+          <div className="mt-4">
+            <ExplorerNavLink href="/imports/pdm">Open PDM import wizard</ExplorerNavLink>
+          </div>
         </section>
 
         <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">

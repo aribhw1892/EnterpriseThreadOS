@@ -31,5 +31,23 @@
       "primaryModelId": "qwen/qwen3-1.7b"
     },
     "futureExtensionPlaceholders": []
+  },
+  {
+    "templateKey": "rework-prediction-assistant",
+    "name": "Rework Prediction Assistant",
+    "description": "Suggest rework probability",
+    "patternCategory": "investigator",
+    "patternSummary": "Suggest rework probability",
+    "preferredRuntimeAdapterKey": "pydantic-ai-v1",
+    "referencedCapabilityKeys": ["say-hi"],
+    "referencedToolKeys": [],
+    "queryIntentKey": "direct-response-v1",
+    "retrievalStrategyKey": "direct-response-v1",
+    "compositionMetadata": {
+      "mode": "normal",
+      "primaryModelProviderKey": "openai-compatible",
+      "primaryModelId": "qwen/qwen3-1.7b"
+    },
+    "futureExtensionPlaceholders": []
   }
 ]

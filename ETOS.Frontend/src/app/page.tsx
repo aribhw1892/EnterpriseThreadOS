@@ -568,7 +568,8 @@ export default async function Home() {
               1–2 Model package: <Link href="/model-artifacts">/model-artifacts</Link>
             </li>
             <li>
-              3–8 Import + identity + promote: <Link href="/imports">/imports</Link>
+              3–8 Import + identity + promote: <Link href="/imports">/imports</Link>,{" "}
+              <Link href="/imports/pdm">PDM wizard</Link>
             </li>
             <li>
               9–11 Governed chat + drafts: <Link href="/chat">/chat</Link>

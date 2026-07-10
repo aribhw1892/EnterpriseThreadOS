@@ -91,8 +91,25 @@ public sealed class ImportTests
         using var client = application.CreateClient();
         var context = await CreatePublishedModelContextAsync(client);
         var batch = await CreateImportBatchAsync(client, context);
-        await UploadCsvAsync(client, context, batch.Id, "partNumber,lifecycle,cost\n,unknown,not-a-number\n");
-        var mapping = await CreateMappingAsync(client, context, batch.Id, lifecycleValues: ["released"]);
+        await UploadCsvAsync(client, context, batch.Id, "pdmVersionKey,status,quantity\n,unknown,not-a-number\n");
+
+        using var mappingRequest = new HttpRequestMessage(HttpMethod.Post, "/api/admin/imports/mappings")
+        {
+            Content = JsonContent.Create(new CreateImportMappingVersionRequest(
+                batch.Id,
+                "1.0.0",
+                "Test mapping.",
+                [
+                    new CreateImportColumnMappingRequest("pdmVersionKey", "partVersion", "pdmVersionKey", true, true),
+                    new CreateImportColumnMappingRequest("quantity", "partVersion", "quantity", false, false)
+                ],
+                [new CreateImportLifecycleMappingRequest("released", "released")]))
+        };
+        AddTenantHeaders(mappingRequest, context.TenantId, context.UserId);
+        var mappingResponse = await client.SendAsync(mappingRequest);
+        Assert.True(mappingResponse.StatusCode == HttpStatusCode.OK, await mappingResponse.Content.ReadAsStringAsync());
+        var mapping = await mappingResponse.Content.ReadFromJsonAsync<ImportMappingVersionResponse>();
+        Assert.NotNull(mapping);
         await ApproveMappingAsync(client, context, mapping.Id);
 
         var validation = await ValidateBatchAsync(client, context, batch.Id);
@@ -270,7 +287,17 @@ public sealed class ImportTests
         var batch = await CreateImportBatchAsync(client, context);
         var csv = "bomSide,partNumber,lifecycle,cost,parent,child,quantity,unit,usage\nCAD,A,released,1,A,B,2,ea,R1\nEBOM,A,released,1,A,B,3,ea,R2\nCAD,A,released,1,A,C,1,ea,R3\nEBOM,A,released,1,A,D,1,ea,R4\n";
         await UploadCsvAsync(client, context, batch.Id, csv);
-        var mapping = await CreateMappingAsync(client, context, batch.Id, ["released"]);
+        var mapping = await ImportFlowTestSupport.CreateStructuralMappingAsync(
+            client,
+            context,
+            batch.Id,
+            [
+                new CreateImportColumnMappingRequest("partNumber", "part", "partNumber", true, true),
+                new CreateImportColumnMappingRequest("cost", "part", "cost", false, false),
+                new CreateImportColumnMappingRequest("parent", "part", "partNumber", true, true),
+                new CreateImportColumnMappingRequest("child", "part", "partNumber", true, true)
+            ],
+            lifecycleMappings: [new CreateImportLifecycleMappingRequest("released", "released")]);
         await ApproveMappingAsync(client, context, mapping.Id);
 
         var staging = await StageBatchAsync(client, context, batch.Id);
@@ -281,6 +308,91 @@ public sealed class ImportTests
         Assert.Equal(1, comparison.MissingInSecondarySideCount);
         Assert.Equal(1, comparison.QuantityMismatchCount);
         Assert.Equal(1, comparison.UsageReferenceMismatchCount);
+    }
+
+    [Fact]
+    public async Task StructuralHasVersionImportStagesPartAndPartVersionRelationship()
+    {
+        var graphMemory = new RecordingGraphMemoryService();
+        await using var application = CreateApplication(graphMemory);
+        using var client = application.CreateClient();
+        var context = await CreatePublishedModelContextAsync(client);
+        var batch = await CreateImportBatchAsync(client, context, "SOLIDWORKS-PDM");
+        await UploadCsvAsync(client, context, batch.Id, "parent,child\n15,15-10\n");
+        var mapping = await ImportFlowTestSupport.CreateStructuralMappingAsync(
+            client,
+            context,
+            batch.Id,
+            [
+                new CreateImportColumnMappingRequest("parent", "part", "documentId", true, true),
+                new CreateImportColumnMappingRequest("child", "partVersion", "pdmVersionKey", true, true)
+            ],
+            "hasVersion");
+        await ApproveMappingAsync(client, context, mapping.Id, "hasVersion");
+
+        var staging = await StageBatchAsync(client, context, batch.Id);
+
+        Assert.Equal(ImportStagingRunStatus.Completed, staging.Status);
+        Assert.Equal(1, staging.RelationshipCount);
+        Assert.Contains(graphMemory.CreatedNodeRequests, request => request.ObjectType == "Part" && request.Attributes != null && request.Attributes.TryGetValue("documentId", out var docId) && docId == "15");
+        Assert.Contains(graphMemory.CreatedNodeRequests, request => request.ObjectType == "PartVersion" && request.Attributes != null && request.Attributes.TryGetValue("pdmVersionKey", out var versionKey) && versionKey == "15-10");
+        Assert.Contains(graphMemory.CreatedRelationshipRequests, request => request.RelationshipType == "HAS_VERSION");
+    }
+
+    [Fact]
+    public async Task StructuralPartVersionContainsImportStagesVersionBomRelationship()
+    {
+        var graphMemory = new RecordingGraphMemoryService();
+        await using var application = CreateApplication(graphMemory);
+        using var client = application.CreateClient();
+        var context = await CreatePublishedModelContextAsync(client);
+        var batch = await CreateImportBatchAsync(client, context, "SOLIDWORKS-PDM");
+        await UploadCsvAsync(client, context, batch.Id, "parent,child,quantity\n15-10,6-4,2\n");
+        var mapping = await ImportFlowTestSupport.CreateStructuralMappingAsync(
+            client,
+            context,
+            batch.Id,
+            [
+                new CreateImportColumnMappingRequest("parent", "partVersion", "pdmVersionKey", true, true),
+                new CreateImportColumnMappingRequest("child", "partVersion", "pdmVersionKey", true, true)
+            ],
+            "contains");
+        await ApproveMappingAsync(client, context, mapping.Id, "contains");
+
+        var staging = await StageBatchAsync(client, context, batch.Id);
+
+        Assert.Equal(ImportStagingRunStatus.Completed, staging.Status);
+        Assert.Equal(1, staging.RelationshipCount);
+        Assert.Contains(graphMemory.CreatedRelationshipRequests, request => request.RelationshipType == "BOM_CONTAINS");
+        Assert.Equal("2", graphMemory.CreatedRelationshipRequests.Single().Attributes?["quantity"]);
+    }
+
+    [Fact]
+    public async Task StructuralRelationshipTypeMismatchIsRejectedOnApprove()
+    {
+        await using var application = CreateApplication();
+        using var client = application.CreateClient();
+        var context = await CreatePublishedModelContextAsync(client);
+        var batch = await CreateImportBatchAsync(client, context);
+        await UploadCsvAsync(client, context, batch.Id, "parent,child\n15,15-10\n");
+        var mapping = await ImportFlowTestSupport.CreateStructuralMappingAsync(
+            client,
+            context,
+            batch.Id,
+            [
+                new CreateImportColumnMappingRequest("parent", "part", "documentId", true, true),
+                new CreateImportColumnMappingRequest("child", "partVersion", "pdmVersionKey", true, true)
+            ],
+            "contains");
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/mappings/{mapping.Id}/approve")
+        {
+            Content = JsonContent.Create(new ApproveImportMappingRequest("Approved by test.", "contains"))
+        };
+        AddTenantHeaders(request, context.TenantId, context.UserId);
+        var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
@@ -327,8 +439,8 @@ public sealed class ImportTests
         string email = "admin@example.test")
         => await ImportFlowTestSupport.CreatePublishedModelContextAsync(client, tenantIdentifier, email);
 
-    private static Task<ImportBatchResponse> CreateImportBatchAsync(HttpClient client, ImportFlowContext context)
-        => ImportFlowTestSupport.CreateImportBatchAsync(client, context, "demo-pdm");
+    private static Task<ImportBatchResponse> CreateImportBatchAsync(HttpClient client, ImportFlowContext context, string? sourceSystem = null)
+        => ImportFlowTestSupport.CreateImportBatchAsync(client, context, sourceSystem ?? "demo-pdm");
 
     private static Task<UploadImportFileResponse> UploadCsvAsync(HttpClient client, ImportFlowContext context, Guid batchId, string csv)
         => ImportFlowTestSupport.UploadCsvAsync(client, context, batchId, csv);
@@ -336,8 +448,8 @@ public sealed class ImportTests
     private static Task<ImportMappingVersionResponse> CreateMappingAsync(HttpClient client, ImportFlowContext context, Guid batchId, IReadOnlyCollection<string> lifecycleValues)
         => ImportFlowTestSupport.CreateMappingAsync(client, context, batchId, lifecycleValues);
 
-    private static Task<ImportMappingVersionResponse> ApproveMappingAsync(HttpClient client, ImportFlowContext context, Guid mappingId)
-        => ImportFlowTestSupport.ApproveMappingAsync(client, context, mappingId);
+    private static Task<ImportMappingVersionResponse> ApproveMappingAsync(HttpClient client, ImportFlowContext context, Guid mappingId, string? structuralRelationshipType = null)
+        => ImportFlowTestSupport.ApproveMappingAsync(client, context, mappingId, structuralRelationshipType);
 
     private static Task<ImportValidationResponse> ValidateBatchAsync(HttpClient client, ImportFlowContext context, Guid batchId)
         => ImportFlowTestSupport.ValidateBatchAsync(client, context, batchId);
@@ -521,4 +633,4 @@ public sealed class ImportTests
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(value));
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
-}
+}

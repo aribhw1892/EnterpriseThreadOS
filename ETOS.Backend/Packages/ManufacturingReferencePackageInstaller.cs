@@ -39,6 +39,8 @@ public sealed class ManufacturingReferencePackageInstaller(
     ISkillDefinitionService skillDefinitionService,
     IGovernedChatArtifactSeeder governedChatArtifactSeeder,
     IImportMappingArtifactSeeder importMappingArtifactSeeder,
+    IDirectResponseArtifactSeeder directResponseArtifactSeeder,
+    IGovernedQueryService governedQueryService,
     IAgentDefinitionService agentDefinitionService,
     IWorkflowDefinitionService workflowDefinitionService,
     EnterpriseThreadDbContext dbContext,
@@ -503,8 +505,7 @@ public sealed class ManufacturingReferencePackageInstaller(
         var publish = new PublishArtifactVersionRequest("Published by reference package installer.");
         var chatArtifacts = await governedChatArtifactSeeder.EnsurePlatformArtifactsAsync(context, cancellationToken);
         var mappingArtifacts = await importMappingArtifactSeeder.EnsurePlatformArtifactsAsync(context, cancellationToken);
-        var queryIntentId = await EnsureQueryIntentAsync(context, cancellationToken);
-        var retrievalStrategyId = await EnsureRetrievalStrategyAsync(context, cancellationToken);
+        var directResponseArtifacts = await directResponseArtifactSeeder.EnsurePlatformArtifactsAsync(context, cancellationToken);
         var optimizationVersions = await dbContext.Artifacts
             .AsNoTracking()
             .Where(item => item.TenantId == context.TenantId
@@ -533,8 +534,7 @@ public sealed class ManufacturingReferencePackageInstaller(
                 publish,
                 chatArtifacts,
                 mappingArtifacts,
-                queryIntentId,
-                retrievalStrategyId,
+                directResponseArtifacts,
                 optimizationVersions,
                 installedArtifacts,
                 cancellationToken);
@@ -693,8 +693,7 @@ public sealed class ManufacturingReferencePackageInstaller(
         PublishArtifactVersionRequest publish,
         GovernedChatPlatformArtifacts chatArtifacts,
         ImportMappingPlatformArtifacts mappingArtifacts,
-        Guid queryIntentId,
-        Guid retrievalStrategyId,
+        DirectResponsePlatformArtifacts directResponseArtifacts,
         IReadOnlyCollection<ArtifactVersion> optimizationVersions,
         List<InstalledReferenceArtifactResponse> installedArtifacts,
         CancellationToken cancellationToken)
@@ -713,6 +712,36 @@ public sealed class ManufacturingReferencePackageInstaller(
             template.PatternCategory,
             "mapping-assistant",
             StringComparison.OrdinalIgnoreCase);
+        var isDirectResponse = string.Equals(
+            template.QueryIntentKey,
+            "direct-response-v1",
+            StringComparison.OrdinalIgnoreCase);
+
+        var intentVersions = await governedQueryService.EnsurePlatformFixedIntentVersionsAsync(
+            template.QueryIntentKey,
+            cancellationToken);
+
+        Guid promptTemplateVersionId;
+        Guid outputSchemaVersionId;
+        if (isDirectResponse)
+        {
+            promptTemplateVersionId = directResponseArtifacts.PromptTemplate.VersionId;
+            outputSchemaVersionId = directResponseArtifacts.OutputSchema.VersionId;
+        }
+        else if (isMappingAssistant)
+        {
+            promptTemplateVersionId = mappingArtifacts.PromptTemplate.VersionId;
+            outputSchemaVersionId = mappingArtifacts.OutputSchema.VersionId;
+        }
+        else
+        {
+            promptTemplateVersionId = chatArtifacts.PromptTemplate.VersionId;
+            outputSchemaVersionId = chatArtifacts.ChatAnswerSchema.VersionId;
+        }
+
+        var referencedToolVersionIds = isDirectResponse
+            ? []
+            : template.ReferencedToolKeys?.Select(key => toolVersions[key]).ToList() ?? [];
 
         var created = await agentTemplateDefinitionService.CreateAsync(
             new CreateAgentTemplateDefinitionRequest(
@@ -727,11 +756,11 @@ public sealed class ManufacturingReferencePackageInstaller(
                 template.ReferencedCapabilityKeys.Select(key => capabilityVersions[key]).ToList(),
                 null,
                 optimizationVersionId is null ? null : [optimizationVersionId.Value],
-                isMappingAssistant ? mappingArtifacts.PromptTemplate.VersionId : chatArtifacts.PromptTemplate.VersionId,
-                isMappingAssistant ? mappingArtifacts.OutputSchema.VersionId : chatArtifacts.ChatAnswerSchema.VersionId,
-                queryIntentId,
-                retrievalStrategyId,
-                template.ReferencedToolKeys?.Select(key => toolVersions[key]).ToList(),
+                promptTemplateVersionId,
+                outputSchemaVersionId,
+                intentVersions.IntentVersionId,
+                intentVersions.RetrievalStrategyVersionId,
+                referencedToolVersionIds,
                 template.CompositionMetadata,
                 template.FutureExtensionPlaceholders),
             cancellationToken);

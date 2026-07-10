@@ -3265,6 +3265,10 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("ModelPackageVersionId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("NormalizedStructuralRelationshipType")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
                     b.Property<string>("NormalizedVersionLabel")
                         .IsRequired()
                         .HasMaxLength(80)
@@ -3280,6 +3284,10 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
+
+                    b.Property<string>("StructuralRelationshipType")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
 
                     b.Property<string>("SuggestionProvider")
                         .IsRequired()
@@ -3378,16 +3386,13 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FailureSummary")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
+                        .HasColumnType("text");
 
                     b.Property<string>("GraphNodeIdsJson")
-                        .HasMaxLength(8000)
-                        .HasColumnType("character varying(8000)");
+                        .HasColumnType("text");
 
                     b.Property<string>("GraphRelationshipIdsJson")
-                        .HasMaxLength(8000)
-                        .HasColumnType("character varying(8000)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("ImportBatchId")
                         .HasColumnType("uuid");

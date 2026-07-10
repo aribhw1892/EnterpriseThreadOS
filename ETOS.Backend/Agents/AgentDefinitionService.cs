@@ -52,7 +52,9 @@ public sealed class AgentDefinitionService(
     IAuditRecorder auditRecorder,
     IClassificationPolicyService classificationPolicyService,
     IArtifactRegistryService artifactRegistryService,
-    ILlmCompletionService llmCompletionService) : IAgentDefinitionService
+    ILlmCompletionService llmCompletionService,
+    IGovernedQueryService governedQueryService,
+    IDirectResponseArtifactSeeder directResponseArtifactSeeder) : IAgentDefinitionService
 {
     private const string AgentDraftPromptSchema = """
         {
@@ -353,9 +355,56 @@ public sealed class AgentDefinitionService(
             ? patternSummaryElement.GetString()?.Trim()
             : null;
 
+        agentKey ??= AgentPromptDraftDeriver.DeriveAgentKey(request.Prompt);
+        displayName ??= AgentPromptDraftDeriver.DeriveDisplayName(request.Prompt);
+        description ??= AgentPromptDraftDeriver.DeriveDescription(request.Prompt);
+        patternSummary ??= AgentPromptDraftDeriver.DerivePatternSummary(request.Prompt);
+
         if (string.IsNullOrWhiteSpace(agentKey) || string.IsNullOrWhiteSpace(displayName))
         {
             throw new RequestValidationException("LLM draft did not produce required agentKey and displayName.");
+        }
+
+        var templateResolution = await TryResolvePublishedTemplateForPromptAsync(
+            context.TenantId,
+            request.Prompt,
+            cancellationToken);
+        var infrastructureTemplate = templateResolution.Match
+            ?? await TryResolveInfrastructureTemplateAsync(context.TenantId, cancellationToken);
+
+        var compositionMetadata = new Dictionary<string, string> { ["createdFromPrompt"] = "true" };
+        if (templateResolution.Match?.Payload.TemplateKey is { Length: > 0 } templateKey)
+        {
+            compositionMetadata["seededFromTemplateKey"] = templateKey;
+        }
+
+        Guid? queryIntentVersionId;
+        Guid? retrievalStrategyVersionId;
+        IReadOnlyCollection<Guid>? referencedToolDefinitionVersionIds;
+        Guid? promptTemplateVersionId;
+        Guid? outputSchemaVersionId;
+        if (templateResolution.Match is not null)
+        {
+            queryIntentVersionId = templateResolution.Match.Payload.QueryIntentVersionId;
+            retrievalStrategyVersionId = templateResolution.Match.Payload.RetrievalStrategyVersionId;
+            referencedToolDefinitionVersionIds = templateResolution.Match.Payload.ReferencedToolDefinitionVersionIds;
+            promptTemplateVersionId = templateResolution.Match.Payload.PromptTemplateVersionId;
+            outputSchemaVersionId = templateResolution.Match.Payload.OutputSchemaVersionId;
+        }
+        else
+        {
+            var directResponse = await governedQueryService.EnsurePlatformFixedIntentVersionsAsync(
+                "direct-response-v1",
+                cancellationToken);
+            var directResponseArtifacts = await directResponseArtifactSeeder.EnsurePlatformArtifactsAsync(
+                context,
+                cancellationToken);
+            queryIntentVersionId = directResponse.IntentVersionId;
+            retrievalStrategyVersionId = directResponse.RetrievalStrategyVersionId;
+            referencedToolDefinitionVersionIds = [];
+            promptTemplateVersionId = directResponseArtifacts.PromptTemplate.VersionId;
+            outputSchemaVersionId = directResponseArtifacts.OutputSchema.VersionId;
+            compositionMetadata["seededQueryIntentKey"] = "direct-response-v1";
         }
 
         var payload = AgentDefinitionPayloadParser.Create(
@@ -363,18 +412,24 @@ public sealed class AgentDefinitionService(
             displayName,
             description ?? patternSummary,
             agentTypeVersionId,
-            null,
-            null,
-            [],
-            [],
-            [],
-            [],
-            [],
-            null,
-            null,
-            null,
-            null,
-            [],
+            templateResolution.Match?.VersionId ?? infrastructureTemplate?.VersionId,
+            templateResolution.Match?.Payload.PreferredRuntimeAdapterKey
+                ?? infrastructureTemplate?.Payload.PreferredRuntimeAdapterKey,
+            templateResolution.Match?.Payload.CompatibleModelPackageVersionIds
+                ?? infrastructureTemplate?.Payload.CompatibleModelPackageVersionIds,
+            templateResolution.Match?.Payload.CompatibleOntologyVersionIds
+                ?? infrastructureTemplate?.Payload.CompatibleOntologyVersionIds,
+            templateResolution.Match?.Payload.ReferencedCapabilityDefinitionVersionIds
+                ?? infrastructureTemplate?.Payload.ReferencedCapabilityDefinitionVersionIds,
+            templateResolution.Match?.Payload.ReferencedBusinessPolicyDefinitionVersionIds
+                ?? infrastructureTemplate?.Payload.ReferencedBusinessPolicyDefinitionVersionIds,
+            templateResolution.Match?.Payload.ReferencedOptimizationModelVersionIds
+                ?? infrastructureTemplate?.Payload.ReferencedOptimizationModelVersionIds,
+            promptTemplateVersionId ?? infrastructureTemplate?.Payload.PromptTemplateVersionId,
+            outputSchemaVersionId ?? infrastructureTemplate?.Payload.OutputSchemaVersionId,
+            queryIntentVersionId,
+            retrievalStrategyVersionId,
+            referencedToolDefinitionVersionIds,
             [],
             request.PrimaryModelProviderKey,
             request.PrimaryModelId,
@@ -385,9 +440,125 @@ public sealed class AgentDefinitionService(
             patternSummary is null ? [] : [patternSummary],
             [],
             context.UserId,
-            new Dictionary<string, string> { ["createdFromPrompt"] = "true" });
+            compositionMetadata);
 
         return await PersistNewAgentAsync(context, displayName, description ?? patternSummary, payload, cancellationToken);
+    }
+
+    private sealed record PromptTemplateDefaults(
+        Guid VersionId,
+        AgentTemplateDefinitionPayloadParser.AgentTemplateDefinitionPayloadDocument Payload);
+
+    private sealed record PromptTemplateResolution(
+        PromptTemplateDefaults? Match,
+        int Score);
+
+    private async Task<PromptTemplateResolution> TryResolvePublishedTemplateForPromptAsync(
+        Guid tenantId,
+        string userPrompt,
+        CancellationToken cancellationToken)
+    {
+        var templateVersions = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .Where(item => item.TenantId == tenantId
+                && item.ReadinessState == ArtifactReadinessState.Published
+                && item.Artifact!.ArtifactType == AgentTemplateDefinitionArtifactTypes.AgentTemplate)
+            .OrderByDescending(item => item.PublishedAt ?? item.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        if (templateVersions.Count == 0)
+        {
+            return new PromptTemplateResolution(null, 0);
+        }
+
+        PromptTemplateDefaults? bestMatch = null;
+        var bestScore = 0;
+        foreach (var version in templateVersions)
+        {
+            var payload = AgentTemplateDefinitionPayloadParser.Deserialize(version.PayloadJson ?? "{}");
+            var score = ScoreTemplateForPrompt(userPrompt, payload.TemplateKey, version.Artifact!.Name);
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestMatch = new PromptTemplateDefaults(version.Id, payload);
+            }
+        }
+
+        return bestScore > 0
+            ? new PromptTemplateResolution(bestMatch, bestScore)
+            : new PromptTemplateResolution(null, 0);
+    }
+
+    private async Task<PromptTemplateDefaults?> TryResolveInfrastructureTemplateAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        var version = await dbContext.ArtifactVersions
+            .AsNoTracking()
+            .Include(item => item.Artifact)
+            .Where(item => item.TenantId == tenantId
+                && item.ReadinessState == ArtifactReadinessState.Published
+                && item.Artifact!.ArtifactType == AgentTemplateDefinitionArtifactTypes.AgentTemplate)
+            .OrderByDescending(item => item.PublishedAt ?? item.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (version is null)
+        {
+            return null;
+        }
+
+        return new PromptTemplateDefaults(version.Id, AgentTemplateDefinitionPayloadParser.Deserialize(version.PayloadJson ?? "{}"));
+    }
+
+    private static int ScoreTemplateForPrompt(string userPrompt, string? templateKey, string artifactName)
+    {
+        var promptLower = userPrompt.ToLowerInvariant();
+        var score = 0;
+
+        foreach (var token in CollectTemplateMatchTokens(templateKey, artifactName))
+        {
+            if (token.Length >= 4 && promptLower.Contains(token, StringComparison.Ordinal))
+            {
+                score += token.Length;
+            }
+        }
+
+        if (promptLower.Contains("investig", StringComparison.Ordinal)
+            && (templateKey?.Contains("investig", StringComparison.OrdinalIgnoreCase) ?? false))
+        {
+            score += 8;
+        }
+
+        if ((promptLower.Contains("bom", StringComparison.Ordinal) || promptLower.Contains("bill of material", StringComparison.Ordinal))
+            && (templateKey?.Contains("manufacturing", StringComparison.OrdinalIgnoreCase) ?? false))
+        {
+            score += 8;
+        }
+
+        if ((promptLower.Contains("import", StringComparison.Ordinal) || promptLower.Contains("mapping", StringComparison.Ordinal))
+            && (templateKey?.Contains("mapping", StringComparison.OrdinalIgnoreCase) ?? false))
+        {
+            score += 8;
+        }
+
+        return score;
+    }
+
+    private static IEnumerable<string> CollectTemplateMatchTokens(string? templateKey, string artifactName)
+    {
+        if (!string.IsNullOrWhiteSpace(templateKey))
+        {
+            foreach (var token in templateKey.Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                yield return token.ToLowerInvariant();
+            }
+        }
+
+        foreach (var token in artifactName.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            yield return token.ToLowerInvariant();
+        }
     }
 
     public async Task<MarkAgentDefinitionReadyResponse> MarkReadyAsync(

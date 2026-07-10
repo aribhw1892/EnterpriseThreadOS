@@ -15,6 +15,8 @@
  * - Missing env config yields a friendly error via `missingContext()`.
  */
 
+import type { PdmImportBatchResult, PdmImportFileProfile, PdmMappingSource } from "@/lib/pdm-import-types";
+
 // --- Platform health (Issue 1) ---
 
 export type ComponentHealth = {
@@ -423,6 +425,7 @@ export type ImportMappingVersion = {
   approvedAt?: string | null;
   rejectedByUserId?: string | null;
   rejectedAt?: string | null;
+  structuralRelationshipType?: string | null;
   columnMappings: ImportColumnMapping[];
   lifecycleMappings: ImportLifecycleMapping[];
 };
@@ -2170,7 +2173,7 @@ export async function askGovernedChatTurn(
     return {
       data: null,
       error:
-        "This intent needs a trusted graph node. Stage and promote an import on /imports, or switch intent to document-evidence-context.",
+        "This intent needs a trusted graph node. Stage and promote an import on /imports, switch intent to document-evidence-context, or use direct-response-v1.",
     };
   }
 
@@ -2494,7 +2497,7 @@ type DraftImportMappingPayload = {
   }>;
 };
 
-function buildDraftImportMappingPayloadFromPreview(
+export function buildImportMappingPayloadFromPreview(
   preview: ImportPreview,
   batchId: string,
   versionLabel: string,
@@ -2593,7 +2596,7 @@ async function createDemoImportForSource(
   }
 
   const versionLabel = `demo-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}-${sourceSystem}`;
-  const draftMapping = buildDraftImportMappingPayloadFromPreview(
+  const draftMapping = buildImportMappingPayloadFromPreview(
     preview.data,
     batch.data.id,
     versionLabel,
@@ -2651,7 +2654,7 @@ async function createPreparedDemoImportForSource(
     return { data: null, error: preview.error };
   }
 
-  const draftMapping = buildDraftImportMappingPayloadFromPreview(
+  const draftMapping = buildImportMappingPayloadFromPreview(
     preview.data,
     batch.data.id,
     `demo-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}-${sourceSystem}`,
@@ -2758,6 +2761,10 @@ function hasUnresolvedIdentityCandidates(candidates: IdentityCandidateLink[]): b
   );
 }
 
+function hasBlockingValidationIssues(issues: ImportValidationIssue[]): boolean {
+  return issues.some((issue) => issue.severity === "Error");
+}
+
 /** Promote the newest staged batch that passes identity and validation gates. */
 export async function promoteReadyStagedImportBatch(): Promise<ApiResult<ImportPromotionRun>> {
   const tenantHeaders =
@@ -2778,7 +2785,12 @@ export async function promoteReadyStagedImportBatch(): Promise<ApiResult<ImportP
   }
 
   for (const batch of stagedBatches) {
-    if (batch.validationIssueCount > 0) {
+    const detail = await fetchApi<ImportBatchDetail>(`/api/admin/imports/batches/${batch.id}`, tenantHeaders);
+    if (detail.error) {
+      return { data: null, error: detail.error };
+    }
+
+    if (hasBlockingValidationIssues(detail.data?.validationIssues ?? [])) {
       continue;
     }
 
@@ -2812,7 +2824,7 @@ export async function promoteReadyStagedImportBatch(): Promise<ApiResult<ImportP
   return {
     data: null,
     error:
-      "No staged batch is ready to promote. Approve or resolve identity candidates on the ERP batch, or stage a source batch without blocking validation issues.",
+      "No staged batch is ready to promote. Resolve identity candidates on the ERP batch, or fix validation errors and re-validate before promoting.",
   };
 }
 
@@ -2837,6 +2849,404 @@ export async function rejectLatestStagedImportBatch(): Promise<ApiResult<{ id: s
     {},
     tenantHeaders,
   );
+}
+
+// --- PDM import wizard (batch-scoped; additive helpers) ---
+
+function resolveTenantHeaders():
+  | { userId: string; tenantId: string }
+  | undefined {
+  return adminUserId && selectedTenantId
+    ? { userId: adminUserId, tenantId: selectedTenantId }
+    : undefined;
+}
+
+export async function getImportBatchDetail(batchId: string): Promise<ApiResult<ImportBatchDetail>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ImportBatchDetail>();
+  }
+
+  return await fetchApi<ImportBatchDetail>(`/api/admin/imports/batches/${batchId}`, tenantHeaders);
+}
+
+export async function createImportBatch(input: {
+  sourceSystem: string;
+  description: string;
+  modelPackageKey?: string;
+}): Promise<ApiResult<ImportBatch>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ImportBatch>();
+  }
+
+  return await postApi<ImportBatch>(
+    "/api/admin/imports/batches",
+    {
+      sourceSystem: input.sourceSystem,
+      description: input.description,
+      modelPackageKey: input.modelPackageKey ?? MANUFACTURING_REFERENCE_PACKAGE_KEY,
+    },
+    tenantHeaders,
+  );
+}
+
+export async function uploadImportBatchFile(
+  batchId: string,
+  csv: string,
+  fileName: string,
+): Promise<ApiResult<{ evidence: ImportFileEvidence }>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<{ evidence: ImportFileEvidence }>();
+  }
+
+  const formData = new FormData();
+  formData.set("file", new File([csv], fileName, { type: "text/csv" }));
+
+  return await fetchApi<{ evidence: ImportFileEvidence }>(
+    `/api/admin/imports/batches/${batchId}/files`,
+    tenantHeaders,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+}
+
+export async function createImportMappingVersion(input: {
+  importBatchId: string;
+  versionLabel: string;
+  summary: string;
+  columnMappings: PdmImportFileProfile["columnMappings"];
+  lifecycleMappings: PdmImportFileProfile["lifecycleMappings"];
+  structuralRelationshipType?: string | null;
+}): Promise<ApiResult<ImportMappingVersion>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ImportMappingVersion>();
+  }
+
+  return await postApi<ImportMappingVersion>(
+    "/api/admin/imports/mappings",
+    {
+      importBatchId: input.importBatchId,
+      versionLabel: input.versionLabel,
+      summary: input.summary,
+      columnMappings: input.columnMappings,
+      lifecycleMappings: input.lifecycleMappings,
+      structuralRelationshipType: input.structuralRelationshipType ?? null,
+    },
+    tenantHeaders,
+  );
+}
+
+export async function approveImportMapping(
+  mappingId: string,
+  input: { summary: string; structuralRelationshipType?: string | null },
+): Promise<ApiResult<ImportMappingVersion>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ImportMappingVersion>();
+  }
+
+  return await postApi<ImportMappingVersion>(
+    `/api/admin/imports/mappings/${mappingId}/approve`,
+    {
+      summary: input.summary,
+      structuralRelationshipType: input.structuralRelationshipType ?? null,
+    },
+    tenantHeaders,
+  );
+}
+
+export async function validateImportBatch(batchId: string): Promise<ApiResult<ImportValidation>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ImportValidation>();
+  }
+
+  return await postApi<ImportValidation>(`/api/admin/imports/batches/${batchId}/validate`, {}, tenantHeaders);
+}
+
+export async function stageImportBatch(batchId: string): Promise<ApiResult<ImportStagingGraphRun>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ImportStagingGraphRun>();
+  }
+
+  return await postApi<ImportStagingGraphRun>(`/api/admin/imports/batches/${batchId}/stage`, {}, tenantHeaders);
+}
+
+export async function getIdentityCandidatesForBatch(
+  batchId: string,
+): Promise<ApiResult<IdentityCandidateLink[]>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<IdentityCandidateLink[]>();
+  }
+
+  return await fetchApi<IdentityCandidateLink[]>(
+    `/api/admin/identity-resolution/batches/${batchId}/candidates`,
+    tenantHeaders,
+  );
+}
+
+export async function generateIdentityCandidatesForBatch(
+  batchId: string,
+): Promise<ApiResult<IdentityCandidateGeneration>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<IdentityCandidateGeneration>();
+  }
+
+  return await postApi<IdentityCandidateGeneration>(
+    `/api/admin/identity-resolution/batches/${batchId}/candidates/generate`,
+    { ruleId: null },
+    tenantHeaders,
+  );
+}
+
+export async function approveIdentityCandidate(
+  candidateId: string,
+  rationale = "Approved from the PDM import wizard.",
+): Promise<ApiResult<IdentityCandidateLink>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<IdentityCandidateLink>();
+  }
+
+  return await postApi<IdentityCandidateLink>(
+    `/api/admin/identity-resolution/candidates/${candidateId}/approve`,
+    { rationale },
+    tenantHeaders,
+  );
+}
+
+export async function markIdentityCandidateConflicted(
+  candidateId: string,
+  rationale = "Marked conflicted from the PDM import wizard.",
+): Promise<ApiResult<IdentityCandidateLink>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<IdentityCandidateLink>();
+  }
+
+  return await postApi<IdentityCandidateLink>(
+    `/api/admin/identity-resolution/candidates/${candidateId}/mark-conflicted`,
+    { rationale },
+    tenantHeaders,
+  );
+}
+
+export async function promoteImportBatch(batchId: string): Promise<ApiResult<ImportPromotionRun>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ImportPromotionRun>();
+  }
+
+  return await postApi<ImportPromotionRun>(`/api/admin/imports/batches/${batchId}/promote`, {}, tenantHeaders);
+}
+
+export async function previewPdmBatchMapping(
+  batchId: string,
+  evidenceId: string,
+): Promise<ApiResult<ImportPreview>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ImportPreview>();
+  }
+
+  return await previewImportMapping(
+    batchId,
+    {
+      evidenceId,
+      sampleRowLimit: 10,
+      suggestionProviderKey: "pydantic-ai-v1",
+      includeDiagnostics: true,
+      mappingAssistantAgentKey: "import-mapping-assistant",
+    },
+    tenantHeaders,
+  );
+}
+
+export async function runPdmImportBatch(input: {
+  profile: PdmImportFileProfile;
+  csv: string;
+  sourceSystem: string;
+  mappingSource: PdmMappingSource;
+  preview?: ImportPreview | null;
+}): Promise<ApiResult<PdmImportBatchResult>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<PdmImportBatchResult>();
+  }
+
+  const batch = await createImportBatch({
+    sourceSystem: input.sourceSystem,
+    description: `PDM ${input.profile.fileName}`,
+  });
+  if (!batch.data) {
+    return { data: null, error: batch.error };
+  }
+
+  const upload = await uploadImportBatchFile(batch.data.id, input.csv, input.profile.fileName);
+  if (!upload.data) {
+    return { data: null, error: upload.error };
+  }
+
+  let mappingPayload: DraftImportMappingPayload;
+  if (input.mappingSource === "ai") {
+    const preview =
+      input.preview ??
+      (
+        await previewPdmBatchMapping(batch.data.id, upload.data.evidence.id)
+      ).data;
+    if (!preview) {
+      return {
+        data: null,
+        error: "AI mapping preview is required when mappingSource is 'ai'.",
+      };
+    }
+
+    const draft = buildImportMappingPayloadFromPreview(
+      preview,
+      batch.data.id,
+      input.profile.fileName,
+      `PDM AI mapping for ${input.profile.fileName}.`,
+    );
+    if (!draft.data) {
+      return { data: null, error: draft.error };
+    }
+    mappingPayload = draft.data;
+  } else {
+    mappingPayload = {
+      importBatchId: batch.data.id,
+      versionLabel: input.profile.fileName,
+      summary: `PDM preset mapping for ${input.profile.fileName}.`,
+      columnMappings: input.profile.columnMappings,
+      lifecycleMappings: input.profile.lifecycleMappings,
+    };
+  }
+
+  const mapping = await createImportMappingVersion({
+    importBatchId: mappingPayload.importBatchId,
+    versionLabel: mappingPayload.versionLabel,
+    summary: mappingPayload.summary,
+    columnMappings: mappingPayload.columnMappings,
+    lifecycleMappings: mappingPayload.lifecycleMappings,
+    structuralRelationshipType: input.profile.structuralRelationshipType,
+  });
+  if (!mapping.data) {
+    return { data: null, error: mapping.error };
+  }
+
+  const approved = await approveImportMapping(mapping.data.id, {
+    summary: `Approved PDM ${input.mappingSource} mapping for ${input.profile.fileName}.`,
+    structuralRelationshipType: input.profile.structuralRelationshipType,
+  });
+  if (!approved.data) {
+    return { data: null, error: approved.error };
+  }
+
+  const stagingRun = await stageImportBatch(batch.data.id);
+  if (!stagingRun.data) {
+    return { data: null, error: stagingRun.error };
+  }
+
+  return {
+    data: {
+      profileKey: input.profile.key,
+      batchId: batch.data.id,
+      mappingId: approved.data.id,
+      stagingRun: {
+        id: stagingRun.data.id,
+        status: stagingRun.data.status,
+        nodeCount: stagingRun.data.nodeCount,
+        relationshipCount: stagingRun.data.relationshipCount,
+      },
+    },
+    error: null,
+  };
+}
+
+export async function runPdmDemoImportFlow(input: {
+  profiles: PdmImportFileProfile[];
+  sourceSystem: string;
+  readCsv: (fileName: string) => Promise<{ data: string | null; error: string | null }>;
+}): Promise<ApiResult<PdmImportBatchResult[]>> {
+  const results: PdmImportBatchResult[] = [];
+
+  for (const profile of input.profiles) {
+    const csv = await input.readCsv(profile.fileName);
+    if (!csv.data) {
+      return { data: null, error: csv.error ?? `Missing demo CSV ${profile.fileName}.` };
+    }
+
+    const result = await runPdmImportBatch({
+      profile,
+      csv: csv.data,
+      sourceSystem: input.sourceSystem,
+      mappingSource: "preset",
+    });
+    if (!result.data) {
+      return { data: null, error: result.error };
+    }
+
+    results.push(result.data);
+  }
+
+  return { data: results, error: null };
+}
+
+export async function promotePdmImportBatches(batchIds: string[]): Promise<ApiResult<ImportPromotionRun[]>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ImportPromotionRun[]>();
+  }
+
+  const promoted: ImportPromotionRun[] = [];
+
+  for (const batchId of batchIds) {
+    const detail = await getImportBatchDetail(batchId);
+    if (detail.error) {
+      return { data: null, error: detail.error };
+    }
+
+    if (hasBlockingValidationIssues(detail.data?.validationIssues ?? [])) {
+      continue;
+    }
+
+    const candidates = await getIdentityCandidatesForBatch(batchId);
+    if (candidates.error) {
+      return { data: null, error: candidates.error };
+    }
+
+    if (hasUnresolvedIdentityCandidates(candidates.data ?? [])) {
+      continue;
+    }
+
+    const result = await promoteImportBatch(batchId);
+    if (result.data) {
+      promoted.push(result.data);
+    } else if (
+      result.error &&
+      !result.error.includes("unresolved identity candidates") &&
+      !result.error.includes("validation errors") &&
+      !result.error.includes("blocking data-quality issues")
+    ) {
+      return { data: null, error: result.error };
+    }
+  }
+
+  if (promoted.length === 0) {
+    return {
+      data: null,
+      error: "No PDM batches are ready to promote. Resolve validation errors and identity candidates first.",
+    };
+  }
+
+  return { data: promoted, error: null };
 }
 
 /** Capture a trusted graph snapshot for MVP demo verification. */

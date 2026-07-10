@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+pdm_export/
+migration.log
+
+# Mapping file may contain environment-specific SQL; add when ready.
+# mapping_definition.xml

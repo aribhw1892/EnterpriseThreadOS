@@ -11,6 +11,14 @@
     { "label": "CAD", "aliases": ["cad"] },
     { "label": "EBOM", "aliases": ["ebom", "engineering"] }
   ],
+  "flatImportMetadataPolicies": {
+    "part": {
+      "requiredMetadataKeys": []
+    },
+    "partVersion": {
+      "requiredMetadataKeys": ["lifecycleState"]
+    }
+  },
   "recommendationTemplates": {
     "structuralDriftTitle": "Review CAD/EBOM synchronization",
     "structuralDriftSummary": "CAD/EBOM drift detected. Missing in EBOM {missingInSecondary}, missing in CAD {missingInPrimary}, quantity mismatches {quantityMismatches}.",

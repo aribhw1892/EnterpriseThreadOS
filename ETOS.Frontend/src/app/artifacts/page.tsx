@@ -49,6 +49,7 @@ export default async function ArtifactsExplorerPage() {
           result={artifacts}
           emptyMessage="No artifacts are available for the selected tenant."
           renderItem={ArtifactCard}
+          getItemKey={(artifact) => artifact.id}
         />
       </div>
     </main>

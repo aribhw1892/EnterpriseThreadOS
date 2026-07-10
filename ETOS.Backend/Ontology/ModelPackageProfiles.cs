@@ -15,6 +15,13 @@ public sealed class ModelPackageImportProfile
     public IReadOnlyCollection<StructuralComparisonSideProfile> ComparisonSides { get; init; } = [];
     public string? MappingAssistantAgentKey { get; init; }
     public ModelPackageRecommendationTemplates? RecommendationTemplates { get; init; }
+    public IReadOnlyDictionary<string, FlatImportMetadataPolicy> FlatImportMetadataPolicies { get; init; }
+        = new Dictionary<string, FlatImportMetadataPolicy>(StringComparer.OrdinalIgnoreCase);
+}
+
+public sealed class FlatImportMetadataPolicy
+{
+    public IReadOnlyCollection<string> RequiredMetadataKeys { get; init; } = [];
 }
 
 public sealed class StructuralComparisonSideProfile

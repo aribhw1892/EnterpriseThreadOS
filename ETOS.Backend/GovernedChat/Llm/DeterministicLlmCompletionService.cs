@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using ETOS.Backend.Agents;
 
 namespace ETOS.Backend.GovernedChat.Llm;
 
@@ -158,6 +159,34 @@ public sealed class DeterministicLlmCompletionService : ILlmCompletionService
         if (required.Contains("relatedObjects"))
         {
             output["relatedObjects"] = new JsonArray();
+        }
+
+        if (required.Contains("agentKey")
+            || required.Contains("displayName")
+            || required.Contains("description")
+            || required.Contains("patternSummary"))
+        {
+            var userPrompt = AgentPromptDraftDeriver.ExtractUserPrompt(prompt);
+
+            if (required.Contains("agentKey"))
+            {
+                output["agentKey"] = AgentPromptDraftDeriver.DeriveAgentKey(userPrompt);
+            }
+
+            if (required.Contains("displayName"))
+            {
+                output["displayName"] = AgentPromptDraftDeriver.DeriveDisplayName(userPrompt);
+            }
+
+            if (required.Contains("description"))
+            {
+                output["description"] = AgentPromptDraftDeriver.DeriveDescription(userPrompt);
+            }
+
+            if (required.Contains("patternSummary"))
+            {
+                output["patternSummary"] = AgentPromptDraftDeriver.DerivePatternSummary(userPrompt);
+            }
         }
 
         return Task.FromResult(output.ToJsonString(JsonOptions));

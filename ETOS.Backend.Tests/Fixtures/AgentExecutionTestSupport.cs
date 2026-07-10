@@ -170,6 +170,29 @@ internal static class AgentExecutionTestSupport
         return created;
     }
 
+    internal static async Task<CreateAgentDefinitionResponse> CreateAgentFromPromptAsync(
+        HttpClient client,
+        Guid tenantId,
+        Guid userId,
+        string prompt)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/admin/agents/from-prompt")
+        {
+            Content = JsonContent.Create(new CreateAgentFromPromptRequest(
+                prompt,
+                null,
+                "openai",
+                "gpt-4o-mini"))
+        };
+        AddTenantHeaders(request, tenantId, userId);
+
+        var response = await client.SendAsync(request);
+        var created = await response.Content.ReadFromJsonAsync<CreateAgentDefinitionResponse>();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+        Assert.NotNull(created);
+        return created;
+    }
+
     internal static async Task<MarkAgentDefinitionReadyResponse> MarkAgentReadyAsync(
         HttpClient client,
         Guid tenantId,

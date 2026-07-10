@@ -86,6 +86,26 @@ public sealed class GovernedQueryTests
     }
 
     [Fact]
+    public async Task DirectResponseIntentRunsWithoutGraphAnchor()
+    {
+        await using var dbContext = CreateDbContext();
+        var context = SeedTenantUserAndDocument(dbContext);
+        var service = CreateService(dbContext, context, new RecordingGraphMemoryService(context.GraphNodeId));
+
+        var run = await service.RunAsync(
+            new RunGovernedQueryRequest("direct-response-v1", null, null, "published-policy", "Only say hi.", 1),
+            CancellationToken.None);
+
+        Assert.Equal("Completed", run.Status);
+        Assert.Equal("direct-response-v1", run.QueryIntent.IntentKey);
+        Assert.Equal(QueryIntentKind.DirectResponse, run.QueryIntent.IntentKind);
+        Assert.NotNull(run.ContextPackage);
+        Assert.Single(run.ContextPackage!.LlmVisibleContext);
+        Assert.Equal("DirectResponse", run.ContextPackage.LlmVisibleContext.Single().SourceKind);
+        Assert.Equal("Only say hi.", run.ContextPackage.LlmVisibleContext.Single().SafeSummary);
+    }
+
+    [Fact]
     public async Task CrossTenantRunAccessIsDenied()
     {
         await using var dbContext = CreateDbContext();

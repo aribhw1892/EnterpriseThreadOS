@@ -18,5 +18,15 @@
     "outcomeMetadata": { "domain": "imports" },
     "suggestedQueryIntentRefs": [],
     "futureExtensionPlaceholders": []
+  },
+  {
+    "capabilityKey": "say-hi",
+    "name": "Helpful Assistance",
+    "description": "Just Say Hi!",
+    "outcomeCategory": "no category",
+    "outcomeSummary": "Just Say Hi",
+    "outcomeMetadata": { "normal string": "string" },
+    "suggestedQueryIntentRefs": [],
+    "futureExtensionPlaceholders": []
   }
 ]

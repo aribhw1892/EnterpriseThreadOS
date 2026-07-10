@@ -105,7 +105,8 @@ public enum QueryIntentKind
 {
     Object360Context = 0,
     BomImpactContext = 1,
-    DocumentEvidenceContext = 2
+    DocumentEvidenceContext = 2,
+    DirectResponse = 3
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

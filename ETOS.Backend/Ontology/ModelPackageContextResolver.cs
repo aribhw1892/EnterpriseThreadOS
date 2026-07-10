@@ -150,11 +150,22 @@ public sealed class ModelPackageContextResolver(
         if (!string.IsNullOrWhiteSpace(importProfile.DefaultBomRelationshipType))
         {
             var normalized = NormalizeKey(importProfile.DefaultBomRelationshipType);
-            return ontology.BomRelationships.FirstOrDefault(item => item.NormalizedRelationshipType == normalized)
+            var matches = ontology.BomRelationships
+                .Where(item => item.NormalizedRelationshipType == normalized)
+                .ToList();
+            return matches.FirstOrDefault(item =>
+                    string.Equals(item.ParentObjectType, "part", StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(item.ChildObjectType, "part", StringComparison.OrdinalIgnoreCase))
+                ?? matches.FirstOrDefault()
                 ?? ontology.BomRelationships.FirstOrDefault();
         }
 
-        return ontology.BomRelationships.OrderBy(item => item.RelationshipType).FirstOrDefault();
+        return ontology.BomRelationships
+            .OrderBy(item => item.RelationshipType)
+            .FirstOrDefault(item =>
+                string.Equals(item.ParentObjectType, "part", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(item.ChildObjectType, "part", StringComparison.OrdinalIgnoreCase))
+            ?? ontology.BomRelationships.OrderBy(item => item.RelationshipType).FirstOrDefault();
     }
 
     private static void EnsurePublished(ModelPackageVersion modelPackage)

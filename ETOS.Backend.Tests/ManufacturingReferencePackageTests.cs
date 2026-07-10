@@ -38,6 +38,8 @@ public sealed class ManufacturingReferencePackageTests
 
         Assert.Equal(ManufacturingReferencePackageKeys.PackageKey, package.Key);
         Assert.False(string.IsNullOrWhiteSpace(package.ImportProfileJson));
+        Assert.Contains("flatImportMetadataPolicies", package.ImportProfileJson, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("partVersion", package.ImportProfileJson, StringComparison.OrdinalIgnoreCase);
         Assert.False(string.IsNullOrWhiteSpace(package.QueryIntentExtensionsJson));
         Assert.Contains("bom-impact-context", package.QueryIntentExtensionsJson, StringComparison.OrdinalIgnoreCase);
     }
@@ -320,7 +322,9 @@ public sealed class ManufacturingReferencePackageTests
                 "Test mapping.",
                 [
                     new CreateImportColumnMappingRequest("partNumber", "part", "partNumber", true, true),
-                    new CreateImportColumnMappingRequest("cost", "part", "cost", false, false)
+                    new CreateImportColumnMappingRequest("cost", "part", "cost", false, false),
+                    new CreateImportColumnMappingRequest("parent", "part", "partNumber", true, true),
+                    new CreateImportColumnMappingRequest("child", "part", "partNumber", true, true)
                 ],
                 lifecycleKeys.Select(key => new CreateImportLifecycleMappingRequest(key, "released")).ToList()))
         };

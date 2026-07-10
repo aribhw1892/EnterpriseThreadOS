@@ -495,9 +495,9 @@
     "semantic_hash": "f67d098b758cd530964e1da325b8c698"
   },
   "ETOS.Backend/Platform/EnterpriseThreadPlatform.cs": {
-    "mtime": 1783368006.8993802,
-    "ast_hash": "2c0bfe6bae89504d5e6b0fb8a16c4b37",
-    "semantic_hash": "2c0bfe6bae89504d5e6b0fb8a16c4b37"
+    "mtime": 1783614367.813747,
+    "ast_hash": "79eda31865ec1e41769592e3bee41211",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Platform/Extensions/ExtensionPoint.cs": {
     "mtime": 1780763773.6560092,
@@ -555,7 +555,7 @@
     "semantic_hash": "dfa1f5f6a7037bf39dc510f30b180002"
   },
   "ETOS.Frontend/next-env.d.ts": {
-    "mtime": 1783595573.0120292,
+    "mtime": 1783609439.5937583,
     "ast_hash": "d0f8375ae1199dc7acd3977fc33b78b8",
     "semantic_hash": "d0f8375ae1199dc7acd3977fc33b78b8"
   },
@@ -575,8 +575,8 @@
     "semantic_hash": "239f3ebf717465dc636818a1a619398d"
   },
   "ETOS.Frontend/src/app/imports/page.tsx": {
-    "mtime": 1783596477.1169698,
-    "ast_hash": "52b2152796d9e21dfa6ab0bb764726e9",
+    "mtime": 1783611004.7444856,
+    "ast_hash": "3a06ff2213441d6ae9863f2aacb2c26d",
     "semantic_hash": ""
   },
   "ETOS.Frontend/src/app/layout.tsx": {
@@ -595,9 +595,9 @@
     "semantic_hash": "3669df6a1b4315a5c3464912ce5b0d01"
   },
   "ETOS.Frontend/src/lib/etos-api.ts": {
-    "mtime": 1783596476.973235,
-    "ast_hash": "7e62d3ad74f533138bf693c12ef13a2c",
-    "semantic_hash": "7e62d3ad74f533138bf693c12ef13a2c"
+    "mtime": 1783612877.7866192,
+    "ast_hash": "a09f0e4baaab3a4e50d57c18b0b498b7",
+    "semantic_hash": ""
   },
   "ETOS.Frontend/tsconfig.json": {
     "mtime": 1780763578.4419763,
@@ -920,14 +920,14 @@
     "semantic_hash": "011304cb8a11beec71ed9553b454e2e5"
   },
   "ETOS.Backend.Tests/GovernedQueryTests.cs": {
-    "mtime": 1783361762.7489386,
-    "ast_hash": "837ed669f349c1f0d6e103eb3b87552f",
-    "semantic_hash": "837ed669f349c1f0d6e103eb3b87552f"
+    "mtime": 1783612871.2083821,
+    "ast_hash": "9e1aac8cbec063f11640de920391a6a9",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GovernedQuery/GovernedQueryContracts.cs": {
-    "mtime": 1781369352.7965968,
-    "ast_hash": "49fe0255cbfd7a826fc08abe2aa0354e",
-    "semantic_hash": "49fe0255cbfd7a826fc08abe2aa0354e"
+    "mtime": 1783612783.3542528,
+    "ast_hash": "f483bccfa1751aaa41966085cf01aa2d",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GovernedQuery/GovernedQueryEndpointExtensions.cs": {
     "mtime": 1781365974.317926,
@@ -935,14 +935,14 @@
     "semantic_hash": "9ee7225f986e66be604f477593f1dabc"
   },
   "ETOS.Backend/GovernedQuery/GovernedQueryModels.cs": {
-    "mtime": 1781365675.8709707,
-    "ast_hash": "5ec5e706dd600c03e5324e6361ab5ea9",
-    "semantic_hash": "5ec5e706dd600c03e5324e6361ab5ea9"
+    "mtime": 1783612783.1809938,
+    "ast_hash": "f8da2a534638d4563124f03ba2326bb9",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GovernedQuery/GovernedQueryService.cs": {
-    "mtime": 1781803040.5844178,
-    "ast_hash": "223846b2956f6fca7a61b5018d3cae90",
-    "semantic_hash": "223846b2956f6fca7a61b5018d3cae90"
+    "mtime": 1783612795.1991777,
+    "ast_hash": "1f8f140af6a861e711bb524e2214c27c",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Infrastructure/Persistence/Migrations/20260613155409_Slice13GovernedQueryContextAssembly.Designer.cs": {
     "mtime": 1781366049.124782,
@@ -1050,9 +1050,9 @@
     "semantic_hash": "5c7ec3e2b631caeac3c1c8f0bfeb0ebf"
   },
   "ETOS.Backend/GovernedChat/Llm/DeterministicLlmCompletionService.cs": {
-    "mtime": 1781371654.3878841,
-    "ast_hash": "c773ad7dc7f6b93d727cab2aa89f4e6b",
-    "semantic_hash": "c773ad7dc7f6b93d727cab2aa89f4e6b"
+    "mtime": 1783610426.0981011,
+    "ast_hash": "2aa158d73ccd80d6a8f8faa9d781b8c1",
+    "semantic_hash": ""
   },
   "ETOS.Backend/GovernedChat/Llm/GovernedChatLlmOptions.cs": {
     "mtime": 1781369310.6623769,
@@ -1085,9 +1085,9 @@
     "semantic_hash": "267e673e5579fddd155f11d2b96ba054"
   },
   "ETOS.Frontend/src/app/chat/page.tsx": {
-    "mtime": 1781452123.5976093,
-    "ast_hash": "24a98fd33a8758c7f47802c0b4f9fb3b",
-    "semantic_hash": "24a98fd33a8758c7f47802c0b4f9fb3b"
+    "mtime": 1783612875.775412,
+    "ast_hash": "d7c3fa78bb6481b177b8150886693def",
+    "semantic_hash": ""
   },
   ".cursor/plans/issue_15_governed_chat.plan.md": {
     "mtime": 1781369651.135712,
@@ -1135,9 +1135,9 @@
     "semantic_hash": "100f5780664369e23eb0f04b6c90e94c"
   },
   "ETOS.Frontend/src/app/artifacts/page.tsx": {
-    "mtime": 1781370274.1900861,
-    "ast_hash": "5a02ba582e0bf3854a8396da8ea7636f",
-    "semantic_hash": "5a02ba582e0bf3854a8396da8ea7636f"
+    "mtime": 1783612272.303646,
+    "ast_hash": "d53aec1b5f51c18a0e27b11063ecc8e3",
+    "semantic_hash": ""
   },
   "ETOS.Frontend/src/app/context-packages/[packageId]/page.tsx": {
     "mtime": 1781370286.8374703,
@@ -1145,14 +1145,14 @@
     "semantic_hash": "ccd6af58c1ebd314d50e6c824827a412"
   },
   "ETOS.Frontend/src/app/context-packages/page.tsx": {
-    "mtime": 1781370284.7855804,
-    "ast_hash": "54b18af8e7edf30f4b8439ee630cb0f2",
-    "semantic_hash": "54b18af8e7edf30f4b8439ee630cb0f2"
+    "mtime": 1783612274.569048,
+    "ast_hash": "cbaded7acbcdb0bb768a6ae53ba862f3",
+    "semantic_hash": ""
   },
   "ETOS.Frontend/src/app/decisions/page.tsx": {
-    "mtime": 1783359031.1391811,
-    "ast_hash": "ab65f6ac85728394081a45d58534fd96",
-    "semantic_hash": "ab65f6ac85728394081a45d58534fd96"
+    "mtime": 1783612276.814277,
+    "ast_hash": "371c07268e6c3b4c7b4849fea247582c",
+    "semantic_hash": ""
   },
   "ETOS.Frontend/src/app/documents/[documentId]/page.tsx": {
     "mtime": 1781370282.8235645,
@@ -1170,9 +1170,9 @@
     "semantic_hash": "4895b5f986fbbfb4a570c79aefc582f6"
   },
   "ETOS.Frontend/src/app/graph/page.tsx": {
-    "mtime": 1781370277.7489877,
-    "ast_hash": "5142c1c6c86124efd921bca4e45ecc7b",
-    "semantic_hash": "5142c1c6c86124efd921bca4e45ecc7b"
+    "mtime": 1783612270.0317593,
+    "ast_hash": "a7cd6175f4b4108ed2737497e5d55ea4",
+    "semantic_hash": ""
   },
   "ETOS.Frontend/src/components/explorers/ContextView360.tsx": {
     "mtime": 1781370265.4608164,
@@ -1180,9 +1180,9 @@
     "semantic_hash": "8f838b5849458f2f89eb656ae1f81a68"
   },
   "ETOS.Frontend/src/components/explorers/ExplorerListShell.tsx": {
-    "mtime": 1781370262.5474472,
-    "ast_hash": "2b9c3747dd685c6a2c814a96c08ab21f",
-    "semantic_hash": "2b9c3747dd685c6a2c814a96c08ab21f"
+    "mtime": 1783612284.7320943,
+    "ast_hash": "5f6e2cd3989b1ceaefe6263dec7e7f72",
+    "semantic_hash": ""
   },
   "ETOS.Frontend/src/components/explorers/GovernanceFlowPanel.tsx": {
     "mtime": 1781370267.8333042,
@@ -1205,9 +1205,9 @@
     "semantic_hash": "041a8bcf70746cb9d42799569a0bc128"
   },
   "ETOS.Backend/Dashboards/DashboardReportContracts.cs": {
-    "mtime": 1783358932.919427,
-    "ast_hash": "6fcc4b0f5a38a694523e332cffcd67d0",
-    "semantic_hash": "6fcc4b0f5a38a694523e332cffcd67d0"
+    "mtime": 1783612854.4108098,
+    "ast_hash": "3bde0af805bce7ceb97b93ab70b9f65a",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Dashboards/DashboardReportEndpointExtensions.cs": {
     "mtime": 1781370753.041195,
@@ -1375,7 +1375,7 @@
     "semantic_hash": "3d2a3c3b1390a16f354859263f777d82"
   },
   "ETOS.Backend.Tests/MappingSuggestionProviderTests.cs": {
-    "mtime": 1783597913.3958838,
+    "mtime": 1783607623.9967344,
     "ast_hash": "9f84a184158e274fd1b4b28ca57478c4",
     "semantic_hash": ""
   },
@@ -1400,7 +1400,7 @@
     "semantic_hash": "ce824da39907de495b3b33bf60471ac5"
   },
   "ETOS.Backend/Imports/MappingSuggestions/MappingSuggestionProviderSelector.cs": {
-    "mtime": 1783597836.1592472,
+    "mtime": 1783607623.9967344,
     "ast_hash": "ea9cdd75f29aa9484a1c57f0fb61838e",
     "semantic_hash": ""
   },
@@ -1680,9 +1680,9 @@
     "semantic_hash": "18634f62789f76301d96c15cc056fc2c"
   },
   "ETOS.Backend/Packages/ManufacturingReferencePackageInstaller.cs": {
-    "mtime": 1783362378.8857403,
-    "ast_hash": "78a80d1cc874d5fb5772b5a005cf1718",
-    "semantic_hash": "78a80d1cc874d5fb5772b5a005cf1718"
+    "mtime": 1783614384.0269306,
+    "ast_hash": "cf5b134913a70f19dd25b8e16bbcfc8e",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Packages/ManufacturingReferencePackageKeys.cs": {
     "mtime": 1781807876.1183498,
@@ -1705,8 +1705,8 @@
     "semantic_hash": "24651bf28e32bcbe8a83a21dfd327ed7"
   },
   "packages/manufacturing-reference/artifacts/agent-templates.json": {
-    "mtime": 1783596545.5589786,
-    "ast_hash": "746d6c1517a3453b066b002f68c294a3",
+    "mtime": 1783614389.266279,
+    "ast_hash": "2c6c014254c0215f6878380d74ed5640",
     "semantic_hash": ""
   },
   "packages/manufacturing-reference/artifacts/business-policies.json": {
@@ -1715,9 +1715,9 @@
     "semantic_hash": "8a00c1ad491fb441d1c931283adbedb6"
   },
   "packages/manufacturing-reference/artifacts/capabilities.json": {
-    "mtime": 1782584086.09218,
-    "ast_hash": "ea31ea9002c93d2c8f3ca7cf6b6001f2",
-    "semantic_hash": "ea31ea9002c93d2c8f3ca7cf6b6001f2"
+    "mtime": 1783614113.3657906,
+    "ast_hash": "fe7b0ec2dda5c4ff3f108ed66b940d6d",
+    "semantic_hash": ""
   },
   "packages/manufacturing-reference/artifacts/optimization-models.json": {
     "mtime": 1781807828.1871555,
@@ -2420,8 +2420,8 @@
     "semantic_hash": "40f4e64eee1f5b24c02bfab8cf8d9c47"
   },
   "ETOS.AgentRuntime/app/execute_service.py": {
-    "mtime": 1783597958.3522058,
-    "ast_hash": "29b5add47aea6f1207b252c7c5d66f80",
+    "mtime": 1783614388.9252598,
+    "ast_hash": "cf005a7fb785bf8d655787fa9ac60a05",
     "semantic_hash": ""
   },
   "ETOS.AgentRuntime/app/main.py": {
@@ -2505,9 +2505,9 @@
     "semantic_hash": "b878a99d52d70c586e4cf8ebb8ed667a"
   },
   "ETOS.Backend/Agents/AgentDefinitionService.cs": {
-    "mtime": 1782586049.3216927,
-    "ast_hash": "602dd190ed2ae667f76ff4518277a815",
-    "semantic_hash": "602dd190ed2ae667f76ff4518277a815"
+    "mtime": 1783614376.9484506,
+    "ast_hash": "01c8585b750cb728718efd9f0e0bbcba",
+    "semantic_hash": ""
   },
   "ETOS.Backend/Infrastructure/Persistence/Migrations/20260619174911_Issue23AgentRuns.Designer.cs": {
     "mtime": 1781891351.4205155,
@@ -2595,14 +2595,14 @@
     "semantic_hash": "4cf359d60ecf0e8bdfcb58b28a5b615d"
   },
   "ETOS.Backend.Tests/AgentVersionTests.cs": {
-    "mtime": 1782586084.659582,
-    "ast_hash": "04b8c3a4253c2a403ee3468f4abe4358",
-    "semantic_hash": "04b8c3a4253c2a403ee3468f4abe4358"
+    "mtime": 1783614389.865257,
+    "ast_hash": "605dbf71c822b82fd67e8d6ab25e3ca4",
+    "semantic_hash": ""
   },
   "ETOS.Backend.Tests/Fixtures/AgentExecutionTestSupport.cs": {
-    "mtime": 1782586068.8567293,
-    "ast_hash": "7b245a177bfeaec7d48ea08a15a787bd",
-    "semantic_hash": "7b245a177bfeaec7d48ea08a15a787bd"
+    "mtime": 1783610437.6596127,
+    "ast_hash": "ea90573c3472cec9c0a7e965917fa056",
+    "semantic_hash": ""
   },
   "ETOS.Backend.Tests/Fixtures/MockAgentRuntimeAdapter.cs": {
     "mtime": 1781892393.2514813,
@@ -2665,7 +2665,7 @@
     "semantic_hash": ""
   },
   "ETOS.Backend/Imports/MappingSuggestions/PydanticAiMappingProvider.cs": {
-    "mtime": 1783597823.3670137,
+    "mtime": 1783607623.9967344,
     "ast_hash": "bdaed1a1d19f5bad37360f2e9e357a96",
     "semantic_hash": ""
   },
@@ -2775,7 +2775,7 @@
     "semantic_hash": "8e0bfff727441bf0124dc555a40cd636"
   },
   "ETOS.AgentRuntime/tests/test_execute_helpers.py": {
-    "mtime": 1783597903.5982232,
+    "mtime": 1783607623.9967344,
     "ast_hash": "a142de7c30c83dedf47d5a0845e62678",
     "semantic_hash": ""
   },
@@ -3340,8 +3340,8 @@
     "semantic_hash": "267ee63bd5d14d80fa988611bbf7be2a"
   },
   "scripts/run-mvp-demo.ps1": {
-    "mtime": 1783596576.4780793,
-    "ast_hash": "49c36d13e1baaf4f7e93db6cb06cd76a",
+    "mtime": 1783598404.2335567,
+    "ast_hash": "10f83fd060402546fc09ad84e2d29b5d",
     "semantic_hash": ""
   },
   ".cursor/plans/issue_26_mvp_demo_e19bd883.plan.md": {
@@ -3355,8 +3355,48 @@
     "semantic_hash": ""
   },
   "ETOS.Backend/Imports/MappingSuggestions/MappingSuggestionOutputQuality.cs": {
-    "mtime": 1783597814.6591742,
+    "mtime": 1783607623.99774,
     "ast_hash": "81cb0c80a89d513bb7298b04d08068b9",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Agents/AgentPromptDraftDeriver.cs": {
+    "mtime": 1783610423.1551702,
+    "ast_hash": "a8a4e18491c6e406489952bc325e12ee",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/test-results/.last-run.json": {
+    "mtime": 1783600610.9108348,
+    "ast_hash": "db6020bda579327db7c024fb626a5caa",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/test-results/mvp-smoke-MVP-demo-smoke-chat-page-renders-session-UI-shell-chromium/error-context.md": {
+    "mtime": 1783600610.8558452,
+    "ast_hash": "bc223b1c8116fc0740c3338803ea15ee",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/test-results/mvp-smoke-MVP-demo-smoke-home-shows-health-and-MVP-checklist-chromium/error-context.md": {
+    "mtime": 1783600610.8558452,
+    "ast_hash": "eec14840bd9703ab206a61a7dbaf0f8f",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/test-results/mvp-smoke-MVP-demo-smoke-i-3aa45--shows-demo-harness-buttons-chromium/error-context.md": {
+    "mtime": 1783600610.878639,
+    "ast_hash": "ce6329560351c774072b0360c85f5455",
+    "semantic_hash": ""
+  },
+  "ETOS.Frontend/test-results/mvp-smoke-MVP-demo-smoke-w-a8e00-m-impact-review-affordances-chromium/error-context.md": {
+    "mtime": 1783600610.8703744,
+    "ast_hash": "40199ee7841b82745f8be7dc27b32786",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Agents/DirectResponseArtifactSeeder.cs": {
+    "mtime": 1783614367.8167455,
+    "ast_hash": "456bde66c20386803efbb110d9f1a222",
+    "semantic_hash": ""
+  },
+  "ETOS.Backend/Agents/DirectResponseOutputSchema.cs": {
+    "mtime": 1783614367.8167455,
+    "ast_hash": "6dd0389b88edda3eb183ebfeaa6df781",
     "semantic_hash": ""
   }
 }

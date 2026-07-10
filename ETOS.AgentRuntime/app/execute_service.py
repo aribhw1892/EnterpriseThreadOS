@@ -26,6 +26,7 @@ _STRING_MOCKS = {
     "sourceValue": "released",
     "canonicalLifecycleKey": "released",
     "rationale": "Example mapping rationale.",
+    "message": "Hi",
 }
 
 
@@ -271,14 +272,24 @@ def _build_structured_user_prompt(
 ) -> str:
     example_output = _generate_deterministic_output(schema, structured_input)
     example_json = json.dumps(example_output, indent=2, sort_keys=True)
-    return (
-        f"{prompt}\n\n"
-        "Return one structured JSON object that satisfies the output schema.\n"
-        "Every column suggestion must include canonicalAttributeKey.\n"
-        "Set isIdentityField=true when the source column is the primary identifier.\n\n"
-        "Example complete response shape:\n"
-        f"{example_json}"
+    sections = [
+        prompt,
+        "Return one structured JSON object that satisfies the output schema.",
+    ]
+    if "columnSuggestions" in schema.get("properties", {}):
+        sections.extend(
+            [
+                "Every column suggestion must include canonicalAttributeKey.",
+                "Set isIdentityField=true when the source column is the primary identifier.",
+            ]
+        )
+    sections.extend(
+        [
+            "Example complete response shape:",
+            example_json,
+        ]
     )
+    return "\n\n".join(sections)
 
 
 async def _run_structured_agent(

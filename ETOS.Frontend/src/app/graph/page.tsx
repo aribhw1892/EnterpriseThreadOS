@@ -48,6 +48,7 @@ export default async function GraphExplorerPage() {
           result={nodes}
           emptyMessage="No graph nodes matched the current filters."
           renderItem={GraphNodeCard}
+          getItemKey={(node) => node.nodeId}
         />
       </div>
     </main>

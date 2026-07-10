@@ -18,6 +18,10 @@ public sealed record RunGovernedQueryRequest(
     int MaxDepth,
     bool CreateAiTrace = true);
 
+public sealed record PlatformFixedIntentVersionResponse(
+    Guid IntentVersionId,
+    Guid RetrievalStrategyVersionId);
+
 public sealed record QueryIntentVersionResponse(
     Guid Id,
     Guid TenantId,

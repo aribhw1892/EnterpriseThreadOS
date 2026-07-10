@@ -1375,6 +1375,8 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.Property(mapping => mapping.Summary).HasMaxLength(1000);
             entity.Property(mapping => mapping.State).HasConversion<string>().HasMaxLength(32).IsRequired();
             entity.Property(mapping => mapping.SuggestionProvider).HasMaxLength(120).IsRequired();
+            entity.Property(mapping => mapping.StructuralRelationshipType).HasMaxLength(120);
+            entity.Property(mapping => mapping.NormalizedStructuralRelationshipType).HasMaxLength(120);
             entity.Property(mapping => mapping.CreatedAt).IsRequired();
             entity.HasIndex(mapping => new { mapping.ImportBatchId, mapping.NormalizedVersionLabel }).IsUnique();
             entity.HasIndex(mapping => new { mapping.TenantId, mapping.State, mapping.CreatedAt });
@@ -1466,9 +1468,9 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.HasKey(run => run.Id);
             entity.Property(run => run.TenantId).IsRequired();
             entity.Property(run => run.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
-            entity.Property(run => run.GraphNodeIdsJson).HasMaxLength(8000);
-            entity.Property(run => run.GraphRelationshipIdsJson).HasMaxLength(8000);
-            entity.Property(run => run.FailureSummary).HasMaxLength(1000);
+            entity.Property(run => run.GraphNodeIdsJson).HasColumnType("text");
+            entity.Property(run => run.GraphRelationshipIdsJson).HasColumnType("text");
+            entity.Property(run => run.FailureSummary).HasColumnType("text");
             entity.Property(run => run.CreatedAt).IsRequired();
             entity.HasIndex(run => new { run.TenantId, run.ImportBatchId, run.CreatedAt });
             entity.HasOne(run => run.ImportBatch)

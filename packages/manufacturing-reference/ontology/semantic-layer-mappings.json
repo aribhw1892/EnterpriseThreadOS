@@ -1,4 +1,4 @@
 {
-  "graphNodeTypeMappingsJson": "{\"part\":\"Part\",\"document\":\"Document\",\"change\":\"Change\"}",
-  "graphRelationshipTypeMappingsJson": "{\"contains\":\"BOM_CONTAINS\",\"references\":\"references\"}"
+  "graphNodeTypeMappingsJson": "{\"part\":\"Part\",\"partVersion\":\"PartVersion\",\"document\":\"Document\",\"change\":\"Change\"}",
+  "graphRelationshipTypeMappingsJson": "{\"contains\":\"BOM_CONTAINS\",\"hasVersion\":\"HAS_VERSION\",\"references\":\"references\"}"
 }

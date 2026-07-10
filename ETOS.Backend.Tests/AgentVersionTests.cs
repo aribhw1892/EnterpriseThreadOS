@@ -54,6 +54,80 @@ public sealed class AgentVersionTests
     }
 
     [Fact]
+    public async Task CreateFromPromptUsesDeterministicDraftDefaults()
+    {
+        await using var application = AgentExecutionTestSupport.CreateApplication();
+        using var client = application.CreateClient();
+        var packageContext = await ManufacturingModelPackageFixture.CreatePublishedPackageAsync(client);
+        await AgentExecutionTestSupport.CreateAndPublishAnalysisAgentTypeAsync(
+            client,
+            packageContext.TenantId,
+            packageContext.UserId);
+
+        const string prompt =
+            "Create an agent that investigates manufacturing BOM discrepancies using governed query and evidence-backed recommendations.";
+
+        var created = await AgentExecutionTestSupport.CreateAgentFromPromptAsync(
+            client,
+            packageContext.TenantId,
+            packageContext.UserId,
+            prompt);
+
+        using var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"/api/admin/agents/{created.ArtifactId}/versions/{created.VersionId}");
+        AgentExecutionTestSupport.AddTenantHeaders(request, packageContext.TenantId, packageContext.UserId);
+
+        var response = await client.SendAsync(request);
+        var detail = await response.Content.ReadFromJsonAsync<AgentDefinitionDetailResponse>();
+
+        Assert.True(response.StatusCode == HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+        Assert.NotNull(detail);
+        Assert.StartsWith("investigates-manufacturing-bom-discrepancies", detail.AgentKey, StringComparison.Ordinal);
+        Assert.StartsWith("Investigates manufacturing BOM discrepancies", detail.DisplayName, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(AgentRuntimeAdapterKeys.PydanticAi, detail.PreferredRuntimeAdapterKey);
+        Assert.True(detail.CompositionMetadata?.ContainsKey("createdFromPrompt") ?? false);
+        Assert.True(detail.CompositionMetadata?.ContainsKey("seededFromTemplateKey") ?? false);
+        Assert.NotEmpty(detail.ReferencedTools);
+    }
+
+    [Fact]
+    public async Task CreateFromPromptUsesDirectResponseForSimplePrompt()
+    {
+        await using var application = AgentExecutionTestSupport.CreateApplication();
+        using var client = application.CreateClient();
+        var packageContext = await ManufacturingModelPackageFixture.CreatePublishedPackageAsync(client);
+        await AgentExecutionTestSupport.CreateAndPublishAnalysisAgentTypeAsync(
+            client,
+            packageContext.TenantId,
+            packageContext.UserId);
+
+        const string prompt = "Only say hi for any user message!";
+
+        var created = await AgentExecutionTestSupport.CreateAgentFromPromptAsync(
+            client,
+            packageContext.TenantId,
+            packageContext.UserId,
+            prompt);
+
+        using var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"/api/admin/agents/{created.ArtifactId}/versions/{created.VersionId}");
+        AgentExecutionTestSupport.AddTenantHeaders(request, packageContext.TenantId, packageContext.UserId);
+
+        var response = await client.SendAsync(request);
+        var detail = await response.Content.ReadFromJsonAsync<AgentDefinitionDetailResponse>();
+
+        Assert.True(response.StatusCode == HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+        Assert.NotNull(detail);
+        Assert.Equal("direct-response-v1", detail.QueryIntent?.IntentKey);
+        Assert.Equal("platform-direct-response", detail.PromptTemplate?.ArtifactName);
+        Assert.Equal("direct-response-schema", detail.OutputSchema?.ArtifactName);
+        Assert.True(detail.CompositionMetadata?.ContainsKey("seededQueryIntentKey") ?? false);
+        Assert.Empty(detail.ReferencedTools);
+    }
+
+    [Fact]
     public async Task MarkReadyBlockedWhenDeferredRuntimeAdapterSelected()
     {
         await using var application = AgentExecutionTestSupport.CreateApplication();

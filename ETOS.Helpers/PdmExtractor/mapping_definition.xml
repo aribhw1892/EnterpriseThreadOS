@@ -1,0 +1,1143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MappingDefinition>
+<!--RH01 Steris PDM Extraction LVH -->
+<ObjectDefinitions>
+	<ObjectDefinition Type="Folder">      
+        <Query>
+		 	SELECT 
+				DISTINCT(project.Path)															AS ProjectPath
+		 	FROM Revisions revision 
+		 	JOIN Documents document ON revision.DocumentID = document.DocumentID
+		 	LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+		 	LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+		 						
+		 	LEFT JOIN 
+		 	(
+		 		SELECT 
+					thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/ AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 														   AS modDate , 
+					status.Name , 
+					wf.Name As Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID 
+		 			ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) AS rn
+		 		FROM TransitionHistory thistory 
+		 		LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+		 		LEFT JOIN Status status ON transitions.Destination = status.StatusID
+		 		LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+		 	) fileStatus ON revision.DocumentID = fileStatus.thistoryID
+		 
+		 	WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2  AND revision.Date IS NOT NULL
+		 	--AND REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) IN ('.slddrw','.sldasm','.sldprt')
+		 	--AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 
+			-- 50825 standard epmdocuments (LVO)
+		 	--AND document.Filename IN ('T5165NTOS.SLDASM')
+	    </Query>
+	<IdField>ProjectPath</IdField>
+      <AttributeSources>
+        <AttributeSource>
+          <Query>
+			SELECT 
+				DISTINCT(project.Path)															AS ProjectPath
+		 	FROM Revisions revision 
+		 	JOIN Documents document ON revision.DocumentID = document.DocumentID
+		 	LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+		 	LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+		 						
+		 	LEFT JOIN 
+		 	(
+		 		SELECT 
+					thistory.DocumentID  AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 														   AS modDate , 
+					status.Name , 
+					wf.Name As Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/
+		 			ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) AS rn
+		 		FROM TransitionHistory thistory 
+		 		LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+		 		LEFT JOIN Status status ON transitions.Destination = status.StatusID
+		 		LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+		 	) fileStatus ON revision.DocumentID = fileStatus.thistoryID
+		 
+		 	WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2  AND revision.Date IS NOT NULL
+		 	--AND REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) IN ('.slddrw','.sldasm','.sldprt')
+		 	--AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 
+			-- 50825 standard epmdocuments (LVO)
+		 	--AND document.Filename IN ('T5165NTOS.SLDASM')
+			</Query>
+			<Attributes>
+				<Attribute Type="Source" Name="ProjectPath"/>
+			</Attributes>
+		</AttributeSource>
+	</AttributeSources>
+	</ObjectDefinition>
+	<ObjectDefinition Type="File">
+		<Query>
+			SELECT 
+				document.DocumentID 									AS MigrationSourceId
+		 	FROM Revisions revision 
+		 	JOIN Documents document ON revision.DocumentID = document.DocumentID
+		 	LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+		 	LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+		 	LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+		 						
+		 	LEFT JOIN 
+		 	(
+		 		SELECT 
+					thistory.DocumentID  AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 														   AS modDate , 
+					status.Name , 
+					wf.Name As Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID 
+		 			ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) AS rn
+		 		FROM TransitionHistory thistory 
+		 		LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+		 		LEFT JOIN Status status ON transitions.Destination = status.StatusID
+		 		LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+		 	) fileStatus ON revision.DocumentID = fileStatus.thistoryID
+
+			LEFT JOIN 
+			(
+				Select * From (SELECT 
+					renHist.DocumentId 															  AS DocId,
+					renHist.oldname,
+					ROW_NUMBER() OVER (PARTITION BY renHist.DocumentId ORDER BY renHist.Time ASC) AS rn
+				FROM HistoryRename renHist ) renHistFinal where renHistFinal.rn = 1 --where renHist.DocumentId = 26182
+			) renHistory ON revision.DocumentID = renHistory.DocId
+			
+			left join 
+				(
+					select concat(urev.DocumentId , '-' , urev.RevNr) AS RevID,
+					urev.Comment,
+					row_number() over (partition by concat(urev.DocumentId , '-' , urev.RevNr) order by urev.UserRevID DESC) as rn
+					from UserRevs urev where urev.Comment is not null
+				) revisionLabel on Concat(revision.DocumentID , '-' , revision.RevNr) = revisionLabel.RevID
+		 
+		 	WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2  AND revision.Date IS NOT NULL
+		 	--AND REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) IN ('.slddrw','.sldasm','.sldprt')
+		 	AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 
+			--and renHistory.rn = 1
+			-- 50825 standard epmdocuments (LVO)
+		 	--AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+		  </Query>
+      <IdField>MigrationSourceId</IdField>
+      <AttributeSources>
+         <AttributeSource>  
+           <Query>
+		 	SELECT 
+				document.DocumentID 									AS MigrationSourceId,
+				revision.DocumentID																AS DocumentID,
+				revisionLabel.Comment															AS LocalRevision,
+				project.Path																	AS ProjectPath,
+				document.Filename 																AS FileName
+		 	FROM Revisions revision 
+		 	JOIN Documents document ON revision.DocumentID = document.DocumentID
+		 	LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+		 	LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+		 	LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+		 						
+		 	LEFT JOIN 
+		 	(
+		 		SELECT 
+					thistory.DocumentID  AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 														   AS modDate , 
+					status.Name , 
+					wf.Name As Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/
+		 			ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) AS rn
+		 		FROM TransitionHistory thistory 
+		 		LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+		 		LEFT JOIN Status status ON transitions.Destination = status.StatusID
+		 		LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+		 	) fileStatus ON revision.DocumentID = fileStatus.thistoryID
+
+			LEFT JOIN 
+			(
+				Select * From (SELECT 
+					renHist.DocumentId 															  AS DocId,
+					renHist.oldname,
+					ROW_NUMBER() OVER (PARTITION BY renHist.DocumentId ORDER BY renHist.Time ASC) AS rn
+				FROM HistoryRename renHist ) renHistFinal where renHistFinal.rn = 1 --where renHist.DocumentId = 26182
+			) renHistory ON revision.DocumentID = renHistory.DocId
+			
+			left join 
+				(
+					select concat(urev.DocumentId , '-' , urev.RevNr) AS RevID,
+					urev.Comment,
+					row_number() over (partition by concat(urev.DocumentId , '-' , urev.RevNr) order by urev.UserRevID DESC) as rn
+					from UserRevs urev where urev.Comment is not null
+				) revisionLabel on Concat(revision.DocumentID , '-' , revision.RevNr) = revisionLabel.RevID
+		 
+		 	WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2  AND revision.Date IS NOT NULL
+		 	--AND REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) IN ('.slddrw','.sldasm','.sldprt')
+		 	AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 -- 50825 standard epmdocuments (LVO)
+			--and renHistory.rn = 1
+		 	--AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+           </Query>
+           <Attributes>
+		 	<Attribute Type="Source" Name="MigrationSourceId"/>
+		 	<Attribute Type="Source" Name="DocumentID"/>
+		 	<Attribute Type="Source" Name="ProjectPath"/>
+		 	<Attribute Type="Source" Name="FileName"/>		
+           </Attributes>
+         </AttributeSource>
+      </AttributeSources>
+	</ObjectDefinition>
+ 	<ObjectDefinition Type="Version">
+		<Query>
+			SELECT 
+				CONCAT(document.DocumentID,'-',revision.RevNr) 									AS MigrationSourceId
+		 	FROM Revisions revision 
+		 	JOIN Documents document ON revision.DocumentID = document.DocumentID
+		 	LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+		 	LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+		 	LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+		 						
+		 	LEFT JOIN 
+		 	(
+		 		SELECT 
+					thistory.DocumentID  AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 														   AS modDate , 
+					status.Name , 
+					wf.Name As Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID 
+		 			ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) AS rn
+		 		FROM TransitionHistory thistory 
+		 		LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+		 		LEFT JOIN Status status ON transitions.Destination = status.StatusID
+		 		LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+		 	) fileStatus ON revision.DocumentID = fileStatus.thistoryID
+
+			LEFT JOIN 
+			(
+				Select * From (SELECT 
+					renHist.DocumentId 															  AS DocId,
+					renHist.oldname,
+					ROW_NUMBER() OVER (PARTITION BY renHist.DocumentId ORDER BY renHist.Time ASC) AS rn
+				FROM HistoryRename renHist ) renHistFinal where renHistFinal.rn = 1 --where renHist.DocumentId = 26182
+			) renHistory ON revision.DocumentID = renHistory.DocId
+			
+			left join 
+				(
+					select concat(urev.DocumentId , '-' , urev.RevNr) AS RevID,
+					urev.Comment,
+					row_number() over (partition by concat(urev.DocumentId , '-' , urev.RevNr) order by urev.UserRevID DESC) as rn
+					from UserRevs urev where urev.Comment is not null
+				) revisionLabel on Concat(revision.DocumentID , '-' , revision.RevNr) = revisionLabel.RevID
+		 
+		 	WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2  AND revision.Date IS NOT NULL
+		 	--AND REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) IN ('.slddrw','.sldasm','.sldprt')
+		 	--AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 
+			--and renHistory.rn = 1
+			-- 50825 standard epmdocuments (LVO)
+		 	--AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+		  </Query>
+      <IdField>MigrationSourceId</IdField>
+      <AttributeSources>
+         <AttributeSource>  
+           <Query>
+		 	SELECT 
+				CONCAT(document.DocumentID,'-',revision.RevNr) 									AS MigrationSourceId,
+				revision.DocumentID																AS DocumentID,
+				--card.CardName																	As DataCardName,
+				renHistory.OldName																As OldName,
+				revision.RevNr 																	AS RevNr,
+				revisionLabel.Comment															AS LocalRevision,
+				project.Path																	AS ProjectPath,
+				UPPER (RIGHT(master.dbo.fn_varbintohexstr(document.DocumentID),1))
+				+ '\' + RIGHT(master.dbo.fn_varbintohexstr(document.DocumentID),8) 
+				+ '\' + RIGHT(master.dbo.fn_varbintohexstr(revision.RevNr),8) 
+				+ REVERSE(LEFT(REVERSE(COALESCE(renHistory.OldName,document.FileName)),
+				CHARINDEX('.',REVERSE(COALESCE(renHistory.OldName,document.FileName)))))  		AS VaultArchivePath,
+				document.Filename 																AS FileName,		
+				COALESCE(fileStatus.Workflow ,'')												AS Workflow,
+				COALESCE(fileStatus.Name ,'') 													AS Status, 
+				ciuser.Username																	AS CheckedInUser,
+				ciuser.FullName																	AS CheckedInUserFullName,
+				revision.ActiveConfigurationId													AS ActiveConfigId,
+				COALESCE(fileStatus.modDate,'')													AS CreatedDate,	
+				COALESCE(revision.Date,'')														AS ModifiedDate,
+				COALESCE(fileStatus.Comment,'')													AS CheckInComments,
+				CASE 
+					WHEN (revision.RevNr = document.LatestRevisionNo) THEN 'TRUE'
+					ELSE 'FALSE' 
+				END 																			AS IsLatest
+		 	FROM Revisions revision 
+		 	JOIN Documents document ON revision.DocumentID = document.DocumentID
+		 	LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+		 	LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+		 	LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+		 						
+		 	LEFT JOIN 
+		 	(
+		 		SELECT 
+					thistory.DocumentID  AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 														   AS modDate , 
+					status.Name , 
+					wf.Name As Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/
+		 			ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) AS rn
+		 		FROM TransitionHistory thistory 
+		 		LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+		 		LEFT JOIN Status status ON transitions.Destination = status.StatusID
+		 		LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+		 	) fileStatus ON revision.DocumentID = fileStatus.thistoryID
+
+			LEFT JOIN 
+			(
+				Select * From (SELECT 
+					renHist.DocumentId 															  AS DocId,
+					renHist.oldname,
+					ROW_NUMBER() OVER (PARTITION BY renHist.DocumentId ORDER BY renHist.Time ASC) AS rn
+				FROM HistoryRename renHist ) renHistFinal where renHistFinal.rn = 1 --where renHist.DocumentId = 26182
+			) renHistory ON revision.DocumentID = renHistory.DocId
+			
+			left join 
+				(
+					select concat(urev.DocumentId , '-' , urev.RevNr) AS RevID,
+					urev.Comment,
+					row_number() over (partition by concat(urev.DocumentId , '-' , urev.RevNr) order by urev.UserRevID DESC) as rn
+					from UserRevs urev where urev.Comment is not null
+				) revisionLabel on Concat(revision.DocumentID , '-' , revision.RevNr) = revisionLabel.RevID
+		 
+		 	WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2  AND revision.Date IS NOT NULL
+		 	--AND REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) IN ('.slddrw','.sldasm','.sldprt')
+		 	--AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 -- 50825 standard epmdocuments (LVO)
+			--and renHistory.rn = 1
+		 	--AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+           </Query>
+           <Attributes>
+		 	<Attribute Type="Source" Name="MigrationSourceId"/>
+		 	<Attribute Type="Source" Name="DocumentID"/>
+			<Attribute Type="Source" Name="OldName"/>
+		 	<Attribute Type="Source" Name="RevNr"/>
+			<Attribute Type="Source" Name="LocalRevision"/>
+		 	<Attribute Type="Source" Name="ProjectPath"/>
+			<Attribute Type="Source" Name="VaultArchivePath"/>
+		 	<Attribute Type="Source" Name="FileName"/>		
+		 	<Attribute Type="Source" Name="Workflow"/>
+		 	<Attribute Type="Source" Name="Status"/>		
+		 	<Attribute Type="Source" Name="CheckedInUser"/>
+		 	<Attribute Type="Source" Name="CheckedInUserFullName"/>
+		 	<Attribute Type="Source" Name="ActiveConfigId"/>
+		 	<Attribute Type="Source" Name="CreatedDate"/>	
+		 	<Attribute Type="Source" Name="ModifiedDate"/>
+		 	<Attribute Type="Source" Name="CheckInComments"/>
+			<Attribute Type="Variable" Name="IsLatest"/>
+           </Attributes>
+         </AttributeSource>
+      </AttributeSources>
+	</ObjectDefinition>
+	
+	<ObjectDefinition Type="Configuration">
+		<Query>
+			SELECT 
+				CONCAT(document.DocumentID,'-',revision.RevNr,'-',dcr.ConfigurationID) 			AS MigrationSourceId
+			FROM DocumentRevisionConfiguration dcr 
+			JOIN DocumentConfiguration docConfig ON dcr.ConfigurationID = docConfig.ConfigurationID
+			JOIN Revisions revision ON CONCAT(dcr.DocumentID,'-',dcr.RevisionNo) =  CONCAT(revision.DocumentID,'-',revision.RevNr)
+			JOIN Documents document ON revision.DocumentID = document.DocumentID
+			LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+			LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+			LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+								
+			LEFT JOIN 
+			(
+				SELECT 
+					thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/ 		AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 																AS modDate , 
+					status.Name , 
+					wf.Name 																	AS Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/
+					ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) 					AS rn
+				FROM TransitionHistory thistory 
+				LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+				LEFT JOIN Status status ON transitions.Destination = status.StatusID
+				LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+			) fileStatus ON revision.DocumentID  = fileStatus.thistoryID
+		
+			WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2 
+			AND revision.Date IS NOT NULL AND REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) 
+			IN ('.sldasm','.sldprt') 
+			-- AND RTRIM(LTRIM(docConfig.ConfigurationName)) NOT IN ('@', 'Default','','No Configuration') --137994 FT Instances EPM (FVH)
+			--AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 --FT Instances EPM (LVO)
+			-- AND dcr.ConfigurationID  = 1
+			-- AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+		  </Query>
+      <IdField>MigrationSourceId</IdField>
+      <AttributeSources>
+         <AttributeSource>  
+           <Query>
+		 	
+			SELECT 
+				CONCAT(document.DocumentID,'-',revision.RevNr,'-',dcr.ConfigurationID) 			AS MigrationSourceId,
+				revision.DocumentID																AS DocumentID,
+				--card.CardName																	As DataCardName,
+				revision.RevNr 																	AS RevNr,
+				dcr.ConfigurationID 															AS ConfigurationID,
+				docConfig.ConfigurationName														AS ConfigurationName,
+				project.Path																	AS ProjectPath,
+				document.Filename 																AS FileName,		
+				COALESCE(fileStatus.Workflow ,'')												AS Workflow,
+				COALESCE(fileStatus.Name ,'') 													AS Status, 
+				ciuser.Username																	AS CheckedInUser,
+				ciuser.FullName																	AS CheckedInUserFullName,
+				revision.ActiveConfigurationId													AS ActiveConfigId,
+				COALESCE(fileStatus.modDate,'')													AS CreatedDate,	
+				COALESCE(revision.Date,'')														AS ModifiedDate,
+				COALESCE(fileStatus.Comment,'')													AS CheckInComments,  
+				CASE 
+					WHEN (revision.RevNr = document.LatestRevisionNo) THEN 'TRUE'
+					ELSE 'FALSE' 
+				END 																			AS IsLatest
+			FROM DocumentRevisionConfiguration dcr 
+			JOIN DocumentConfiguration docConfig ON dcr.ConfigurationID = docConfig.ConfigurationID
+			JOIN Revisions revision ON CONCAT(dcr.DocumentID,'-',dcr.RevisionNo) =  CONCAT(revision.DocumentID,'-',revision.RevNr)
+			JOIN Documents document ON revision.DocumentID = document.DocumentID
+			LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+			LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+			LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+								
+			LEFT JOIN 
+			(
+				SELECT 
+					thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/ 		AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 																AS modDate , 
+					status.Name , 
+					wf.Name 																	AS Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/
+					ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) 					AS rn
+				FROM TransitionHistory thistory 
+				LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+				LEFT JOIN Status status ON transitions.Destination = status.StatusID
+				LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+			) fileStatus ON revision.DocumentID  = fileStatus.thistoryID
+		
+			WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2 
+			AND revision.Date IS NOT NULL AND /**ext.Extension**/ REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) 
+			IN ('.sldasm','.sldprt') 
+			-- AND RTRIM(LTRIM(docConfig.ConfigurationName)) NOT IN ('@', 'Default','','No Configuration') --137994 FT Instances EPM (FVH)
+			--AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 --FT Instances EPM (LVO)
+			-- AND dcr.ConfigurationID  = 1
+			-- AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+           </Query>
+           <Attributes>
+		 	<Attribute Type="Source" Name="MigrationSourceId"/>
+		 	<Attribute Type="Source" Name="DocumentID"/>
+			<Attribute Type="Source" Name="ConfigurationName"/>
+		 	<Attribute Type="Source" Name="RevNr"/>
+		 	<Attribute Type="Source" Name="ProjectPath"/>
+
+		 	<Attribute Type="Source" Name="FileName"/>		
+		 	<Attribute Type="Source" Name="Workflow"/>
+		 	<Attribute Type="Source" Name="Status"/>		
+		 	<Attribute Type="Source" Name="CheckedInUser"/>
+		 	<Attribute Type="Source" Name="CheckedInUserFullName"/>
+		 	<Attribute Type="Source" Name="ActiveConfigId"/>
+		 	<Attribute Type="Source" Name="CreatedDate"/>	
+		 	<Attribute Type="Source" Name="ModifiedDate"/>
+		 	<Attribute Type="Source" Name="CheckInComments"/>
+			<Attribute Type="Variable" Name="IsLatest"/>
+           </Attributes>
+         </AttributeSource>
+      </AttributeSources>
+	</ObjectDefinition>
+	<ObjectDefinition Type="Variables">
+		<Query>
+			SELECT distinct
+				vv.VariableID  		AS MigrationSourceId
+			FROM VariableValue vv
+			JOIN Variable v ON vv.VariableID = v.VariableID
+			JOIN Documents document ON vv.DocumentID = document.DocumentID
+			JOIN DocumentConfiguration docConfig ON vv.ConfigurationID = docConfig.ConfigurationID
+			LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+			LEFT JOIN 
+			(
+				Select
+				CONCAT('VarValue_',vv.VariableID,'-',vv.DocumentID,'-',vv.RevisionNo,'-',vv.ConfigurationID)  		AS InnerMigrationSourceId,
+				ROW_NUMBER() OVER (PARTITION BY CONCAT(vv.VariableID,'-',vv.DocumentID,'-',vv.ConfigurationID)
+				ORDER BY vv.RevisionNo DESC)																		AS VariableVersion
+				
+				FROM VariableValue vv
+				JOIN Variable v ON vv.VariableID = v.VariableID
+				/**JOIN Documents document ON vv.DocumentID = document.DocumentID
+				JOIN DocumentConfiguration docConfig ON vv.ConfigurationID = docConfig.ConfigurationID
+				LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID**/
+			)Latest ON CONCAT('VarValue_',vv.VariableID,'-',vv.DocumentID,'-',vv.RevisionNo,'-',vv.ConfigurationID) = Latest.InnerMigrationSourceId
+			WHERE 
+			--vv.RevisionNo &lt;= document.LatestRevisionNo AND 
+			document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2 
+			--AND LOWER(REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename))))) IN ('.sldasm','.slddrw','.sldprt','.pdf')
+			--AND v.VariableName IN ('Revision') /*Define variable/IBA's names*/
+			AND Latest.VariableVersion = 1 /**AND document.DocumentID = '10112' **/
+		</Query>
+		<IdField>MigrationSourceId</IdField>
+		<AttributeSources>
+			<AttributeSource>
+			<Query>
+				SELECT distinct
+					vv.VariableID  		AS MigrationSourceId,
+					v.VariableName																						AS VariableName 
+					
+				FROM VariableValue vv
+				JOIN Variable v ON vv.VariableID = v.VariableID
+				JOIN Documents document ON vv.DocumentID = document.DocumentID
+				JOIN DocumentConfiguration docConfig ON vv.ConfigurationID = docConfig.ConfigurationID
+				LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+				LEFT JOIN 
+				(
+					Select
+					CONCAT('VarValue_',vv.VariableID,'-',vv.DocumentID,'-',vv.RevisionNo,'-',vv.ConfigurationID)  		AS InnerMigrationSourceId,
+					ROW_NUMBER() OVER (PARTITION BY CONCAT(vv.VariableID,'-',vv.DocumentID,'-',vv.ConfigurationID)
+					ORDER BY vv.RevisionNo DESC)																		AS VariableVersion
+					
+					FROM VariableValue vv
+					JOIN Variable v ON vv.VariableID = v.VariableID
+					/**JOIN Documents document ON vv.DocumentID = document.DocumentID
+					JOIN DocumentConfiguration docConfig ON vv.ConfigurationID = docConfig.ConfigurationID
+					LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID**/
+				)Latest ON CONCAT('VarValue_',vv.VariableID,'-',vv.DocumentID,'-',vv.RevisionNo,'-',vv.ConfigurationID) = Latest.InnerMigrationSourceId
+				WHERE 
+				--vv.RevisionNo &lt;= document.LatestRevisionNo AND 
+				document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2 
+				--AND LOWER(REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename))))) IN ('.sldasm','.slddrw','.sldprt','.pdf')
+				--AND v.VariableName IN ('Revision') /*Define variable/IBA's names*/
+				AND Latest.VariableVersion = 1 /**AND document.DocumentID = '10112' **/
+          </Query>
+          <Attributes>
+			<Attribute Type="Source" Name="MigrationSourceId"/>
+			<Attribute Type="Source" Name="VariableName"/> 
+          </Attributes>
+        </AttributeSource>
+		</AttributeSources>
+	</ObjectDefinition>
+	
+	<ObjectDefinition Type="DataCard">      
+        <Query>
+		 	SELECT distinct
+			CONCAT(cards.cardId,'-', cardext.ExtensionID,'-', proj.ProjectID) As MigrationSourceId
+			--cards.CardName, cardext.Extension, proj.Path
+			FROM [Cards] cards
+			left join  Projects proj on proj.ProjectID =  cards.ProjectID
+			  
+			left join CardExtensions cardext on cardext.CardID = cards.CardID
+			left join Documents document on document.ExtensionID = cardext.ExtensionID
+			where 
+			--CardName like '%fixture%'
+			cardext.Extension in (
+			--EPMDocs
+			'sldasm', 'sldprt', 'slddrw', 'smg', 
+			--WTParts/ECR
+			'cvd',
+			--ENST 
+			'xml', 'xls', 'xlsx', 
+			--DrawingChangeRequest
+			'pdf', 'msg', 
+			--OfficePocsAndPDF
+			'doc','xls','ppt', 'pub', 'dot', 'mpp', 'vsd', 'docx', 
+			'xlsx', 'pptx', 'docm', 'xlsm', 'pptm', 'mdb', 'vsdx', 
+			'pst', 'xlt',	'thmx'
+			)
+			and proj.Deleted = 0
+	    </Query>
+	<IdField>MigrationSourceId</IdField>
+      <AttributeSources>
+        <AttributeSource>
+          <Query>
+			SELECT distinct
+			CONCAT(cards.cardId,'-', cardext.ExtensionID,'-', proj.ProjectID) As MigrationSourceId,
+			cards.CardName As CardName,
+			cardext.Extension As Extension,
+			proj.Path As CardRootPath
+			FROM [Cards] cards
+			left join  Projects proj on proj.ProjectID =  cards.ProjectID
+			  
+			left join CardExtensions cardext on cardext.CardID = cards.CardID
+			left join Documents document on document.ExtensionID = cardext.ExtensionID
+			where 
+			--CardName like '%fixture%'
+			cardext.Extension in (
+			--EPMDocs
+			'sldasm', 'sldprt', 'slddrw', 'smg', 
+			--WTParts/ECR
+			'cvd',
+			--ENST 
+			'xml', 'xls', 'xlsx', 
+			--DrawingChangeRequest
+			'pdf', 'msg', 
+			--OfficePocsAndPDF
+			'doc','xls','ppt', 'pub', 'dot', 'mpp', 'vsd', 'docx', 
+			'xlsx', 'pptx', 'docm', 'xlsm', 'pptm', 'mdb', 'vsdx', 
+			'pst', 'xlt',	'thmx'
+			)
+			and proj.Deleted = 0
+			</Query>
+			<Attributes>
+				<Attribute Type="Source" Name="MigrationSourceId"/>
+				<Attribute Type="Source" Name="CardName"/>
+				<Attribute Type="Source" Name="Extension"/>
+				<Attribute Type="Source" Name="CardRootPath"/>
+			</Attributes>
+		</AttributeSource>
+	</AttributeSources>
+	</ObjectDefinition>
+</ObjectDefinitions>
+<RelationshipDefinitions>  
+	<RelationshipDefinition Type="FolderToFile">
+      <Query>
+			SELECT 
+				CONCAT(project.Path,'-',document.DocumentID) 									AS MigrationSourceId,
+				project.Path AS ParentId,
+				document.DocumentID As ChildId
+		 	FROM Revisions revision 
+		 	JOIN Documents document ON revision.DocumentID = document.DocumentID
+		 	LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+		 	LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+		 	LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+		 						
+		 	LEFT JOIN 
+		 	(
+		 		SELECT 
+					thistory.DocumentID  AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 														   AS modDate , 
+					status.Name , 
+					wf.Name As Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID 
+		 			ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) AS rn
+		 		FROM TransitionHistory thistory 
+		 		LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+		 		LEFT JOIN Status status ON transitions.Destination = status.StatusID
+		 		LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+		 	) fileStatus ON revision.DocumentID = fileStatus.thistoryID
+
+			LEFT JOIN 
+			(
+				Select * From (SELECT 
+					renHist.DocumentId 															  AS DocId,
+					renHist.oldname,
+					ROW_NUMBER() OVER (PARTITION BY renHist.DocumentId ORDER BY renHist.Time ASC) AS rn
+				FROM HistoryRename renHist ) renHistFinal where renHistFinal.rn = 1 --where renHist.DocumentId = 26182
+			) renHistory ON revision.DocumentID = renHistory.DocId
+			
+			left join 
+				(
+					select concat(urev.DocumentId , '-' , urev.RevNr) AS RevID,
+					urev.Comment,
+					row_number() over (partition by concat(urev.DocumentId , '-' , urev.RevNr) order by urev.UserRevID DESC) as rn
+					from UserRevs urev where urev.Comment is not null
+				) revisionLabel on Concat(revision.DocumentID , '-' , revision.RevNr) = revisionLabel.RevID
+		 
+		 	WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2  AND revision.Date IS NOT NULL
+		 	--AND REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) IN ('.slddrw','.sldasm','.sldprt')
+		 	AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 
+			--and renHistory.rn = 1
+			-- 50825 standard epmdocuments (LVO)
+		 	--AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+      </Query>
+      <IdField>MigrationSourceId</IdField>
+      <ParentIdField>ParentId</ParentIdField>
+      <ChildIdField>ChildId</ChildIdField>
+      <ParentType>Folder</ParentType>
+      <ChildType>File</ChildType>
+      <AttributeSources>
+        <AttributeSource>
+          <Query>
+			SELECT 
+				CONCAT(project.Path,'-',document.DocumentID) 									AS MigrationSourceId,
+				'HAS_FILE' As RelationshipType
+		 	FROM Revisions revision 
+		 	JOIN Documents document ON revision.DocumentID = document.DocumentID
+		 	LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+		 	LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+		 	LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+		 						
+		 	LEFT JOIN 
+		 	(
+		 		SELECT 
+					thistory.DocumentID  AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 														   AS modDate , 
+					status.Name , 
+					wf.Name As Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID 
+		 			ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) AS rn
+		 		FROM TransitionHistory thistory 
+		 		LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+		 		LEFT JOIN Status status ON transitions.Destination = status.StatusID
+		 		LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+		 	) fileStatus ON revision.DocumentID = fileStatus.thistoryID
+
+			LEFT JOIN 
+			(
+				Select * From (SELECT 
+					renHist.DocumentId 															  AS DocId,
+					renHist.oldname,
+					ROW_NUMBER() OVER (PARTITION BY renHist.DocumentId ORDER BY renHist.Time ASC) AS rn
+				FROM HistoryRename renHist ) renHistFinal where renHistFinal.rn = 1 --where renHist.DocumentId = 26182
+			) renHistory ON revision.DocumentID = renHistory.DocId
+			
+			left join 
+				(
+					select concat(urev.DocumentId , '-' , urev.RevNr) AS RevID,
+					urev.Comment,
+					row_number() over (partition by concat(urev.DocumentId , '-' , urev.RevNr) order by urev.UserRevID DESC) as rn
+					from UserRevs urev where urev.Comment is not null
+				) revisionLabel on Concat(revision.DocumentID , '-' , revision.RevNr) = revisionLabel.RevID
+		 
+		 	WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2  AND revision.Date IS NOT NULL
+		 	--AND REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) IN ('.slddrw','.sldasm','.sldprt')
+		 	AND 
+			document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 
+			--and renHistory.rn = 1
+			-- 50825 standard epmdocuments (LVO)
+		 	--AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+          </Query>
+          <Attributes>
+            <Attribute Type="Source" Name="MigrationSourceId"/>
+		 	<Attribute Type="Source" Name="RelationshipType"/>
+			
+          </Attributes>
+        </AttributeSource>
+      </AttributeSources>
+    </RelationshipDefinition>
+	<RelationshipDefinition Type="VersionToVariable">
+      <Query>
+		 	SELECT 
+				CONCAT('VarValue_',vv.VariableID,'-',vv.DocumentID,'-',vv.RevisionNo,'-',vv.ConfigurationID)  		AS MigrationSourceId,
+				CONCAT(vv.DocumentID,'-',vv.RevisionNo) AS ParentId,
+				vv.VariableID As ChildId
+			FROM VariableValue vv
+			JOIN Variable v ON vv.VariableID = v.VariableID
+			JOIN Documents document ON vv.DocumentID = document.DocumentID
+			JOIN DocumentConfiguration docConfig ON vv.ConfigurationID = docConfig.ConfigurationID
+			LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+			LEFT JOIN 
+			(
+				Select
+				CONCAT('VarValue_',vv.VariableID,'-',vv.DocumentID,'-',vv.RevisionNo,'-',vv.ConfigurationID)  		AS InnerMigrationSourceId,
+				ROW_NUMBER() OVER (PARTITION BY CONCAT(vv.VariableID,'-',vv.DocumentID,'-',vv.ConfigurationID)
+				ORDER BY vv.RevisionNo DESC)																		AS VariableVersion
+				
+				FROM VariableValue vv
+				JOIN Variable v ON vv.VariableID = v.VariableID
+				/**JOIN Documents document ON vv.DocumentID = document.DocumentID
+				JOIN DocumentConfiguration docConfig ON vv.ConfigurationID = docConfig.ConfigurationID
+				LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID**/
+			)Latest ON CONCAT('VarValue_',vv.VariableID,'-',vv.DocumentID,'-',vv.RevisionNo,'-',vv.ConfigurationID) = Latest.InnerMigrationSourceId
+			WHERE 
+			--vv.RevisionNo &lt;= document.LatestRevisionNo AND 
+			document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2 
+			--AND LOWER(REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename))))) IN ('.sldasm','.slddrw','.sldprt','.pdf')
+			And vv.ConfigurationID = 2
+			--AND v.VariableName IN ('Revision') /*Define variable/IBA's names*/
+			AND Latest.VariableVersion = 1 /**AND document.DocumentID = '10112' **/
+      </Query>
+      <IdField>MigrationSourceId</IdField>
+      <ParentIdField>ParentId</ParentIdField>
+      <ChildIdField>ChildId</ChildIdField>
+      <ParentType>Version</ParentType>
+      <ChildType>Variables</ChildType>
+      <AttributeSources>
+        <AttributeSource>
+          <Query>
+			SELECT 
+				CONCAT('VarValue_',vv.VariableID,'-',vv.DocumentID,'-',vv.RevisionNo,'-',vv.ConfigurationID)  		AS MigrationSourceId,
+					'HAS_ATTRIBUTE' As RelationshipType,
+					document.LatestRevisionNo																			AS LatestRevisionNo,
+					v.VariableName																						AS VariableName, 
+					vv.VariableID																						AS VariableID,
+					vv.DocumentID																						AS DocumentID, 
+					vv.RevisionNo																						AS RevNr, 
+					vv.ConfigurationID																					AS ConfigurationID,
+					docConfig.ConfigurationName																			AS ConfigurationName,
+					COALESCE(vv.ValueText,																	
+					cast(vv.ValueInt AS VARCHAR),																	
+					cast(vv.ValueFloat AS VARCHAR),																	
+					cast(vv.ValueDate AS VARCHAR))																		AS VariableValue,
+					UPPER(REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))))			AS Extension
+			FROM VariableValue vv
+			JOIN Variable v ON vv.VariableID = v.VariableID
+			JOIN Documents document ON vv.DocumentID = document.DocumentID
+			JOIN DocumentConfiguration docConfig ON vv.ConfigurationID = docConfig.ConfigurationID
+			LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+			LEFT JOIN 
+			(
+				Select
+				CONCAT('VarValue_',vv.VariableID,'-',vv.DocumentID,'-',vv.RevisionNo,'-',vv.ConfigurationID)  		AS InnerMigrationSourceId,
+				ROW_NUMBER() OVER (PARTITION BY CONCAT(vv.VariableID,'-',vv.DocumentID,'-',vv.ConfigurationID)
+				ORDER BY vv.RevisionNo DESC)																		AS VariableVersion
+				
+				FROM VariableValue vv
+				JOIN Variable v ON vv.VariableID = v.VariableID
+				/**JOIN Documents document ON vv.DocumentID = document.DocumentID
+				JOIN DocumentConfiguration docConfig ON vv.ConfigurationID = docConfig.ConfigurationID
+				LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID**/
+			)Latest ON CONCAT('VarValue_',vv.VariableID,'-',vv.DocumentID,'-',vv.RevisionNo,'-',vv.ConfigurationID) = Latest.InnerMigrationSourceId
+			WHERE 
+			--vv.RevisionNo &lt;= document.LatestRevisionNo AND 
+			document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2 
+			--AND LOWER(REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename))))) IN ('.sldasm','.slddrw','.sldprt','.pdf')
+			And vv.ConfigurationID = 2
+			--AND v.VariableName IN ('Revision') /*Define variable/IBA's names*/
+			AND Latest.VariableVersion = 1 /**AND document.DocumentID = '10112' **/
+          </Query>
+          <Attributes>
+            <Attribute Type="Source" Name="MigrationSourceId"/>
+		 	<Attribute Type="Source" Name="RelationshipType"/>
+			<Attribute Type="Source" Name="LatestRevisionNo"/>
+			<Attribute Type="Source" Name="VariableName"/> 
+			<Attribute Type="Source" Name="VariableID"/> 
+			<Attribute Type="Source" Name="DocumentID"/> 
+			<Attribute Type="Source" Name="RevNr"/>
+			<Attribute Type="Source" Name="ConfigurationID"/>
+			<Attribute Type="Source" Name="ConfigurationName"/>
+			<Attribute Type="Source" Name="VariableValue"/> 
+			<Attribute Type="Variable" Name="Extension"/> 
+			
+          </Attributes>
+        </AttributeSource>
+      </AttributeSources>
+    </RelationshipDefinition>
+	<RelationshipDefinition Type="FileToVersion">
+      <Query>
+			SELECT 
+				CONCAT(document.DocumentID,'-',revision.RevNr) 									AS MigrationSourceId,
+				document.DocumentID AS ParentId,
+				CONCAT(document.DocumentID,'-',revision.RevNr) As ChildId
+		 	FROM Revisions revision 
+		 	JOIN Documents document ON revision.DocumentID = document.DocumentID
+		 	LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+		 	LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+		 	LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+		 						
+		 	LEFT JOIN 
+		 	(
+		 		SELECT 
+					thistory.DocumentID  AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 														   AS modDate , 
+					status.Name , 
+					wf.Name As Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID 
+		 			ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) AS rn
+		 		FROM TransitionHistory thistory 
+		 		LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+		 		LEFT JOIN Status status ON transitions.Destination = status.StatusID
+		 		LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+		 	) fileStatus ON revision.DocumentID = fileStatus.thistoryID
+
+			LEFT JOIN 
+			(
+				Select * From (SELECT 
+					renHist.DocumentId 															  AS DocId,
+					renHist.oldname,
+					ROW_NUMBER() OVER (PARTITION BY renHist.DocumentId ORDER BY renHist.Time ASC) AS rn
+				FROM HistoryRename renHist ) renHistFinal where renHistFinal.rn = 1 --where renHist.DocumentId = 26182
+			) renHistory ON revision.DocumentID = renHistory.DocId
+			
+			left join 
+				(
+					select concat(urev.DocumentId , '-' , urev.RevNr) AS RevID,
+					urev.Comment,
+					row_number() over (partition by concat(urev.DocumentId , '-' , urev.RevNr) order by urev.UserRevID DESC) as rn
+					from UserRevs urev where urev.Comment is not null
+				) revisionLabel on Concat(revision.DocumentID , '-' , revision.RevNr) = revisionLabel.RevID
+		 
+		 	WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2  AND revision.Date IS NOT NULL
+		 	--AND REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) IN ('.slddrw','.sldasm','.sldprt')
+		 	--AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 
+			--and renHistory.rn = 1
+			-- 50825 standard epmdocuments (LVO)
+		 	--AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+      </Query>
+      <IdField>MigrationSourceId</IdField>
+      <ParentIdField>ParentId</ParentIdField>
+      <ChildIdField>ChildId</ChildIdField>
+      <ParentType>File</ParentType>
+      <ChildType>Version</ChildType>
+      <AttributeSources>
+        <AttributeSource>
+          <Query>
+			SELECT 
+				CONCAT(document.DocumentID,'-',revision.RevNr) 									AS MigrationSourceId,
+				'HAS_VERSION' As RelationshipType
+		 	FROM Revisions revision 
+		 	JOIN Documents document ON revision.DocumentID = document.DocumentID
+		 	LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+		 	LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+		 	LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+			--LEFT JOIN CardExtensions cardExt on document.ExtensionID = cardExt.ExtensionID
+			--LEFT JOIN Cards card on cardExt.CardID = card.CardID
+		 						
+		 	LEFT JOIN 
+		 	(
+		 		SELECT 
+					thistory.DocumentID  AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 														   AS modDate , 
+					status.Name , 
+					wf.Name As Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID 
+		 			ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) AS rn
+		 		FROM TransitionHistory thistory 
+		 		LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+		 		LEFT JOIN Status status ON transitions.Destination = status.StatusID
+		 		LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+		 	) fileStatus ON revision.DocumentID = fileStatus.thistoryID
+
+			LEFT JOIN 
+			(
+				Select * From (SELECT 
+					renHist.DocumentId 															  AS DocId,
+					renHist.oldname,
+					ROW_NUMBER() OVER (PARTITION BY renHist.DocumentId ORDER BY renHist.Time ASC) AS rn
+				FROM HistoryRename renHist ) renHistFinal where renHistFinal.rn = 1 --where renHist.DocumentId = 26182
+			) renHistory ON revision.DocumentID = renHistory.DocId
+			
+			left join 
+				(
+					select concat(urev.DocumentId , '-' , urev.RevNr) AS RevID,
+					urev.Comment,
+					row_number() over (partition by concat(urev.DocumentId , '-' , urev.RevNr) order by urev.UserRevID DESC) as rn
+					from UserRevs urev where urev.Comment is not null
+				) revisionLabel on Concat(revision.DocumentID , '-' , revision.RevNr) = revisionLabel.RevID
+		 
+		 	WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2  AND revision.Date IS NOT NULL
+		 	--AND REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) IN ('.slddrw','.sldasm','.sldprt')
+		 	--AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 
+			--and renHistory.rn = 1
+			-- 50825 standard epmdocuments (LVO)
+		 	--AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+          </Query>
+          <Attributes>
+            <Attribute Type="Source" Name="MigrationSourceId"/>
+		 	<Attribute Type="Source" Name="RelationshipType"/>
+			
+          </Attributes>
+        </AttributeSource>
+      </AttributeSources>
+    </RelationshipDefinition>
+    <RelationshipDefinition Type="VersionConfiguration">
+      <Query>
+		SELECT 
+			CONCAT('Rel-',document.DocumentID,'-',revision.RevNr,'-',dcr.ConfigurationID) 			AS MigrationSourceId
+			, CONCAT(document.DocumentID,'-',revision.RevNr)										As ParentId
+			, CONCAT(document.DocumentID,'-',revision.RevNr,'-',dcr.ConfigurationID)				As ChildId
+			
+		FROM DocumentRevisionConfiguration dcr 
+		JOIN DocumentConfiguration docConfig ON dcr.ConfigurationID = docConfig.ConfigurationID
+		JOIN Revisions revision ON CONCAT(dcr.DocumentID,'-',dcr.RevisionNo) =  CONCAT(revision.DocumentID,'-',revision.RevNr)
+		JOIN Documents document ON revision.DocumentID = document.DocumentID
+		LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+		LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+		LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+		
+							
+		LEFT JOIN 
+		(
+			SELECT 
+				thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/ 		AS thistoryID, 
+				thistory.TransitionNr ,
+				thistory.Date 																AS modDate , 
+				status.Name , 
+				wf.Name 																	AS Workflow,
+				thistory.Comment,
+				ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/
+				ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) 					AS rn
+			FROM TransitionHistory thistory 
+			LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+			LEFT JOIN Status status ON transitions.Destination = status.StatusID
+			LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+		) fileStatus ON revision.DocumentID  = fileStatus.thistoryID
+	
+		WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2 
+		AND revision.Date IS NOT NULL AND /**ext.Extension**/ REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) 
+		IN ('.sldasm','.sldprt') 
+		-- AND RTRIM(LTRIM(docConfig.ConfigurationName)) NOT IN ('@', 'Default','','No Configuration') --137994 FT Instances EPM (FVH)
+		--AND document.LatestRevisionNo = revision.RevNr 
+		AND COALESCE(fileStatus.rn,1) = 1 --FT Instances EPM (LVO)
+		-- AND dcr.ConfigurationID  = 1
+		-- AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+      </Query>
+      <IdField>MigrationSourceId</IdField>
+      <ParentIdField>ParentId</ParentIdField>
+      <ChildIdField>ChildId</ChildIdField>
+      <ParentType>Version</ParentType>
+      <ChildType>Configuration</ChildType>
+      <AttributeSources>
+        <AttributeSource>
+          <Query>
+			SELECT 
+			CONCAT('Rel-',document.DocumentID,'-',revision.RevNr,'-',dcr.ConfigurationID) 			AS MigrationSourceId
+			, 'HAS_CONFIGURATION' As RelationshipType
+			, CONCAT(document.DocumentID,'-',revision.RevNr)										As ParentId
+			, CONCAT(document.DocumentID,'-',revision.RevNr,'-',dcr.ConfigurationID)				As ChildId
+			
+			FROM DocumentRevisionConfiguration dcr 
+			JOIN DocumentConfiguration docConfig ON dcr.ConfigurationID = docConfig.ConfigurationID
+			JOIN Revisions revision ON CONCAT(dcr.DocumentID,'-',dcr.RevisionNo) =  CONCAT(revision.DocumentID,'-',revision.RevNr)
+			JOIN Documents document ON revision.DocumentID = document.DocumentID
+			LEFT JOIN DocumentsInProjects docInProj ON document.DocumentID = docInProj.DocumentID
+			LEFT JOIN Projects project ON docInProj.ProjectID = project.ProjectID
+			LEFT JOIN Users ciuser ON revision.UserID = ciuser.UserID
+			
+								
+			LEFT JOIN 
+			(
+				SELECT 
+					thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/ 		AS thistoryID, 
+					thistory.TransitionNr ,
+					thistory.Date 																AS modDate , 
+					status.Name , 
+					wf.Name 																	AS Workflow,
+					thistory.Comment,
+					ROW_NUMBER() OVER (PARTITION BY thistory.DocumentID /*CONCAT(thistory.DocumentID,'-',thistory.RevNr)*/
+					ORDER BY thistory.RevNr DESC, thistory.TransitionNr DESC) 					AS rn
+				FROM TransitionHistory thistory 
+				LEFT JOIN Transitions transitions ON thistory.TransitionID = transitions.TransitionID
+				LEFT JOIN Status status ON transitions.Destination = status.StatusID
+				LEFT JOIN Workflows wf ON status.WorkflowID = wf.WorkflowID
+			) fileStatus ON revision.DocumentID  = fileStatus.thistoryID
+		
+			WHERE document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2 
+			AND revision.Date IS NOT NULL AND /**ext.Extension**/ REVERSE(LEFT(REVERSE(document.Filename),CHARINDEX('.',REVERSE(document.Filename)))) 
+			IN ('.sldasm','.sldprt') 
+			-- AND RTRIM(LTRIM(docConfig.ConfigurationName)) NOT IN ('@', 'Default','','No Configuration') --137994 FT Instances EPM (FVH)
+			--AND document.LatestRevisionNo = revision.RevNr 
+			AND COALESCE(fileStatus.rn,1) = 1 --FT Instances EPM (LVO)
+			-- AND dcr.ConfigurationID  = 1
+			-- AND document.Filename IN ('T5165NTOS.SLDASM','4 INCH 418 FGT BP-NV-D (ALKD).sldprt','ELS TANK.SLDASM','4 INCH NB Weldneck Flange 150 RF sch-std ASME B16_5 2003_.SLDPRT','KF0007-3.SLDPRT')
+          </Query>
+          <Attributes>
+            <Attribute Type="Source" Name="MigrationSourceId"/>
+			<Attribute Type="Source" Name="RelationshipType"/>
+          </Attributes>
+        </AttributeSource>
+      </AttributeSources>
+    </RelationshipDefinition>
+	<RelationshipDefinition Type="VersionToVersion">
+      <Query>
+		select distinct
+			CAST(xref.XRefID AS varchar) + '-' +  CAST(xref.DocumentID AS varchar) + '-' + CAST(xref.RevNr AS varchar)
+			+ '-' + CAST(xref.XRefDocument AS varchar) + '-' +CAST(xref.XRefRevNr AS varchar)  AS MigrationSourceId,
+			
+			
+			CAST(xref.DocumentID AS varchar) + '-' + CAST(xref.RevNr AS varchar)		AS ParentId,
+			CAST(xref.XRefDocument AS varchar) + '-' +CAST(xref.XRefRevNr AS varchar)	AS ChildId
+
+			from XRefs xref 
+			left join XRefConfiguration xRefConfig on xref.XRefID = xRefConfig.XRefID
+			left join Documents document on xref.DocumentID = document.DocumentID
+			left join DocumentsInProjects docInProj ON xref.DocumentID=docInProj.DocumentID
+			left join Projects project ON docInProj.ProjectID=project.ProjectID
+			
+			left join Documents documentChild on xref.XRefDocument = documentChild.DocumentID
+			left join DocumentsInProjects docInProjChild ON xref.XRefDocument=docInProjChild.DocumentID
+			left join Projects projectChild ON docInProjChild.ProjectID=projectChild.ProjectID
+			
+			
+			where xref.XrType != 2 and xref.HasFullPath=1 
+			and document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2 
+			and documentChild.Deleted = 0 AND docInProjChild.Deleted = 0 AND documentChild.shared != 2 
+			--and project.Path Like '%\6_PRODUCT DATA\02_PRODUCT LINES\PL - CIC%' 
+			--and xref.RevNr = document.LatestRevisionNo
+			--and xRefConfig.ConfigurationID in (2)
+      </Query>
+      <IdField>MigrationSourceId</IdField>
+      <ParentIdField>ParentId</ParentIdField>
+      <ChildIdField>ChildId</ChildIdField>
+      <ParentType>Version</ParentType>
+      <ChildType>Version</ChildType>
+      <AttributeSources>
+        <AttributeSource>
+          <Query>
+			select distinct CAST(xref.XRefID AS varchar) + '-' +  CAST(xref.DocumentID AS varchar) + '-' + CAST(xref.RevNr AS varchar) + '-' + CAST(xref.XRefDocument AS varchar) + '-' +CAST(xref.XRefRevNr AS varchar)  AS MigrationSourceId,
+				'CHILD' As RelationshipType,
+				xRefConfig.SuppressedCount		As SuppressedCount,
+				xref.RefCount 					AS QTY,
+				xref.XrType 					AS LinkType,
+				xRefConfig.ConfigurationID		As ParConfig,
+				xRefConfig.XRefConfigurationID	As ChildConfig
+				
+				from XRefs xref 
+				left join XRefConfiguration xRefConfig on xref.XRefID = xRefConfig.XRefID
+				left join Documents document on xref.DocumentID = document.DocumentID
+				left join DocumentsInProjects docInProj ON xref.DocumentID=docInProj.DocumentID
+				left join Projects project ON docInProj.ProjectID=project.ProjectID
+				
+				left join Documents documentChild on xref.XRefDocument = documentChild.DocumentID
+				left join DocumentsInProjects docInProjChild ON xref.XRefDocument=docInProjChild.DocumentID
+				left join Projects projectChild ON docInProjChild.ProjectID=projectChild.ProjectID
+			
+				where xref.XrType != 2 and xref.HasFullPath=1 
+				and document.Deleted = 0 AND docInProj.Deleted = 0 AND document.shared != 2 
+				and documentChild.Deleted = 0 AND docInProjChild.Deleted = 0 AND documentChild.shared != 2 
+          </Query>
+          <Attributes>
+            <Attribute Type="Source" Name="MigrationSourceId"/>
+			<Attribute Type="Source" Name="RelationshipType"/>
+		 	<Attribute Type="Source" Name="SuppressedCount"/>
+			<Attribute Type="Source" Name="QTY"/>
+		 	<Attribute Type="Source" Name="LinkType"/>
+		 	<Attribute Type="Source" Name="ParConfig"/>
+			<Attribute Type="Source" Name="ChildConfig"/>
+          </Attributes>
+        </AttributeSource>
+      </AttributeSources>
+    </RelationshipDefinition>
+  </RelationshipDefinitions>
+</MappingDefinition>

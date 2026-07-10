@@ -7,6 +7,13 @@
     "safeSummary": "Part identity and lifecycle metadata."
   },
   {
+    "key": "partVersion",
+    "displayName": "Part Version",
+    "description": "A revision-specific part version from a PDM vault.",
+    "versionIdentityFieldsJson": "[\"pdmVersionKey\"]",
+    "safeSummary": "PDM part version identity and revision metadata."
+  },
+  {
     "key": "document",
     "displayName": "Document",
     "description": "A governed document or drawing reference.",

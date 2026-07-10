@@ -200,16 +200,47 @@ public static class ImportFlowTestSupport
     internal static async Task<ImportMappingVersionResponse> ApproveMappingAsync(
         HttpClient client,
         ImportFlowContext context,
-        Guid mappingId)
+        Guid mappingId,
+        string? structuralRelationshipType = null)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/mappings/{mappingId}/approve")
         {
-            Content = JsonContent.Create(new ApproveImportMappingRequest("Approved by test."))
+            Content = JsonContent.Create(new ApproveImportMappingRequest("Approved by test.", structuralRelationshipType))
         };
         AddTenantHeaders(request, context.TenantId, context.UserId);
         var response = await client.SendAsync(request);
         var mapping = await response.Content.ReadFromJsonAsync<ImportMappingVersionResponse>();
         Assert.True(response.StatusCode == HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+        Assert.NotNull(mapping);
+        return mapping;
+    }
+
+    internal static async Task<ImportMappingVersionResponse> CreateStructuralMappingAsync(
+        HttpClient client,
+        ImportFlowContext context,
+        Guid batchId,
+        IReadOnlyCollection<CreateImportColumnMappingRequest> columnMappings,
+        string? structuralRelationshipType = null,
+        string versionLabel = "1.0.0",
+        IReadOnlyCollection<CreateImportLifecycleMappingRequest>? lifecycleMappings = null)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/admin/imports/mappings")
+        {
+            Content = JsonContent.Create(new CreateImportMappingVersionRequest(
+                batchId,
+                versionLabel,
+                "Structural test mapping.",
+                columnMappings,
+                lifecycleMappings ?? [],
+                structuralRelationshipType))
+        };
+        AddTenantHeaders(request, context.TenantId, context.UserId);
+        var response = await client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
+        var mapping = System.Text.Json.JsonSerializer.Deserialize<ImportMappingVersionResponse>(
+            body,
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
         Assert.NotNull(mapping);
         return mapping;
     }

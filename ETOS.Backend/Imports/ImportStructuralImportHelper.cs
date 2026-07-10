@@ -144,6 +144,37 @@ internal static class ImportStructuralImportHelper
         bool isParent)
     {
         var objectType = isParent ? bomRelationship.ParentObjectType : bomRelationship.ChildObjectType;
+        return BuildOntologyFallbackIdentityAttributes(identityValue, objectType, modelContext);
+    }
+
+    internal static Dictionary<string, string?> BuildStructuralIdentityAttributes(
+        string identityValue,
+        string sourceColumnHeader,
+        string objectType,
+        ImportMappingVersion mapping,
+        ResolvedModelPackageContext modelContext)
+    {
+        var normalizedHeader = NormalizeKey(sourceColumnHeader);
+        var identityMapping = mapping.ColumnMappings.FirstOrDefault(item =>
+            item.IsIdentityField
+            && item.NormalizedSourceColumn == normalizedHeader
+            && string.Equals(item.CanonicalObjectType, objectType, StringComparison.OrdinalIgnoreCase));
+        if (identityMapping?.CanonicalAttributeKey is not null)
+        {
+            return new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                [identityMapping.CanonicalAttributeKey] = identityValue
+            };
+        }
+
+        return BuildOntologyFallbackIdentityAttributes(identityValue, objectType, modelContext);
+    }
+
+    private static Dictionary<string, string?> BuildOntologyFallbackIdentityAttributes(
+        string identityValue,
+        string objectType,
+        ResolvedModelPackageContext modelContext)
+    {
         var objectTypeDefinition = modelContext.Ontology.ObjectTypes
             .FirstOrDefault(item => string.Equals(item.Key, objectType, StringComparison.OrdinalIgnoreCase));
         var identityFields = ParseIdentityFields(objectTypeDefinition?.VersionIdentityFieldsJson);
@@ -243,4 +274,6 @@ internal static class ImportStructuralImportHelper
 
     private static string NormalizeLoose(string value) =>
         value.Trim().Replace("-", string.Empty, StringComparison.Ordinal).Replace("_", string.Empty, StringComparison.Ordinal).ToLowerInvariant();
+
+    private static string NormalizeKey(string value) => value.Trim().ToUpperInvariant();
 }

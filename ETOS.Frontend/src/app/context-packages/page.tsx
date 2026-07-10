@@ -48,6 +48,7 @@ export default async function ContextPackagesExplorerPage() {
           result={packages}
           emptyMessage="No context packages are available yet."
           renderItem={ContextPackageCard}
+          getItemKey={(item) => item.packageId}
         />
       </div>
     </main>

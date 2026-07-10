@@ -62,6 +62,8 @@ public sealed class ImportMappingVersion : ITenantScoped
     public DateTimeOffset? ApprovedAt { get; set; }
     public Guid? RejectedByUserId { get; set; }
     public DateTimeOffset? RejectedAt { get; set; }
+    public string? StructuralRelationshipType { get; set; }
+    public string? NormalizedStructuralRelationshipType { get; set; }
     public List<ImportColumnMapping> ColumnMappings { get; set; } = [];
     public List<ImportLifecycleMapping> LifecycleMappings { get; set; } = [];
 }

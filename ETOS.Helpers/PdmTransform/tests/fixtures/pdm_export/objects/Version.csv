@@ -1,0 +1,3 @@
+Type,Id,MigrationSourceId,DocumentID,RevNr,FileName,Workflow,Status,IsLatest,ProjectPath
+Version,15-10,15-10,15,10,200069.SLDASM,Alligator CAD,MFG,TRUE,\PROJECTS\
+Version,6-4,6-4,6,4,Temp497181.sldprt,Alligator CAD,MFG,TRUE,\PROJECTS\

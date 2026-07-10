@@ -10,5 +10,17 @@
     "lifecycleConstraintJson": "{\"allowedParentStates\":[\"released\",\"in-review\"]}",
     "requiresApproval": true,
     "auditReferenceAttributeKey": "approvalRecordId"
+  },
+  {
+    "relationshipType": "contains",
+    "parentObjectType": "partVersion",
+    "childObjectType": "partVersion",
+    "quantityAttributeKey": "quantity",
+    "unitAttributeKey": "unit",
+    "findNumberAttributeKey": "findNumber",
+    "referenceDesignatorAttributeKey": "referenceDesignator",
+    "lifecycleConstraintJson": null,
+    "requiresApproval": false,
+    "auditReferenceAttributeKey": null
   }
 ]

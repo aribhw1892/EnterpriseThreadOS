@@ -31,7 +31,8 @@ public static class PlatformGovernanceKpiPlaceholders
     {
         "object-360-context",
         "bom-impact-context",
-        "document-evidence-context"
+        "document-evidence-context",
+        "direct-response-v1"
     };
 }
 

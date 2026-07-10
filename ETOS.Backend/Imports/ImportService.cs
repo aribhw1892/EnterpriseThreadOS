@@ -192,6 +192,7 @@ public sealed class ImportService(
         }
 
         var modelContext = await LoadModelContextAsync(batch.ActiveModelPackageVersionId, context, "imports.mappings.create", cancellationToken);
+        StructuralRelationshipResolver.ValidateStructuralRelationshipType(modelContext.Resolved, request.StructuralRelationshipType);
         var evidence = ResolveEvidence(batch, null);
         var parsed = await ParseEvidenceAsync(evidence, 25, cancellationToken);
         var previewSuggestions = await mappingSuggestionProviderSelector.SuggestAsync(
@@ -209,6 +210,8 @@ public sealed class ImportService(
             Summary = TrimOptional(request.Summary),
             State = ImportMappingState.Draft,
             SuggestionProvider = previewSuggestions.ProviderKey,
+            StructuralRelationshipType = TrimOptional(request.StructuralRelationshipType),
+            NormalizedStructuralRelationshipType = TrimOptional(request.StructuralRelationshipType) is null ? null : NormalizeKey(request.StructuralRelationshipType!),
             CreatedByUserId = context.UserId,
             CreatedAt = DateTimeOffset.UtcNow,
             ColumnMappings = request.ColumnMappings.Select(item => new ImportColumnMapping
@@ -263,7 +266,18 @@ public sealed class ImportService(
         }
 
         var modelContext = await LoadModelContextAsync(mapping.ModelPackageVersionId, context, "imports.mappings.approve", cancellationToken);
+        if (!string.IsNullOrWhiteSpace(request.StructuralRelationshipType))
+        {
+            mapping.StructuralRelationshipType = NormalizeText(request.StructuralRelationshipType);
+            mapping.NormalizedStructuralRelationshipType = NormalizeKey(request.StructuralRelationshipType);
+        }
+
         ValidateMappingAgainstModel(mapping, modelContext);
+        if (!string.IsNullOrWhiteSpace(mapping.StructuralRelationshipType))
+        {
+            ValidateStructuralRelationshipEndpoints(mapping, modelContext);
+        }
+
         mapping.State = ImportMappingState.Approved;
         mapping.ApprovedByUserId = context.UserId;
         mapping.ApprovedAt = DateTimeOffset.UtcNow;
@@ -376,10 +390,10 @@ public sealed class ImportService(
             var structuralHeaders = ImportStructuralImportHelper.TryResolveStructuralHeaders(parsed.Headers, modelContext.ImportProfile);
             if (structuralHeaders is not null)
             {
-                var bomRelationship = modelContext.Resolved.RequireDefaultBomRelationship();
-                var parentGraphType = modelContext.Resolved.ResolveGraphObjectType(bomRelationship.ParentObjectType);
-                var childGraphType = modelContext.Resolved.ResolveGraphObjectType(bomRelationship.ChildObjectType);
-                var relationshipGraphType = modelContext.Resolved.ResolveGraphRelationshipType(bomRelationship.RelationshipType);
+                var structuralRelationship = StructuralRelationshipResolver.Resolve(modelContext.Resolved, mapping, structuralHeaders);
+                var parentGraphType = modelContext.Resolved.ResolveGraphObjectType(structuralRelationship.ParentObjectType);
+                var childGraphType = modelContext.Resolved.ResolveGraphObjectType(structuralRelationship.ChildObjectType);
+                var relationshipGraphType = modelContext.Resolved.ResolveGraphRelationshipType(structuralRelationship.RelationshipType);
                 foreach (var row in parsed.Rows)
                 {
                     var parentId = ImportStructuralImportHelper.GetRowValue(row, structuralHeaders.ParentHeader);
@@ -395,7 +409,12 @@ public sealed class ImportService(
                             GraphSpace.Staging,
                             parentGraphType,
                             TrustState.Unverified,
-                            ImportStructuralImportHelper.BuildIdentityAttributes(parentId, bomRelationship, modelContext.Resolved, isParent: true),
+                            ImportStructuralImportHelper.BuildStructuralIdentityAttributes(
+                                parentId,
+                                structuralHeaders.ParentHeader,
+                                structuralRelationship.ParentObjectType,
+                                mapping,
+                                modelContext.Resolved),
                             new GraphSourceReference(batch.SourceSystem, parentId, batch.Id.ToString())),
                         cancellationToken);
                     var child = await graphMemoryService.CreateNodeAsync(
@@ -404,9 +423,17 @@ public sealed class ImportService(
                             GraphSpace.Staging,
                             childGraphType,
                             TrustState.Unverified,
-                            ImportStructuralImportHelper.BuildIdentityAttributes(childId, bomRelationship, modelContext.Resolved, isParent: false),
+                            ImportStructuralImportHelper.BuildStructuralIdentityAttributes(
+                                childId,
+                                structuralHeaders.ChildHeader,
+                                structuralRelationship.ChildObjectType,
+                                mapping,
+                                modelContext.Resolved),
                             new GraphSourceReference(batch.SourceSystem, childId, batch.Id.ToString())),
                         cancellationToken);
+                    var relationshipAttributes = structuralRelationship.BomRelationship is not null
+                        ? ImportStructuralImportHelper.BuildRelationshipAttributes(row, structuralHeaders, structuralRelationship.BomRelationship)
+                        : new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
                     var relationship = await graphMemoryService.CreateRelationshipAsync(
                         new CreateGraphRelationshipRequest(
                             context.TenantId,
@@ -414,7 +441,7 @@ public sealed class ImportService(
                             child.NodeId,
                             relationshipGraphType,
                             TrustState.Unverified,
-                            ImportStructuralImportHelper.BuildRelationshipAttributes(row, structuralHeaders, bomRelationship),
+                            relationshipAttributes,
                             new GraphSourceReference(batch.SourceSystem, $"{parentId}|{childId}", batch.Id.ToString())),
                         cancellationToken);
                     nodeIds.Add(parent.NodeId);
@@ -429,7 +456,11 @@ public sealed class ImportService(
                     var objectType = identityMappings.First().CanonicalObjectType;
                     var sourceRecordId = BuildSourceRecordId(row, identityMappings);
                     var attributes = BuildGraphAttributes(row, mapping);
-                    attributes["lifecycleState"] = ResolveLifecycleValue(row, mapping);
+                    var lifecycleValue = ImportFlatMetadataHelper.ResolveLifecycleValue(row, mapping);
+                    if (!string.IsNullOrWhiteSpace(lifecycleValue))
+                    {
+                        attributes["lifecycleState"] = lifecycleValue;
+                    }
 
                     var node = await graphMemoryService.CreateNodeAsync(
                         new CreateGraphNodeRequest(
@@ -459,7 +490,7 @@ public sealed class ImportService(
         catch (Exception exception) when (exception is not RequestValidationException)
         {
             run.Status = ImportStagingRunStatus.Failed;
-            run.FailureSummary = exception.Message.Length > 1000 ? exception.Message[..1000] : exception.Message;
+            run.FailureSummary = exception.Message;
             run.CompletedAt = DateTimeOffset.UtcNow;
             batch.Status = ImportBatchStatus.Failed;
             await dbContext.SaveChangesAsync(cancellationToken);
@@ -507,7 +538,7 @@ public sealed class ImportService(
         catch (Exception exception) when (exception is not RequestValidationException)
         {
             run.Status = ImportPromotionRunStatus.Failed;
-            run.FailureSummary = exception.Message.Length > 1000 ? exception.Message[..1000] : exception.Message;
+            run.FailureSummary = exception.Message;
             run.CompletedAt = DateTimeOffset.UtcNow;
             await dbContext.SaveChangesAsync(cancellationToken);
             throw;
@@ -808,6 +839,33 @@ public sealed class ImportService(
                 throw new RequestValidationException($"Unknown canonical lifecycle state '{lifecycleMapping.CanonicalLifecycleKey}'.");
             }
         }
+
+        StructuralRelationshipResolver.ValidateStructuralRelationshipType(modelContext.Resolved, mapping.StructuralRelationshipType);
+    }
+
+    private static void ValidateStructuralRelationshipEndpoints(ImportMappingVersion mapping, ImportModelContext modelContext)
+    {
+        var profile = modelContext.ImportProfile;
+        var parentMapping = mapping.ColumnMappings.FirstOrDefault(item =>
+            item.IsIdentityField
+            && profile.ParentColumnSynonyms.Any(synonym =>
+                string.Equals(synonym, item.SourceColumn, StringComparison.OrdinalIgnoreCase)));
+        var childMapping = mapping.ColumnMappings.FirstOrDefault(item =>
+            item.IsIdentityField
+            && profile.ChildColumnSynonyms.Any(synonym =>
+                string.Equals(synonym, item.SourceColumn, StringComparison.OrdinalIgnoreCase)));
+        if (parentMapping is null || childMapping is null)
+        {
+            return;
+        }
+
+        var headers = new ImportStructuralImportHelper.StructuralHeaders(
+            parentMapping.SourceColumn,
+            childMapping.SourceColumn,
+            null,
+            null,
+            null);
+        StructuralRelationshipResolver.Resolve(modelContext.Resolved, mapping, headers);
     }
 
     private static IEnumerable<ImportValidationIssue> ValidateParsedRows(
@@ -817,6 +875,16 @@ public sealed class ImportService(
         ParsedImportFile parsed)
     {
         ValidateMappingAgainstModel(mapping, modelContext);
+        var structuralHeaders = ImportStructuralImportHelper.TryResolveStructuralHeaders(parsed.Headers, modelContext.ImportProfile);
+        var isStructuralImport = structuralHeaders is not null;
+        if (isStructuralImport && structuralHeaders is not null)
+        {
+            foreach (var issue in ValidateStructuralMappingHeaders(batch, mapping, structuralHeaders))
+            {
+                yield return issue;
+            }
+        }
+
         var headerKeys = parsed.Headers.Select(NormalizeKey).ToHashSet();
         foreach (var columnMapping in mapping.ColumnMappings)
         {
@@ -860,11 +928,71 @@ public sealed class ImportService(
                 }
             }
 
-            var lifecycleValue = ResolveLifecycleValue(row, mapping);
-            if (lifecycleValue is null)
+            if (!isStructuralImport)
             {
-                yield return NewIssue(batch, mapping, ImportIssueSeverity.Error, rowNumber, null, null, "invalid_lifecycle_value", "No mapped canonical lifecycle value was present for this row.");
+                var objectType = ImportFlatMetadataHelper.ResolveFlatImportObjectType(mapping);
+                foreach (var metadataKey in ImportFlatMetadataHelper.ResolveRequiredMetadataKeys(modelContext.ImportProfile, objectType))
+                {
+                    var resolvedMetadata = ImportFlatMetadataHelper.ResolveMetadataValue(metadataKey, row, mapping, objectType);
+                    if (!string.IsNullOrWhiteSpace(resolvedMetadata))
+                    {
+                        continue;
+                    }
+
+                    if (string.Equals(metadataKey, "lifecycleState", StringComparison.OrdinalIgnoreCase)
+                        && ImportFlatMetadataHelper.HasUnmappedLifecycleSourceSignal(row, mapping))
+                    {
+                        yield return NewIssue(batch, mapping, ImportIssueSeverity.Error, rowNumber, null, objectType, "invalid_lifecycle_value", "No mapped canonical lifecycle value was present for this row.");
+                        continue;
+                    }
+
+                    yield return NewIssue(
+                        batch,
+                        mapping,
+                        ImportIssueSeverity.Error,
+                        rowNumber,
+                        null,
+                        objectType,
+                        "missing_required_metadata",
+                        $"Required metadata '{metadataKey}' is missing for object type '{objectType}'.");
+                }
             }
+        }
+    }
+
+    private static IEnumerable<ImportValidationIssue> ValidateStructuralMappingHeaders(
+        ImportBatch batch,
+        ImportMappingVersion mapping,
+        ImportStructuralImportHelper.StructuralHeaders structuralHeaders)
+    {
+        if (!mapping.ColumnMappings.Any(item =>
+                item.IsIdentityField
+                && string.Equals(item.SourceColumn, structuralHeaders.ParentHeader, StringComparison.OrdinalIgnoreCase)))
+        {
+            yield return NewIssue(
+                batch,
+                mapping,
+                ImportIssueSeverity.Error,
+                null,
+                structuralHeaders.ParentHeader,
+                null,
+                "missing_structural_identity_mapping",
+                $"Structural import requires an identity mapping for parent column '{structuralHeaders.ParentHeader}'.");
+        }
+
+        if (!mapping.ColumnMappings.Any(item =>
+                item.IsIdentityField
+                && string.Equals(item.SourceColumn, structuralHeaders.ChildHeader, StringComparison.OrdinalIgnoreCase)))
+        {
+            yield return NewIssue(
+                batch,
+                mapping,
+                ImportIssueSeverity.Error,
+                null,
+                structuralHeaders.ChildHeader,
+                null,
+                "missing_structural_identity_mapping",
+                $"Structural import requires an identity mapping for child column '{structuralHeaders.ChildHeader}'.");
         }
     }
 
@@ -954,19 +1082,6 @@ public sealed class ImportService(
         return attributes;
     }
 
-    private static string? ResolveLifecycleValue(IReadOnlyDictionary<string, string?> row, ImportMappingVersion mapping)
-    {
-        foreach (var lifecycleMapping in mapping.LifecycleMappings)
-        {
-            if (row.Values.Any(value => !string.IsNullOrWhiteSpace(value) && NormalizeKey(value!) == lifecycleMapping.NormalizedSourceValue))
-            {
-                return lifecycleMapping.CanonicalLifecycleKey;
-            }
-        }
-
-        return null;
-    }
-
     private async Task<AuditRecordResponse> RecordAuditAsync(ActiveTenantContext context, string action, string safeSummary, string sourceObjectType, Guid sourceObjectId, CancellationToken cancellationToken)
     {
         return await auditRecorder.RecordAsync(
@@ -1049,6 +1164,7 @@ public sealed class ImportService(
             mapping.ApprovedAt,
             mapping.RejectedByUserId,
             mapping.RejectedAt,
+            mapping.StructuralRelationshipType,
             mapping.ColumnMappings.OrderBy(item => item.SourceColumn).Select(item => new ImportColumnMappingResponse(item.Id, item.SourceColumn, item.CanonicalObjectType, item.CanonicalAttributeKey, item.IsIdentityField, item.IsRequired)).ToList(),
             mapping.LifecycleMappings.OrderBy(item => item.SourceValue).Select(item => new ImportLifecycleMappingResponse(item.Id, item.SourceValue, item.CanonicalLifecycleKey)).ToList());
     }

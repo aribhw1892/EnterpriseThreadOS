@@ -29,6 +29,7 @@ Use open-source libraries to accelerate commodity implementation work while keep
 | Issues 23-25: Agents, Workflows, Multi-Agent Teams | FastAPI, PydanticAI, Pydantic, httpx, tenacity, Dapr Workflow, deferred Hermes adapter, LangGraph for Issue 25 multi-agent orchestration, MassTransit where event-driven execution is useful | `IAgentRuntimeAdapter`, PydanticAI for single-step governed agents, optional future Hermes adapter for skill-rich execution, governed workflow orchestration, safe mode events, delegation traces, and team run records. Neo4j Agent Memory may be evaluated later behind an internal agent-memory provider contract, not used as a replacement for the platform graph. |
 | Issue 26: End-to-End MVP Demo | Playwright, Testcontainers for .NET, seeded fixtures, NSwag-generated clients if useful | Scripted happy path, denied/restricted-context path, browser-verifiable flow, and stable integration smoke tests. |
 | Issues 27-28: ADRs and Future Contracts | ADR templates, Mermaid, OpenAPI/JSON Schema contracts | Architecture decision capture, disabled write-action contracts, connector boundaries, deployment placeholders, and reviewable diagrams. |
+| Issue 29: PDM Extract, Transform, and Governed Import | Python helpers (`PdmExtractor`, `PdmTransform`), existing import module, manufacturing reference package | XML SQL extract, canonical CSV transform, generalized relationship staging for `part` / `partVersion` / `hasVersion` / version BOM. |
 
 ## Issue 1: Bootstrap Local Platform Foundation
 
@@ -826,6 +827,30 @@ Prepare the future enterprise action framework without enabling write-back. This
 ## Blocked by
 
 Issue 26 and Issue 27.
+
+## Issue 29: PDM Extract, Transform, and Governed Import
+
+Type: AFK  
+Blocked by: Issue 8, Issue 18.5  
+User stories covered: 1, 3, 4, 5, 12, 26, 28, 31 (PDM digital thread extension)
+
+Full issue sheet: [`issue-29-pdm-extract-transform-import.md`](issue-29-pdm-extract-transform-import.md)
+
+## What to build
+
+Three-layer SolidWorks PDM ingestion: XML-driven extract helper (`ETOS.Helpers/PdmExtractor`, partial), canonical transform helper (`ETOS.Helpers/PdmTransform`), and governed import via existing `/imports` flow with generalized structural **relationship** import (`hasVersion`, version-level `contains` BOM). Target graph: `part` → `partVersion` → CAD BOM between versions.
+
+## Acceptance criteria
+
+- Extract remains ontology-neutral; transform maps PDM export to canonical CSVs.
+- Manufacturing reference package defines `part`, `partVersion`, and required relationships/attributes.
+- Import staging supports per-mapping structural relationship type (not BOM-only default).
+- Documented four-batch import runbook and integration smoke from real PDM sample export.
+- Live PDM connector remains out of scope (future Issue 22 follow-up).
+
+## Blocked by
+
+Issue 8 and Issue 18.5.
 
 ## Review Questions Before Publishing to an Issue Tracker
 

@@ -5,5 +5,12 @@
     "toObjectType": "document",
     "description": "Part references document evidence.",
     "isVersionRelationship": true
+  },
+  {
+    "relationshipType": "hasVersion",
+    "fromObjectType": "part",
+    "toObjectType": "partVersion",
+    "description": "Part has a PDM revision-specific version.",
+    "isVersionRelationship": true
   }
 ]

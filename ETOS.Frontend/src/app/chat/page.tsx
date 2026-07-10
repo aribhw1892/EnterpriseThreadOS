@@ -302,6 +302,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
                   <option value="object-360-context">object-360-context</option>
                   <option value="bom-impact-context">bom-impact-context</option>
                   <option value="document-evidence-context">document-evidence-context</option>
+                  <option value="direct-response-v1">direct-response-v1</option>
                 </select>
               </label>
               <label className="grid gap-2 text-sm">

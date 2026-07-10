@@ -1,0 +1,148 @@
+{
+  "sourceSystem": "SOLIDWORKS-PDM",
+  "files": [
+    {
+      "key": "parts",
+      "fileName": "parts.csv",
+      "kind": "flat",
+      "structuralRelationshipType": null,
+      "columnMappings": [
+        {
+          "sourceColumn": "documentId",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "documentId",
+          "isIdentityField": true,
+          "isRequired": true
+        },
+        {
+          "sourceColumn": "fileName",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "partNumber",
+          "isIdentityField": false,
+          "isRequired": false
+        }
+      ],
+      "lifecycleMappings": [{ "sourceValue": "MFG", "canonicalLifecycleKey": "released" }]
+    },
+    {
+      "key": "partVersions",
+      "fileName": "part-versions.csv",
+      "kind": "flat",
+      "structuralRelationshipType": null,
+      "columnMappings": [
+        {
+          "sourceColumn": "pdmVersionKey",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "pdmVersionKey",
+          "isIdentityField": true,
+          "isRequired": true
+        },
+        {
+          "sourceColumn": "documentId",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "documentId",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "revision",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "revision",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "fileName",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "fileName",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "lifecycleState",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "status",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "workflow",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "workflow",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "isLatest",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "isLatest",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "projectPath",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "projectPath",
+          "isIdentityField": false,
+          "isRequired": false
+        }
+      ],
+      "lifecycleMappings": [
+        { "sourceValue": "MFG", "canonicalLifecycleKey": "released" },
+        { "sourceValue": "Concept Approved", "canonicalLifecycleKey": "released" },
+        { "sourceValue": "Under Detailing", "canonicalLifecycleKey": "in-review" },
+        { "sourceValue": "ECN waiting for Approval", "canonicalLifecycleKey": "in-review" },
+        { "sourceValue": "Waiting for Detailing Approval", "canonicalLifecycleKey": "in-review" },
+        { "sourceValue": "Waiting for Approval", "canonicalLifecycleKey": "in-review" },
+        { "sourceValue": "Project Under Design", "canonicalLifecycleKey": "draft" },
+        { "sourceValue": "Changes in 3D Model", "canonicalLifecycleKey": "draft" }
+      ]
+    },
+    {
+      "key": "hasVersion",
+      "fileName": "has-version.csv",
+      "kind": "structural",
+      "structuralRelationshipType": "hasVersion",
+      "columnMappings": [
+        {
+          "sourceColumn": "parent",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "documentId",
+          "isIdentityField": true,
+          "isRequired": true
+        },
+        {
+          "sourceColumn": "child",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "pdmVersionKey",
+          "isIdentityField": true,
+          "isRequired": true
+        }
+      ],
+      "lifecycleMappings": []
+    },
+    {
+      "key": "versionBom",
+      "fileName": "version-bom.csv",
+      "kind": "structural",
+      "structuralRelationshipType": "contains",
+      "columnMappings": [
+        {
+          "sourceColumn": "parent",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "pdmVersionKey",
+          "isIdentityField": true,
+          "isRequired": true
+        },
+        {
+          "sourceColumn": "child",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "pdmVersionKey",
+          "isIdentityField": true,
+          "isRequired": true
+        }
+      ],
+      "lifecycleMappings": []
+    }
+  ]
+}

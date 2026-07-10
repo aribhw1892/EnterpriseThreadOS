@@ -174,6 +174,7 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IAiTraceService, AiTraceService>();
         services.AddScoped<IGovernedChatArtifactSeeder, GovernedChatArtifactSeeder>();
         services.AddScoped<IImportMappingArtifactSeeder, ImportMappingArtifactSeeder>();
+        services.AddScoped<IDirectResponseArtifactSeeder, DirectResponseArtifactSeeder>();
         services.AddScoped<IAgentExecutionProfileResolver, AgentExecutionProfileResolver>();
         services.AddScoped<IAgentRuntimePreviewOrchestrator, AgentRuntimePreviewOrchestrator>();
         services.AddScoped<IOutputSchemaValidator, OutputSchemaValidator>();
