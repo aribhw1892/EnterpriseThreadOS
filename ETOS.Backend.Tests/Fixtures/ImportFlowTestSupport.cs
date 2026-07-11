@@ -265,6 +265,23 @@ public static class ImportFlowTestSupport
         return validation;
     }
 
+    internal static async Task<ImportBatchDetailResponse> GetBatchDetailAsync(
+        HttpClient client,
+        ImportFlowContext context,
+        Guid batchId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"/api/admin/imports/batches/{batchId}");
+        AddTenantHeaders(request, context.TenantId, context.UserId);
+        var response = await client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
+        var batch = System.Text.Json.JsonSerializer.Deserialize<ImportBatchDetailResponse>(
+            body,
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+        Assert.NotNull(batch);
+        return batch;
+    }
+
     internal static async Task<ImportStagingGraphRunResponse> StageBatchAsync(
         HttpClient client,
         ImportFlowContext context,
@@ -430,16 +447,51 @@ public static class ImportFlowTestSupport
         string csvFileName,
         IReadOnlyCollection<string>? lifecycleValues = null)
     {
+        if (string.Equals(csvFileName, "bom-comparison.csv", StringComparison.OrdinalIgnoreCase))
+        {
+            await StageFlatPartsForBomComparisonAsync(client, context, sourceSystem);
+        }
+
         var csv = await ReadDemoCsvAsync(csvFileName);
         var batch = await CreateImportBatchAsync(client, context, sourceSystem);
         await UploadCsvAsync(client, context, batch.Id, csv, csvFileName);
-        var mapping = lifecycleValues is null
-            ? await CreateMappingFromPreviewAsync(client, context, batch.Id, $"demo-{Guid.NewGuid():N}"[..12])
-            : await CreateMappingAsync(client, context, batch.Id, lifecycleValues);
-        await ApproveMappingAsync(client, context, mapping.Id);
+        var mapping = string.Equals(csvFileName, "bom-comparison.csv", StringComparison.OrdinalIgnoreCase)
+            ? await CreateStructuralMappingAsync(
+                client,
+                context,
+                batch.Id,
+                [
+                    new CreateImportColumnMappingRequest("partNumber", "part", "partNumber", true, true),
+                    new CreateImportColumnMappingRequest("cost", "part", "cost", false, false),
+                    new CreateImportColumnMappingRequest("parent", "part", "partNumber", true, true),
+                    new CreateImportColumnMappingRequest("child", "part", "partNumber", true, true)
+                ],
+                "contains",
+                lifecycleMappings: [new CreateImportLifecycleMappingRequest("released", "released")])
+            : lifecycleValues is null
+                ? await CreateMappingFromPreviewAsync(client, context, batch.Id, $"demo-{Guid.NewGuid():N}"[..12])
+                : await CreateMappingAsync(client, context, batch.Id, lifecycleValues);
+        await ApproveMappingAsync(
+            client,
+            context,
+            mapping.Id,
+            string.Equals(csvFileName, "bom-comparison.csv", StringComparison.OrdinalIgnoreCase) ? "contains" : null);
         await ValidateBatchAsync(client, context, batch.Id);
         await StageBatchAsync(client, context, batch.Id);
         return (batch, mapping);
+    }
+
+    internal static async Task StageFlatPartsForBomComparisonAsync(
+        HttpClient client,
+        ImportFlowContext context,
+        string sourceSystem)
+    {
+        var csv = "partNumber,lifecycle,cost\nA,released,1\nB,released,1\nC,released,1\nD,released,1\n";
+        var batch = await CreateImportBatchAsync(client, context, sourceSystem);
+        await UploadCsvAsync(client, context, batch.Id, csv, "bom-endpoints.csv");
+        var mapping = await CreateMappingAsync(client, context, batch.Id, ["released"]);
+        await ApproveMappingAsync(client, context, mapping.Id);
+        await StageBatchAsync(client, context, batch.Id);
     }
 
     internal static void AddTenantHeaders(HttpRequestMessage request, Guid tenantId, Guid userId)
@@ -468,7 +520,8 @@ public static class ImportFlowTestSupport
                 request.Attributes ?? new Dictionary<string, string?>(),
                 request.SourceReference,
                 now,
-                now);
+                now,
+                request.IdentityKey);
             Nodes.Add(node);
             return Task.FromResult(node);
         }
@@ -478,9 +531,57 @@ public static class ImportFlowTestSupport
             return Task.FromResult(Nodes.SingleOrDefault(node => node.TenantId == tenantId && node.NodeId == nodeId));
         }
 
+        public Task<BaseNode?> FindNodeByIdentityAsync(
+            Guid tenantId,
+            GraphSpace graphSpace,
+            string identityKey,
+            CancellationToken cancellationToken)
+        {
+            return Task.FromResult(Nodes.FirstOrDefault(node =>
+                node.TenantId == tenantId
+                && node.GraphSpace == graphSpace
+                && string.Equals(node.IdentityKey, identityKey, StringComparison.Ordinal)));
+        }
+
+        public async Task<BaseNode> EnsureNodeAsync(CreateGraphNodeRequest request, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(request.IdentityKey))
+            {
+                return await CreateNodeAsync(request, cancellationToken);
+            }
+
+            var existing = Nodes.FirstOrDefault(node =>
+                node.TenantId == request.TenantId
+                && node.GraphSpace == request.GraphSpace
+                && string.Equals(node.IdentityKey, request.IdentityKey, StringComparison.Ordinal));
+            if (existing is null)
+            {
+                return await CreateNodeAsync(request, cancellationToken);
+            }
+
+            var updated = existing with
+            {
+                TrustState = request.TrustState,
+                Attributes = MergeAttributes(existing.Attributes, request.Attributes),
+                SourceReference = request.SourceReference ?? existing.SourceReference,
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
+            Nodes[Nodes.IndexOf(existing)] = updated;
+            return updated;
+        }
+
         public Task<BaseNode> UpdateNodeAsync(UpdateGraphNodeRequest request, CancellationToken cancellationToken)
         {
-            throw new NotSupportedException();
+            var existing = Nodes.Single(node => node.TenantId == request.TenantId && node.NodeId == request.NodeId);
+            var updated = existing with
+            {
+                TrustState = request.TrustState ?? existing.TrustState,
+                Attributes = request.Attributes is null ? existing.Attributes : MergeAttributes(existing.Attributes, request.Attributes),
+                SourceReference = request.SourceReference ?? existing.SourceReference,
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
+            Nodes[Nodes.IndexOf(existing)] = updated;
+            return Task.FromResult(updated);
         }
 
         public Task<BaseRelationship> CreateRelationshipAsync(
@@ -502,6 +603,31 @@ public static class ImportFlowTestSupport
                 now);
             Relationships.Add(relationship);
             return Task.FromResult(relationship);
+        }
+
+        public async Task<BaseRelationship> EnsureRelationshipAsync(
+            CreateGraphRelationshipRequest request,
+            CancellationToken cancellationToken)
+        {
+            var existing = Relationships.FirstOrDefault(relationship =>
+                relationship.TenantId == request.TenantId
+                && relationship.FromNodeId == request.FromNodeId
+                && relationship.ToNodeId == request.ToNodeId
+                && string.Equals(relationship.RelationshipType, request.RelationshipType, StringComparison.Ordinal));
+            if (existing is null)
+            {
+                return await CreateRelationshipAsync(request, cancellationToken);
+            }
+
+            var updated = existing with
+            {
+                TrustState = request.TrustState,
+                Attributes = MergeAttributes(existing.Attributes, request.Attributes),
+                SourceReference = request.SourceReference ?? existing.SourceReference,
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
+            Relationships[Relationships.IndexOf(existing)] = updated;
+            return updated;
         }
 
         public Task<GraphTraversalResult> TraverseAsync(TraverseGraphRequest request, CancellationToken cancellationToken)
@@ -551,15 +677,28 @@ public static class ImportFlowTestSupport
         {
             var staging = await ListGraphAsync(tenantId, GraphSpace.Staging, null, stagingNodeIds, stagingRelationshipIds, cancellationToken);
             var nodeMap = new Dictionary<Guid, Guid>();
+            var trustedNodeIds = new HashSet<Guid>();
             foreach (var node in staging.Nodes)
             {
-                var promoted = await CreateNodeAsync(
-                    new CreateGraphNodeRequest(tenantId, GraphSpace.Trusted, node.ObjectType, TrustState.Trusted, node.Attributes, node.SourceReference),
-                    cancellationToken);
+                var promoted = string.IsNullOrWhiteSpace(node.IdentityKey)
+                    ? await CreateNodeAsync(
+                        new CreateGraphNodeRequest(tenantId, GraphSpace.Trusted, node.ObjectType, TrustState.Trusted, node.Attributes, node.SourceReference),
+                        cancellationToken)
+                    : await EnsureNodeAsync(
+                        new CreateGraphNodeRequest(
+                            tenantId,
+                            GraphSpace.Trusted,
+                            node.ObjectType,
+                            TrustState.Trusted,
+                            node.Attributes,
+                            node.SourceReference,
+                            node.IdentityKey),
+                        cancellationToken);
                 nodeMap[node.NodeId] = promoted.NodeId;
+                trustedNodeIds.Add(promoted.NodeId);
             }
 
-            var promotedRelationshipIds = new List<Guid>();
+            var promotedRelationshipIds = new HashSet<Guid>();
             foreach (var relationship in staging.Relationships)
             {
                 if (!nodeMap.TryGetValue(relationship.FromNodeId, out var fromNodeId)
@@ -568,7 +707,7 @@ public static class ImportFlowTestSupport
                     continue;
                 }
 
-                var promoted = await CreateRelationshipAsync(
+                var promoted = await EnsureRelationshipAsync(
                     new CreateGraphRelationshipRequest(
                         tenantId,
                         fromNodeId,
@@ -581,7 +720,28 @@ public static class ImportFlowTestSupport
                 promotedRelationshipIds.Add(promoted.RelationshipId);
             }
 
-            return new GraphPromotionCopyResult(nodeMap.Values.ToList(), promotedRelationshipIds);
+            return new GraphPromotionCopyResult(trustedNodeIds.ToList(), promotedRelationshipIds.ToList());
+        }
+
+        private static Dictionary<string, string?> MergeAttributes(
+            IReadOnlyDictionary<string, string?> existing,
+            IReadOnlyDictionary<string, string?>? incoming)
+        {
+            var merged = new Dictionary<string, string?>(existing, StringComparer.OrdinalIgnoreCase);
+            if (incoming is null)
+            {
+                return merged;
+            }
+
+            foreach (var (key, value) in incoming)
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    merged[key] = value;
+                }
+            }
+
+            return merged;
         }
     }
 }

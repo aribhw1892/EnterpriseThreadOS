@@ -13,6 +13,7 @@ using ETOS.Backend.Ontology;
 using ETOS.Backend.Packages;
 using ETOS.Backend.Tests.Fixtures;
 using ETOS.Backend.ToolRegistry;
+using RecordingGraphMemoryService = ETOS.Backend.Tests.Fixtures.ImportFlowTestSupport.RecordingGraphMemoryService;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -168,10 +169,14 @@ public sealed class ManufacturingReferencePackageTests
         var packagesRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "packages"));
         var csv = await File.ReadAllTextAsync(Path.Combine(packagesRoot, "manufacturing-reference", "demo-imports", "bom-comparison.csv"));
 
+        await ImportFlowTestSupport.StageFlatPartsForBomComparisonAsync(
+            client,
+            new ImportFlowTestSupport.ImportFlowContext(context.TenantId, context.UserId),
+            "demo-pdm");
         var batch = await CreateImportBatchAsync(client, context);
         await UploadCsvAsync(client, context, batch.Id, csv);
         var mapping = await CreateMappingAsync(client, context, batch.Id, ["released"]);
-        await ApproveMappingAsync(client, context, mapping.Id);
+        await ApproveMappingAsync(client, context, mapping.Id, "contains");
 
         var staging = await StageBatchAsync(client, context, batch.Id);
         var comparison = await CreateBomComparisonAsync(client, context, batch.Id);
@@ -336,11 +341,15 @@ public sealed class ManufacturingReferencePackageTests
         return mapping;
     }
 
-    private static async Task ApproveMappingAsync(HttpClient client, ManufacturingModelPackageFixture.PublishedPackageContext context, Guid mappingId)
+    private static async Task ApproveMappingAsync(
+        HttpClient client,
+        ManufacturingModelPackageFixture.PublishedPackageContext context,
+        Guid mappingId,
+        string? structuralRelationshipType = null)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/imports/mappings/{mappingId}/approve")
         {
-            Content = JsonContent.Create(new ApproveImportMappingRequest("Approved by reference package test."))
+            Content = JsonContent.Create(new ApproveImportMappingRequest("Approved by reference package test.", structuralRelationshipType))
         };
         AddTenantHeaders(request, context.TenantId, context.UserId);
         var response = await client.SendAsync(request);
@@ -385,64 +394,5 @@ public sealed class ManufacturingReferencePackageTests
     {
         request.Headers.Add(TenantHeaderNames.UserId, userId.ToString());
         request.Headers.Add(TenantHeaderNames.TenantId, tenantId.ToString());
-    }
-
-    private sealed class RecordingGraphMemoryService : IGraphMemoryService
-    {
-        public Task<BaseNode> CreateNodeAsync(CreateGraphNodeRequest request, CancellationToken cancellationToken)
-        {
-            var now = DateTimeOffset.UtcNow;
-            return Task.FromResult(new BaseNode(
-                Guid.NewGuid(),
-                request.TenantId,
-                request.GraphSpace,
-                request.ObjectType,
-                request.TrustState,
-                request.Attributes ?? new Dictionary<string, string?>(),
-                request.SourceReference,
-                now,
-                now));
-        }
-
-        public Task<BaseNode?> GetNodeAsync(Guid tenantId, Guid nodeId, CancellationToken cancellationToken) =>
-            Task.FromResult<BaseNode?>(null);
-
-        public Task<BaseNode> UpdateNodeAsync(UpdateGraphNodeRequest request, CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task<BaseRelationship> CreateRelationshipAsync(CreateGraphRelationshipRequest request, CancellationToken cancellationToken)
-        {
-            var now = DateTimeOffset.UtcNow;
-            return Task.FromResult(new BaseRelationship(
-                Guid.NewGuid(),
-                request.TenantId,
-                request.FromNodeId,
-                request.ToNodeId,
-                request.RelationshipType,
-                request.TrustState,
-                request.Attributes ?? new Dictionary<string, string?>(),
-                request.SourceReference,
-                now,
-                now));
-        }
-
-        public Task<GraphTraversalResult> TraverseAsync(TraverseGraphRequest request, CancellationToken cancellationToken) =>
-            throw new NotSupportedException();
-
-        public Task<GraphReadModel> ListGraphAsync(
-            Guid tenantId,
-            GraphSpace? graphSpace,
-            string? sourceBatchId,
-            IReadOnlyCollection<Guid>? nodeIds,
-            IReadOnlyCollection<Guid>? relationshipIds,
-            CancellationToken cancellationToken) =>
-            Task.FromResult(new GraphReadModel([], []));
-
-        public Task<GraphPromotionCopyResult> PromoteStagingAsync(
-            Guid tenantId,
-            IReadOnlyCollection<Guid> nodeIds,
-            IReadOnlyCollection<Guid> relationshipIds,
-            CancellationToken cancellationToken) =>
-            Task.FromResult(new GraphPromotionCopyResult([], []));
     }
 }

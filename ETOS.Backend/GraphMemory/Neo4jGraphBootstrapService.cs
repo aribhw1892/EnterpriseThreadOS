@@ -12,6 +12,7 @@ public sealed class Neo4jGraphBootstrapService(
         "CREATE CONSTRAINT etos_base_node_node_id IF NOT EXISTS FOR (node:BaseNode) REQUIRE node.nodeId IS UNIQUE",
         "CREATE INDEX etos_base_node_tenant IF NOT EXISTS FOR (node:BaseNode) ON (node.tenantId)",
         "CREATE INDEX etos_base_node_tenant_space_type IF NOT EXISTS FOR (node:BaseNode) ON (node.tenantId, node.graphSpace, node.objectType)",
+        "CREATE INDEX etos_base_node_tenant_space_identity IF NOT EXISTS FOR (node:BaseNode) ON (node.tenantId, node.graphSpace, node.identityKey)",
         "CREATE INDEX etos_base_node_tenant_trust IF NOT EXISTS FOR (node:BaseNode) ON (node.tenantId, node.trustState)",
         "CREATE INDEX etos_base_relationship_id IF NOT EXISTS FOR ()-[relationship:BASE_RELATIONSHIP]-() ON (relationship.relationshipId)",
         "CREATE INDEX etos_base_relationship_tenant_type IF NOT EXISTS FOR ()-[relationship:BASE_RELATIONSHIP]-() ON (relationship.tenantId, relationship.relationshipType)",

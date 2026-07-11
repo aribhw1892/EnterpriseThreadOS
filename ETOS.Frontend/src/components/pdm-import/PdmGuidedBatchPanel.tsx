@@ -50,7 +50,7 @@ export function PdmGuidedBatchPanel({
       <div className="grid gap-4 rounded-2xl border border-slate-800 bg-slate-950 p-4">
         <p className="text-sm font-semibold text-slate-200">{profile.fileName}</p>
 
-        <form action={uploadPdmBatchAction} encType="multipart/form-data" className="grid gap-3">
+        <form action={uploadPdmBatchAction} className="grid gap-3">
           <input type="hidden" name="profileKey" value={profile.key} />
           <input type="hidden" name="step" value="4" />
           <input type="hidden" name="batches" value={batches} />

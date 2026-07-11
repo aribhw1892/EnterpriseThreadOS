@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Neo4j.Driver;
 using Testcontainers.Neo4j;
 
 namespace ETOS.Backend.Tests;
@@ -152,6 +153,158 @@ public sealed class GraphMemoryTests : IClassFixture<GraphMemoryTests.Neo4jFixtu
         Assert.Contains(traversal.Nodes, node => node.NodeId == child.NodeId);
         Assert.DoesNotContain(traversal.Nodes, node => node.NodeId == foreignChild.NodeId);
         Assert.All(traversal.Nodes, node => Assert.Equal(tenantId, node.TenantId));
+    }
+
+    [Fact]
+    public async Task EnsureNodeAndRelationshipAreIdempotentByIdentityKeyAndEndpoints()
+    {
+        await using var serviceProvider = CreateGraphServiceProvider();
+        var graphMemory = serviceProvider.GetRequiredService<IGraphMemoryService>();
+        var bootstrapService = serviceProvider.GetRequiredService<IGraphBootstrapService>();
+        await bootstrapService.BootstrapAsync(CancellationToken.None);
+
+        var tenantId = Guid.NewGuid();
+        var identityKey = GraphIdentityKeyBuilder.Build(
+            "SOLIDWORKS-PDM",
+            "part",
+            new Dictionary<string, string?> { ["documentId"] = "2" });
+        Assert.NotNull(identityKey);
+
+        var first = await graphMemory.EnsureNodeAsync(
+            new CreateGraphNodeRequest(
+                tenantId,
+                GraphSpace.Staging,
+                "part",
+                TrustState.Unverified,
+                new Dictionary<string, string?> { ["documentId"] = "2", ["fileName"] = "part2.sldprt" },
+                new GraphSourceReference("SOLIDWORKS-PDM", "2", "batch-a"),
+                identityKey),
+            CancellationToken.None);
+        var second = await graphMemory.EnsureNodeAsync(
+            new CreateGraphNodeRequest(
+                tenantId,
+                GraphSpace.Staging,
+                "part",
+                TrustState.Unverified,
+                new Dictionary<string, string?> { ["documentId"] = "2", ["fileName"] = "part2-updated.sldprt" },
+                new GraphSourceReference("SOLIDWORKS-PDM", "2", "batch-b"),
+                identityKey),
+            CancellationToken.None);
+
+        Assert.Equal(first.NodeId, second.NodeId);
+        Assert.Equal("part2-updated.sldprt", second.Attributes["fileName"]);
+
+        var childIdentityKey = GraphIdentityKeyBuilder.Build(
+            "SOLIDWORKS-PDM",
+            "partVersion",
+            new Dictionary<string, string?> { ["pdmVersionKey"] = "2-1" });
+        Assert.NotNull(childIdentityKey);
+        var child = await graphMemory.EnsureNodeAsync(
+            new CreateGraphNodeRequest(
+                tenantId,
+                GraphSpace.Staging,
+                "partVersion",
+                TrustState.Unverified,
+                new Dictionary<string, string?> { ["pdmVersionKey"] = "2-1" },
+                new GraphSourceReference("SOLIDWORKS-PDM", "2-1", "batch-a"),
+                childIdentityKey),
+            CancellationToken.None);
+
+        var relationship = await graphMemory.EnsureRelationshipAsync(
+            new CreateGraphRelationshipRequest(
+                tenantId,
+                first.NodeId,
+                child.NodeId,
+                "HAS_VERSION",
+                TrustState.Unverified,
+                null,
+                new GraphSourceReference("SOLIDWORKS-PDM", "2|2-1", "batch-c")),
+            CancellationToken.None);
+        var duplicateRelationship = await graphMemory.EnsureRelationshipAsync(
+            new CreateGraphRelationshipRequest(
+                tenantId,
+                first.NodeId,
+                child.NodeId,
+                "HAS_VERSION",
+                TrustState.Unverified,
+                new Dictionary<string, string?> { ["note"] = "linked" },
+                new GraphSourceReference("SOLIDWORKS-PDM", "2|2-1", "batch-d")),
+            CancellationToken.None);
+
+        Assert.Equal(relationship.RelationshipId, duplicateRelationship.RelationshipId);
+        Assert.Equal("linked", duplicateRelationship.Attributes["note"]);
+    }
+
+    [Fact]
+    public async Task DomainAttributesAreStoredAsPrefixedFlatPropertiesOnNodesAndRelationships()
+    {
+        await using var serviceProvider = CreateGraphServiceProvider();
+        var graphMemory = serviceProvider.GetRequiredService<IGraphMemoryService>();
+        var driver = serviceProvider.GetRequiredService<IDriver>();
+        var tenantId = Guid.NewGuid();
+        var parent = await graphMemory.CreateNodeAsync(
+            new CreateGraphNodeRequest(
+                tenantId,
+                GraphSpace.Staging,
+                "partVersion",
+                TrustState.Unverified,
+                new Dictionary<string, string?>
+                {
+                    ["pdmVersionKey"] = "2-22",
+                    ["status"] = "MFG",
+                    ["revision"] = "22"
+                },
+                new GraphSourceReference("SOLIDWORKS-PDM", "2-22", "batch-a")),
+            CancellationToken.None);
+        var child = await CreateNodeAsync(graphMemory, tenantId, "Part");
+
+        var relationship = await graphMemory.CreateRelationshipAsync(
+            new CreateGraphRelationshipRequest(
+                tenantId,
+                parent.NodeId,
+                child.NodeId,
+                "HAS_VERSION",
+                TrustState.Unverified,
+                new Dictionary<string, string?> { ["quantity"] = "1" },
+                new GraphSourceReference("SOLIDWORKS-PDM", "2|2-22", "batch-a")),
+            CancellationToken.None);
+
+        Assert.Equal("MFG", parent.Attributes["status"]);
+
+        await using var session = driver.AsyncSession(builder => builder.WithDatabase("neo4j"));
+        var nodeCursor = await session.RunAsync(
+            """
+            MATCH (node:BaseNode { tenantId: $tenantId, nodeId: $nodeId })
+            RETURN node
+            """,
+            new Dictionary<string, object?>
+            {
+                ["tenantId"] = tenantId.ToString(),
+                ["nodeId"] = parent.NodeId.ToString()
+            });
+        var nodeRecord = await nodeCursor.SingleAsync();
+        var nodeProperties = nodeRecord["node"].As<INode>().Properties;
+
+        Assert.True(nodeProperties.ContainsKey("attributesJson"));
+        Assert.Equal("MFG", Convert.ToString(nodeProperties["attr_status"]));
+        Assert.Equal("2-22", Convert.ToString(nodeProperties["attr_pdmVersionKey"]));
+        Assert.Equal("22", Convert.ToString(nodeProperties["attr_revision"]));
+
+        var relationshipCursor = await session.RunAsync(
+            """
+            MATCH ()-[relationship:BASE_RELATIONSHIP { tenantId: $tenantId, relationshipId: $relationshipId }]->()
+            RETURN relationship
+            """,
+            new Dictionary<string, object?>
+            {
+                ["tenantId"] = tenantId.ToString(),
+                ["relationshipId"] = relationship.RelationshipId.ToString()
+            });
+        var relationshipRecord = await relationshipCursor.SingleAsync();
+        var relationshipProperties = relationshipRecord["relationship"].As<IRelationship>().Properties;
+
+        Assert.True(relationshipProperties.ContainsKey("attributesJson"));
+        Assert.Equal("1", Convert.ToString(relationshipProperties["attr_quantity"]));
     }
 
     [Fact]

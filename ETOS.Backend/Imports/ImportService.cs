@@ -386,16 +386,17 @@ public sealed class ImportService(
         {
             var nodeIds = new List<Guid>();
             var relationshipIds = new List<Guid>();
+            var stagingIssues = new List<ImportValidationIssue>();
             var identityMappings = mapping.ColumnMappings.Where(item => item.IsIdentityField).ToList();
             var structuralHeaders = ImportStructuralImportHelper.TryResolveStructuralHeaders(parsed.Headers, modelContext.ImportProfile);
             if (structuralHeaders is not null)
             {
                 var structuralRelationship = StructuralRelationshipResolver.Resolve(modelContext.Resolved, mapping, structuralHeaders);
-                var parentGraphType = modelContext.Resolved.ResolveGraphObjectType(structuralRelationship.ParentObjectType);
-                var childGraphType = modelContext.Resolved.ResolveGraphObjectType(structuralRelationship.ChildObjectType);
                 var relationshipGraphType = modelContext.Resolved.ResolveGraphRelationshipType(structuralRelationship.RelationshipType);
+                var rowNumber = 1;
                 foreach (var row in parsed.Rows)
                 {
+                    rowNumber++;
                     var parentId = ImportStructuralImportHelper.GetRowValue(row, structuralHeaders.ParentHeader);
                     var childId = ImportStructuralImportHelper.GetRowValue(row, structuralHeaders.ChildHeader);
                     if (string.IsNullOrWhiteSpace(parentId) || string.IsNullOrWhiteSpace(childId))
@@ -403,38 +404,62 @@ public sealed class ImportService(
                         continue;
                     }
 
-                    var parent = await graphMemoryService.CreateNodeAsync(
-                        new CreateGraphNodeRequest(
+                    var parentIdentityAttributes = ImportStructuralImportHelper.BuildStructuralIdentityAttributes(
+                        parentId,
+                        structuralHeaders.ParentHeader,
+                        structuralRelationship.ParentObjectType,
+                        mapping,
+                        modelContext.Resolved);
+                    var childIdentityAttributes = ImportStructuralImportHelper.BuildStructuralIdentityAttributes(
+                        childId,
+                        structuralHeaders.ChildHeader,
+                        structuralRelationship.ChildObjectType,
+                        mapping,
+                        modelContext.Resolved);
+                    var parentIdentityKey = GraphIdentityKeyBuilder.Build(
+                        batch.SourceSystem,
+                        structuralRelationship.ParentObjectType,
+                        parentIdentityAttributes);
+                    var childIdentityKey = GraphIdentityKeyBuilder.Build(
+                        batch.SourceSystem,
+                        structuralRelationship.ChildObjectType,
+                        childIdentityAttributes);
+                    var parent = parentIdentityKey is null
+                        ? null
+                        : await graphMemoryService.FindNodeByIdentityAsync(
                             context.TenantId,
                             GraphSpace.Staging,
-                            parentGraphType,
-                            TrustState.Unverified,
-                            ImportStructuralImportHelper.BuildStructuralIdentityAttributes(
-                                parentId,
-                                structuralHeaders.ParentHeader,
-                                structuralRelationship.ParentObjectType,
-                                mapping,
-                                modelContext.Resolved),
-                            new GraphSourceReference(batch.SourceSystem, parentId, batch.Id.ToString())),
-                        cancellationToken);
-                    var child = await graphMemoryService.CreateNodeAsync(
-                        new CreateGraphNodeRequest(
+                            parentIdentityKey,
+                            cancellationToken);
+                    var child = childIdentityKey is null
+                        ? null
+                        : await graphMemoryService.FindNodeByIdentityAsync(
                             context.TenantId,
                             GraphSpace.Staging,
-                            childGraphType,
-                            TrustState.Unverified,
-                            ImportStructuralImportHelper.BuildStructuralIdentityAttributes(
-                                childId,
-                                structuralHeaders.ChildHeader,
-                                structuralRelationship.ChildObjectType,
-                                mapping,
-                                modelContext.Resolved),
-                            new GraphSourceReference(batch.SourceSystem, childId, batch.Id.ToString())),
-                        cancellationToken);
+                            childIdentityKey,
+                            cancellationToken);
+                    if (parent is null || child is null)
+                    {
+                        stagingIssues.Add(NewIssue(
+                            batch,
+                            mapping,
+                            ImportIssueSeverity.Warning,
+                            rowNumber,
+                            parent is null ? structuralHeaders.ParentHeader : structuralHeaders.ChildHeader,
+                            parent is null ? structuralRelationship.ParentObjectType : structuralRelationship.ChildObjectType,
+                            "structural-endpoint-missing",
+                            parent is null && child is null
+                                ? $"Structural relationship row references missing parent '{parentId}' and child '{childId}' objects in staging."
+                                : parent is null
+                                    ? $"Structural relationship row references missing parent object '{parentId}' in staging."
+                                    : $"Structural relationship row references missing child object '{childId}' in staging."));
+                        continue;
+                    }
+
                     var relationshipAttributes = structuralRelationship.BomRelationship is not null
                         ? ImportStructuralImportHelper.BuildRelationshipAttributes(row, structuralHeaders, structuralRelationship.BomRelationship)
                         : new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-                    var relationship = await graphMemoryService.CreateRelationshipAsync(
+                    var relationship = await graphMemoryService.EnsureRelationshipAsync(
                         new CreateGraphRelationshipRequest(
                             context.TenantId,
                             parent.NodeId,
@@ -462,17 +487,25 @@ public sealed class ImportService(
                         attributes["lifecycleState"] = lifecycleValue;
                     }
 
-                    var node = await graphMemoryService.CreateNodeAsync(
+                    var identityAttributes = BuildFlatIdentityAttributes(row, identityMappings);
+                    var identityKey = GraphIdentityKeyBuilder.Build(batch.SourceSystem, objectType, identityAttributes);
+                    var node = await graphMemoryService.EnsureNodeAsync(
                         new CreateGraphNodeRequest(
                             context.TenantId,
                             GraphSpace.Staging,
                             objectType,
                             TrustState.Unverified,
                             attributes,
-                            new GraphSourceReference(batch.SourceSystem, sourceRecordId, batch.Id.ToString())),
+                            new GraphSourceReference(batch.SourceSystem, sourceRecordId, batch.Id.ToString()),
+                            identityKey),
                         cancellationToken);
                     nodeIds.Add(node.NodeId);
                 }
+            }
+
+            if (stagingIssues.Count > 0)
+            {
+                dbContext.ImportValidationIssues.AddRange(stagingIssues);
             }
 
             run.Status = ImportStagingRunStatus.Completed;
@@ -1064,6 +1097,24 @@ public sealed class ImportService(
             .OrderByDescending(mapping => mapping.ApprovedAt)
             .FirstOrDefault()
             ?? throw new RequestValidationException("An approved import mapping is required before validation or staging.");
+    }
+
+    private static Dictionary<string, string?> BuildFlatIdentityAttributes(
+        IReadOnlyDictionary<string, string?> row,
+        IReadOnlyCollection<ImportColumnMapping> identityMappings)
+    {
+        var attributes = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        foreach (var mapping in identityMappings)
+        {
+            if (mapping.CanonicalAttributeKey is null)
+            {
+                continue;
+            }
+
+            attributes[mapping.CanonicalAttributeKey] = row.TryGetValue(mapping.SourceColumn, out var value) ? value : null;
+        }
+
+        return attributes;
     }
 
     private static string BuildSourceRecordId(IReadOnlyDictionary<string, string?> row, IReadOnlyCollection<ImportColumnMapping> identityMappings)

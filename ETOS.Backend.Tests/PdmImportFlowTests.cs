@@ -79,8 +79,8 @@ public sealed class PdmImportFlowTests
 
         Assert.Contains(graphMemory.CreatedRelationshipRequests, request => request.RelationshipType == "HAS_VERSION");
         Assert.Contains(graphMemory.CreatedRelationshipRequests, request => request.RelationshipType == "BOM_CONTAINS");
-        Assert.True(graphMemory.CreatedNodeRequests.Count(request => request.ObjectType == "Part") >= 2);
-        Assert.True(graphMemory.CreatedNodeRequests.Count(request => request.ObjectType == "PartVersion") >= 2);
+        Assert.True(graphMemory.CreatedNodeRequests.Count(request => request.ObjectType == "part") >= 2);
+        Assert.True(graphMemory.CreatedNodeRequests.Count(request => request.ObjectType == "partVersion") >= 2);
     }
 
     private static async Task ImportFlatBatchAsync(

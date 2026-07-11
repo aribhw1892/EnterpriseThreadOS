@@ -8,6 +8,7 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
 {
     private const int MaximumTraversalDepth = 5;
     private const int TraversalRowLimit = 250;
+    private const string FlatAttributePrefix = "attr_";
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -26,11 +27,13 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
             ["objectType"] = request.ObjectType,
             ["trustState"] = request.TrustState.ToString(),
             ["attributesJson"] = SerializeAttributes(request.Attributes),
+            ["identityKey"] = request.IdentityKey,
             ["sourceSystem"] = request.SourceReference?.SourceSystem,
             ["sourceRecordId"] = request.SourceReference?.SourceRecordId,
             ["sourceBatchId"] = request.SourceReference?.SourceBatchId,
             ["createdAt"] = now.ToString("O"),
-            ["updatedAt"] = now.ToString("O")
+            ["updatedAt"] = now.ToString("O"),
+            ["flatAttributes"] = BuildFlatAttributeProperties(request.Attributes)
         };
 
         await using var session = OpenSession();
@@ -43,12 +46,14 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
                 objectType: $objectType,
                 trustState: $trustState,
                 attributesJson: $attributesJson,
+                identityKey: $identityKey,
                 sourceSystem: $sourceSystem,
                 sourceRecordId: $sourceRecordId,
                 sourceBatchId: $sourceBatchId,
                 createdAt: $createdAt,
                 updatedAt: $updatedAt
             })
+            SET node += $flatAttributes
             RETURN node
             """,
             parameters);
@@ -83,6 +88,62 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
         return records.Count == 0 ? null : MapNode(records[0]["node"].As<INode>());
     }
 
+    public async Task<BaseNode?> FindNodeByIdentityAsync(
+        Guid tenantId,
+        GraphSpace graphSpace,
+        string identityKey,
+        CancellationToken cancellationToken)
+    {
+        ValidateTenant(tenantId);
+        ValidateRequired(identityKey, nameof(identityKey));
+
+        await using var session = OpenSession();
+        var cursor = await session.RunAsync(
+            """
+            MATCH (node:BaseNode { tenantId: $tenantId, graphSpace: $graphSpace, identityKey: $identityKey })
+            RETURN node
+            LIMIT 1
+            """,
+            new Dictionary<string, object?>
+            {
+                ["tenantId"] = tenantId.ToString(),
+                ["graphSpace"] = graphSpace.ToString(),
+                ["identityKey"] = identityKey
+            });
+
+        var records = await cursor.ToListAsync();
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return records.Count == 0 ? null : MapNode(records[0]["node"].As<INode>());
+    }
+
+    public async Task<BaseNode> EnsureNodeAsync(CreateGraphNodeRequest request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.IdentityKey))
+        {
+            return await CreateNodeAsync(request, cancellationToken);
+        }
+
+        var existing = await FindNodeByIdentityAsync(
+            request.TenantId,
+            request.GraphSpace,
+            request.IdentityKey,
+            cancellationToken);
+        if (existing is null)
+        {
+            return await CreateNodeAsync(request, cancellationToken);
+        }
+
+        return await UpdateNodeAsync(
+            new UpdateGraphNodeRequest(
+                request.TenantId,
+                existing.NodeId,
+                request.TrustState,
+                MergeAttributes(existing.Attributes, request.Attributes),
+                request.SourceReference),
+            cancellationToken);
+    }
+
     public async Task<BaseNode> UpdateNodeAsync(UpdateGraphNodeRequest request, CancellationToken cancellationToken)
     {
         ValidateTenant(request.TenantId);
@@ -99,6 +160,7 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
                 node.sourceRecordId = coalesce($sourceRecordId, node.sourceRecordId),
                 node.sourceBatchId = coalesce($sourceBatchId, node.sourceBatchId),
                 node.updatedAt = $updatedAt
+            SET node += $flatAttributes
             RETURN node
             """,
             new Dictionary<string, object?>
@@ -110,7 +172,8 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
                 ["sourceSystem"] = request.SourceReference?.SourceSystem,
                 ["sourceRecordId"] = request.SourceReference?.SourceRecordId,
                 ["sourceBatchId"] = request.SourceReference?.SourceBatchId,
-                ["updatedAt"] = now.ToString("O")
+                ["updatedAt"] = now.ToString("O"),
+                ["flatAttributes"] = BuildFlatAttributeProperties(request.Attributes)
             });
 
         var records = await cursor.ToListAsync();
@@ -152,6 +215,7 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
                 createdAt: $createdAt,
                 updatedAt: $updatedAt
             }]->(to)
+            SET relationship += $flatAttributes
             RETURN relationship, from.nodeId AS fromNodeId, to.nodeId AS toNodeId
             """,
             new Dictionary<string, object?>
@@ -167,7 +231,8 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
                 ["sourceRecordId"] = request.SourceReference?.SourceRecordId,
                 ["sourceBatchId"] = request.SourceReference?.SourceBatchId,
                 ["createdAt"] = now.ToString("O"),
-                ["updatedAt"] = now.ToString("O")
+                ["updatedAt"] = now.ToString("O"),
+                ["flatAttributes"] = BuildFlatAttributeProperties(request.Attributes)
             });
 
         var records = await cursor.ToListAsync();
@@ -182,6 +247,83 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
             records[0]["relationship"].As<IRelationship>(),
             Guid.Parse(records[0]["fromNodeId"].As<string>()),
             Guid.Parse(records[0]["toNodeId"].As<string>()));
+    }
+
+    public async Task<BaseRelationship> EnsureRelationshipAsync(
+        CreateGraphRelationshipRequest request,
+        CancellationToken cancellationToken)
+    {
+        ValidateTenant(request.TenantId);
+        ValidateIdentifier(request.FromNodeId, nameof(request.FromNodeId));
+        ValidateIdentifier(request.ToNodeId, nameof(request.ToNodeId));
+        ValidateRequired(request.RelationshipType, nameof(request.RelationshipType));
+
+        await using var session = OpenSession();
+        var cursor = await session.RunAsync(
+            """
+            MATCH (from:BaseNode { tenantId: $tenantId, nodeId: $fromNodeId })
+            MATCH (to:BaseNode { tenantId: $tenantId, nodeId: $toNodeId })
+            MATCH (from)-[relationship:BASE_RELATIONSHIP {
+                tenantId: $tenantId,
+                relationshipType: $relationshipType
+            }]->(to)
+            RETURN relationship, from.nodeId AS fromNodeId, to.nodeId AS toNodeId
+            LIMIT 1
+            """,
+            new Dictionary<string, object?>
+            {
+                ["tenantId"] = request.TenantId.ToString(),
+                ["fromNodeId"] = request.FromNodeId.ToString(),
+                ["toNodeId"] = request.ToNodeId.ToString(),
+                ["relationshipType"] = request.RelationshipType
+            });
+
+        var records = await cursor.ToListAsync();
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (records.Count > 0)
+        {
+            var existing = MapRelationship(
+                records[0]["relationship"].As<IRelationship>(),
+                Guid.Parse(records[0]["fromNodeId"].As<string>()),
+                Guid.Parse(records[0]["toNodeId"].As<string>()));
+            var now = DateTimeOffset.UtcNow;
+            var mergedAttributes = MergeAttributes(existing.Attributes, request.Attributes);
+            var updateCursor = await session.RunAsync(
+                """
+                MATCH ()-[relationship:BASE_RELATIONSHIP { tenantId: $tenantId, relationshipId: $relationshipId }]->()
+                SET relationship.trustState = coalesce($trustState, relationship.trustState),
+                    relationship.attributesJson = coalesce($attributesJson, relationship.attributesJson),
+                    relationship.sourceSystem = coalesce($sourceSystem, relationship.sourceSystem),
+                    relationship.sourceRecordId = coalesce($sourceRecordId, relationship.sourceRecordId),
+                    relationship.sourceBatchId = coalesce($sourceBatchId, relationship.sourceBatchId),
+                    relationship.updatedAt = $updatedAt
+                SET relationship += $flatAttributes
+                RETURN relationship, $fromNodeId AS fromNodeId, $toNodeId AS toNodeId
+                """,
+                new Dictionary<string, object?>
+                {
+                    ["tenantId"] = request.TenantId.ToString(),
+                    ["relationshipId"] = existing.RelationshipId.ToString(),
+                    ["fromNodeId"] = request.FromNodeId.ToString(),
+                    ["toNodeId"] = request.ToNodeId.ToString(),
+                    ["trustState"] = request.TrustState.ToString(),
+                    ["attributesJson"] = SerializeAttributes(mergedAttributes),
+                    ["sourceSystem"] = request.SourceReference?.SourceSystem,
+                    ["sourceRecordId"] = request.SourceReference?.SourceRecordId,
+                    ["sourceBatchId"] = request.SourceReference?.SourceBatchId,
+                    ["updatedAt"] = now.ToString("O"),
+                    ["flatAttributes"] = BuildFlatAttributeProperties(mergedAttributes)
+                });
+            var updateRecords = await updateCursor.ToListAsync();
+            cancellationToken.ThrowIfCancellationRequested();
+            return MapRelationship(
+                updateRecords[0]["relationship"].As<IRelationship>(),
+                Guid.Parse(updateRecords[0]["fromNodeId"].As<string>()),
+                Guid.Parse(updateRecords[0]["toNodeId"].As<string>()));
+        }
+
+        return await CreateRelationshipAsync(request, cancellationToken);
     }
 
     public async Task<GraphTraversalResult> TraverseAsync(TraverseGraphRequest request, CancellationToken cancellationToken)
@@ -312,21 +454,34 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
     {
         var staging = await ListGraphAsync(tenantId, GraphSpace.Staging, null, stagingNodeIds, stagingRelationshipIds, cancellationToken);
         var nodeMap = new Dictionary<Guid, Guid>();
+        var trustedNodeIds = new HashSet<Guid>();
         foreach (var node in staging.Nodes.OrderBy(item => item.NodeId))
         {
-            var promoted = await CreateNodeAsync(
-                new CreateGraphNodeRequest(
-                    tenantId,
-                    GraphSpace.Trusted,
-                    node.ObjectType,
-                    TrustState.Trusted,
-                    node.Attributes,
-                    node.SourceReference),
-                cancellationToken);
+            var promoted = string.IsNullOrWhiteSpace(node.IdentityKey)
+                ? await CreateNodeAsync(
+                    new CreateGraphNodeRequest(
+                        tenantId,
+                        GraphSpace.Trusted,
+                        node.ObjectType,
+                        TrustState.Trusted,
+                        node.Attributes,
+                        node.SourceReference),
+                    cancellationToken)
+                : await EnsureNodeAsync(
+                    new CreateGraphNodeRequest(
+                        tenantId,
+                        GraphSpace.Trusted,
+                        node.ObjectType,
+                        TrustState.Trusted,
+                        node.Attributes,
+                        node.SourceReference,
+                        node.IdentityKey),
+                    cancellationToken);
             nodeMap[node.NodeId] = promoted.NodeId;
+            trustedNodeIds.Add(promoted.NodeId);
         }
 
-        var relationshipIds = new List<Guid>();
+        var relationshipIds = new HashSet<Guid>();
         foreach (var relationship in staging.Relationships.OrderBy(item => item.RelationshipId))
         {
             if (!nodeMap.TryGetValue(relationship.FromNodeId, out var fromNodeId)
@@ -335,7 +490,7 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
                 continue;
             }
 
-            var promoted = await CreateRelationshipAsync(
+            var promoted = await EnsureRelationshipAsync(
                 new CreateGraphRelationshipRequest(
                     tenantId,
                     fromNodeId,
@@ -348,7 +503,7 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
             relationshipIds.Add(promoted.RelationshipId);
         }
 
-        return new GraphPromotionCopyResult(nodeMap.Values.ToList(), relationshipIds);
+        return new GraphPromotionCopyResult(trustedNodeIds.ToList(), relationshipIds.ToList());
     }
 
     private IAsyncSession OpenSession()
@@ -367,7 +522,8 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
             DeserializeAttributes(GetOptionalString(node.Properties, "attributesJson")),
             MapSourceReference(node.Properties),
             DateTimeOffset.Parse(GetRequiredString(node.Properties, "createdAt")),
-            DateTimeOffset.Parse(GetRequiredString(node.Properties, "updatedAt")));
+            DateTimeOffset.Parse(GetRequiredString(node.Properties, "updatedAt")),
+            GetOptionalString(node.Properties, "identityKey"));
     }
 
     private static BaseRelationship MapRelationship(IRelationship relationship, Guid fromNodeId, Guid toNodeId)
@@ -396,9 +552,52 @@ public sealed class Neo4jGraphMemoryService(IDriver driver, IOptions<GraphMemory
             : new GraphSourceReference(sourceSystem, sourceRecordId, sourceBatchId);
     }
 
+    private static Dictionary<string, string?> MergeAttributes(
+        IReadOnlyDictionary<string, string?> existing,
+        IReadOnlyDictionary<string, string?>? incoming)
+    {
+        var merged = new Dictionary<string, string?>(existing, StringComparer.OrdinalIgnoreCase);
+        if (incoming is null)
+        {
+            return merged;
+        }
+
+        foreach (var (key, value) in incoming)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                merged[key] = value;
+            }
+        }
+
+        return merged;
+    }
+
     private static string SerializeAttributes(IReadOnlyDictionary<string, string?>? attributes)
     {
         return JsonSerializer.Serialize(attributes ?? new Dictionary<string, string?>(), JsonOptions);
+    }
+
+    private static Dictionary<string, object?> BuildFlatAttributeProperties(
+        IReadOnlyDictionary<string, string?>? attributes)
+    {
+        var map = new Dictionary<string, object?>(StringComparer.Ordinal);
+        if (attributes is null)
+        {
+            return map;
+        }
+
+        foreach (var (key, value) in attributes)
+        {
+            if (string.IsNullOrWhiteSpace(key) || value is null)
+            {
+                continue;
+            }
+
+            map[$"{FlatAttributePrefix}{key}"] = value;
+        }
+
+        return map;
     }
 
     private static IReadOnlyDictionary<string, string?> DeserializeAttributes(string? attributesJson)

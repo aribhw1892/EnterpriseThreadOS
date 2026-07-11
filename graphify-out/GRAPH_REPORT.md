@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 11021 nodes · 22453 edges · 585 communities (470 shown, 115 thin omitted)
+- 11073 nodes · 22611 edges · 599 communities (482 shown, 117 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 112 edges (avg confidence: 0.64)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3bdef25f`
+- Built from commit: `7dbc3f6a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -479,6 +479,7 @@
 - [[_COMMUNITY_Community 462|Community 462]]
 - [[_COMMUNITY_Community 463|Community 463]]
 - [[_COMMUNITY_Community 465|Community 465]]
+- [[_COMMUNITY_Community 466|Community 466]]
 - [[_COMMUNITY_Community 467|Community 467]]
 - [[_COMMUNITY_Community 468|Community 468]]
 - [[_COMMUNITY_Community 469|Community 469]]
@@ -566,8 +567,11 @@
 - [[_COMMUNITY_Community 572|Community 572]]
 - [[_COMMUNITY_Community 573|Community 573]]
 - [[_COMMUNITY_Community 574|Community 574]]
+- [[_COMMUNITY_Community 575|Community 575]]
+- [[_COMMUNITY_Community 576|Community 576]]
 - [[_COMMUNITY_Community 577|Community 577]]
 - [[_COMMUNITY_Community 578|Community 578]]
+- [[_COMMUNITY_Community 579|Community 579]]
 - [[_COMMUNITY_Community 580|Community 580]]
 - [[_COMMUNITY_Community 581|Community 581]]
 - [[_COMMUNITY_Community 582|Community 582]]
@@ -575,7 +579,17 @@
 - [[_COMMUNITY_Community 585|Community 585]]
 - [[_COMMUNITY_Community 586|Community 586]]
 - [[_COMMUNITY_Community 587|Community 587]]
+- [[_COMMUNITY_Community 588|Community 588]]
+- [[_COMMUNITY_Community 589|Community 589]]
+- [[_COMMUNITY_Community 590|Community 590]]
+- [[_COMMUNITY_Community 591|Community 591]]
 - [[_COMMUNITY_Community 592|Community 592]]
+- [[_COMMUNITY_Community 593|Community 593]]
+- [[_COMMUNITY_Community 594|Community 594]]
+- [[_COMMUNITY_Community 595|Community 595]]
+- [[_COMMUNITY_Community 596|Community 596]]
+- [[_COMMUNITY_Community 597|Community 597]]
+- [[_COMMUNITY_Community 598|Community 598]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `EnterpriseThreadOS Implementation Issues` - 205 edges
@@ -584,7 +598,7 @@
 4. `AI-Native Enterprise Digital Thread Agentic OS` - 110 edges
 5. `tenantHeadersOrNull()` - 81 edges
 6. `ITenantScoped` - 70 edges
-7. `ImportService` - 63 edges
+7. `ImportService` - 64 edges
 8. `OntologyService` - 61 edges
 9. `Task` - 54 edges
 10. `CancellationToken` - 54 edges
@@ -604,7 +618,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (585 total, 115 thin omitted)
+## Communities (599 total, 117 thin omitted)
 
 ### Community 0 - "Schema Versioning and Validation"
 Cohesion: 0.02
@@ -675,8 +689,8 @@ Cohesion: 0.09
 Nodes (38): AbstractValidator, ArtifactDependencyResponse, ArtifactDetailResponse, ArtifactImpactResponse, ArtifactReadinessResponse, ArtifactRelationshipResponse, ArtifactRegistryService, CreateArtifactDependencyRequestValidator (+30 more)
 
 ### Community 17 - "Health Endpoint and Monitoring"
-Cohesion: 0.09
-Nodes (29): CancellationToken, Guid, IReadOnlyCollection, IReadOnlyList, JsonSerializerOptions, SafeModeEvent, Task, WorkflowDefinitionPayloadDocument (+21 more)
+Cohesion: 0.12
+Nodes (21): CancellationToken, Guid, IReadOnlyCollection, IReadOnlyList, JsonSerializerOptions, SafeModeEvent, Task, WorkflowDefinitionPayloadDocument (+13 more)
 
 ### Community 18 - "Audit Records and Security Events"
 Cohesion: 0.08
@@ -691,16 +705,16 @@ Cohesion: 0.08
 Nodes (31): AccessGrantResponse, AccessRequestResponse, AssignRolePermissionRequest, CreateAccessGrantRequest, CreateAccessRequestRequest, CreatePermissionRequest, CreateTenantMembershipRequest, CreateTenantRequest (+23 more)
 
 ### Community 21 - "Graph Memory Service Testing"
-Cohesion: 0.07
-Nodes (39): AddReviewTaskCommentRequest, AddReviewTaskCommentResponse, AssignReviewTaskRequest, AssignReviewTaskResponse, CompleteReviewTaskRequest, CreateEscalationReviewTaskResponse, CancellationToken, Guid (+31 more)
+Cohesion: 0.20
+Nodes (14): CreateEscalationReviewTaskResponse, ActiveTenantContext, Artifact, ArtifactVersion, CancellationToken, Guid, IReadOnlyCollection, ReviewTaskChainLinkResponse (+6 more)
 
 ### Community 22 - "Frontend Dependencies Configuration"
 Cohesion: 0.09
 Nodes (29): CreateDataQualityIssueRequest, CreateDataQualityIssueRequestValidator, DataQualityIssueService, IDataQualityIssueService, DataQualityAffectedEntityType, DataQualityIssueSourceLink, DataQualityIssueSourceLinkResponse, DataQualityTrustImpact (+21 more)
 
 ### Community 23 - "Project and Backend Dependencies"
-Cohesion: 0.13
-Nodes (29): AttributeSchemaVersionResponse, BomComparisonRunResponse, Fact, GraphDiffContract, GraphSnapshotContract, GraphSpace, Guid, HttpClient (+21 more)
+Cohesion: 0.12
+Nodes (31): AttributeSchemaVersionResponse, BomComparisonRunResponse, CreateImportColumnMappingRequest, CreateImportLifecycleMappingRequest, Fact, GraphDiffContract, GraphSnapshotContract, GraphSpace (+23 more)
 
 ### Community 24 - "Data Quality and Identity Actions"
 Cohesion: 0.05
@@ -723,12 +737,12 @@ Cohesion: 0.08
 Nodes (54): ExecuteRequest, ExecuteResponse, FallbackModelConfig, Mirrors the HTTP payload sent by PydanticAiRuntimeAdapter (.NET)., Mirrors AgentRuntimeExecutionResult fields exposed over HTTP., _build_structured_output_type(), _build_structured_user_prompt(), _coerce_structured_output() (+46 more)
 
 ### Community 29 - "Import File Parsing"
-Cohesion: 0.07
-Nodes (40): AddDecisionCommentRequest, AddDecisionCommentResponse, CastDecisionVoteRequest, CastDecisionVoteResponse, CreateDecisionEscalationResponse, DecisionDetailResponse, DecisionReviewTaskCompletionHandler, DecisionService (+32 more)
+Cohesion: 0.13
+Nodes (24): AddDecisionCommentRequest, AddDecisionCommentResponse, CastDecisionVoteRequest, CastDecisionVoteResponse, CreateDecisionEscalationResponse, DecisionDetailResponse, DecisionService, IDecisionService (+16 more)
 
 ### Community 30 - "Graph Snapshot Management"
 Cohesion: 0.08
-Nodes (38): Batch, BaseNode, BaseRelationship, BomComparisonRunResponse, CancellationToken, CreateGraphNodeRequest, CreateGraphRelationshipRequest, CreateImportColumnMappingRequest (+30 more)
+Nodes (41): Batch, BaseNode, BaseRelationship, BomComparisonRunResponse, CancellationToken, CreateGraphNodeRequest, CreateGraphRelationshipRequest, CreateImportColumnMappingRequest (+33 more)
 
 ### Community 31 - "Governance Audit Testing"
 Cohesion: 0.11
@@ -755,8 +769,8 @@ Cohesion: 0.11
 Nodes (23): CreateWorkflowDefinitionVersionRequest, CreateWorkflowDefinitionVersionResponse, ActiveTenantContext, Artifact, ArtifactVersion, CancellationToken, CreateWorkflowDefinitionRequest, CreateWorkflowDefinitionResponse (+15 more)
 
 ### Community 37 - "Identity Seeder Testing"
-Cohesion: 0.09
-Nodes (29): AllowAllPermissionService, ActiveTenantContext, ArtifactVersion, AuditRecordResponse, AuditRecordWriteRequest, CancellationToken, DecisionReviewTaskCompletionHandler, EnterpriseThreadDbContext (+21 more)
+Cohesion: 0.22
+Nodes (11): ArtifactVersion, DecisionReviewTaskCompletionHandler, EnterpriseThreadDbContext, Fact, Guid, ReviewTaskFactory, ReviewTaskService, Task (+3 more)
 
 ### Community 38 - "Identity and Data Quality Configuration"
 Cohesion: 0.10
@@ -811,8 +825,8 @@ Cohesion: 0.02
 Nodes (101): 2. assistant, 701. assistant, 702. user, 703. assistant, 704. user, 705. assistant, 706. user, 707. assistant (+93 more)
 
 ### Community 51 - "Health Endpoint Extensions"
-Cohesion: 0.14
-Nodes (20): AgentExecutionMode, AgentExecutionRequest, AgentExecutionService, IAgentExecutionService, ActiveTenantContext, AgentDefinitionPayloadDocument, AgentExecutionProfile, AgentExecutionResponse (+12 more)
+Cohesion: 0.05
+Nodes (54): AgentExecutionMode, AgentExecutionRequest, AgentExecutionService, IAgentExecutionService, Document, ActiveTenantContext, AgentDefinitionPayloadDocument, AgentExecutionProfile (+46 more)
 
 ### Community 52 - "Graph Bootstrap Service"
 Cohesion: 0.07
@@ -843,8 +857,8 @@ Cohesion: 0.14
 Nodes (19): AgentTypeDefinitionArtifactSummaryResponse, AgentTypeDefinitionService, IAgentTypeDefinitionService, CreateAgentTypeDefinitionRequest, CreateAgentTypeDefinitionVersionRequest, CreateAgentTypeDefinitionVersionResponse, ActiveTenantContext, AgentTypeDefinitionDetailResponse (+11 more)
 
 ### Community 59 - "Classification Policy Migration"
-Cohesion: 0.16
-Nodes (15): ContextPackageExplorerService, ContextViewService, DecisionExplorerFoundationService, AiTraceService, ArtifactRegistryService, DocumentService, EnterpriseThreadDbContext, Fact (+7 more)
+Cohesion: 0.15
+Nodes (16): ContextPackageExplorerService, ContextViewService, DecisionExplorerFoundationService, AiTraceService, ArtifactRegistryService, DocumentService, EnterpriseThreadDbContext, Fact (+8 more)
 
 ### Community 60 - "Canonical Ontology Migration"
 Cohesion: 0.12
@@ -879,16 +893,16 @@ Cohesion: 0.05
 Nodes (41): 1. API helpers in [`etos-api.ts`](ETOS.Frontend/src/lib/etos-api.ts), 1. New request/response contracts, 2. New component [`AgentModelConfigPanel.tsx`](ETOS.Frontend/src/components/agents/AgentModelConfigPanel.tsx), 2. Service method `UpdateModelConfigAsync`, 3. Tests, 3. Update configure page, 4. Verification, Backend (small focused API) (+33 more)
 
 ### Community 68 - "UI Layout and Styling"
-Cohesion: 0.13
-Nodes (22): BaseNode, BaseRelationship, CancellationToken, CreateGraphNodeRequest, CreateGraphRelationshipRequest, GraphPromotionCopyResult, GraphReadModel, GraphSpace (+14 more)
+Cohesion: 0.14
+Nodes (23): BaseNode, BaseRelationship, CancellationToken, CreateGraphNodeRequest, CreateGraphRelationshipRequest, Dictionary, GraphPromotionCopyResult, GraphReadModel (+15 more)
 
 ### Community 69 - "Graph Bootstrap Interface"
-Cohesion: 0.12
-Nodes (18): ArtifactPolicyRiskStatus, CancellationToken, ClassificationSchemeVersionResponse, CreateClassificationSchemeVersionRequest, CreatePolicyVersionRequest, CreateRestrictedContextRuleRequest, GraphPromotionCopyResult, GraphReadModel (+10 more)
+Cohesion: 0.11
+Nodes (21): AllowAllPolicyService, ArtifactPolicyRiskStatus, CancellationToken, ClassificationSchemeResponse, ClassificationSchemeVersionResponse, CreateClassificationSchemeRequest, CreateClassificationSchemeVersionRequest, CreatePolicyVersionRequest (+13 more)
 
 ### Community 70 - "DbContext Factory"
 Cohesion: 0.08
-Nodes (29): AllowAllPermissionService, AllowAllPolicyService, ActiveTenantContext, ArtifactPolicyRiskStatus, CancellationToken, ClassificationSchemeResponse, ClassificationSchemeVersionResponse, CreateClassificationSchemeRequest (+21 more)
+Nodes (18): AllowAllPolicyService, ClassificationSchemeResponse, ClassificationSchemeVersionResponse, CreateClassificationSchemeRequest, CreateClassificationSchemeVersionRequest, CreatePolicyVersionRequest, CreateRestrictedContextRuleRequest, EvaluatePolicyRequest (+10 more)
 
 ### Community 71 - "Initial Operational Store Model"
 Cohesion: 0.18
@@ -907,8 +921,8 @@ Cohesion: 0.24
 Nodes (15): ContextView360Response, ContextViewFilterSummaryResponse, ContextViewItemResponse, ContextViewSectionResponse, ActiveTenantContext, AiTraceArtifactLinkKind, CancellationToken, ContextItemResponse (+7 more)
 
 ### Community 75 - "Classification Policy Model"
-Cohesion: 0.05
-Nodes (52): AllowAllPermissionService, AllowAllPolicyService, ActiveTenantContext, ArtifactPolicyRiskStatus, AuditRecordResponse, AuditRecordWriteRequest, BaseNode, BaseRelationship (+44 more)
+Cohesion: 0.09
+Nodes (30): AllowAllPermissionService, AllowAllPolicyService, ActiveTenantContext, ArtifactPolicyRiskStatus, CancellationToken, ClassificationSchemeResponse, ClassificationSchemeVersionResponse, CreateClassificationSchemeRequest (+22 more)
 
 ### Community 76 - "Canonical Ontology Model"
 Cohesion: 0.06
@@ -979,8 +993,8 @@ Cohesion: 0.10
 Nodes (20): BaseNode, BaseRelationship, CancellationToken, GraphSnapshot, GraphSnapshotContract, GraphSpace, Guid, IReadOnlyCollection (+12 more)
 
 ### Community 93 - "Governance Models"
-Cohesion: 0.14
-Nodes (18): ClaimsPrincipal, ActiveTenantContext, CancellationToken, DateTimeOffset, EtosTenantInfo, Guid, SecurityEventSeverity, Task (+10 more)
+Cohesion: 0.17
+Nodes (15): ClaimsPrincipal, ActiveTenantContext, CancellationToken, DateTimeOffset, EtosTenantInfo, Guid, Task, StaticTenantContextResolver (+7 more)
 
 ### Community 94 - "Application Program"
 Cohesion: 0.10
@@ -996,7 +1010,7 @@ Nodes (18): CancellationToken, Dictionary, GraphDiffContract, GraphSnapshot, Gui
 
 ### Community 97 - "PostCSS Configuration"
 Cohesion: 0.16
-Nodes (16): ActiveTenantContext, AgentRuntimePreviewInput, AgentRuntimePreviewOrchestratorResult, CancellationToken, Guid, IToolGateway, ResolvedModelPackageContext, ToolExecutionRequest (+8 more)
+Nodes (19): ActiveTenantContext, AgentExecutionProfile, AgentRuntimePreviewInput, AgentRuntimePreviewOrchestratorResult, CancellationToken, Guid, IToolGateway, ResolvedModelPackageContext (+11 more)
 
 ### Community 98 - "Artifact Lifecycle ADR"
 Cohesion: 0.14
@@ -1007,8 +1021,8 @@ Cohesion: 0.09
 Nodes (22): DateTimeOffset, Guid, IReadOnlyCollection, JsonSerializerOptions, RecommendationConflictState, RecommendationRiskState, ReviewTaskChainLinkResponse, ReviewTaskCommentResponse (+14 more)
 
 ### Community 100 - "EnterpriseThreadOS Agent Guide"
-Cohesion: 0.06
-Nodes (34): Agent Runtime Adapter Contracts, Agent Template Definitions Module, AI Trace Module, Artifact Registry Module, Business Policy Definitions Module, Capability Definitions Module, Classification And Policy Module, Dashboard and Report Module (+26 more)
+Cohesion: 0.07
+Nodes (27): Agent Runtime Adapter Contracts, Agent Template Definitions Module, AI Trace Module, Artifact Registry Module, Business Policy Definitions Module, Capability Definitions Module, Classification And Policy Module, Dashboard and Report Module (+19 more)
 
 ### Community 101 - "AI Agent Workflow"
 Cohesion: 0.09
@@ -1107,7 +1121,7 @@ Cohesion: 0.14
 Nodes (18): anchorHint(), askTurnAction(), ChatPage(), createSessionAction(), loadLatestTurn(), PageProps, renderApiError(), TurnPanel() (+10 more)
 
 ### Community 125 - "Local Docker Compose Setup"
-Cohesion: 0.15
+Cohesion: 0.18
 Nodes (15): BaseNode, BaseRelationship, CancellationToken, CreateGraphNodeRequest, CreateGraphRelationshipRequest, GraphPromotionCopyResult, GraphReadModel, GraphSpace (+7 more)
 
 ### Community 126 - "Local Development Environment"
@@ -1187,7 +1201,7 @@ Cohesion: 0.02
 Nodes (100): 201. assistant, 202. user, 203. assistant, 204. user, 205. assistant, 206. user, 207. assistant, 208. user (+92 more)
 
 ### Community 145 - "Community 145"
-Cohesion: 0.19
+Cohesion: 0.20
 Nodes (12): ArtifactId, CreateToolDefinitionResponse, CreateWorkflowDefinitionRequest, Fact, Guid, HttpClient, Program, PublishedPackageContext (+4 more)
 
 ### Community 146 - "Community 146"
@@ -1203,8 +1217,8 @@ Cohesion: 0.16
 Nodes (12): BusinessPolicyDefinitionPayloadDocument, BusinessPolicyDefinitionPayloadParser, BusinessPolicyCapabilityReferenceResponse, BusinessPolicyDefinitionDetailResponse, BusinessPolicyDefinitionPayloadDocument, BusinessPolicyModelPackageReferenceResponse, BusinessPolicyOntologyReferenceResponse, Guid (+4 more)
 
 ### Community 149 - "Community 149"
-Cohesion: 0.10
-Nodes (21): DisabledCadParsingPlaceholder, DisabledDocumentVectorIndexingService, DocumentFileStorageOptions, ICadParsingPlaceholder, IDocumentFileStorage, IDocumentVectorIndexingService, LocalDocumentFileStorage, CadParsingPlaceholderResponse (+13 more)
+Cohesion: 0.17
+Nodes (14): DisabledDocumentVectorIndexingService, DocumentFileStorageOptions, IDocumentFileStorage, IDocumentVectorIndexingService, LocalDocumentFileStorage, CancellationToken, DocumentVectorIndexStatus, DocumentVersion (+6 more)
 
 ### Community 150 - "Community 150"
 Cohesion: 0.22
@@ -1239,8 +1253,8 @@ Cohesion: 0.18
 Nodes (11): CapabilityDefinitionPayloadDocument, CapabilityDefinitionPayloadParser, CapabilityDefinitionDetailResponse, CapabilityDefinitionPayloadDocument, CapabilityModelPackageReferenceResponse, CapabilityOntologyReferenceResponse, Guid, HashSet (+3 more)
 
 ### Community 158 - "Community 158"
-Cohesion: 0.11
-Nodes (16): AllowAllPermissionService, AllowAllPolicyService, ActiveTenantContext, ClassificationSchemeResponse, CreateClassificationSchemeRequest, DocumentVectorIndexStatus, DocumentVersion, EvaluatePolicyRequest (+8 more)
+Cohesion: 0.10
+Nodes (15): AllowAllPermissionService, ActiveTenantContext, DocumentVectorIndexStatus, DocumentVersion, EvaluatePolicyRequest, IAccessPermissionService, PolicyEvaluationResponse, StoredDocumentFile (+7 more)
 
 ### Community 159 - "Community 159"
 Cohesion: 0.27
@@ -1255,8 +1269,8 @@ Cohesion: 0.18
 Nodes (10): CancellationToken, GovernedOptimizationEvaluationResult, Guid, IReadOnlyDictionary, JsonNode, JsonObject, JsonSerializerOptions, Task (+2 more)
 
 ### Community 162 - "Community 162"
-Cohesion: 0.33
-Nodes (8): BusinessPolicyWorkflowEvaluationResult, CancellationToken, GovernedOptimizationEvaluationResult, Guid, Task, WorkflowExecutionRequest, WorkflowExecutionResponse, IWorkflowExecutionService
+Cohesion: 0.20
+Nodes (12): BusinessPolicyWorkflowEvaluationResult, CancellationToken, GovernedOptimizationEvaluationResult, Guid, Task, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowRuntimeStartRequest (+4 more)
 
 ### Community 163 - "Community 163"
 Cohesion: 0.11
@@ -1287,7 +1301,7 @@ Cohesion: 0.13
 Nodes (12): PydanticAiRuntimeAdapter, AgentRuntimeExecutionRequest, AgentRuntimeExecutionResult, CancellationToken, IReadOnlyCollection, JsonSerializerOptions, Task, AgentRuntimeExecutionRequest (+4 more)
 
 ### Community 171 - "Community 171"
-Cohesion: 0.13
+Cohesion: 0.11
 Nodes (6): AgentTemplateDefinitionArtifactTypes, AgentTemplateDefinitionPermissions, FutureAgentArtifactTypes, BusinessPolicies, string, Program
 
 ### Community 172 - "Community 172"
@@ -1339,8 +1353,8 @@ Cohesion: 0.21
 Nodes (9): Guid, IReadOnlyCollection, IReadOnlyDictionary, JsonSerializerOptions, SkillDefinitionDetailResponse, SkillDefinitionPayloadDocument, SkillToolReferenceResponse, SkillDefinitionPayloadDocument (+1 more)
 
 ### Community 184 - "Community 184"
-Cohesion: 0.29
-Nodes (5): AuditRecordResponse, AuditRecordWriteRequest, SecurityEventResponse, SecurityEventWriteRequest, RecordingAuditRecorder
+Cohesion: 0.30
+Nodes (5): EnterpriseThreadDbContext, GovernanceFlowService, GovernedChatService, Guid, TestContext
 
 ### Community 185 - "Community 185"
 Cohesion: 0.17
@@ -1511,20 +1525,20 @@ Cohesion: 0.30
 Nodes (7): Guid, HttpClient, HttpRequestMessage, PublishedPackageContext, Task, TenantResponse, ManufacturingModelPackageFixture
 
 ### Community 227 - "Community 227"
-Cohesion: 0.30
-Nodes (6): AgentExecutionProfile, Fact, Task, MappingSuggestionProviderTests, StubAgentExecutionProfileResolver, PydanticAiMappingProvider
+Cohesion: 0.42
+Nodes (3): Fact, MappingSuggestionProviderTests, PydanticAiMappingProvider
 
 ### Community 228 - "Community 228"
 Cohesion: 0.05
 Nodes (37): 1. user, 610. user, 618. user, 620. user, 642. user, 648. user, 654. user, 662. user (+29 more)
 
 ### Community 229 - "Community 229"
-Cohesion: 0.29
+Cohesion: 0.33
 Nodes (8): ArtifactId, Fact, Guid, Program, Task, VersionId, WebApplicationFactory, WorkflowSafeModeTests
 
 ### Community 230 - "Community 230"
-Cohesion: 0.20
-Nodes (8): IReadOnlyCollection, string, WorkflowRuntimeStartRequest, WorkflowRuntimeStartResult, IGovernedOptimizationEvaluationService, IWorkflowRuntimeAdapter, IWorkflowRuntimeAdapterSelector, WorkflowRuntimeAdapterKeys
+Cohesion: 0.17
+Nodes (9): IReadOnlyDictionary, IWorkflowRuntimeAdapter, IReadOnlyCollection, string, WorkflowRuntimeAdapterSelector, IGovernedOptimizationEvaluationService, IWorkflowRuntimeAdapter, IWorkflowRuntimeAdapterSelector (+1 more)
 
 ### Community 231 - "Community 231"
 Cohesion: 0.43
@@ -1815,8 +1829,8 @@ Cohesion: 0.36
 Nodes (9): Acceptance Criteria Mapping, Backend Implementation, Existing Foundation To Reuse, Frontend Implementation, Proposed Flow, Scope Decisions, Slice 5 Classification And Policy Enforcement Foundation, Tests And Verification (+1 more)
 
 ### Community 303 - "Community 303"
-Cohesion: 0.16
-Nodes (11): AllowAllPermissionService, AuditRecordResponse, AuditRecordWriteRequest, CancellationToken, Guid, SecurityEventResponse, SecurityEventWriteRequest, RecordingAuditRecorder (+3 more)
+Cohesion: 0.19
+Nodes (9): AllowAllPermissionService, AuditRecordResponse, AuditRecordWriteRequest, CancellationToken, Guid, SecurityEventResponse, SecurityEventWriteRequest, RecordingAuditRecorder (+1 more)
 
 ### Community 304 - "Community 304"
 Cohesion: 0.25
@@ -1843,8 +1857,8 @@ Cohesion: 0.33
 Nodes (5): IdentityCandidateLink, IdentityLearningEvidence, IdentityResolutionDecision, IdentityResolutionRule, TrustScoreRecord
 
 ### Community 310 - "Community 310"
-Cohesion: 0.18
-Nodes (8): CancellationToken, int, WorkflowStepExecutionContext, WorkflowStepExecutionResult, RecordingWorkflowStepExecutor, WorkflowStepExecutionContext, WorkflowStepExecutionResult, IWorkflowStepExecutor
+Cohesion: 0.25
+Nodes (6): CancellationToken, int, WorkflowStepExecutionContext, WorkflowStepExecutionResult, RecordingWorkflowStepExecutor, IWorkflowStepExecutor
 
 ### Community 311 - "Community 311"
 Cohesion: 0.39
@@ -1855,8 +1869,8 @@ Cohesion: 0.25
 Nodes (7): Backend Configuration, Current App, ETOS Frontend, Local Development, More Documentation, Scripts, Stack
 
 ### Community 313 - "Community 313"
-Cohesion: 0.16
-Nodes (19): Document, ActiveTenantContext, Artifact, ArtifactVersion, CancellationToken, ConnectorDefinitionPayloadDocument, Guid, IReadOnlyCollection (+11 more)
+Cohesion: 0.08
+Nodes (19): AllowAllPermissionService, ActiveTenantContext, AuditRecordResponse, AuditRecordWriteRequest, CancellationToken, RecommendationConflictState, RecommendationRiskState, ReviewTaskPriority (+11 more)
 
 ### Community 314 - "Community 314"
 Cohesion: 0.07
@@ -1871,16 +1885,16 @@ Cohesion: 0.29
 Nodes (6): ADR Guidance, Architecture Decision Records, Required ADRs From The PRD, Status Values, Suggested File Names, Template
 
 ### Community 317 - "Community 317"
-Cohesion: 0.40
-Nodes (3): IReadOnlyDictionary, IWorkflowRuntimeAdapter, WorkflowRuntimeAdapterSelector
+Cohesion: 0.33
+Nodes (8): CancellationToken, Guid, JsonSerializerOptions, SafeModeEvent, Task, WorkflowStepExecutionContext, WorkflowStepExecutionResult, WorkflowStepExecutor
 
 ### Community 318 - "Community 318"
 Cohesion: 0.40
 Nodes (4): Artifact, ArtifactDependency, ArtifactRelationship, ArtifactVersion
 
 ### Community 319 - "Community 319"
-Cohesion: 0.18
-Nodes (8): BaseNode, BaseRelationship, CreateGraphNodeRequest, CreateGraphRelationshipRequest, GraphTraversalResult, TraverseGraphRequest, UpdateGraphNodeRequest, RecordingGraphMemoryService
+Cohesion: 0.09
+Nodes (24): AllowAllPermissionService, ActiveTenantContext, ArtifactPolicyRiskStatus, AuditRecordResponse, AuditRecordWriteRequest, BaseNode, BaseRelationship, CancellationToken (+16 more)
 
 ### Community 320 - "Community 320"
 Cohesion: 0.38
@@ -1948,7 +1962,7 @@ Nodes (6): Checkpoint Format, Guidance, Project Checkpoint, Purpose, Source Docu
 
 ### Community 337 - "Community 337"
 Cohesion: 0.06
-Nodes (42): ExecuteGovernedWorkflowStepActivity, GovernedWorkflowOrchestrator, Task, WorkflowStepActivityInput, WorkflowStepActivityOutput, Task, WorkflowOrchestrationInput, WorkflowOrchestrationOutput (+34 more)
+Nodes (27): ExecuteGovernedWorkflowStepActivity, GovernedWorkflowOrchestrator, Task, WorkflowStepActivityInput, WorkflowStepActivityOutput, Task, WorkflowOrchestrationInput, WorkflowOrchestrationOutput (+19 more)
 
 ### Community 338 - "Community 338"
 Cohesion: 0.40
@@ -1971,12 +1985,12 @@ Cohesion: 0.53
 Nodes (4): CancellationToken, ImportMappingSuggestionRequest, ImportMappingSuggestionResult, Task
 
 ### Community 343 - "Community 343"
-Cohesion: 0.33
-Nodes (4): MigrationBuilder, Migration, ETOS.Backend.Infrastructure.Persistence.Migrations, InitialOperationalStore
+Cohesion: 0.40
+Nodes (3): MigrationBuilder, ETOS.Backend.Infrastructure.Persistence.Migrations, InitialOperationalStore
 
 ### Community 344 - "Community 344"
-Cohesion: 0.40
-Nodes (3): MigrationBuilder, ETOS.Backend.Infrastructure.Persistence.Migrations, Slice3AuditSecurityEvents
+Cohesion: 0.33
+Nodes (4): MigrationBuilder, Migration, ETOS.Backend.Infrastructure.Persistence.Migrations, Slice3AuditSecurityEvents
 
 ### Community 345 - "Community 345"
 Cohesion: 0.40
@@ -2334,6 +2348,10 @@ Nodes (3): Error details, Instructions, Test info
 Cohesion: 0.50
 Nodes (3): Error details, Instructions, Test info
 
+### Community 466 - "Community 466"
+Cohesion: 0.27
+Nodes (8): DocumentArtifactDetailResponse, DocumentService, EnterpriseThreadDbContext, Fact, IFormFile, TestContext, DocumentMemoryTests, IDocumentService
+
 ### Community 561 - "Community 561"
 Cohesion: 0.50
 Nodes (4): Immediate learning evidence, Phase 5 — Learning evidence and rollup, Placeholder artifacts, Rollup → LearningSignalArtifact
@@ -2370,6 +2388,14 @@ Nodes (13): IAgentRuntimeAdapter, HermesRuntimeAdapter, LangGraphRuntimeAdapter,
 Cohesion: 0.31
 Nodes (8): PageProps, PageProps, getAgentRunDetail(), getToolRunDetail(), getToolRuns(), AgentRunDetailPage(), loadChildToolRunIds(), ToolRunDetailPage()
 
+### Community 575 - "Community 575"
+Cohesion: 0.28
+Nodes (10): CancellationToken, Guid, IReadOnlyCollection, ReviewTaskCompletionResolution, Task, ReviewTaskBlockingCondition, ReviewTaskChainLink, ReviewTaskChainReason (+2 more)
+
+### Community 576 - "Community 576"
+Cohesion: 0.28
+Nodes (9): CreateImportColumnMappingRequest, CreateImportLifecycleMappingRequest, Fact, HttpClient, ImportBatchResponse, ImportFlowContext, IReadOnlyCollection, Task (+1 more)
+
 ### Community 577 - "Community 577"
 Cohesion: 0.40
 Nodes (3): MigrationBuilder, ETOS.Backend.Infrastructure.Persistence.Migrations, Issue29StructuralRelationshipType
@@ -2377,6 +2403,10 @@ Nodes (3): MigrationBuilder, ETOS.Backend.Infrastructure.Persistence.Migrations,
 ### Community 578 - "Community 578"
 Cohesion: 0.33
 Nodes (5): Full pipeline, Outputs, PdmTransform, Run, Tests
+
+### Community 579 - "Community 579"
+Cohesion: 0.18
+Nodes (8): BaseNode, BaseRelationship, CreateGraphNodeRequest, CreateGraphRelationshipRequest, GraphTraversalResult, TraverseGraphRequest, UpdateGraphNodeRequest, RecordingGraphMemoryService
 
 ### Community 585 - "Community 585"
 Cohesion: 0.22
@@ -2390,26 +2420,58 @@ Nodes (8): generatedAt, inputDir, outputs, has-version.csv, part-versions.csv, p
 Cohesion: 0.40
 Nodes (3): ModelBuilder, ETOS.Backend.Infrastructure.Persistence.Migrations, Issue29StructuralRelationshipType
 
+### Community 588 - "Community 588"
+Cohesion: 0.18
+Nodes (7): AddReviewTaskCommentRequest, AddReviewTaskCommentResponse, AssignReviewTaskRequest, AssignReviewTaskResponse, IReviewTaskService, UpdateReviewTaskStatusRequest, UpdateReviewTaskStatusResponse
+
+### Community 589 - "Community 589"
+Cohesion: 0.18
+Nodes (9): DecisionReviewTaskCompletionHandler, IDecisionConflictResolver, IDecisionFactory, IDecisionVoteService, CancellationToken, DecisionCompletionHandleResult, Guid, ReviewTaskCompletionResolution (+1 more)
+
+### Community 590 - "Community 590"
+Cohesion: 0.18
+Nodes (10): 1. Graph contracts and Neo4j service — `ETOS.Backend/GraphMemory/`, 2. Identity key builder, 3. Import staging — [ImportService.cs](ETOS.Backend/Imports/ImportService.cs) `StageBatchAsync` (~lines 385–476), 4. Promote — `PromoteStagingAsync` in [Neo4jGraphMemoryService.cs](ETOS.Backend/GraphMemory/Neo4jGraphMemoryService.cs) (~lines 307–352), 5. Tests — `ETOS.Backend.Tests/`, Assumptions, Changes, Identity-Keyed Graph Node Materialization (+2 more)
+
+### Community 591 - "Community 591"
+Cohesion: 0.33
+Nodes (7): CancellationToken, DecisionCompletionHandleResult, Guid, ReviewTaskCompletionResolution, Task, DeferredReviewTaskCompletionHandler, IReviewTaskCompletionHandler
+
 ### Community 592 - "Community 592"
-Cohesion: 0.30
-Nodes (5): EnterpriseThreadDbContext, GovernanceFlowService, GovernedChatService, Guid, TestContext
+Cohesion: 0.25
+Nodes (6): Func, IEndpointRouteBuilder, IResult, Task, TResponse, ReviewTaskEndpointExtensions
+
+### Community 593 - "Community 593"
+Cohesion: 0.29
+Nodes (5): DisabledCadParsingPlaceholder, ICadParsingPlaceholder, CadParsingPlaceholderResponse, CadParsingPlaceholderResponse, NoOpCadParsingPlaceholder
+
+### Community 594 - "Community 594"
+Cohesion: 0.29
+Nodes (7): Health Module, MinIO, Neo4j, PostgreSQL Operational Store, Qdrant, RabbitMQ, Redis
+
+### Community 595 - "Community 595"
+Cohesion: 0.29
+Nodes (5): AuditRecordResponse, AuditRecordWriteRequest, SecurityEventResponse, SecurityEventWriteRequest, RecordingAuditRecorder
+
+### Community 597 - "Community 597"
+Cohesion: 0.40
+Nodes (4): SecurityEventSeverity, EventType, SecurityEventType, Severity
 
 ## Knowledge Gaps
-- **3947 isolated node(s):** `MonkeyPatch`, `Task`, `Fact`, `DateTimeOffset`, `ResolvedModelPackageContext` (+3942 more)
+- **3950 isolated node(s):** `MonkeyPatch`, `Task`, `Fact`, `DateTimeOffset`, `ResolvedModelPackageContext` (+3945 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **115 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **117 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ITenantScoped` connect `Community 134` to `Community 313`, `Community 138`, `Community 462`, `Community 463`, `Community 569`, `Community 432`, `Next.js SVG Icon`, `Community 467`, `Community 179`, `Community 309`, `Community 566`, `Community 565`, `Community 568`, `Community 185`, `Community 474`, `Community 318`, `Community 383`?**
-  _High betweenness centrality (0.073) - this node is a cross-community bridge._
+- **Why does `WorkflowExecutionService` connect `Health Endpoint Extensions` to `Community 162`, `Classification API Endpoints`, `Graph Node Management`, `Community 337`, `Data Quality Permissions`?**
+  _High betweenness centrality (0.080) - this node is a cross-community bridge._
 - **Why does `EnterpriseThreadOS Agent Guide` connect `Canonical Ontology Model` to `Globe SVG Icon`, `Community 171`, `Community 156`, `Graph Memory Options`?**
-  _High betweenness centrality (0.067) - this node is a cross-community bridge._
-- **Why does `WorkflowExecutionService` connect `Community 337` to `Community 162`, `Classification API Endpoints`, `Graph Node Management`, `Health Endpoint and Monitoring`, `Health Endpoint Extensions`, `Data Quality Permissions`, `Community 313`?**
-  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+  _High betweenness centrality (0.078) - this node is a cross-community bridge._
+- **Why does `ITenantScoped` connect `Community 134` to `Community 138`, `Community 462`, `Community 463`, `Community 569`, `Community 432`, `Next.js SVG Icon`, `Community 467`, `Community 179`, `Community 309`, `Community 566`, `Community 565`, `Community 568`, `Community 185`, `Community 474`, `Health Endpoint Extensions`, `Community 318`, `Community 383`?**
+  _High betweenness centrality (0.078) - this node is a cross-community bridge._
 - **What connects `ETOS.AgentRuntime FastAPI sidecar for governed agent execution.`, `Mirrors the HTTP payload sent by PydanticAiRuntimeAdapter (.NET).`, `Mirrors AgentRuntimeExecutionResult fields exposed over HTTP.` to the rest of the system?**
-  _3952 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _3955 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Schema Versioning and Validation` be split into smaller, more focused modules?**
   _Cohesion score 0.022727272727272728 - nodes in this community are weakly interconnected._
 - **Should `Import Batch and Mapping` be split into smaller, more focused modules?**

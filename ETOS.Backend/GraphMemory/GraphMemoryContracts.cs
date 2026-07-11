@@ -6,7 +6,8 @@ public sealed record CreateGraphNodeRequest(
     string ObjectType,
     TrustState TrustState,
     IReadOnlyDictionary<string, string?>? Attributes,
-    GraphSourceReference? SourceReference);
+    GraphSourceReference? SourceReference,
+    string? IdentityKey = null);
 
 public sealed record UpdateGraphNodeRequest(
     Guid TenantId,

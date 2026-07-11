@@ -30,7 +30,8 @@ public sealed record BaseNode(
     IReadOnlyDictionary<string, string?> Attributes,
     GraphSourceReference? SourceReference,
     DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    string? IdentityKey = null);
 
 public sealed record BaseRelationship(
     Guid RelationshipId,

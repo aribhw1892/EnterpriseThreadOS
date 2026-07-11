@@ -127,6 +127,7 @@ The graph memory module currently includes:
 
 - internal `IGraphMemoryService` contracts for BaseNode/BaseRelationship create/read/update/traverse operations.
 - Neo4j driver, bootstrap, and health services.
+- dual attribute persistence on Neo4j nodes and relationships: canonical `attributesJson` for API read models plus additive flattened domain properties prefixed with `attr_` (for example `attr_status`, `attr_pdmVersionKey`) for direct graph inspection and Cypher filters without changing existing read contracts.
 - snapshot/diff contract placeholders for later slices.
 - optional Memgraph adapter placeholder that is disabled by default.
 
@@ -159,7 +160,7 @@ The import module currently includes:
 - `ImportMappingLearningSignalInput` records emitted on mapping approve, reject, and corrected drafts via `IImportMappingLearningSignalEmitter`.
 - package-driven structural import staging and two-side BOM comparison using active model package `ImportProfileJson` and ontology BOM relationship definitions (no hardcoded manufacturing literals in platform core).
 - row-level validation issues for missing required values, invalid value types, invalid lifecycle values, and model/package consistency failures.
-- staging graph creation through `IGraphMemoryService` using `GraphSpace.Staging`, `TrustState.Unverified`, and `GraphSourceReference`.
+- staging graph creation through `IGraphMemoryService` using `GraphSpace.Staging`, `TrustState.Unverified`, and `GraphSourceReference`. PDM and other import staging writes persist domain attributes in both `attributesJson` and flattened Neo4j properties prefixed with `attr_` on nodes and relationships.
 - neutral comparison counters (`MissingInPrimarySideCount`, `MissingInSecondarySideCount`) driven by package comparison side order.
 - admin endpoints under `/api/admin/imports`.
 
