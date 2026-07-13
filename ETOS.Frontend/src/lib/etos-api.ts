@@ -15,7 +15,7 @@
  * - Missing env config yields a friendly error via `missingContext()`.
  */
 
-import type { PdmImportBatchResult, PdmImportFileProfile, PdmMappingSource } from "@/lib/pdm-import-types";
+import type { ImportBatchResult, ImportFileProfile, ImportMappingSource } from "@/lib/import-wizard/import-profile-types";
 
 // --- Platform health (Issue 1) ---
 
@@ -556,6 +556,13 @@ export type IdentityCandidateGeneration = {
   importBatchId: string;
   createdCount: number;
   existingCount: number;
+  candidates: IdentityCandidateLink[];
+};
+
+export type ApproveAllIdentityCandidates = {
+  importBatchId: string;
+  approvedCount: number;
+  skippedCount: number;
   candidates: IdentityCandidateLink[];
 };
 
@@ -2918,8 +2925,8 @@ export async function createImportMappingVersion(input: {
   importBatchId: string;
   versionLabel: string;
   summary: string;
-  columnMappings: PdmImportFileProfile["columnMappings"];
-  lifecycleMappings: PdmImportFileProfile["lifecycleMappings"];
+  columnMappings: ImportFileProfile["columnMappings"];
+  lifecycleMappings: ImportFileProfile["lifecycleMappings"];
   structuralRelationshipType?: string | null;
 }): Promise<ApiResult<ImportMappingVersion>> {
   const tenantHeaders = resolveTenantHeaders();
@@ -3023,6 +3030,22 @@ export async function approveIdentityCandidate(
   );
 }
 
+export async function approveAllIdentityCandidatesForBatch(
+  batchId: string,
+  rationale = "Approved all reviewable candidates from the import wizard.",
+): Promise<ApiResult<ApproveAllIdentityCandidates>> {
+  const tenantHeaders = resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ApproveAllIdentityCandidates>();
+  }
+
+  return await postApi<ApproveAllIdentityCandidates>(
+    `/api/admin/identity-resolution/batches/${batchId}/candidates/approve-all`,
+    { rationale },
+    tenantHeaders,
+  );
+}
+
 export async function markIdentityCandidateConflicted(
   candidateId: string,
   rationale = "Marked conflicted from the PDM import wizard.",
@@ -3048,7 +3071,7 @@ export async function promoteImportBatch(batchId: string): Promise<ApiResult<Imp
   return await postApi<ImportPromotionRun>(`/api/admin/imports/batches/${batchId}/promote`, {}, tenantHeaders);
 }
 
-export async function previewPdmBatchMapping(
+export async function previewBatchMapping(
   batchId: string,
   evidenceId: string,
 ): Promise<ApiResult<ImportPreview>> {
@@ -3070,21 +3093,25 @@ export async function previewPdmBatchMapping(
   );
 }
 
-export async function runPdmImportBatch(input: {
-  profile: PdmImportFileProfile;
+/** @deprecated Use previewBatchMapping */
+export const previewPdmBatchMapping = previewBatchMapping;
+
+export async function runImportBatch(input: {
+  profile: ImportFileProfile;
   csv: string;
   sourceSystem: string;
-  mappingSource: PdmMappingSource;
+  sourceLabel: string;
+  mappingSource: ImportMappingSource;
   preview?: ImportPreview | null;
-}): Promise<ApiResult<PdmImportBatchResult>> {
+}): Promise<ApiResult<ImportBatchResult>> {
   const tenantHeaders = resolveTenantHeaders();
   if (!tenantHeaders) {
-    return missingContext<PdmImportBatchResult>();
+    return missingContext<ImportBatchResult>();
   }
 
   const batch = await createImportBatch({
     sourceSystem: input.sourceSystem,
-    description: `PDM ${input.profile.fileName}`,
+    description: `${input.sourceLabel} ${input.profile.fileName}`,
   });
   if (!batch.data) {
     return { data: null, error: batch.error };
@@ -3100,7 +3127,7 @@ export async function runPdmImportBatch(input: {
     const preview =
       input.preview ??
       (
-        await previewPdmBatchMapping(batch.data.id, upload.data.evidence.id)
+        await previewBatchMapping(batch.data.id, upload.data.evidence.id)
       ).data;
     if (!preview) {
       return {
@@ -3113,7 +3140,7 @@ export async function runPdmImportBatch(input: {
       preview,
       batch.data.id,
       input.profile.fileName,
-      `PDM AI mapping for ${input.profile.fileName}.`,
+      `${input.sourceLabel} AI mapping for ${input.profile.fileName}.`,
     );
     if (!draft.data) {
       return { data: null, error: draft.error };
@@ -3123,7 +3150,7 @@ export async function runPdmImportBatch(input: {
     mappingPayload = {
       importBatchId: batch.data.id,
       versionLabel: input.profile.fileName,
-      summary: `PDM preset mapping for ${input.profile.fileName}.`,
+      summary: `${input.sourceLabel} preset mapping for ${input.profile.fileName}.`,
       columnMappings: input.profile.columnMappings,
       lifecycleMappings: input.profile.lifecycleMappings,
     };
@@ -3142,7 +3169,7 @@ export async function runPdmImportBatch(input: {
   }
 
   const approved = await approveImportMapping(mapping.data.id, {
-    summary: `Approved PDM ${input.mappingSource} mapping for ${input.profile.fileName}.`,
+    summary: `Approved ${input.sourceLabel} ${input.mappingSource} mapping for ${input.profile.fileName}.`,
     structuralRelationshipType: input.profile.structuralRelationshipType,
   });
   if (!approved.data) {
@@ -3170,12 +3197,24 @@ export async function runPdmImportBatch(input: {
   };
 }
 
-export async function runPdmDemoImportFlow(input: {
-  profiles: PdmImportFileProfile[];
+/** @deprecated Use runImportBatch */
+export async function runPdmImportBatch(input: {
+  profile: ImportFileProfile;
+  csv: string;
   sourceSystem: string;
+  mappingSource: ImportMappingSource;
+  preview?: ImportPreview | null;
+}): Promise<ApiResult<ImportBatchResult>> {
+  return runImportBatch({ ...input, sourceLabel: "PDM" });
+}
+
+export async function runDemoImportFlow(input: {
+  profiles: ImportFileProfile[];
+  sourceSystem: string;
+  sourceLabel: string;
   readCsv: (fileName: string) => Promise<{ data: string | null; error: string | null }>;
-}): Promise<ApiResult<PdmImportBatchResult[]>> {
-  const results: PdmImportBatchResult[] = [];
+}): Promise<ApiResult<ImportBatchResult[]>> {
+  const results: ImportBatchResult[] = [];
 
   for (const profile of input.profiles) {
     const csv = await input.readCsv(profile.fileName);
@@ -3183,10 +3222,11 @@ export async function runPdmDemoImportFlow(input: {
       return { data: null, error: csv.error ?? `Missing demo CSV ${profile.fileName}.` };
     }
 
-    const result = await runPdmImportBatch({
+    const result = await runImportBatch({
       profile,
       csv: csv.data,
       sourceSystem: input.sourceSystem,
+      sourceLabel: input.sourceLabel,
       mappingSource: "preset",
     });
     if (!result.data) {
@@ -3199,7 +3239,19 @@ export async function runPdmDemoImportFlow(input: {
   return { data: results, error: null };
 }
 
-export async function promotePdmImportBatches(batchIds: string[]): Promise<ApiResult<ImportPromotionRun[]>> {
+/** @deprecated Use runDemoImportFlow */
+export async function runPdmDemoImportFlow(input: {
+  profiles: ImportFileProfile[];
+  sourceSystem: string;
+  readCsv: (fileName: string) => Promise<{ data: string | null; error: string | null }>;
+}): Promise<ApiResult<ImportBatchResult[]>> {
+  return runDemoImportFlow({ ...input, sourceLabel: "PDM" });
+}
+
+export async function promoteImportBatches(
+  batchIds: string[],
+  sourceLabel: string,
+): Promise<ApiResult<ImportPromotionRun[]>> {
   const tenantHeaders = resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportPromotionRun[]>();
@@ -3242,11 +3294,16 @@ export async function promotePdmImportBatches(batchIds: string[]): Promise<ApiRe
   if (promoted.length === 0) {
     return {
       data: null,
-      error: "No PDM batches are ready to promote. Resolve validation errors and identity candidates first.",
+      error: `No ${sourceLabel} batches are ready to promote. Resolve validation errors and identity candidates first.`,
     };
   }
 
   return { data: promoted, error: null };
+}
+
+/** @deprecated Use promoteImportBatches */
+export async function promotePdmImportBatches(batchIds: string[]): Promise<ApiResult<ImportPromotionRun[]>> {
+  return promoteImportBatches(batchIds, "PDM");
 }
 
 /** Capture a trusted graph snapshot for MVP demo verification. */

@@ -117,7 +117,7 @@ Implemented or partially implemented:
 
 Planned by PRD and backlog, but not generally implemented unless future source code says otherwise:
 
-- Graph business flows beyond the current import staging and identity-review foundations: trusted graph promotion, snapshots, diffs, and governed traversals.
+- Graph business flows beyond the current import staging, identity-keyed promotion, and identity-review foundations: richer snapshot/diff viewers, on-demand trusted-graph BOM compare endpoints, and governed traversals beyond current explorer APIs.
 - Live Qdrant indexing/provider execution.
 - `ETOS.Backend/Decisions/` implements `DecisionArtifact` creation from completed review tasks, votes, conflict resolution, escalation from blocked decisions, and admin APIs under `/api/admin/decisions`.
 - `ETOS.Backend/Outcomes/` implements `OutcomeTaxonomyVersion` artifacts, `OutcomeCheckRun` manual outcome recording, and `/api/admin/outcome-taxonomies`.

@@ -12,7 +12,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 3,
       "norm_label": "ai agent workflow guide",
       "id": "ai_agent_workflow_guide"
     },
@@ -25,7 +25,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 3,
       "norm_label": "local development guide",
       "id": "local_development_guide"
     },
@@ -38,7 +38,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 3,
       "norm_label": "enterprisethreados extension points document",
       "id": "architecture_extension_points_doc"
     },
@@ -51,7 +51,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 3,
       "norm_label": "adr 0002: artifact lifecycle",
       "id": "adr_0002_artifact_lifecycle"
     },
@@ -64,7 +64,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 3,
       "norm_label": "architecture decision records readme",
       "id": "adr_readme"
     },
@@ -77,7 +77,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 3,
       "norm_label": "backend architecture document",
       "id": "backend_architecture_doc"
     },
@@ -90,7 +90,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 3,
       "norm_label": "frontend architecture document",
       "id": "frontend_architecture_doc"
     },
@@ -103,7 +103,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 5,
       "norm_label": "ai agent workflow",
       "id": "ai_agent_workflow"
     },
@@ -116,7 +116,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 5,
       "norm_label": "local development",
       "id": "local_development"
     },
@@ -129,7 +129,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 5,
       "norm_label": "backend architecture",
       "id": "backend_architecture"
     },
@@ -142,7 +142,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 5,
       "norm_label": "frontend architecture",
       "id": "frontend_architecture"
     },
@@ -155,7 +155,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 3,
       "norm_label": "domain packages document",
       "id": "domain_packages_document"
     },
@@ -168,7 +168,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 7,
       "norm_label": "enterprisethreados",
       "id": "domainpackages_enterprisethreados"
     },
@@ -181,7 +181,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 7,
       "norm_label": "etos.backend (platform core)",
       "id": "domainpackages_etos_backend"
     },
@@ -194,7 +194,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 7,
       "norm_label": "manufacturing reference domain package",
       "id": "domainpackages_packages_manufacturing_reference"
     },
@@ -207,7 +207,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 6,
       "norm_label": "modelpackageversion",
       "id": "domainpackages_modelpackageversion"
     },
@@ -220,7 +220,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 6,
       "norm_label": "capabilitydefinitionversion",
       "id": "domainpackages_capabilitydefinitionversion"
     },
@@ -233,7 +233,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 6,
       "norm_label": "businesspolicydefinitionversion",
       "id": "domainpackages_businesspolicydefinitionversion"
     },
@@ -246,7 +246,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 6,
       "norm_label": "optimizationmodelversion",
       "id": "domainpackages_optimizationmodelversion"
     },
@@ -259,7 +259,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 6,
       "norm_label": "agenttemplateversion",
       "id": "domainpackages_agenttemplateversion"
     },
@@ -272,7 +272,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 7,
       "norm_label": "referencepackagemanifestloader",
       "id": "domainpackages_referencepackagemanifestloader"
     },
@@ -285,7 +285,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 3,
+      "community": 5,
       "norm_label": "enterprisethreados extension points",
       "id": "architecture_extensionpoints_enterprisethreadosextensionpoints"
     },
@@ -363,7 +363,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "enterprisethreadplatform",
       "id": "backendarchitecture_enterprisethreadplatform"
     },
@@ -376,7 +376,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "health module",
       "id": "backendarchitecture_healthmodule"
     },
@@ -389,7 +389,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "identity and tenant access module",
       "id": "backendarchitecture_identitymodule"
     },
@@ -402,7 +402,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "governance and audit module",
       "id": "backendarchitecture_governancemodule"
     },
@@ -415,7 +415,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "artifact registry module",
       "id": "backendarchitecture_artifactmodule"
     },
@@ -428,7 +428,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "classification and policy module",
       "id": "backendarchitecture_classificationmodule"
     },
@@ -441,7 +441,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "graph memory module",
       "id": "backendarchitecture_graphmemorymodule"
     },
@@ -467,7 +467,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "import mapping and staging module",
       "id": "backendarchitecture_importmodule"
     },
@@ -480,7 +480,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "identity resolution and trust module",
       "id": "backendarchitecture_identityresolutionmodule"
     },
@@ -506,7 +506,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "document memory module",
       "id": "backendarchitecture_documentmodule"
     },
@@ -519,7 +519,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "governed query and context assembly module",
       "id": "backendarchitecture_governedquerymodule"
     },
@@ -532,7 +532,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "ai trace module",
       "id": "backendarchitecture_aitracemodule"
     },
@@ -545,7 +545,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "governed chat module",
       "id": "backendarchitecture_governedchatmodule"
     },
@@ -558,7 +558,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "explorers module",
       "id": "backendarchitecture_explorersmodule"
     },
@@ -571,7 +571,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "dashboards and reports module",
       "id": "backendarchitecture_dashboardsmodule"
     },
@@ -623,7 +623,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "optimization models module",
       "id": "backendarchitecture_optimizationmodelsmodule"
     },
@@ -649,7 +649,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 0,
+      "community": 1,
       "norm_label": "agent runtime module",
       "id": "backendarchitecture_agentruntimemodule"
     },
@@ -662,9 +662,464 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 2,
+      "community": 4,
       "norm_label": "etos.frontend",
       "id": "frontendarchitecture_frontend"
+    },
+    {
+      "label": "Docker Compose Infrastructure",
+      "file_type": "concept",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 10,
+      "norm_label": "docker compose infrastructure",
+      "id": "localdevelopment_dockercompose"
+    },
+    {
+      "label": "Memgraph (optional graph backend)",
+      "file_type": "concept",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 10,
+      "norm_label": "memgraph (optional graph backend)",
+      "id": "localdevelopment_memgraph"
+    },
+    {
+      "label": "LM Studio (local OpenAI-compatible server)",
+      "file_type": "concept",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 2,
+      "norm_label": "lm studio (local openai-compatible server)",
+      "id": "localdevelopment_lmstudio"
+    },
+    {
+      "label": "Workflow Runtime",
+      "file_type": "concept",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 2,
+      "norm_label": "workflow runtime",
+      "id": "localdevelopment_workflowruntime"
+    },
+    {
+      "label": "Dapr (optional workflow host)",
+      "file_type": "concept",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 2,
+      "norm_label": "dapr (optional workflow host)",
+      "id": "localdevelopment_dapr"
+    },
+    {
+      "label": "MvpDemonstrationFlowSupport (backend integration tests)",
+      "file_type": "code",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 2,
+      "norm_label": "mvpdemonstrationflowsupport (backend integration tests)",
+      "id": "localdevelopment_mvpdemonstrationflowsupport"
+    },
+    {
+      "label": "Manufacturing Reference Model Package",
+      "file_type": "concept",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 13,
+      "norm_label": "manufacturing reference model package",
+      "id": "localdevelopment_manufacturingreferencemodelpackage"
+    },
+    {
+      "label": "Import Mapping Suggestions",
+      "file_type": "concept",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 2,
+      "norm_label": "import mapping suggestions",
+      "id": "localdevelopment_importmappingsuggestions"
+    },
+    {
+      "label": "Mapping Agent Debug UI",
+      "file_type": "concept",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 2,
+      "norm_label": "mapping agent debug ui",
+      "id": "localdevelopment_mappingagentdebugui"
+    },
+    {
+      "label": "dotnet run (backend local run)",
+      "file_type": "concept",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 2,
+      "norm_label": "dotnet run (backend local run)",
+      "id": "localdevelopment_dotnetrun"
+    },
+    {
+      "label": "Docker Compose agent-runtime service",
+      "file_type": "concept",
+      "source_file": "local-development.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 12,
+      "norm_label": "docker compose agent-runtime service",
+      "id": "localdevelopment_dockercompose_agentruntime"
+    },
+    {
+      "label": "MvpDemonstrationFlowSupport",
+      "file_type": "code",
+      "source_file": "mvp-demonstration-flow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 8,
+      "norm_label": "mvpdemonstrationflowsupport",
+      "id": "mvpdemonstrationflow_mvpdemonstrationflowsupport"
+    },
+    {
+      "label": "MvpDemonstrationFlowTests",
+      "file_type": "code",
+      "source_file": "mvp-demonstration-flow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 8,
+      "norm_label": "mvpdemonstrationflowtests",
+      "id": "mvpdemonstrationflow_mvpdemonstrationflowtests"
+    },
+    {
+      "label": "Operator Script (scripts/run-mvp-demo.ps1)",
+      "file_type": "code",
+      "source_file": "mvp-demonstration-flow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 8,
+      "norm_label": "operator script (scripts/run-mvp-demo.ps1)",
+      "id": "mvpdemonstrationflow_operatorscript"
+    },
+    {
+      "label": "Frontend Harness",
+      "file_type": "concept",
+      "source_file": "mvp-demonstration-flow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 2,
+      "norm_label": "frontend harness",
+      "id": "mvpdemonstrationflow_frontendharness"
+    },
+    {
+      "label": "Playwright Smoke Tests",
+      "file_type": "code",
+      "source_file": "mvp-demonstration-flow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 2,
+      "norm_label": "playwright smoke tests",
+      "id": "mvpdemonstrationflow_playwrightsmoke"
+    },
+    {
+      "label": "Manufacturing Reference Model Package",
+      "file_type": "concept",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 9,
+      "norm_label": "manufacturing reference model package",
+      "id": "domainpackages_manufacturingreferencemodelpackage"
+    },
+    {
+      "label": "Reference Package Installer",
+      "file_type": "concept",
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 9,
+      "norm_label": "reference package installer",
+      "id": "domainpackages_referencepackageinstaller"
+    },
+    {
+      "label": "ETOS.Backend",
+      "file_type": "code",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 11,
+      "norm_label": "etos.backend",
+      "id": "backendarchitecture_backend"
+    },
+    {
+      "label": "Program.cs",
+      "file_type": "code",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 0,
+      "norm_label": "program.cs",
+      "id": "backendarchitecture_programcs"
+    },
+    {
+      "label": "Platform/EnterpriseThreadPlatform.cs",
+      "file_type": "code",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 0,
+      "norm_label": "platform/enterprisethreadplatform.cs",
+      "id": "backendarchitecture_platform_enterprisethreadplatformcs"
+    },
+    {
+      "label": "Agent Types Module",
+      "file_type": "concept",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 0,
+      "norm_label": "agent types module",
+      "id": "backendarchitecture_agenttypesmodule"
+    },
+    {
+      "label": "Agents Module",
+      "file_type": "concept",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 0,
+      "norm_label": "agents module",
+      "id": "backendarchitecture_agentsmodule"
+    },
+    {
+      "label": "Agent Runs Module",
+      "file_type": "concept",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 0,
+      "norm_label": "agent runs module",
+      "id": "backendarchitecture_agentrunsmodule"
+    },
+    {
+      "label": "Review Tasks Module",
+      "file_type": "concept",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 0,
+      "norm_label": "review tasks module",
+      "id": "backendarchitecture_reviewtasksmodule"
+    },
+    {
+      "label": "Decisions Module",
+      "file_type": "concept",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 0,
+      "norm_label": "decisions module",
+      "id": "backendarchitecture_decisionsmodule"
+    },
+    {
+      "label": "Outcomes Module",
+      "file_type": "concept",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 0,
+      "norm_label": "outcomes module",
+      "id": "backendarchitecture_outcomesmodule"
+    },
+    {
+      "label": "Learning Module",
+      "file_type": "concept",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 0,
+      "norm_label": "learning module",
+      "id": "backendarchitecture_learningmodule"
+    },
+    {
+      "label": "Platform Development Module",
+      "file_type": "concept",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 0,
+      "norm_label": "platform development module",
+      "id": "backendarchitecture_platformdevelopmentmodule"
+    },
+    {
+      "label": "Platform Extensions Module",
+      "file_type": "concept",
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 0,
+      "norm_label": "platform extensions module",
+      "id": "backendarchitecture_platformextensionsmodule"
+    },
+    {
+      "label": "Next.js 16",
+      "file_type": "concept",
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 4,
+      "norm_label": "next.js 16",
+      "id": "frontendarchitecture_nextjs"
+    },
+    {
+      "label": "React 19",
+      "file_type": "concept",
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 4,
+      "norm_label": "react 19",
+      "id": "frontendarchitecture_react"
+    },
+    {
+      "label": "TypeScript",
+      "file_type": "concept",
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 4,
+      "norm_label": "typescript",
+      "id": "frontendarchitecture_typescript"
+    },
+    {
+      "label": "Tailwind CSS 4",
+      "file_type": "concept",
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 4,
+      "norm_label": "tailwind css 4",
+      "id": "frontendarchitecture_tailwindcss"
+    },
+    {
+      "label": "ESLint 9",
+      "file_type": "concept",
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "community": 4,
+      "norm_label": "eslint 9",
+      "id": "frontendarchitecture_eslint"
     }
   ],
   "links": [
@@ -945,7 +1400,17 @@
       "source_file": "architecture/domain-packages.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "domainpackages_modelpackageversion",
+      "source": "domainpackages_capabilitydefinitionversion",
+      "target": "domainpackages_modelpackageversion"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "domainpackages_agenttemplateversion",
       "target": "domainpackages_capabilitydefinitionversion"
     },
     {
@@ -955,18 +1420,8 @@
       "source_file": "architecture/domain-packages.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "domainpackages_capabilitydefinitionversion",
-      "target": "domainpackages_agenttemplateversion"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "architecture/domain-packages.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "domainpackages_capabilitydefinitionversion",
-      "target": "domainpackages_businesspolicydefinitionversion"
+      "source": "domainpackages_businesspolicydefinitionversion",
+      "target": "domainpackages_capabilitydefinitionversion"
     },
     {
       "relation": "references",
@@ -995,8 +1450,18 @@
       "source_file": "architecture/domain-packages.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "domainpackages_optimizationmodelversion",
-      "target": "domainpackages_agenttemplateversion"
+      "source": "domainpackages_agenttemplateversion",
+      "target": "domainpackages_optimizationmodelversion"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "localdevelopment_agentruntime",
+      "target": "localdevelopment_lmstudio"
     },
     {
       "relation": "calls",
@@ -1007,6 +1472,16 @@
       "weight": 1.0,
       "source": "localdevelopment_agentruntime",
       "target": "localdevelopment_pydanticairuntimeadapter"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "localdevelopment_backend",
+      "target": "localdevelopment_agentruntime"
     },
     {
       "relation": "calls",
@@ -1049,6 +1524,46 @@
       "target": "backendarchitecture_program"
     },
     {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "localdevelopment_backend",
+      "target": "localdevelopment_dotnetrun"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "localdevelopment_backend",
+      "target": "localdevelopment_importmappingsuggestions"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "localdevelopment_backend",
+      "target": "localdevelopment_mvpdemonstrationflowsupport"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "localdevelopment_backend",
+      "target": "localdevelopment_workflowruntime"
+    },
+    {
       "relation": "calls",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -1057,6 +1572,36 @@
       "weight": 1.0,
       "source": "localdevelopment_frontend",
       "target": "localdevelopment_backend"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "localdevelopment_frontend",
+      "target": "localdevelopment_mappingagentdebugui"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "mvp-demonstration-flow.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mvpdemonstrationflow_frontendharness",
+      "target": "localdevelopment_frontend"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mvp-demonstration-flow.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mvpdemonstrationflow_playwrightsmoke",
+      "target": "localdevelopment_frontend"
     },
     {
       "relation": "calls",
@@ -1287,8 +1832,408 @@
       "weight": 1.0,
       "source": "backendarchitecture_enterprisethreadplatform",
       "target": "backendarchitecture_recommendationsmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_healthmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_identitymodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_governancemodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_artifactmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_classificationmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_graphmemorymodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_ontologymodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_importmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_identityresolutionmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_dataqualitymodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_documentmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_governedchatmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_dashboardsmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_recommendationsmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_capabilitiesmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_businesspoliciesmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_optimizationmodelsmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_agenttemplatesmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_agentruntimemodule"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "frontendarchitecture_frontend",
+      "target": "frontendarchitecture_eslint"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "frontendarchitecture_frontend",
+      "target": "frontendarchitecture_nextjs"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "frontendarchitecture_frontend",
+      "target": "frontendarchitecture_react"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "frontendarchitecture_frontend",
+      "target": "frontendarchitecture_tailwindcss"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "frontend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "frontendarchitecture_frontend",
+      "target": "frontendarchitecture_typescript"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "localdevelopment_dockercompose",
+      "target": "localdevelopment_memgraph"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "local-development.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "localdevelopment_workflowruntime",
+      "target": "localdevelopment_dapr"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mvp-demonstration-flow.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mvpdemonstrationflow_mvpdemonstrationflowtests",
+      "target": "mvpdemonstrationflow_mvpdemonstrationflowsupport"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mvp-demonstration-flow.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mvpdemonstrationflow_operatorscript",
+      "target": "mvpdemonstrationflow_mvpdemonstrationflowsupport"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "mvp-demonstration-flow.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "mvpdemonstrationflow_operatorscript",
+      "target": "mvpdemonstrationflow_mvpdemonstrationflowtests"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "architecture/domain-packages.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "domainpackages_manufacturingreferencemodelpackage",
+      "target": "domainpackages_referencepackageinstaller"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_programcs",
+      "target": "backendarchitecture_platform_enterprisethreadplatformcs"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_agentrunsmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_agentsmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_agenttypesmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_decisionsmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_learningmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_outcomesmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_platformdevelopmentmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_platformextensionsmodule"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/architecture.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "backendarchitecture_platform_enterprisethreadplatformcs",
+      "target": "backendarchitecture_reviewtasksmodule"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "9757ee1413b5630e99403c81cbe99bfc803d49c6"
+  "built_at_commit": "cae032dd8adc26aa0d078a60affc814ac0f825a0"
 }

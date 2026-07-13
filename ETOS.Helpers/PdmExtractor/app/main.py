@@ -2,17 +2,19 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import sys
 from pathlib import Path
 
-from app.export_service import export_entities, export_relationships, write_manifest
-from app.extract_service import (
-    build_connection_string_from_env,
-    create_db_connection,
-    extract_entities,
-    extract_relationships,
+import pyodbc
+
+from etos_extract_common.export_service import (
+    export_entities,
+    export_relationships,
+    write_manifest,
 )
-from app.xml_mapping import parse_xml
+from etos_extract_common.extract_service import extract_entities, extract_relationships
+from etos_extract_common.xml_mapping import parse_xml
 
 DEFAULT_XML_NAME = "mapping_definition.xml"
 DEFAULT_OUTPUT_DIR = "pdm_export"
@@ -36,6 +38,27 @@ def project_root() -> Path:
 
 def default_xml_path() -> Path:
     return project_root() / DEFAULT_XML_NAME
+
+
+def build_connection_string_from_env() -> str:
+    driver = os.getenv("PDM_ODBC_DRIVER", "ODBC Driver 17 for SQL Server")
+    server = os.environ["PDM_DB_SERVER"]
+    database = os.environ["PDM_DB_NAME"]
+    uid = os.environ["PDM_DB_USER"]
+    pwd = os.environ["PDM_DB_PASSWORD"]
+    return (
+        f"DRIVER={{{driver}}};"
+        f"SERVER={server};"
+        f"DATABASE={database};"
+        f"UID={uid};"
+        f"PWD={pwd}"
+    )
+
+
+def create_db_connection(connection_string: str) -> pyodbc.Connection:
+    conn = pyodbc.connect(connection_string)
+    logging.info("Database connection established.")
+    return conn
 
 
 def parse_args() -> argparse.Namespace:

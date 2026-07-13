@@ -16,6 +16,7 @@ public interface IIdentityResolutionService
     Task<IdentityCandidateGenerationResponse> GenerateCandidatesAsync(Guid batchId, GenerateIdentityCandidatesRequest request, CancellationToken cancellationToken);
     Task<IReadOnlyCollection<IdentityCandidateLinkResponse>> ListCandidatesAsync(Guid batchId, CancellationToken cancellationToken);
     Task<IdentityCandidateLinkResponse> ApproveCandidateAsync(Guid candidateId, IdentityReviewDecisionRequest request, CancellationToken cancellationToken);
+    Task<ApproveAllIdentityCandidatesResponse> ApproveAllCandidatesAsync(Guid batchId, IdentityReviewDecisionRequest request, CancellationToken cancellationToken);
     Task<IdentityCandidateLinkResponse> RejectCandidateAsync(Guid candidateId, IdentityReviewDecisionRequest request, CancellationToken cancellationToken);
     Task<IdentityCandidateLinkResponse> MarkCandidateConflictedAsync(Guid candidateId, IdentityReviewDecisionRequest request, CancellationToken cancellationToken);
     Task<IReadOnlyCollection<TrustScoreRecordResponse>> ListTrustScoresAsync(Guid batchId, CancellationToken cancellationToken);
@@ -51,7 +52,9 @@ public sealed class IdentityResolutionService(
     {
         await ValidateAsync(RuleValidator, request, cancellationToken);
         var context = await RequirePermissionAsync("identity_resolution.rules.create", IdentityResolutionPermissions.Manage, cancellationToken);
-        var normalizedName = NormalizeKey(request.Name);
+        var normalizedName = !string.IsNullOrWhiteSpace(request.RuleKey)
+            ? NormalizeKey(request.RuleKey)
+            : NormalizeKey(request.Name);
         var exists = await dbContext.IdentityResolutionRules.AnyAsync(
             rule => rule.TenantId == context.TenantId && rule.NormalizedName == normalizedName,
             cancellationToken);
@@ -60,6 +63,7 @@ public sealed class IdentityResolutionService(
             throw new RequestValidationException("Identity resolution rule name already exists for this tenant.");
         }
 
+        var crossPairs = request.CrossAttributePairs?.ToList() ?? [];
         var rule = new IdentityResolutionRule
         {
             Id = Guid.NewGuid(),
@@ -69,6 +73,9 @@ public sealed class IdentityResolutionService(
             ObjectType = NormalizeText(request.ObjectType),
             NormalizedObjectType = NormalizeKey(request.ObjectType),
             IdentityAttributeKeysJson = JsonSerializer.Serialize(request.IdentityAttributeKeys.Select(NormalizeText).ToArray(), JsonOptions),
+            CrossAttributePairsJson = crossPairs.Count == 0
+                ? null
+                : JsonSerializer.Serialize(crossPairs, JsonOptions),
             AutoApproveThreshold = request.AutoApproveThreshold,
             ReviewThreshold = request.ReviewThreshold,
             IsActive = true,
@@ -95,12 +102,19 @@ public sealed class IdentityResolutionService(
         }
 
         var mapping = GetApprovedMapping(batch);
+        if (!IsEntityIdentityMapping(mapping))
+        {
+            throw new RequestValidationException("Identity candidate generation requires a flat entity import mapping. Structural relationship batches are excluded.");
+        }
+
         var stagingRun = GetCompletedStagingRun(batch);
-        var rule = await ResolveRuleAsync(context, request.RuleId, mapping, cancellationToken);
+        var rule = await ResolveRuleAsync(context, request.RuleId, batch, mapping, cancellationToken);
+        var crossPairs = DeserializeCrossAttributePairs(rule.CrossAttributePairsJson);
         var ruleKeys = DeserializeStringArray(rule.IdentityAttributeKeysJson)
             .Select(NormalizeKey)
             .ToHashSet(StringComparer.Ordinal);
-        var currentRecords = await LoadIndexedRecordsAsync(batch, mapping, stagingRun, ruleKeys, cancellationToken);
+        var requiredAttributeKeys = BuildRequiredAttributeKeys(ruleKeys, crossPairs);
+        var currentRecords = await LoadIndexedRecordsAsync(batch, mapping, stagingRun, requiredAttributeKeys, cancellationToken);
         var comparisonBatches = await dbContext.ImportBatches
             .Include(item => item.FileEvidence)
             .Include(item => item.MappingVersions)
@@ -116,8 +130,13 @@ public sealed class IdentityResolutionService(
         foreach (var comparisonBatch in comparisonBatches)
         {
             var comparisonMapping = GetApprovedMapping(comparisonBatch);
+            if (!IsEntityIdentityMapping(comparisonMapping))
+            {
+                continue;
+            }
+
             var comparisonRun = GetCompletedStagingRun(comparisonBatch);
-            comparisonRecords.AddRange(await LoadIndexedRecordsAsync(comparisonBatch, comparisonMapping, comparisonRun, ruleKeys, cancellationToken));
+            comparisonRecords.AddRange(await LoadIndexedRecordsAsync(comparisonBatch, comparisonMapping, comparisonRun, requiredAttributeKeys, cancellationToken));
         }
 
         var existingCandidates = await dbContext.IdentityCandidateLinks
@@ -134,20 +153,22 @@ public sealed class IdentityResolutionService(
             foreach (var target in comparisonRecords)
             {
                 if (!string.Equals(source.NormalizedObjectType, target.NormalizedObjectType, StringComparison.Ordinal)
-                    || string.Equals(source.NormalizedSourceSystem, target.NormalizedSourceSystem, StringComparison.Ordinal)
-                    || string.IsNullOrWhiteSpace(source.IdentityKey)
-                    || !string.Equals(source.IdentityKey, target.IdentityKey, StringComparison.Ordinal))
+                    || string.Equals(source.NormalizedSourceSystem, target.NormalizedSourceSystem, StringComparison.Ordinal))
                 {
                     continue;
                 }
 
-                var score = CalculateConfidence(source, target, ruleKeys);
+                if (!TryBuildMatch(source, target, ruleKeys, crossPairs, out var identityKey, out var score, out var evidenceSummary))
+                {
+                    continue;
+                }
+
                 if (score < rule.ReviewThreshold)
                 {
                     continue;
                 }
 
-                var candidateKey = CandidateKey(source.GraphNodeId, target.GraphNodeId, source.IdentityKey);
+                var candidateKey = CandidateKey(source.GraphNodeId, target.GraphNodeId, identityKey);
                 if (existingKeys.Contains(candidateKey))
                 {
                     continue;
@@ -169,12 +190,12 @@ public sealed class IdentityResolutionService(
                     TargetRecordId = target.SourceRecordId,
                     ObjectType = source.ObjectType,
                     NormalizedObjectType = source.NormalizedObjectType,
-                    IdentityKey = source.IdentityKey,
+                    IdentityKey = identityKey,
                     ConfidenceScore = score,
                     State = score >= rule.AutoApproveThreshold ? IdentityCandidateState.Provisional : IdentityCandidateState.Unverified,
                     TrustState = score >= rule.AutoApproveThreshold ? TrustState.Provisional : TrustState.Unverified,
                     ExcludedFromTrustedRecommendations = true,
-                    EvidenceSummary = BuildEvidenceSummary(source, target, score),
+                    EvidenceSummary = evidenceSummary,
                     CreatedAt = DateTimeOffset.UtcNow
                 };
                 created.Add(candidate);
@@ -265,6 +286,82 @@ public sealed class IdentityResolutionService(
         await dbContext.SaveChangesAsync(cancellationToken);
         await RecordAuditAsync(context, "identity_resolution.candidates.approve", "Identity candidate was approved and represented as a graph relationship.", nameof(IdentityCandidateLink), candidate.Id, cancellationToken);
         return ToCandidateResponse(candidate);
+    }
+
+    public async Task<ApproveAllIdentityCandidatesResponse> ApproveAllCandidatesAsync(
+        Guid batchId,
+        IdentityReviewDecisionRequest request,
+        CancellationToken cancellationToken)
+    {
+        var context = await RequirePermissionAsync("identity_resolution.candidates.approve_all", IdentityResolutionPermissions.Review, cancellationToken);
+        var batch = await RequireBatchAsync(batchId, context, "identity_resolution.candidates.approve_all", cancellationToken);
+        var candidates = await dbContext.IdentityCandidateLinks
+            .Include(candidate => candidate.ImportBatch)
+            .ThenInclude(item => item!.ValidationIssues)
+            .Include(candidate => candidate.Decisions)
+            .Where(candidate => candidate.TenantId == context.TenantId && candidate.ImportBatchId == batch.Id)
+            .OrderBy(candidate => candidate.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        var approvedCount = 0;
+        var skippedCount = 0;
+        foreach (var candidate in candidates)
+        {
+            if (candidate.State is IdentityCandidateState.Approved or IdentityCandidateState.Rejected or IdentityCandidateState.Conflicted)
+            {
+                skippedCount++;
+                continue;
+            }
+
+            var resultingTrust = candidate.ConfidenceScore >= 0.97m ? TrustState.Trusted : TrustState.Provisional;
+            var relationship = candidate.GraphRelationshipId is null
+                ? await graphMemoryService.CreateRelationshipAsync(
+                    new CreateGraphRelationshipRequest(
+                        context.TenantId,
+                        candidate.SourceGraphNodeId,
+                        candidate.TargetGraphNodeId,
+                        IdentityRelationshipType,
+                        resultingTrust,
+                        new Dictionary<string, string?>
+                        {
+                            ["identityKey"] = candidate.IdentityKey,
+                            ["confidenceScore"] = candidate.ConfidenceScore.ToString("0.###"),
+                            ["reviewState"] = IdentityDecisionType.Approved.ToString()
+                        },
+                        new GraphSourceReference("identity-resolution", candidate.Id.ToString(), candidate.ImportBatchId.ToString())),
+                    cancellationToken)
+                : null;
+
+            candidate.State = IdentityCandidateState.Approved;
+            candidate.TrustState = resultingTrust;
+            candidate.ExcludedFromTrustedRecommendations = resultingTrust != TrustState.Trusted;
+            candidate.GraphRelationshipId ??= relationship?.RelationshipId;
+            candidate.ReviewedByUserId = context.UserId;
+            candidate.ReviewedAt = DateTimeOffset.UtcNow;
+            AddDecisionAndLearning(context, candidate, IdentityDecisionType.Approved, resultingTrust, request.Rationale);
+            await RecalculateCandidateTrustScoreAsync(candidate, batch.ValidationIssues, cancellationToken);
+            approvedCount++;
+        }
+
+        if (approvedCount > 0)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        await RecordAuditAsync(
+            context,
+            "identity_resolution.candidates.approve_all",
+            $"Approved {approvedCount} identity candidate link(s) for import batch.",
+            nameof(ImportBatch),
+            batch.Id,
+            cancellationToken);
+
+        var responses = candidates
+            .OrderByDescending(candidate => candidate.ConfidenceScore)
+            .ThenBy(candidate => candidate.CreatedAt)
+            .Select(ToCandidateResponse)
+            .ToList();
+        return new ApproveAllIdentityCandidatesResponse(batch.Id, approvedCount, skippedCount, responses);
     }
 
     public async Task<IdentityCandidateLinkResponse> RejectCandidateAsync(
@@ -390,6 +487,7 @@ public sealed class IdentityResolutionService(
     private async Task<IdentityResolutionRule> ResolveRuleAsync(
         ActiveTenantContext context,
         Guid? ruleId,
+        ImportBatch batch,
         ImportMappingVersion mapping,
         CancellationToken cancellationToken)
     {
@@ -409,8 +507,25 @@ public sealed class IdentityResolutionService(
 
         var objectType = identityMappings.First().CanonicalObjectType;
         var normalizedObjectType = NormalizeKey(objectType);
+        var normalizedBatchSourceSystem = batch.NormalizedSourceSystem;
+
+        var crossAttributeRule = await dbContext.IdentityResolutionRules
+            .Where(rule => rule.TenantId == context.TenantId
+                && rule.NormalizedObjectType == normalizedObjectType
+                && rule.IsActive
+                && rule.CrossAttributePairsJson != null)
+            .ToListAsync(cancellationToken);
+        var matchedCrossRule = crossAttributeRule.FirstOrDefault(rule =>
+            DeserializeCrossAttributePairs(rule.CrossAttributePairsJson)
+                .Any(pair => string.Equals(NormalizeKey(pair.SourceSystem), normalizedBatchSourceSystem, StringComparison.Ordinal)
+                    || string.Equals(NormalizeKey(pair.TargetSystem), normalizedBatchSourceSystem, StringComparison.Ordinal)));
+        if (matchedCrossRule is not null)
+        {
+            return matchedCrossRule;
+        }
+
         var identityKeys = identityMappings
-            .Select(mapping => mapping.CanonicalAttributeKey ?? mapping.SourceColumn)
+            .Select(item => item.CanonicalAttributeKey ?? item.SourceColumn)
             .Select(NormalizeText)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(item => item, StringComparer.OrdinalIgnoreCase)
@@ -448,11 +563,30 @@ public sealed class IdentityResolutionService(
         return rule;
     }
 
+    private static HashSet<string> BuildRequiredAttributeKeys(
+        IReadOnlySet<string> ruleIdentityKeys,
+        IReadOnlyCollection<IdentityCrossAttributePair> crossPairs)
+    {
+        var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var key in ruleIdentityKeys)
+        {
+            keys.Add(NormalizeKey(key));
+        }
+
+        foreach (var pair in crossPairs)
+        {
+            keys.Add(NormalizeKey(pair.SourceAttributeKey));
+            keys.Add(NormalizeKey(pair.TargetAttributeKey));
+        }
+
+        return keys;
+    }
+
     private async Task<IReadOnlyCollection<IdentityIndexedRecord>> LoadIndexedRecordsAsync(
         ImportBatch batch,
         ImportMappingVersion mapping,
         ImportStagingGraphRun stagingRun,
-        IReadOnlySet<string> ruleIdentityKeys,
+        IReadOnlySet<string> requiredAttributeKeys,
         CancellationToken cancellationToken)
     {
         var evidence = batch.FileEvidence.OrderByDescending(item => item.CreatedAt).FirstOrDefault()
@@ -460,15 +594,16 @@ public sealed class IdentityResolutionService(
         await using var stream = await fileStorage.OpenReadAsync(evidence.StorageKey, cancellationToken);
         var parsed = await fileParser.ParseAsync(evidence.OriginalFileName, stream, null, cancellationToken);
         var nodeIds = DeserializeGuidArray(stagingRun.GraphNodeIdsJson).ToList();
-        var identityMappings = mapping.ColumnMappings
-            .Where(item => item.IsIdentityField)
-            .Where(item => ruleIdentityKeys.Count == 0
-                || ruleIdentityKeys.Contains(NormalizeKey(item.CanonicalAttributeKey ?? item.SourceColumn)))
+        var identityMappings = mapping.ColumnMappings.Where(item => item.IsIdentityField).ToList();
+        var attributeMappings = mapping.ColumnMappings
+            .Where(item => item.CanonicalAttributeKey is not null
+                && requiredAttributeKeys.Contains(NormalizeKey(item.CanonicalAttributeKey)))
             .ToList();
-        if (identityMappings.Count == 0)
-        {
-            identityMappings = mapping.ColumnMappings.Where(item => item.IsIdentityField).ToList();
-        }
+        var indexedMappings = identityMappings
+            .Concat(attributeMappings)
+            .GroupBy(item => NormalizeKey(item.CanonicalAttributeKey ?? item.SourceColumn), StringComparer.Ordinal)
+            .Select(group => group.First())
+            .ToList();
 
         var records = new List<IdentityIndexedRecord>();
         var rowIndex = 0;
@@ -480,16 +615,19 @@ public sealed class IdentityResolutionService(
             }
 
             var values = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-            foreach (var identityMapping in identityMappings)
+            foreach (var indexedMapping in indexedMappings)
             {
-                var key = identityMapping.CanonicalAttributeKey ?? identityMapping.SourceColumn;
-                values[key] = row.TryGetValue(identityMapping.SourceColumn, out var value) ? NormalizeOptional(value) : null;
+                var key = indexedMapping.CanonicalAttributeKey ?? indexedMapping.SourceColumn;
+                values[key] = row.TryGetValue(indexedMapping.SourceColumn, out var value) ? NormalizeOptional(value) : null;
             }
 
             var sourceRecordId = string.Join("|", identityMappings
-                .Select(identityMapping => row.TryGetValue(identityMapping.SourceColumn, out var value) ? value : null)
+                .Select(item => row.TryGetValue(item.SourceColumn, out var value) ? value : null)
                 .Where(value => !string.IsNullOrWhiteSpace(value))
                 .Select(value => value!.Trim()));
+            var identityKey = string.Join("|", identityMappings
+                .Select(item => item.CanonicalAttributeKey ?? item.SourceColumn)
+                .Select(key => values.TryGetValue(key, out var value) ? NormalizeKey(value ?? string.Empty) : string.Empty));
             records.Add(new IdentityIndexedRecord(
                 batch.Id,
                 mapping.Id,
@@ -500,7 +638,7 @@ public sealed class IdentityResolutionService(
                 batch.SourceSystem,
                 batch.NormalizedSourceSystem,
                 sourceRecordId,
-                string.Join("|", values.OrderBy(item => item.Key).Select(item => NormalizeKey(item.Value ?? string.Empty))),
+                identityKey,
                 values,
                 ResolveLifecycleValue(row, mapping),
                 batch.ValidationIssues.Count(issue => issue.Severity == ImportIssueSeverity.Error)));
@@ -519,6 +657,9 @@ public sealed class IdentityResolutionService(
             ?? throw new RequestValidationException("An approved import mapping is required before identity resolution.");
     }
 
+    private static bool IsEntityIdentityMapping(ImportMappingVersion mapping)
+        => string.IsNullOrWhiteSpace(mapping.StructuralRelationshipType);
+
     private static ImportStagingGraphRun GetCompletedStagingRun(ImportBatch batch)
     {
         return batch.StagingRuns
@@ -528,22 +669,160 @@ public sealed class IdentityResolutionService(
             ?? throw new RequestValidationException("A completed staging graph run is required before identity resolution.");
     }
 
-    private static decimal CalculateConfidence(IdentityIndexedRecord source, IdentityIndexedRecord target, IReadOnlySet<string> ruleKeys)
+    private static bool TryBuildMatch(
+        IdentityIndexedRecord source,
+        IdentityIndexedRecord target,
+        IReadOnlySet<string> ruleKeys,
+        IReadOnlyCollection<IdentityCrossAttributePair> crossPairs,
+        out string identityKey,
+        out decimal score,
+        out string evidenceSummary)
     {
-        var consideredKeys = source.IdentityValues.Keys
+        identityKey = string.Empty;
+        score = 0m;
+        evidenceSummary = string.Empty;
+
+        if (TryBuildSameAttributeMatch(source, target, ruleKeys, out identityKey))
+        {
+            score = CalculateSameAttributeConfidence(source, target, ruleKeys);
+            evidenceSummary = BuildSameAttributeEvidenceSummary(source, target, score);
+            return true;
+        }
+
+        foreach (var pair in crossPairs)
+        {
+            if (TryBuildCrossAttributeMatch(source, target, pair, out identityKey))
+            {
+                score = CalculateCrossAttributeConfidence(source, target);
+                evidenceSummary = BuildCrossAttributeEvidenceSummary(source, target, pair, identityKey, score);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryBuildSameAttributeMatch(
+        IdentityIndexedRecord source,
+        IdentityIndexedRecord target,
+        IReadOnlySet<string> ruleKeys,
+        out string identityKey)
+    {
+        identityKey = string.Empty;
+        if (ruleKeys.Count == 0)
+        {
+            return false;
+        }
+
+        var consideredKeys = source.AttributeValues.Keys
+            .Where(key => ruleKeys.Contains(NormalizeKey(key)))
+            .OrderBy(key => key, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (consideredKeys.Count == 0)
+        {
+            return false;
+        }
+
+        foreach (var key in consideredKeys)
+        {
+            if (!source.AttributeValues.TryGetValue(key, out var sourceValue)
+                || !target.AttributeValues.TryGetValue(key, out var targetValue)
+                || string.IsNullOrWhiteSpace(sourceValue)
+                || !string.Equals(NormalizeKey(sourceValue), NormalizeKey(targetValue ?? string.Empty), StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        identityKey = string.Join("|", consideredKeys.Select(key => NormalizeKey(source.AttributeValues[key] ?? string.Empty)));
+        return true;
+    }
+
+    private static bool TryBuildCrossAttributeMatch(
+        IdentityIndexedRecord source,
+        IdentityIndexedRecord target,
+        IdentityCrossAttributePair pair,
+        out string identityKey)
+    {
+        identityKey = string.Empty;
+        if (string.Equals(NormalizeKey(source.NormalizedSourceSystem), NormalizeKey(pair.SourceSystem), StringComparison.Ordinal)
+            && string.Equals(NormalizeKey(target.NormalizedSourceSystem), NormalizeKey(pair.TargetSystem), StringComparison.Ordinal))
+        {
+            return TryReadMatchingValues(source, target, pair.SourceAttributeKey, pair.TargetAttributeKey, out identityKey);
+        }
+
+        if (string.Equals(NormalizeKey(source.NormalizedSourceSystem), NormalizeKey(pair.TargetSystem), StringComparison.Ordinal)
+            && string.Equals(NormalizeKey(target.NormalizedSourceSystem), NormalizeKey(pair.SourceSystem), StringComparison.Ordinal))
+        {
+            return TryReadMatchingValues(source, target, pair.TargetAttributeKey, pair.SourceAttributeKey, out identityKey);
+        }
+
+        return false;
+    }
+
+    private static bool TryReadMatchingValues(
+        IdentityIndexedRecord source,
+        IdentityIndexedRecord target,
+        string sourceAttributeKey,
+        string targetAttributeKey,
+        out string identityKey)
+    {
+        identityKey = string.Empty;
+        var sourceValue = FindAttributeValue(source.AttributeValues, sourceAttributeKey);
+        var targetValue = FindAttributeValue(target.AttributeValues, targetAttributeKey);
+        if (string.IsNullOrWhiteSpace(sourceValue) || string.IsNullOrWhiteSpace(targetValue))
+        {
+            return false;
+        }
+
+        if (!string.Equals(NormalizeKey(sourceValue), NormalizeKey(targetValue), StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        identityKey = NormalizeKey(sourceValue);
+        return true;
+    }
+
+    private static string? FindAttributeValue(IReadOnlyDictionary<string, string?> values, string attributeKey)
+    {
+        foreach (var entry in values)
+        {
+            if (string.Equals(NormalizeKey(entry.Key), NormalizeKey(attributeKey), StringComparison.Ordinal))
+            {
+                return entry.Value;
+            }
+        }
+
+        return null;
+    }
+
+    private static decimal CalculateSameAttributeConfidence(IdentityIndexedRecord source, IdentityIndexedRecord target, IReadOnlySet<string> ruleKeys)
+    {
+        var consideredKeys = source.AttributeValues.Keys
             .Where(key => ruleKeys.Count == 0 || ruleKeys.Contains(NormalizeKey(key)))
             .ToList();
         if (consideredKeys.Count == 0)
         {
-            consideredKeys = source.IdentityValues.Keys.ToList();
+            consideredKeys = source.AttributeValues.Keys.ToList();
         }
 
         var matchingKeys = consideredKeys.Count(key =>
-            source.IdentityValues.TryGetValue(key, out var sourceValue)
-            && target.IdentityValues.TryGetValue(key, out var targetValue)
+            source.AttributeValues.TryGetValue(key, out var sourceValue)
+            && target.AttributeValues.TryGetValue(key, out var targetValue)
             && !string.IsNullOrWhiteSpace(sourceValue)
             && string.Equals(NormalizeKey(sourceValue), NormalizeKey(targetValue ?? string.Empty), StringComparison.Ordinal));
         var identityComponent = consideredKeys.Count == 0 ? 0m : (decimal)matchingKeys / consideredKeys.Count * 0.75m;
+        return ApplyConfidenceBonuses(identityComponent, source, target);
+    }
+
+    private static decimal CalculateCrossAttributeConfidence(IdentityIndexedRecord source, IdentityIndexedRecord target)
+    {
+        return ApplyConfidenceBonuses(0.75m, source, target);
+    }
+
+    private static decimal ApplyConfidenceBonuses(decimal identityComponent, IdentityIndexedRecord source, IdentityIndexedRecord target)
+    {
         var lifecycleComponent = !string.IsNullOrWhiteSpace(source.LifecycleState)
             && string.Equals(source.LifecycleState, target.LifecycleState, StringComparison.OrdinalIgnoreCase)
                 ? 0.1m
@@ -707,9 +986,19 @@ public sealed class IdentityResolutionService(
             cancellationToken);
     }
 
-    private static string BuildEvidenceSummary(IdentityIndexedRecord source, IdentityIndexedRecord target, decimal score)
+    private static string BuildSameAttributeEvidenceSummary(IdentityIndexedRecord source, IdentityIndexedRecord target, decimal score)
     {
         return $"Matched {source.ObjectType} identity '{source.SourceRecordId}' from {source.SourceSystem} to '{target.SourceRecordId}' from {target.SourceSystem} with confidence {score:0.###}.";
+    }
+
+    private static string BuildCrossAttributeEvidenceSummary(
+        IdentityIndexedRecord source,
+        IdentityIndexedRecord target,
+        IdentityCrossAttributePair pair,
+        string identityKey,
+        decimal score)
+    {
+        return $"Matched {source.ObjectType} via {pair.SourceAttributeKey}={identityKey} ↔ {pair.TargetAttributeKey}={identityKey} from {source.SourceSystem} to {target.SourceSystem} with confidence {score:0.###}.";
     }
 
     private static string? ResolveLifecycleValue(IReadOnlyDictionary<string, string?> row, ImportMappingVersion mapping)
@@ -733,6 +1022,7 @@ public sealed class IdentityResolutionService(
             rule.Name,
             rule.ObjectType,
             DeserializeStringArray(rule.IdentityAttributeKeysJson),
+            DeserializeCrossAttributePairs(rule.CrossAttributePairsJson),
             rule.AutoApproveThreshold,
             rule.ReviewThreshold,
             rule.IsActive,
@@ -814,6 +1104,13 @@ public sealed class IdentityResolutionService(
             : JsonSerializer.Deserialize<IReadOnlyCollection<string>>(json, JsonOptions) ?? [];
     }
 
+    private static IReadOnlyCollection<IdentityCrossAttributePair> DeserializeCrossAttributePairs(string? json)
+    {
+        return string.IsNullOrWhiteSpace(json)
+            ? []
+            : JsonSerializer.Deserialize<IReadOnlyCollection<IdentityCrossAttributePair>>(json, JsonOptions) ?? [];
+    }
+
     private static string CandidateKey(Guid sourceGraphNodeId, Guid targetGraphNodeId, string identityKey)
     {
         return $"{sourceGraphNodeId:N}:{targetGraphNodeId:N}:{identityKey}";
@@ -844,7 +1141,7 @@ public sealed class IdentityResolutionService(
         string NormalizedSourceSystem,
         string SourceRecordId,
         string IdentityKey,
-        IReadOnlyDictionary<string, string?> IdentityValues,
+        IReadOnlyDictionary<string, string?> AttributeValues,
         string? LifecycleState,
         int ValidationErrorCount);
 
@@ -854,8 +1151,21 @@ public sealed class IdentityResolutionService(
         {
             RuleFor(request => request.Name).NotEmpty().MaximumLength(120);
             RuleFor(request => request.ObjectType).NotEmpty().MaximumLength(120);
-            RuleFor(request => request.IdentityAttributeKeys).NotEmpty();
+            RuleFor(request => request).Must(request =>
+                (request.IdentityAttributeKeys?.Count ?? 0) > 0
+                || (request.CrossAttributePairs?.Count ?? 0) > 0)
+                .WithMessage("At least one identity attribute key or cross-attribute pair is required.");
             RuleForEach(request => request.IdentityAttributeKeys).NotEmpty().MaximumLength(160);
+            RuleForEach(request => request.CrossAttributePairs).ChildRules(pair =>
+            {
+                pair.RuleFor(item => item.SourceSystem).NotEmpty().MaximumLength(120);
+                pair.RuleFor(item => item.SourceAttributeKey).NotEmpty().MaximumLength(160);
+                pair.RuleFor(item => item.TargetSystem).NotEmpty().MaximumLength(120);
+                pair.RuleFor(item => item.TargetAttributeKey).NotEmpty().MaximumLength(160);
+                pair.RuleFor(item => item).Must(item =>
+                    !string.Equals(item.SourceSystem.Trim(), item.TargetSystem.Trim(), StringComparison.OrdinalIgnoreCase))
+                    .WithMessage("Cross-attribute pair source and target systems must differ.");
+            });
             RuleFor(request => request.AutoApproveThreshold).InclusiveBetween(0.01m, 1m);
             RuleFor(request => request.ReviewThreshold).InclusiveBetween(0.01m, 1m);
             RuleFor(request => request).Must(request => request.AutoApproveThreshold >= request.ReviewThreshold)

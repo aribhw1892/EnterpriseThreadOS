@@ -14,6 +14,7 @@ public sealed class IdentityResolutionRule : ITenantScoped
     public required string ObjectType { get; set; }
     public required string NormalizedObjectType { get; set; }
     public required string IdentityAttributeKeysJson { get; set; }
+    public string? CrossAttributePairsJson { get; set; }
     public decimal AutoApproveThreshold { get; set; } = 0.97m;
     public decimal ReviewThreshold { get; set; } = 0.6m;
     public bool IsActive { get; set; } = true;

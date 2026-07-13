@@ -41,6 +41,13 @@ public static class IdentityResolutionEndpointExtensions
             CancellationToken cancellationToken) =>
             await ExecuteAsync(() => service.ApproveCandidateAsync(candidateId, request, cancellationToken)));
 
+        group.MapPost("/batches/{batchId:guid}/candidates/approve-all", async (
+            Guid batchId,
+            IdentityReviewDecisionRequest request,
+            IIdentityResolutionService service,
+            CancellationToken cancellationToken) =>
+            await ExecuteAsync(() => service.ApproveAllCandidatesAsync(batchId, request, cancellationToken)));
+
         group.MapPost("/candidates/{candidateId:guid}/reject", async (
             Guid candidateId,
             IdentityReviewDecisionRequest request,

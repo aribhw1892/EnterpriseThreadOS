@@ -3,7 +3,12 @@ name = "etos-pdm-transform"
 version = "0.1.0"
 description = "Transform PdmExtractor exports into EnterpriseThreadOS import CSV batches"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "etos-transform-common",
+]
+
+[tool.uv.sources]
+etos-transform-common = { path = "../EtosTransformCommon", editable = true }
 
 [project.optional-dependencies]
 dev = [

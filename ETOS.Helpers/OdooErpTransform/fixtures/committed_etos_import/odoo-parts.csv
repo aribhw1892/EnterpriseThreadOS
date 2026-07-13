@@ -1,0 +1,108 @@
+odooProductId,sourceDocumentId,defaultCode,name,productType,uom,productCategory,route,active,companyCode
+ODOO-PROD-000002,2,210868,210868,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000003,3,200046,200046,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000004,4,TEMP570307,TEMP570307,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000005,5,TEMP566662,TEMP566662,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000006,6,TEMP497181,TEMP497181,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000007,7,TEMP248872,TEMP248872,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000008,8,TEMP171669,TEMP171669,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000009,9,TEMP160360,TEMP160360,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000010,10,TEMP154255,TEMP154255,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000011,11,TEMP79360,TEMP79360,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000012,12,TEMP75793,TEMP75793,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000013,13,HEX NUT GRADEC_ISO,HEX NUT GRADEC ISO,product,Units,Purchased / Fasteners,Manufacture,TRUE,MAIN
+ODOO-PROD-000014,14,200104,200104,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-000015,15,200069,200069,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001022,1022,200081,200081,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001023,1023,200108,200108,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001024,1024,COPY OF 200080,COPY OF 200080,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001025,1025,200106,200106,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001027,1027,COPY OF TEMP581055,COPY OF TEMP581055,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001029,1029,TEST,TEST,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001030,1030,COPY OF TEST,COPY OF TEST,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001031,1031,COPY OF COPY OF TEST,COPY OF COPY OF TEST,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001032,1032,210875,210875,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001033,1033,COPY OF COPY (2) OF COPY OF TEST,COPY OF COPY (2) OF COPY OF TEST,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001034,1034,COPY OF COPY OF COPY (2) OF COPY OF TEST,COPY OF COPY OF COPY (2) OF COPY OF TEST,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001035,1035,COPY OF COPY OF COPY OF COPY (2) OF COPY OF TEST,COPY OF COPY OF COPY OF COPY (2) OF COPY OF TEST,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001036,1036,COPY (2) OF TEMP581055,COPY (2) OF TEMP581055,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001038,1038,COPY (2) OF COPY OF COPY OF COPY (2) OF COPY OF TEST,COPY (2) OF COPY OF COPY OF COPY (2) OF COPY OF TEST,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001039,1039,COPY (2) OF COPY (2) OF COPY OF TEST,COPY (2) OF COPY (2) OF COPY OF TEST,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001040,1040,COPY OF 200108,COPY OF 200108,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001041,1041,COPY (2) OF 200108,COPY (2) OF 200108,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001042,1042,200186,200186,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001043,1043,COPY OF 200106,COPY OF 200106,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-001044,1044,200187,200187,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002043,2043,210873,210873,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002060,2060,210877,210877,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002061,2061,210878,210878,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002062,2062,210876,210876,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002063,2063,219052,219052,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002069,2069,TEMP566999,TEMP566999,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002070,2070,COPY OF TEMP566999,COPY OF TEMP566999,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002071,2071,COPY (2) OF TEMP566999,COPY (2) OF TEMP566999,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002072,2072,COPY (3) OF TEMP566999,COPY (3) OF TEMP566999,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002073,2073,COPY OF TEMP566662,COPY OF TEMP566662,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002074,2074,VIRTUAL DOCUMENT.SLDPRT,VIRTUAL DOCUMENT.SLDPRT,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002075,2075,NEW MICROSOFT EXCEL WORKSHEET,NEW MICROSOFT EXCEL WORKSHEET,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002076,2076,COPY (2) OF TEMP566662,COPY (2) OF TEMP566662,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002077,2077,COPY (3) OF TEMP566662,COPY (3) OF TEMP566662,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002078,2078,COPY OF 200046,COPY OF 200046,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002079,2079,COPY OF COPY OF 200046,COPY OF COPY OF 200046,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002080,2080,COPY (2) OF 200046,COPY (2) OF 200046,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002083,2083,COPY (3) OF 200046,COPY (3) OF 200046,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002086,2086,COPY (4) OF 200046,COPY (4) OF 200046,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002087,2087,NEW MICROSOFT EXCEL WORKSHEET (2),NEW MICROSOFT EXCEL WORKSHEET (2),product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002088,2088,COPY (5) OF 200046,COPY (5) OF 200046,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002089,2089,COPY (6) OF 200046,COPY (6) OF 200046,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002090,2090,212919,212919,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002093,2093,212928,212928,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002095,2095,212929,212929,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002097,2097,212930,212930,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002100,2100,212939,212939,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002103,2103,PART1,PART1,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002104,2104,23232323232323,23232323232323,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002107,2107,COPY OF 212931,COPY OF 212931,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002110,2110,212933,212933,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002112,2112,212934,212934,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002114,2114,212935,212935,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002116,2116,COPY (2) OF 212930,COPY (2) OF 212930,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002117,2117,212936,212936,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002118,2118,212937,212937,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002119,2119,212940,212940,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002120,2120,212938,212938,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002128,2128,212941,212941,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002130,2130,COPY OF 212940,COPY OF 212940,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002131,2131,212943,212943,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002132,2132,212942,212942,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002136,2136,212945,212945,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002138,2138,212946,212946,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002140,2140,212947,212947,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002142,2142,212948,212948,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002144,2144,212951,212951,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002146,2146,21545459044,21545459044,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002147,2147,PNEUMATIC 200080,PNEUMATIC 200080,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002148,2148,COPY OF 200080,COPY OF 200080,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002149,2149,COPY OF 212919,COPY OF 212919,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002150,2150,MULTIPLETESTFILE,MULTIPLETESTFILE,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002153,2153,COPY OF MULTIPLETESTFILE,COPY OF MULTIPLETESTFILE,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002154,2154,COPY (2) OF MULTIPLETESTFILE,COPY (2) OF MULTIPLETESTFILE,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002155,2155,219055,219055,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002156,2156,COPY (4) OF MULTIPLETESTFILE,COPY (4) OF MULTIPLETESTFILE,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002165,2165,219056,219056,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002166,2166,219069,219069,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002167,2167,219064,219064,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002168,2168,COPY (3) OF MULTIPLETESTFILE,COPY (3) OF MULTIPLETESTFILE,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002173,2173,219059,219059,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002175,2175,COPY OF 200081,COPY OF 200081,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002176,2176,COPY OF COPY OF 200081,COPY OF COPY OF 200081,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002181,2181,219066,219066,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002184,2184,219065,219065,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002187,2187,219068,219068,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002188,2188,219067,219067,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002193,2193,COPY OF 219067,COPY OF 219067,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002196,2196,COPY OF 219068,COPY OF 219068,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002197,2197,209876543,209876543,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002199,2199,COPY OF PART1,COPY OF PART1,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-002200,2200,COPY OF 210876,COPY OF 210876,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN
+ODOO-PROD-003197,3197,223735,223735,product,Units,Manufactured / Components,Manufacture,TRUE,MAIN

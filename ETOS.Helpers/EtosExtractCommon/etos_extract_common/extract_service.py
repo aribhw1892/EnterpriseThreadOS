@@ -1,40 +1,32 @@
 from __future__ import annotations
 
 import logging
-import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Protocol
 
-import pyodbc
-
-from app.xml_mapping import (
+from etos_extract_common.xml_mapping import (
     Entity,
     MappingDefinition,
     RelationshipData,
 )
 
 
-def create_db_connection(connection_string: str) -> pyodbc.Connection:
-    conn = pyodbc.connect(connection_string)
-    logging.info("Database connection established.")
-    return conn
+class DatabaseCursor(Protocol):
+    description: Any
+
+    def execute(self, query: str) -> Any: ...
+
+    def fetchall(self) -> list[Any]: ...
+
+    def close(self) -> None: ...
 
 
-def build_connection_string_from_env() -> str:
-    driver = os.getenv("PDM_ODBC_DRIVER", "ODBC Driver 17 for SQL Server")
-    server = os.environ["PDM_DB_SERVER"]
-    database = os.environ["PDM_DB_NAME"]
-    uid = os.environ["PDM_DB_USER"]
-    pwd = os.environ["PDM_DB_PASSWORD"]
-    return (
-        f"DRIVER={{{driver}}};"
-        f"SERVER={server};"
-        f"DATABASE={database};"
-        f"UID={uid};"
-        f"PWD={pwd}"
-    )
+class DatabaseConnection(Protocol):
+    def cursor(self) -> DatabaseCursor: ...
+
+    def close(self) -> None: ...
 
 
-def extract_entities(mapping: MappingDefinition, conn: pyodbc.Connection) -> Dict[str, Dict[Any, Entity]]:
+def extract_entities(mapping: MappingDefinition, conn: DatabaseConnection) -> Dict[str, Dict[Any, Entity]]:
     entities: Dict[str, Dict[Any, Entity]] = {}
     cursor = conn.cursor()
 
@@ -45,7 +37,7 @@ def extract_entities(mapping: MappingDefinition, conn: pyodbc.Connection) -> Dic
 
         try:
             cursor.execute(obj_def.Query)
-        except pyodbc.Error as e:
+        except Exception as e:
             logging.error("Error executing master query for '%s': %s", obj_type, e)
             continue
 
@@ -67,7 +59,7 @@ def extract_entities(mapping: MappingDefinition, conn: pyodbc.Connection) -> Dic
                 continue
             try:
                 cursor.execute(attr_source.Query)
-            except pyodbc.Error as e:
+            except Exception as e:
                 logging.error("Error executing attribute query for '%s': %s", obj_type, e)
                 continue
 
@@ -96,7 +88,7 @@ def extract_entities(mapping: MappingDefinition, conn: pyodbc.Connection) -> Dic
 def extract_relationships(
     mapping: MappingDefinition,
     entities: Dict[str, Dict[Any, Entity]],
-    conn: pyodbc.Connection,
+    conn: DatabaseConnection,
 ) -> Dict[str, List[RelationshipData]]:
     relationships_by_type: Dict[str, List[RelationshipData]] = {}
     cursor = conn.cursor()
@@ -107,7 +99,7 @@ def extract_relationships(
 
         try:
             cursor.execute(rel_def.Query)
-        except pyodbc.Error as e:
+        except Exception as e:
             logging.error("Error executing relationship query for '%s': %s", rel_type, e)
             continue
 
@@ -156,7 +148,7 @@ def extract_relationships(
                 continue
             try:
                 cursor.execute(attr_source.Query)
-            except pyodbc.Error as e:
+            except Exception as e:
                 logging.error("Error executing relationship attribute query for '%s': %s", rel_type, e)
                 continue
 

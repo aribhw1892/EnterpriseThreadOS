@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-07-11T15:26:50.394316+00:00",
+  "sourceSystem": "ODOO-ERP",
+  "inputDir": "committed-upload",
+  "outputs": {
+    "odoo-parts.csv": 107,
+    "odoo-part-versions.csv": 479,
+    "odoo-has-version.csv": 479,
+    "odoo-version-bom.csv": 719
+  }
+}

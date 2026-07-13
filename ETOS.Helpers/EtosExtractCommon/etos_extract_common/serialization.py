@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from typing import Any, Dict
 
-from app.xml_mapping import Entity, RelationshipData
+from etos_extract_common.xml_mapping import Entity, RelationshipData
 
 
 class DateTimeEncoder(json.JSONEncoder):

@@ -29,7 +29,8 @@ public sealed record LoadedReferencePackageManifest(
     IReadOnlyList<ReferenceConnectorDocument> Connectors,
     IReadOnlyList<ReferenceToolDocument> Tools,
     IReadOnlyList<ReferenceSkillDocument> Skills,
-    IReadOnlyList<ReferenceWorkflowDocument> Workflows);
+    IReadOnlyList<ReferenceWorkflowDocument> Workflows,
+    IReadOnlyList<ReferenceIdentityResolutionRuleDocument> IdentityResolutionRules);
 
 public sealed class ReferencePackageManifestLoader(
     IWebHostEnvironment environment,
@@ -75,7 +76,8 @@ public sealed class ReferencePackageManifestLoader(
             DeserializeRelative<ReferenceConnectorDocument[]>(packageDirectory, manifest.Artifacts.ConnectorsFile),
             DeserializeRelative<ReferenceToolDocument[]>(packageDirectory, manifest.Artifacts.ToolsFile),
             DeserializeRelative<ReferenceSkillDocument[]>(packageDirectory, manifest.Artifacts.SkillsFile),
-            DeserializeRelative<ReferenceWorkflowDocument[]>(packageDirectory, manifest.Artifacts.WorkflowsFile));
+            DeserializeRelative<ReferenceWorkflowDocument[]>(packageDirectory, manifest.Artifacts.WorkflowsFile),
+            DeserializeRelative<ReferenceIdentityResolutionRuleDocument[]>(packageDirectory, manifest.Profiles.IdentityResolutionRulesFile));
     }
 
     public string ReadPackageFile(string packageKey, string relativePath)
@@ -185,6 +187,7 @@ public sealed class ReferenceProfilesManifestSection
 {
     public required string ImportProfileFile { get; init; }
     public required string QueryIntentExtensionsFile { get; init; }
+    public required string IdentityResolutionRulesFile { get; init; }
 }
 
 public sealed class ReferenceDemoImportsManifestSection
@@ -420,4 +423,23 @@ public sealed class ReferenceSkillDocument
     public required IReadOnlyCollection<string> ReferencedToolKeys { get; init; }
     public IReadOnlyDictionary<string, string>? CompositionMetadata { get; init; }
     public IReadOnlyCollection<string>? FutureExtensionPlaceholders { get; init; }
+}
+
+public sealed class ReferenceIdentityResolutionRuleDocument
+{
+    public required string RuleKey { get; init; }
+    public required string Name { get; init; }
+    public required string ObjectType { get; init; }
+    public IReadOnlyCollection<string>? IdentityAttributeKeys { get; init; }
+    public IReadOnlyCollection<ReferenceIdentityCrossAttributePairDocument>? CrossAttributePairs { get; init; }
+    public decimal AutoApproveThreshold { get; init; } = 0.97m;
+    public decimal ReviewThreshold { get; init; } = 0.6m;
+}
+
+public sealed class ReferenceIdentityCrossAttributePairDocument
+{
+    public required string SourceSystem { get; init; }
+    public required string SourceAttributeKey { get; init; }
+    public required string TargetSystem { get; init; }
+    public required string TargetAttributeKey { get; init; }
 }

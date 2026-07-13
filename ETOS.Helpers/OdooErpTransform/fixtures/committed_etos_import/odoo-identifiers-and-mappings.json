@@ -1,0 +1,216 @@
+{
+  "sourceSystem": "ODOO-ERP",
+  "notes": "Synthetic Odoo-style ERP test export derived from the supplied SOLIDWORKS PDM files. Odoo does not natively use this exact part-version model; the revision object is a testing abstraction to preserve the EnterpriseThreadOS canonical pattern.",
+  "files": [
+    {
+      "key": "parts",
+      "fileName": "odoo-parts.csv",
+      "kind": "flat",
+      "structuralRelationshipType": null,
+      "columnMappings": [
+        {
+          "sourceColumn": "odooProductId",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "odooProductId",
+          "isIdentityField": true,
+          "isRequired": true
+        },
+        {
+          "sourceColumn": "defaultCode",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "partNumber",
+          "isIdentityField": false,
+          "isRequired": true
+        },
+        {
+          "sourceColumn": "name",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "name",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "productType",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "productType",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "uom",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "uom",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "productCategory",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "category",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "route",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "route",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "active",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "active",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "companyCode",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "companyCode",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "sourceDocumentId",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "sourceDocumentId",
+          "isIdentityField": false,
+          "isRequired": false
+        }
+      ],
+      "lifecycleMappings": []
+    },
+    {
+      "key": "partVersions",
+      "fileName": "odoo-part-versions.csv",
+      "kind": "flat",
+      "structuralRelationshipType": null,
+      "columnMappings": [
+        {
+          "sourceColumn": "odooVersionKey",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "odooVersionKey",
+          "isIdentityField": true,
+          "isRequired": true
+        },
+        {
+          "sourceColumn": "odooProductId",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "odooProductId",
+          "isIdentityField": false,
+          "isRequired": true
+        },
+        {
+          "sourceColumn": "revision",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "revision",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "lifecycleState",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "status",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "isCurrent",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "isLatest",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "effectiveDate",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "effectiveDate",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "standardPrice",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "standardPrice",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "sourcePdmVersionKey",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "sourcePdmVersionKey",
+          "isIdentityField": false,
+          "isRequired": false
+        },
+        {
+          "sourceColumn": "sourceDocumentId",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "sourceDocumentId",
+          "isIdentityField": false,
+          "isRequired": false
+        }
+      ],
+      "lifecycleMappings": [
+        {
+          "sourceValue": "released",
+          "canonicalLifecycleKey": "released"
+        },
+        {
+          "sourceValue": "in_review",
+          "canonicalLifecycleKey": "in-review"
+        },
+        {
+          "sourceValue": "draft",
+          "canonicalLifecycleKey": "draft"
+        }
+      ]
+    },
+    {
+      "key": "hasVersion",
+      "fileName": "odoo-has-version.csv",
+      "kind": "structural",
+      "structuralRelationshipType": "hasVersion",
+      "columnMappings": [
+        {
+          "sourceColumn": "parent",
+          "canonicalObjectType": "part",
+          "canonicalAttributeKey": "odooProductId",
+          "isIdentityField": true,
+          "isRequired": true
+        },
+        {
+          "sourceColumn": "child",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "odooVersionKey",
+          "isIdentityField": true,
+          "isRequired": true
+        }
+      ],
+      "lifecycleMappings": []
+    },
+    {
+      "key": "versionBom",
+      "fileName": "odoo-version-bom.csv",
+      "kind": "structural",
+      "structuralRelationshipType": "contains",
+      "columnMappings": [
+        {
+          "sourceColumn": "parent",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "odooVersionKey",
+          "isIdentityField": true,
+          "isRequired": true
+        },
+        {
+          "sourceColumn": "child",
+          "canonicalObjectType": "partVersion",
+          "canonicalAttributeKey": "odooVersionKey",
+          "isIdentityField": true,
+          "isRequired": true
+        }
+      ],
+      "lifecycleMappings": []
+    }
+  ]
+}

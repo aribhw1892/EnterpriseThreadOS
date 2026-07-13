@@ -11,6 +11,7 @@ using ETOS.Backend.GovernedChat;
 using ETOS.Backend.GovernedQuery;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
+using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Imports;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.OptimizationModels;
@@ -43,6 +44,7 @@ public sealed class ManufacturingReferencePackageInstaller(
     IGovernedQueryService governedQueryService,
     IAgentDefinitionService agentDefinitionService,
     IWorkflowDefinitionService workflowDefinitionService,
+    IIdentityResolutionService identityResolutionService,
     EnterpriseThreadDbContext dbContext,
     ITenantContextResolver tenantContextResolver,
     IAccessPermissionService permissionService,
@@ -89,6 +91,7 @@ public sealed class ManufacturingReferencePackageInstaller(
         await InstallAgentTemplatesAsync(context, loaded, modelPackage.Id, capabilityVersions, toolVersions, installedArtifacts, cancellationToken);
         await EnsureAnalysisAgentTypeAsync(context, cancellationToken);
         await InstallWorkflowsAsync(context, loaded, modelPackage.Id, toolVersions, policyVersions, optimizationVersions, installedArtifacts, cancellationToken);
+        await EnsureIdentityResolutionRulesAsync(context, loaded, cancellationToken);
         await EnsureMappingAssistantAgentAsync(context, loaded, cancellationToken);
 
         await auditRecorder.RecordAsync(
@@ -680,7 +683,45 @@ public sealed class ManufacturingReferencePackageInstaller(
             optimizationVersions,
             installedArtifacts,
             cancellationToken);
+        await EnsureIdentityResolutionRulesAsync(context, loaded, cancellationToken);
         await EnsureMappingAssistantAgentAsync(context, loaded, cancellationToken);
+    }
+
+    private async Task EnsureIdentityResolutionRulesAsync(
+        ActiveTenantContext context,
+        LoadedReferencePackageManifest loaded,
+        CancellationToken cancellationToken)
+    {
+        foreach (var ruleDocument in loaded.IdentityResolutionRules)
+        {
+            var normalizedRuleKey = ruleDocument.RuleKey.Trim().ToUpperInvariant();
+            var exists = await dbContext.IdentityResolutionRules.AnyAsync(
+                rule => rule.TenantId == context.TenantId && rule.NormalizedName == normalizedRuleKey,
+                cancellationToken);
+            if (exists)
+            {
+                continue;
+            }
+
+            var crossPairs = ruleDocument.CrossAttributePairs?
+                .Select(pair => new IdentityCrossAttributePair(
+                    pair.SourceSystem,
+                    pair.SourceAttributeKey,
+                    pair.TargetSystem,
+                    pair.TargetAttributeKey))
+                .ToList() ?? [];
+
+            await identityResolutionService.CreateRuleAsync(
+                new CreateIdentityResolutionRuleRequest(
+                    ruleDocument.Name,
+                    ruleDocument.ObjectType,
+                    ruleDocument.IdentityAttributeKeys?.ToList() ?? [],
+                    ruleDocument.AutoApproveThreshold,
+                    ruleDocument.ReviewThreshold,
+                    crossPairs,
+                    ruleDocument.RuleKey),
+                cancellationToken);
+        }
     }
 
     private async Task InstallAgentTemplateAsync(

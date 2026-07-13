@@ -4,8 +4,12 @@ version = "0.1.0"
 description = "SolidWorks PDM XML-driven SQL extractor for EnterpriseThreadOS import workflows"
 requires-python = ">=3.11"
 dependencies = [
+    "etos-extract-common",
     "pyodbc>=5.2.0",
 ]
+
+[tool.uv.sources]
+etos-extract-common = { path = "../EtosExtractCommon", editable = true }
 
 [project.optional-dependencies]
 dev = [

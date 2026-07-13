@@ -2,6 +2,8 @@
 
 Transforms [`PdmExtractor`](../PdmExtractor/) `pdm_export/` output into four EnterpriseThreadOS import CSV batches.
 
+Shared CSV utilities live in [`../EtosTransformCommon/`](../EtosTransformCommon/).
+
 ## Outputs
 
 | File | Import mode | ETOS relationship |

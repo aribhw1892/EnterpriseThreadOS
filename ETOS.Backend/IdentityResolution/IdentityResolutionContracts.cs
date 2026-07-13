@@ -10,12 +10,20 @@ public static class IdentityResolutionPermissions
     public const string Admin = "identity_resolution.admin";
 }
 
+public sealed record IdentityCrossAttributePair(
+    string SourceSystem,
+    string SourceAttributeKey,
+    string TargetSystem,
+    string TargetAttributeKey);
+
 public sealed record CreateIdentityResolutionRuleRequest(
     string Name,
     string ObjectType,
     IReadOnlyCollection<string> IdentityAttributeKeys,
     decimal AutoApproveThreshold,
-    decimal ReviewThreshold);
+    decimal ReviewThreshold,
+    IReadOnlyCollection<IdentityCrossAttributePair>? CrossAttributePairs = null,
+    string? RuleKey = null);
 
 public sealed record GenerateIdentityCandidatesRequest(Guid? RuleId);
 
@@ -27,6 +35,7 @@ public sealed record IdentityResolutionRuleResponse(
     string Name,
     string ObjectType,
     IReadOnlyCollection<string> IdentityAttributeKeys,
+    IReadOnlyCollection<IdentityCrossAttributePair> CrossAttributePairs,
     decimal AutoApproveThreshold,
     decimal ReviewThreshold,
     bool IsActive,
@@ -37,6 +46,12 @@ public sealed record IdentityCandidateGenerationResponse(
     Guid ImportBatchId,
     int CreatedCount,
     int ExistingCount,
+    IReadOnlyCollection<IdentityCandidateLinkResponse> Candidates);
+
+public sealed record ApproveAllIdentityCandidatesResponse(
+    Guid ImportBatchId,
+    int ApprovedCount,
+    int SkippedCount,
     IReadOnlyCollection<IdentityCandidateLinkResponse> Candidates);
 
 public sealed record IdentityCandidateLinkResponse(

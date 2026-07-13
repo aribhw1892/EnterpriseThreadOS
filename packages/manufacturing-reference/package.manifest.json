@@ -29,8 +29,36 @@
   "profiles": {
     "importProfileFile": "profiles/import-profile.json",
     "pdmImportMappingsFile": "profiles/pdm-import-mappings.json",
-    "queryIntentExtensionsFile": "profiles/query-intent-extensions.json"
+    "odooImportMappingsFile": "profiles/odoo-import-mappings.json",
+    "queryIntentExtensionsFile": "profiles/query-intent-extensions.json",
+    "identityResolutionRulesFile": "profiles/identity-resolution-rules.json"
   },
+  "importSources": [
+    {
+      "slug": "pdm",
+      "title": "SolidWorks PDM",
+      "sourceSystem": "SOLIDWORKS-PDM",
+      "mappingsFile": "profiles/pdm-import-mappings.json",
+      "demoImportDir": "demo-imports/pdm",
+      "helpersManifestPath": "ETOS.Helpers/PdmTransform/etos_import/manifest.json",
+      "runbook": {
+        "extractReadme": "ETOS.Helpers/PdmExtractor/README.md",
+        "transformReadme": "ETOS.Helpers/PdmTransform/README.md"
+      }
+    },
+    {
+      "slug": "odoo",
+      "title": "Odoo ERP",
+      "sourceSystem": "ODOO-ERP",
+      "mappingsFile": "profiles/odoo-import-mappings.json",
+      "demoImportDir": "demo-imports/odoo",
+      "helpersManifestPath": "ETOS.Helpers/OdooErpTransform/etos_import/manifest.json",
+      "runbook": {
+        "extractReadme": "ETOS.Helpers/OdooErpExtractor/README.md",
+        "transformReadme": "ETOS.Helpers/OdooErpTransform/README.md"
+      }
+    }
+  ],
   "demoImports": {
     "flatPartImportFile": "demo-imports/flat-part-import.csv",
     "bomComparisonFile": "demo-imports/bom-comparison.csv"

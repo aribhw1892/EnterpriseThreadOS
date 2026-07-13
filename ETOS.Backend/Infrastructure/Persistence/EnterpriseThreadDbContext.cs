@@ -1222,6 +1222,7 @@ public sealed class EnterpriseThreadDbContext(DbContextOptions<EnterpriseThreadD
             entity.Property(rule => rule.ObjectType).HasMaxLength(120).IsRequired();
             entity.Property(rule => rule.NormalizedObjectType).HasMaxLength(120).IsRequired();
             entity.Property(rule => rule.IdentityAttributeKeysJson).HasMaxLength(2000).IsRequired();
+            entity.Property(rule => rule.CrossAttributePairsJson).HasMaxLength(4000);
             entity.Property(rule => rule.AutoApproveThreshold).HasPrecision(5, 3).IsRequired();
             entity.Property(rule => rule.ReviewThreshold).HasPrecision(5, 3).IsRequired();
             entity.Property(rule => rule.CreatedAt).IsRequired();

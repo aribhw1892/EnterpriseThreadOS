@@ -314,6 +314,24 @@ Useful endpoints:
 - `POST http://localhost:5000/api/admin/identity-resolution/candidates/{candidateId}/reject`
 - `POST http://localhost:5000/api/admin/identity-resolution/candidates/{candidateId}/mark-conflicted`
 - `GET http://localhost:5000/api/admin/identity-resolution/batches/{batchId}/trust-scores`
+
+### PDM ↔ Odoo identity linking
+
+Cross-attribute identity rules are seeded when you install the manufacturing reference package (`POST /api/admin/development/install-reference-package` or `/model-artifacts`). They match Odoo bridge attributes to PDM identifiers:
+
+| Odoo attribute | PDM attribute | Object type |
+| --- | --- | --- |
+| `sourceDocumentId` | `documentId` | `part` |
+| `sourcePdmVersionKey` | `pdmVersionKey` | `partVersion` |
+
+Workflow:
+
+1. Import and stage all four PDM batches (`/imports/pdm`, `SourceSystem=SOLIDWORKS-PDM`).
+2. Import and stage all four Odoo batches (`/imports/odoo`, `SourceSystem=ODOO-ERP`).
+3. On `/imports/odoo` step 5, generate identity candidates on the Odoo flat batches (especially `odoo-part-versions.csv` and `odoo-parts.csv`).
+4. Review and approve candidates, then promote both sides to the trusted graph.
+
+Approved matches create non-destructive `IDENTITY_LINK` graph relationships between Odoo and PDM nodes.
 - `GET http://localhost:5000/api/admin/recommendations`
 - `POST http://localhost:5000/api/admin/recommendations`
 - `GET http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}`

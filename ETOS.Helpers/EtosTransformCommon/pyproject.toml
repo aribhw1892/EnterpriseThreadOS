@@ -1,0 +1,13 @@
+[project]
+name = "etos-transform-common"
+version = "0.1.0"
+description = "Shared CSV transform utilities for ETOS helper projects"
+requires-python = ">=3.11"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["etos_transform_common"]

@@ -152,8 +152,10 @@
 
 **Implemented**
 
-- `IGraphMemoryService`, Neo4j implementation, bootstrap constraints/indexes
+- `IGraphMemoryService`, Neo4j implementation, bootstrap constraints/indexes (including `identityKey`)
 - Tenant-scoped nodes/relationships, trust state, staging vs trusted spaces
+- Identity-keyed find-or-create: `FindNodeByIdentityAsync`, `EnsureNodeAsync`, `EnsureRelationshipAsync`, and `GraphIdentityKeyBuilder`
+- `PromoteStagingAsync` merges staging into trusted by `identityKey` and deduplicates relationships
 - Graph health checks; Testcontainers Neo4j integration tests
 - Public APIs: snapshots/diffs only — no raw Cypher (`GraphMemoryEndpointExtensions.cs`)
 - Memgraph: disabled placeholder (`MemgraphGraphMemoryService` throws)
@@ -200,8 +202,10 @@
 - `pydantic-ai-v1` LLM mapping preview via `PydanticAiMappingProvider` + agent runtime sidecar (Development config; base config keeps `rule-based-v1` default)
 - Optional `mapping-predictor-tool` prefetch; mapping preview diagnostics (`includeDiagnostics`)
 - UI: `imports/page.tsx` with demo flows and **Mapping Agent Debug** panel (`MappingAgentDebugPanel.tsx`)
-- Validation, staging graph (unverified), audit trail
-- Tests: import tests including staging, validation, tenant isolation; `MappingSuggestionProviderTests` for LLM provider and prefetch handler
+- Validation, staging graph (unverified) with identity-keyed `EnsureNodeAsync` for flat rows and structural rows that link existing endpoints only
+- Trusted promotion via `PromoteBatchAsync` / `PromoteStagingAsync` (identity merge into `GraphSpace.Trusted`)
+- Audit trail
+- Tests: import tests including staging, validation, tenant isolation, identity-keyed staging/promote idempotency (`ImportIdentityKeyedStagingTests`, `GraphMemoryTests`); `MappingSuggestionProviderTests` for LLM provider and prefetch handler
 
 **Gaps**
 
@@ -257,7 +261,7 @@
 
 **Implemented**
 
-- Staging → trusted promotion with audit (`ImportService.PromoteBatchAsync`)
+- Staging → trusted promotion with audit (`ImportService.PromoteBatchAsync`), merging nodes by `identityKey` and deduplicating relationships on re-promote
 - Rejected staging summaries retained
 - `DeferredGraphSnapshotService` / `DeferredGraphDiffService` — snapshots + diffs persisted
 - CAD BOM vs EBOM comparison during import (`CreateBomComparisonAsync`)

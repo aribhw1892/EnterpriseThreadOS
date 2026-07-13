@@ -126,8 +126,11 @@ Restricted data must be filtered before downstream query, dashboard, export, age
 The graph memory module currently includes:
 
 - internal `IGraphMemoryService` contracts for BaseNode/BaseRelationship create/read/update/traverse operations.
+- identity-keyed find-or-create helpers: `FindNodeByIdentityAsync`, `EnsureNodeAsync`, and `EnsureRelationshipAsync` (Neo4j implementation; default interface fallbacks delegate to create for test fakes).
+- `GraphIdentityKeyBuilder` for normalized keys `sourceSystem|objectType|attrKey=value;...` stored on nodes as `identityKey`, with a bootstrap index on that property.
 - Neo4j driver, bootstrap, and health services.
 - dual attribute persistence on Neo4j nodes and relationships: canonical `attributesJson` for API read models plus additive flattened domain properties prefixed with `attr_` (for example `attr_status`, `attr_pdmVersionKey`) for direct graph inspection and Cypher filters without changing existing read contracts.
+- `PromoteStagingAsync` to copy staging nodes/relationships into `GraphSpace.Trusted`, merging by `identityKey` and deduplicating relationships on re-promote.
 - snapshot/diff contract placeholders for later slices.
 - optional Memgraph adapter placeholder that is disabled by default.
 
@@ -160,7 +163,8 @@ The import module currently includes:
 - `ImportMappingLearningSignalInput` records emitted on mapping approve, reject, and corrected drafts via `IImportMappingLearningSignalEmitter`.
 - package-driven structural import staging and two-side BOM comparison using active model package `ImportProfileJson` and ontology BOM relationship definitions (no hardcoded manufacturing literals in platform core).
 - row-level validation issues for missing required values, invalid value types, invalid lifecycle values, and model/package consistency failures.
-- staging graph creation through `IGraphMemoryService` using `GraphSpace.Staging`, `TrustState.Unverified`, and `GraphSourceReference`. PDM and other import staging writes persist domain attributes in both `attributesJson` and flattened Neo4j properties prefixed with `attr_` on nodes and relationships.
+- staging graph creation through `IGraphMemoryService` using `GraphSpace.Staging`, `TrustState.Unverified`, and `GraphSourceReference`. Flat object rows call `EnsureNodeAsync` with an identity key from `isIdentityField` mappings so the same source object materializes once per batch and across re-stages. Structural relationship rows resolve both endpoints by identity key via `FindNodeByIdentityAsync` and create only the relationship (`EnsureRelationshipAsync`); missing endpoints emit a non-blocking `structural-endpoint-missing` validation warning and skip the row. PDM and other import staging writes persist domain attributes in both `attributesJson` and flattened Neo4j properties prefixed with `attr_` on nodes and relationships.
+- trusted graph promotion through `ImportService.PromoteBatchAsync`, which calls `PromoteStagingAsync` to merge staging nodes into `GraphSpace.Trusted` by `identityKey` (latest staged attributes win) and deduplicate relationships. Cross-source-system matching remains in identity resolution (`IDENTITY_LINK`), not promotion.
 - neutral comparison counters (`MissingInPrimarySideCount`, `MissingInSecondarySideCount`) driven by package comparison side order.
 - admin endpoints under `/api/admin/imports`.
 
@@ -170,7 +174,7 @@ Parser/library choices:
 - Excel `.xls` and `.xlsx` parsing uses `ExcelDataReader` because ETOS only needs read/import behavior, not workbook editing, styling, formula evaluation, or export generation.
 - If CSV imports need richer customer-facing diagnostics, custom delimiters, cultures, comments, or broader edge-case coverage, prefer switching the CSV path to `CsvHelper`.
 
-The import module creates only untrusted staging graph records. Identity resolution consumes those staged records through the identity-resolution module. Data-quality issues consume import validation records through the data-quality module. Trusted graph promotion, snapshots, and diffs remain deferred to later owning issues.
+The import module creates untrusted staging graph records and can promote approved batches into trusted graph space. Identity resolution consumes staged records through the identity-resolution module without merging cross-source objects during promotion. Data-quality issues consume import validation records through the data-quality module. Graph snapshots and diffs are implemented through deferred snapshot/diff services; richer snapshot viewers and on-demand BOM compare endpoints remain later slices.
 
 ### Identity Resolution And Trust
 

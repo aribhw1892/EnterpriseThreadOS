@@ -1,0 +1,10 @@
+{
+  "sourceSystem": "ODOO-ERP",
+  "outputs": {
+    "parts": "odoo-parts.csv",
+    "partVersions": "odoo-part-versions.csv",
+    "hasVersion": "odoo-has-version.csv",
+    "versionBom": "odoo-version-bom.csv",
+    "mappings": "odoo-identifiers-and-mappings.json"
+  }
+}

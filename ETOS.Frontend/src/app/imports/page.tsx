@@ -831,6 +831,17 @@ export default async function ImportsPage({ searchParams }: PageProps) {
         </section>
 
         <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
+          <h2 className="text-2xl font-semibold">Odoo ERP Import Wizard</h2>
+          <p className="mt-2 text-sm text-slate-300">
+            Package-driven Odoo ERP import with the same seven-step flow as PDM. Import four CSV batches with preset
+            mappings, optional AI review, and cross-source identity resolution against staged PDM data.
+          </p>
+          <div className="mt-4">
+            <ExplorerNavLink href="/imports/odoo">Open Odoo ERP import wizard</ExplorerNavLink>
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
           <h2 className="text-2xl font-semibold">API Upload Support</h2>
           <p className="mt-2 text-sm text-slate-300">
             Multipart upload is available at <code>/api/admin/imports/batches/{"{batchId}"}/files</code>.

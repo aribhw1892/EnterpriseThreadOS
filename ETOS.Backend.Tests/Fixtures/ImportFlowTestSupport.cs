@@ -440,6 +440,25 @@ public static class ImportFlowTestSupport
         return candidate;
     }
 
+    internal static async Task<ApproveAllIdentityCandidatesResponse> ApproveAllIdentityCandidatesAsync(
+        HttpClient client,
+        ImportFlowContext context,
+        Guid batchId,
+        string rationale = "Approved all reviewable candidates for MVP demonstration flow.")
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/admin/identity-resolution/batches/{batchId}/candidates/approve-all")
+        {
+            Content = JsonContent.Create(new IdentityReviewDecisionRequest(rationale))
+        };
+        AddTenantHeaders(request, context.TenantId, context.UserId);
+        var response = await client.SendAsync(request);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, body);
+        var result = await response.Content.ReadFromJsonAsync<ApproveAllIdentityCandidatesResponse>();
+        Assert.NotNull(result);
+        return result;
+    }
+
     internal static async Task<(ImportBatchResponse Batch, ImportMappingVersionResponse Mapping)> PrepareStagedImportAsync(
         HttpClient client,
         ImportFlowContext context,

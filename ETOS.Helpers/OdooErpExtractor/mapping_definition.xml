@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MappingDefinition>
+  <!--
+    Placeholder Odoo ERP mapping for future PostgreSQL extraction.
+    Replace Query blocks with vault-specific SQL against Odoo tables
+    (product_template, product_product, mrp_bom, mrp_bom_line, etc.).
+
+    Mock extract output for the Steris/PDM demo dataset is committed under
+    odoo_export/mock/ until a live Odoo database is available.
+  -->
+  <ObjectDefinitions>
+    <ObjectDefinition Type="Product">
+      <Query>SELECT 1 AS Id WHERE 1 = 0</Query>
+      <IdField>Id</IdField>
+      <AttributeSources>
+        <AttributeSource>
+          <Query></Query>
+          <Attributes>
+            <Attribute Name="DefaultCode" Type="string" />
+            <Attribute Name="Name" Type="string" />
+            <Attribute Name="DocumentId" Type="string" />
+            <Attribute Name="Active" Type="boolean" />
+          </Attributes>
+        </AttributeSource>
+      </AttributeSources>
+    </ObjectDefinition>
+  </ObjectDefinitions>
+
+  <RelationshipDefinitions>
+    <RelationshipDefinition Type="BomLine">
+      <Query>SELECT 1 AS Id WHERE 1 = 0</Query>
+      <IdField>Id</IdField>
+      <ParentIdField>ParentId</ParentIdField>
+      <ChildIdField>ChildId</ChildIdField>
+      <ParentType>Product</ParentType>
+      <ChildType>Product</ChildType>
+      <AttributeSources>
+        <AttributeSource>
+          <Query></Query>
+          <Attributes>
+            <Attribute Name="QTY" Type="number" />
+            <Attribute Name="BomId" Type="string" />
+          </Attributes>
+        </AttributeSource>
+      </AttributeSources>
+    </RelationshipDefinition>
+  </RelationshipDefinitions>
+</MappingDefinition>

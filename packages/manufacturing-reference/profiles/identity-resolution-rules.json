@@ -1,0 +1,34 @@
+[
+  {
+    "ruleKey": "odoo-pdm-part-document-bridge",
+    "name": "Odoo part → PDM document",
+    "objectType": "part",
+    "identityAttributeKeys": [],
+    "crossAttributePairs": [
+      {
+        "sourceSystem": "ODOO-ERP",
+        "sourceAttributeKey": "sourceDocumentId",
+        "targetSystem": "SOLIDWORKS-PDM",
+        "targetAttributeKey": "documentId"
+      }
+    ],
+    "autoApproveThreshold": 0.97,
+    "reviewThreshold": 0.6
+  },
+  {
+    "ruleKey": "odoo-pdm-part-version-bridge",
+    "name": "Odoo version → PDM version",
+    "objectType": "partVersion",
+    "identityAttributeKeys": [],
+    "crossAttributePairs": [
+      {
+        "sourceSystem": "ODOO-ERP",
+        "sourceAttributeKey": "sourcePdmVersionKey",
+        "targetSystem": "SOLIDWORKS-PDM",
+        "targetAttributeKey": "pdmVersionKey"
+      }
+    ],
+    "autoApproveThreshold": 0.97,
+    "reviewThreshold": 0.6
+  }
+]

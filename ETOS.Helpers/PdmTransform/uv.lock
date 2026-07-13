@@ -15,6 +15,9 @@ wheels = [
 name = "etos-pdm-transform"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "etos-transform-common" },
+]
 
 [package.optional-dependencies]
 dev = [
@@ -22,8 +25,16 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.0" }]
+requires-dist = [
+    { name = "etos-transform-common", editable = "../EtosTransformCommon" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.0" },
+]
 provides-extras = ["dev"]
+
+[[package]]
+name = "etos-transform-common"
+version = "0.1.0"
+source = { editable = "../EtosTransformCommon" }
 
 [[package]]
 name = "iniconfig"

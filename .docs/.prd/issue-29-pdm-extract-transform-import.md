@@ -284,6 +284,18 @@ Track under Issue 22 / post-29 follow-up. Do not implement live connector in thi
 
 ---
 
+### 29.6 PDM document manifest (optional, blocked by Issue 12.1)
+
+**Not required to close Issue 29.**
+
+Optional follow-up after [`issue-12.1-governed-document-ingest-vector-parsers.md`](issue-12.1-governed-document-ingest-vector-parsers.md):
+
+- `PdmTransform` emits `document-manifest.csv` with metadata rows only: `documentId`, `pdmVersionKey`, `filePath`, `contentType`, `originalFileName`.
+- Operators use the manifest to plan bulk document uploads and `DocumentObjectLink` targets; **binary files** still ingest through document APIs (not CSV staging).
+- Does not replace Issue 12.1 extraction, Qdrant indexing, or parser registry.
+
+---
+
 ## Acceptance criteria
 
 ### Extract (29.0)

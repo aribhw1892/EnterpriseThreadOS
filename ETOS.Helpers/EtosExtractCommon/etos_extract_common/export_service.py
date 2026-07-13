@@ -7,13 +7,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
-from app.serialization import (
+from etos_extract_common.serialization import (
     DateTimeEncoder,
     entity_to_row,
     relationship_to_row,
     safe_filename,
 )
-from app.xml_mapping import Entity, RelationshipData
+from etos_extract_common.xml_mapping import Entity, RelationshipData
 
 
 def write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:

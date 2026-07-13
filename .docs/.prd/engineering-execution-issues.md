@@ -30,6 +30,7 @@ Use open-source libraries to accelerate commodity implementation work while keep
 | Issue 26: End-to-End MVP Demo | Playwright, Testcontainers for .NET, seeded fixtures, NSwag-generated clients if useful | Scripted happy path, denied/restricted-context path, browser-verifiable flow, and stable integration smoke tests. |
 | Issues 27-28: ADRs and Future Contracts | ADR templates, Mermaid, OpenAPI/JSON Schema contracts | Architecture decision capture, disabled write-action contracts, connector boundaries, deployment placeholders, and reviewable diagrams. |
 | Issue 29: PDM Extract, Transform, and Governed Import | Python helpers (`PdmExtractor`, `PdmTransform`), existing import module, manufacturing reference package | XML SQL extract, canonical CSV transform, generalized relationship staging for `part` / `partVersion` / `hasVersion` / version BOM. |
+| Issue 12.1: Governed Document Ingest and Qdrant Retrieval | Minio .NET SDK, Qdrant.Client, document module, governed query, Issue 22 connector patterns, manufacturing reference package | Pluggable file extraction providers, live Qdrant indexing, MinIO document storage, document→graph linking, vector fallback in governed retrieval. |
 
 ## Issue 1: Bootstrap Local Platform Foundation
 
@@ -312,6 +313,33 @@ Implement DocumentArtifact and DocumentVersion, document storage metadata, extra
 ## Blocked by
 
 Issue 11.
+
+## Issue 12.1: Governed Document Ingest, Extraction Parsers, and Qdrant Retrieval
+
+Type: AFK  
+Blocked by: Issue 12, Issue 18.5  
+User stories covered: 28, 29, 30, 31, 35, 38, 40, 52 (document and vector retrieval completion)
+
+Full issue sheet: [`issue-12.1-governed-document-ingest-vector-parsers.md`](issue-12.1-governed-document-ingest-vector-parsers.md)
+
+Implementation status: **Not started.** Issue 12 contracts exist (`DocumentArtifact`, `DocumentObjectLink`, `DisabledDocumentVectorIndexingService`, `DisabledCadParsingPlaceholder`). Live Qdrant writes, extraction providers, and MinIO document storage remain deferred.
+
+## What to build
+
+Complete document memory for binary file ingest: pluggable extraction providers (text, PDF, SolidWorks metadata, generic binary), MinIO-backed file storage, live Qdrant chunk indexing with tenant/policy payloads, auto-index after extraction, governed-query vector fallback, and runbook/UI smoke for linking files to promoted `part` / `partVersion` graph nodes. Extend manufacturing package `document` attributes — do not add parallel `ArchiveFiles` graph type.
+
+## Acceptance criteria
+
+- Files ingest through document APIs (not CSV import staging); extraction router selects provider by type.
+- Qdrant indexing is live when enabled; `DocumentVectorIndexRecord` reflects real status.
+- Governed query can apply vector fallback with classification/trust filtering.
+- Native CAD geometry parsing remains disabled; metadata-only SolidWorks provider is allowed.
+- Document-object links (not identity resolution) are the primary file→parent graph mechanism.
+- Tests cover MinIO storage, extraction, Qdrant index, retrieval, and PDM-linked integration smoke.
+
+## Blocked by
+
+Issue 12 and Issue 18.5.
 
 ## Issue 13: Governed Query Intents and Context Assembly
 
@@ -851,6 +879,10 @@ Three-layer SolidWorks PDM ingestion: XML-driven extract helper (`ETOS.Helpers/P
 ## Blocked by
 
 Issue 8 and Issue 18.5.
+
+### Issue 29.6: PDM document manifest (optional, blocked by 12.1)
+
+Optional follow-up: `PdmTransform` emits `document-manifest.csv` (file metadata rows: `documentId`, `pdmVersionKey`, `filePath`, `contentType`) for bulk link planning. Binary files still upload through Issue 12.1 document APIs. Not required to close Issue 29.
 
 ## Review Questions Before Publishing to an Issue Tracker
 

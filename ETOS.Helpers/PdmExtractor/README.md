@@ -24,6 +24,8 @@ The root element may be `<Mapping>` or `<MappingDefinition>`. Object types, rela
 
 See your vault-specific mapping document or a future sample under `samples/` when added.
 
+Shared XML parsing and export logic lives in [`../EtosExtractCommon/`](../EtosExtractCommon/).
+
 ## Setup
 
 From this directory (`ETOS.Helpers/PdmExtractor`):
@@ -120,11 +122,7 @@ PdmExtractor/
   mapping_definition.xml   # you provide this at project root
   pyproject.toml
   app/
-    main.py                # CLI entry
-    xml_mapping.py         # XML parse + mapping models
-    extract_service.py     # SQL extraction
-    export_service.py      # per-type CSV/JSON export
-    serialization.py       # value normalization
+    main.py                # CLI entry (ODBC + shared extract/export)
   pdm_export/              # generated (gitignored)
 ```
 

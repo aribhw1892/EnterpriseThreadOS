@@ -2822,6 +2822,10 @@ namespace ETOS.Backend.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("CreatedByUserId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("CrossAttributePairsJson")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
                     b.Property<string>("IdentityAttributeKeysJson")
                         .IsRequired()
                         .HasMaxLength(2000)

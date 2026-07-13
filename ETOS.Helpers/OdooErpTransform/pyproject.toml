@@ -1,0 +1,29 @@
+[project]
+name = "etos-odoo-erp-transform"
+version = "0.1.0"
+description = "Transform OdooErpExtractor exports into EnterpriseThreadOS import CSV batches"
+requires-python = ">=3.11"
+dependencies = [
+    "etos-transform-common",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+]
+
+[project.scripts]
+odoo-erp-transform = "app.main:cli"
+
+[tool.uv.sources]
+etos-transform-common = { path = "../EtosTransformCommon", editable = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

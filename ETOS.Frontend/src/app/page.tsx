@@ -569,7 +569,7 @@ export default async function Home() {
             </li>
             <li>
               3–8 Import + identity + promote: <Link href="/imports">/imports</Link>,{" "}
-              <Link href="/imports/pdm">PDM wizard</Link>
+              <Link href="/imports/pdm">PDM wizard</Link>, <Link href="/imports/odoo">Odoo wizard</Link>
             </li>
             <li>
               9–11 Governed chat + drafts: <Link href="/chat">/chat</Link>
