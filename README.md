@@ -22,12 +22,16 @@ For product intent, start with `.docs/.prd/engineering-execution-prd.md`. For or
 - `packages/manufacturing-reference/`: versioned manufacturing demo ontology, profiles, CSV fixtures, and governed artifact seeds.
 - `docs/ai-agent-workflow.md`: practical AI-agent workflow for this repo.
 
+
+
 ## Prerequisites
 
 - .NET SDK 10
 - Node.js 22+
 - npm 10+
 - Docker Desktop
+
+
 
 ## Quick Start
 
@@ -40,8 +44,7 @@ Copy-Item .env.example .env
 Start local infrastructure:
 
 ```powershell
-docker compose --env-file .env -f infra/local/docker-compose.yml up -d
-docker compose --env-file .env -f infra/local/docker-compose.yml --profile dapr-workflow up -d
+docker compose --env-file .env -f infra/local/docker-compose.yml up
 ```
 
 Restore .NET tools and apply migrations:
@@ -76,13 +79,15 @@ Open `http://localhost:3000` to view the local platform health, identity, govern
 
 Mapping preview and governed agents call the Python sidecar (`ETOS.AgentRuntime`) at `AgentRuntime:BaseUrl` in `ETOS.Backend/appsettings.json` (default `http://localhost:8010`). Docker Compose starts that sidecar as `agent-runtime`; the .NET backend is **not** containerized in the default local workflow—you run it with `dotnet run` above.
 
-| Component | Where it runs | Config location |
-| --- | --- | --- |
-| LM Studio server | Host (outside Docker) | LM Studio UI; OpenAI-compatible server (default port `1234`) |
-| Sidecar → LM Studio URL | `agent-runtime` container env | `.env`: `OPENAI_BASE_URL`, `OPENAI_API_KEY` (see `.env.example`) |
-| Sidecar Python code | `agent-runtime` Docker image | `ETOS.AgentRuntime/` (baked in at image build) |
-| Mapping provider + model id | Published tenant agent | `/agents/import-mapping-assistant/configure`; seed defaults in `packages/manufacturing-reference/artifacts/agent-templates.json` |
-| Enable mapping preview in dev | Backend | `ETOS.Backend/appsettings.Development.json` → `ImportMappingSuggestions` |
+
+| Component                     | Where it runs                 | Config location                                                                                                                  |
+| ----------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| LM Studio server              | Host (outside Docker)         | LM Studio UI; OpenAI-compatible server (default port `1234`)                                                                     |
+| Sidecar → LM Studio URL       | `agent-runtime` container env | `.env`: `OPENAI_BASE_URL`, `OPENAI_API_KEY` (see `.env.example`)                                                                 |
+| Sidecar Python code           | `agent-runtime` Docker image  | `ETOS.AgentRuntime/` (baked in at image build)                                                                                   |
+| Mapping provider + model id   | Published tenant agent        | `/agents/import-mapping-assistant/configure`; seed defaults in `packages/manufacturing-reference/artifacts/agent-templates.json` |
+| Enable mapping preview in dev | Backend                       | `ETOS.Backend/appsettings.Development.json` → `ImportMappingSuggestions`                                                         |
+
 
 Example `.env` when LM Studio runs on the host and `agent-runtime` runs in Docker:
 
@@ -91,17 +96,19 @@ OPENAI_API_KEY=lm-studio
 OPENAI_BASE_URL=http://host.docker.internal:1234/v1
 ```
 
-Set the agent's **Primary model id** to the id LM Studio exposes (for example `google/gemma-3-1b`), not the package seed placeholder `local-model`. Full workflow and troubleshooting: [`docs/local-development.md`](docs/local-development.md) (LLM-assisted import mapping).
+Set the agent's **Primary model id** to the id LM Studio exposes (for example `google/gemma-3-1b`), not the package seed placeholder `local-model`. Full workflow and troubleshooting: `[docs/local-development.md](docs/local-development.md)` (LLM-assisted import mapping).
 
 ### When to rebuild vs restart
 
-| Change | Action |
-| --- | --- |
+
+| Change                                                                 | Action                                                           |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | `ETOS.AgentRuntime/` Python code (prompt handling, model router, etc.) | **Rebuild** the `agent-runtime` image and recreate the container |
-| `.env` only (`OPENAI_BASE_URL`, `OPENAI_API_KEY`) | **Restart** the `agent-runtime` container (no rebuild) |
-| `ETOS.Backend/` C# code (resolver, mapping provider, API) | **Restart** `dotnet run` (no Docker) |
-| Agent model routing on the configure page | Publish agent version in UI (no Docker) |
-| LM Studio model loaded in the UI | No ETOS rebuild; ensure `primaryModelId` matches LM Studio |
+| `.env` only (`OPENAI_BASE_URL`, `OPENAI_API_KEY`)                      | **Restart** the `agent-runtime` container (no rebuild)           |
+| `ETOS.Backend/` C# code (resolver, mapping provider, API)              | **Restart** `dotnet run` (no Docker)                             |
+| Agent model routing on the configure page                              | Publish agent version in UI (no Docker)                          |
+| LM Studio model loaded in the UI                                       | No ETOS rebuild; ensure `primaryModelId` matches LM Studio       |
+
 
 Rebuild and restart the sidecar after Python changes:
 
@@ -215,6 +222,8 @@ Bootstrap flow for local testing:
 3. Tenant creation gives the existing authenticated user a default `Tenant Admin` membership and identity administration permission for that tenant.
 4. Use both `X-ETOS-User-Id` and `X-ETOS-Tenant-Id` for tenant-scoped endpoints such as roles, memberships, and grants.
 
+
+
 ## Verification
 
 Build the solution:
@@ -243,6 +252,8 @@ Docker Compose syntax:
 ```powershell
 docker compose -f infra/local/docker-compose.yml config
 ```
+
+
 
 ## Current Scope
 

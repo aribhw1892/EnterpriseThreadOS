@@ -1,73 +1,63 @@
-import Link from "next/link";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
-import { getBusinessPolicyDefinitionArtifacts } from "@/lib/etos-api";
-
-export const dynamic = "force-dynamic";
-
-export default async function BusinessPoliciesPage() {
-  const artifacts = await getBusinessPolicyDefinitionArtifacts();
-
-  return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 18.3</p>
-              <h1 className="mt-2 text-4xl font-semibold">Business Policies</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
-                Governed business constraint policies (Layer 4) pinned to published capabilities, ontology, and model
-                packages. Distinct from classification governance policies.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
-              <ExplorerNavLink href="/">Home</ExplorerNavLink>
-            </div>
-          </div>
-        </section>
-
-        {artifacts.error ? (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-            {artifacts.error}
-          </div>
-        ) : null}
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">BusinessPolicyDefinitionVersion artifacts</h2>
-          {artifacts.data && artifacts.data.length > 0 ? (
-            <ul className="mt-6 space-y-3">
-              {artifacts.data.map((artifact) => (
-                <li key={artifact.id}>
-                  <Link
-                    href={`/business-policies/${artifact.id}`}
-                    className="block rounded-2xl border border-slate-800 bg-slate-950 p-4 transition hover:border-cyan-300/40"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold">{artifact.name}</p>
-                        <p className="text-sm text-slate-400">
-                          {artifact.policyKey ?? artifact.artifactType}
-                          {artifact.constraintCategory ? ` · ${artifact.constraintCategory}` : ""}
-                        </p>
-                      </div>
-                      <div className="text-right text-sm text-slate-400">
-                        <p>{artifact.latestVersionLabel ?? "No version"}</p>
-                        <p>{artifact.readinessState ?? "Unknown"}</p>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">
-              No business policy definitions yet. Create one via the admin API or seed from a reference package in a
-              later issue.
-            </p>
-          )}
-        </section>
-      </div>
-    </main>
-  );
-}
+import { DefinitionLibraryPage } from "@/components/model/DefinitionLibraryPage";
+import { getBusinessPolicyDefinitionArtifacts } from "@/lib/etos-api";
+
+export const dynamic = "force-dynamic";
+
+export default async function BusinessPoliciesPage() {
+  const artifacts = await getBusinessPolicyDefinitionArtifacts();
+  const rows = (artifacts.data ?? []).map((artifact) => ({
+    id: artifact.id,
+    name: artifact.policyKey ?? artifact.name,
+    secondary: artifact.name,
+    versionLabel: artifact.latestVersionLabel,
+    readinessState: artifact.readinessState,
+    dependencyHint: artifact.constraintCategory ?? "→ capabilities / packages",
+  }));
+
+  return (
+    <DefinitionLibraryPage
+      title="Business policy definitions"
+      description="Governed business constraint policies pinned to published capabilities, ontology, and model packages."
+      hrefBase="/business-policies"
+      rows={rows}
+      error={artifacts.error}
+      emptyMessage="No business policy definitions yet."
+      primaryActionLabel="New business policy"
+      registryTitle="Policy definitions"
+      columnLabels={{
+        name: "Policy",
+        secondary: "Constraint",
+        deps: "Applies to",
+      }}
+      previewTitle="Policy composition"
+      previewPills={[
+        { label: "Depends on", value: "Published capability", variant: "info" },
+        { label: "Applies to", value: rows[0]?.dependencyHint ?? "Package", variant: "warning" },
+        { label: "Publish gate", value: "Human approval", variant: "purple" },
+      ]}
+      sideExtra={
+        <div className="mt-4">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-etos-ink-muted">
+            Composition flow
+          </p>
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-extrabold">
+            <span className="rounded-xl border border-etos-border bg-etos-panel px-2.5 py-2">
+              Capability
+            </span>
+            <span className="text-etos-ink-subtle">→</span>
+            <span className="rounded-xl border border-etos-warning-border bg-etos-warning-bg px-2.5 py-2 text-etos-warning-fg">
+              Business Policy
+            </span>
+            <span className="text-etos-ink-subtle">→</span>
+            <span className="rounded-xl border border-etos-purple-border bg-etos-purple-bg px-2.5 py-2 text-etos-purple-fg">
+              Agent Template
+            </span>
+          </div>
+          <p className="mt-3 rounded-xl border-l-4 border-etos-info-border bg-etos-info-bg/30 p-3 text-xs text-etos-ink">
+            Policies remain drafts until capability and package pins pass publish governance.
+          </p>
+        </div>
+      }
+    />
+  );
+}

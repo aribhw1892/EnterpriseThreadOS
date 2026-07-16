@@ -2,6 +2,7 @@
 bin/
 obj/
 TestResults/
+.tmp-test-out/
 *.user
 *.suo
 *.rsuser

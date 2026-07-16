@@ -1,14 +1,18 @@
 # EnterpriseThreadOS Design System — Light & Dark Mode
 
-Companion to `engineering-execution-ui-issues.md`. Extracts visual language from the mockup pack HTML (`References/etos_ui_mockup_pack_with_digital_thread_timeline/etos_ui_mockups/html/01-command-center.html`) and defines dual-theme tokens for Tailwind 4 implementation.
+Companion to `engineering-execution-ui-issues.md`. Extracts visual language from the mockup pack (light shell HTML for screens 02–37, e.g. `html/01-command-center-legacy-executive.html`) and defines dual-theme tokens for Tailwind 4 implementation.
+
+**Theme rule:** every chrome surface and product screen — including sidebar and Mission Control (`/`) — follows the light/dark toggle. Dark mode is a deliberate second palette, not an inversion. Mockup PNGs that ship dark-only (e.g. screen 01 Mission Control) define the **dark** ops look; light mode uses the same layout with workspace-light ops tokens.
+
+**Implementation status (2026-07-16):** Tokens + `next-themes` live in `ETOS.Frontend/src/app/globals.css`. Shared primitives live under `src/components/ui/` (**17** files: Badge, Button, Card, PageHeader, KpiCard, Empty/ErrorState, DataTable + TanStackDataTable, Tabs, Stepper, TraceTimeline, Timeline, ListItem, SidePanel/PillStack, GovernancePanel, Notice/Callout). Gallery: `/dev/ui-kit`. Gold pages (Phases 0–4) use these primitives; remaining slate dumps (`/tasks`, `/decisions`, `/context-packages`, `/admin/foundation`) still open.
 
 ---
 
 ## Design Intent
 
-The mockups use a **light enterprise workspace** with a **fixed navy sidebar**. Content areas are bright, card-based, and audit-friendly. Status semantics (success, warning, danger, info) stay consistent across themes so operators recognize risk at a glance.
+Most mockups use a **light enterprise workspace** with a **light sidebar** (white → soft slate gradient, dark ink). Content areas are bright, card-based, and audit-friendly. Status semantics (success, warning, danger, info) stay consistent across themes so operators recognize risk at a glance.
 
-Dark mode is not an inversion hack—it is a deliberate second palette with the same hierarchy: navy sidebar, deep canvas, elevated panels, muted table rows.
+**Dark mode** uses a navy sidebar, deep canvas, elevated panels, and muted table rows. **Mission Control home (`/`)** and digital-thread screens use **ops-canvas** tokens that switch with the theme (light workspace panels in light mode; near-black ops panels in dark mode).
 
 ---
 
@@ -49,18 +53,23 @@ Implement in `ETOS.Frontend/src/app/globals.css`:
   --etos-border-soft: #e2e8f0;
   --etos-border-panel: rgba(203, 213, 225, 0.9);
 
-  /* Sidebar (shared both themes) */
-  --etos-nav-from: #101a33;
-  --etos-nav-to: #0b1224;
-  --etos-nav-ink: #dbeafe;
-  --etos-nav-muted: #93c5fd;
-  --etos-nav-section: #7da0d5;
-  --etos-nav-active-border: rgba(147, 197, 253, 0.22);
+  /* Sidebar — light theme */
+  --etos-nav-from: #ffffff;
+  --etos-nav-to: #f1f5f9;
+  --etos-nav-ink: #334155;
+  --etos-nav-muted: #64748b;
+  --etos-nav-section: #94a3b8;
+  --etos-nav-brand: #0f172a;
+  --etos-nav-active-ink: #0f172a;
+  --etos-nav-active-border: rgba(37, 99, 235, 0.28);
   --etos-nav-active-bg: linear-gradient(
     90deg,
-    rgba(14, 165, 233, 0.22),
-    rgba(124, 58, 237, 0.17)
+    rgba(14, 165, 233, 0.14),
+    rgba(124, 58, 237, 0.1)
   );
+  --etos-nav-hover: rgba(15, 23, 42, 0.05);
+  --etos-nav-divider: rgba(15, 23, 42, 0.08);
+  --etos-nav-soon-border: rgba(15, 23, 42, 0.12);
 
   /* Accents */
   --etos-accent: #2563eb;
@@ -100,6 +109,14 @@ Implement in `ETOS.Frontend/src/app/globals.css`:
   --etos-tenant-pill-bg: #e0f2fe;
   --etos-tenant-pill-fg: #0369a1;
   --etos-tenant-pill-border: #bae6fd;
+
+  /* Mission Control ops — light */
+  --etos-ops-canvas: #f5f7fb;
+  --etos-ops-panel: #ffffff;
+  --etos-ops-panel-elevated: #ffffff;
+  --etos-ops-border: #d8e0ea;
+  --etos-ops-ink: #0f172a;
+  --etos-ops-ink-muted: #64748b;
 }
 
 .dark {
@@ -118,9 +135,23 @@ Implement in `ETOS.Frontend/src/app/globals.css`:
   --etos-border-soft: #1e293b;
   --etos-border-panel: rgba(51, 65, 85, 0.9);
 
-  /* Sidebar: slightly deeper, same hue family */
-  --etos-nav-from: #070d1a;
-  --etos-nav-to: #050810;
+  /* Sidebar — navy brand in dark */
+  --etos-nav-from: #101a33;
+  --etos-nav-to: #0b1224;
+  --etos-nav-ink: #dbeafe;
+  --etos-nav-muted: #93c5fd;
+  --etos-nav-section: #7da0d5;
+  --etos-nav-brand: #ffffff;
+  --etos-nav-active-ink: #ffffff;
+  --etos-nav-active-border: rgba(147, 197, 253, 0.22);
+  --etos-nav-active-bg: linear-gradient(
+    90deg,
+    rgba(14, 165, 233, 0.22),
+    rgba(124, 58, 237, 0.17)
+  );
+  --etos-nav-hover: rgba(255, 255, 255, 0.05);
+  --etos-nav-divider: rgba(255, 255, 255, 0.1);
+  --etos-nav-soon-border: rgba(255, 255, 255, 0.15);
 
   --etos-accent: #60a5fa;
   --etos-accent-indigo: #818cf8;
@@ -155,6 +186,14 @@ Implement in `ETOS.Frontend/src/app/globals.css`:
   --etos-tenant-pill-bg: #172554;
   --etos-tenant-pill-fg: #93c5fd;
   --etos-tenant-pill-border: #1e3a8a;
+
+  /* Mission Control ops — dark (screen 01 PNG) */
+  --etos-ops-canvas: #070b14;
+  --etos-ops-panel: #0f172a;
+  --etos-ops-panel-elevated: #152033;
+  --etos-ops-border: #1e3a5f;
+  --etos-ops-ink: #e2e8f0;
+  --etos-ops-ink-muted: #7d93b5;
 }
 ```
 
@@ -165,6 +204,21 @@ Map tokens to utilities, e.g.:
 - `--color-etos-panel` → `bg-etos-panel`
 - `--color-etos-ink` → `text-etos-ink`
 - `--color-etos-border` → `border-etos-border`
+
+### Mission Control / digital-thread ops canvas
+
+Use on `/` (screen 01) and `/digital-thread/*` (38–40). Tokens **switch with theme**:
+
+| Token | Light | Dark | Usage |
+| --- | --- | --- | --- |
+| `--etos-ops-canvas` | `#f5f7fb` | `#070b14` | Page background |
+| `--etos-ops-panel` | `#ffffff` | `#0f172a` | Cards, rails |
+| `--etos-ops-panel-elevated` | `#ffffff` | `#152033` | KPI cards, stream |
+| `--etos-ops-border` | `#d8e0ea` | `#1e3a5f` | Panel borders |
+| `--etos-ops-ink` / muted | slate ink | slate light | Labels, body |
+| Heatmap (`--etos-ops-heat-0…4`) | soft blues → teal → amber | deep blues → teal → amber | Activity intensity |
+
+Keep semantic status badges aligned with the main token set so Mission Control and light-shell routes share meaning.
 
 ---
 
@@ -205,8 +259,10 @@ Always include text label; do not use color alone.
 ### Sidebar nav item
 
 - Default: `--etos-nav-ink` at 14px
-- Active: `--etos-nav-active-bg`, white text, dot with cyan glow
+- Active: `--etos-nav-active-bg`, `--etos-nav-active-ink` text, cyan glow dot
+- Brand title: `--etos-nav-brand`
 - Section label: uppercase 11px, `--etos-nav-section`
+- Light: light panel sidebar; dark: navy brand sidebar
 
 ### Top bar search
 
@@ -218,17 +274,7 @@ Always include text label; do not use color alone.
 
 ## Digital Thread Timeline — Special Canvas Theme
 
-Screens 38–40 use a **deeper immersive canvas** even in light mode. Use a scoped class `.digital-thread-canvas` on that route only:
-
-| Token | Value |
-| --- | --- |
-| Canvas | `#071426` → `#0b1628` gradient |
-| Panel | `rgba(13, 27, 47, 0.86)` |
-| Border | `#1e3a5f` |
-| Pulse accent | `#60a5fa` |
-| Live badge | `#052e2b` / `#a7f3d0` |
-
-In dark mode, timeline canvas may stay identical (already dark-native) to avoid jarring transition from shell.
+Screens 38–40 use ops-canvas tokens (same light/dark switch as Mission Control). Optional scoped class `.digital-thread-canvas` may deepen the dark palette further when immersive zoom ships; light mode still follows workspace-light ops tokens.
 
 ---
 
@@ -255,7 +301,8 @@ Current pages use `bg-slate-950 text-slate-100` patterns. Migration steps:
 
 ## Verification Checklist
 
-- [ ] Sidebar identical hue in light and dark (navy brand)
+- [ ] Sidebar flips with theme (light panel / dark navy)
+- [ ] Mission Control `/` readable in light and dark (ops tokens)
 - [ ] Table rows readable in both modes
 - [ ] Primary CTA contrast ≥ 4.5:1
 - [ ] Warning/danger badges distinguishable for deuteranopia

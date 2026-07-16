@@ -1,72 +1,47 @@
 import Link from "next/link";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
+import { DefinitionLibraryPage } from "@/components/model/DefinitionLibraryPage";
+import { Button } from "@/components/ui/Button";
 import { getCapabilityDefinitionArtifacts } from "@/lib/etos-api";
 
 export const dynamic = "force-dynamic";
 
 export default async function CapabilitiesPage() {
   const artifacts = await getCapabilityDefinitionArtifacts();
+  const rows = (artifacts.data ?? []).map((artifact) => ({
+    id: artifact.id,
+    name: artifact.capabilityKey ?? artifact.name,
+    secondary: artifact.name,
+    versionLabel: artifact.latestVersionLabel,
+    readinessState: artifact.readinessState,
+    dependencyHint: "etos-manufacturing-reference",
+  }));
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 18.2</p>
-              <h1 className="mt-2 text-4xl font-semibold">Capabilities</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
-                Governed business outcome definitions pinned to published ontology and model packages.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
-              <ExplorerNavLink href="/">Home</ExplorerNavLink>
-            </div>
-          </div>
-        </section>
-
-        {artifacts.error ? (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-            {artifacts.error}
-          </div>
-        ) : null}
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">CapabilityDefinitionVersion artifacts</h2>
-          {artifacts.data && artifacts.data.length > 0 ? (
-            <ul className="mt-6 space-y-3">
-              {artifacts.data.map((artifact) => (
-                <li key={artifact.id}>
-                  <Link
-                    href={`/capabilities/${artifact.id}`}
-                    className="block rounded-2xl border border-slate-800 bg-slate-950 p-4 transition hover:border-cyan-300/40"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold">{artifact.name}</p>
-                        <p className="text-sm text-slate-400">
-                          {artifact.capabilityKey ?? artifact.artifactType}
-                          {artifact.outcomeCategory ? ` · ${artifact.outcomeCategory}` : ""}
-                        </p>
-                      </div>
-                      <div className="text-right text-sm text-slate-400">
-                        <p>{artifact.latestVersionLabel ?? "No version"}</p>
-                        <p>{artifact.readinessState ?? "Unknown"}</p>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">
-              No capability definitions yet. Create one via the admin API or seed from a reference package in a later
-              issue.
-            </p>
-          )}
-        </section>
-      </div>
-    </main>
+    <DefinitionLibraryPage
+      title="Capability definitions"
+      description="Business outcomes are versioned separately from ontology and agent runtime capability profiles."
+      hrefBase="/capabilities"
+      rows={rows}
+      error={artifacts.error}
+      emptyMessage="No capability definitions yet."
+      primaryActionLabel="New capability"
+      registryTitle="Capability registry"
+      secondaryAction={
+        <Link href="/business-policies">
+          <Button variant="ghost">Publish selected</Button>
+        </Link>
+      }
+      columnLabels={{
+        name: "Capability",
+        secondary: "Outcome",
+        deps: "Compatible package",
+      }}
+      previewTitle="Definition preview"
+      previewPills={[
+        { label: "Depends on", value: "Published ontology", variant: "info" },
+        { label: "Allowed outputs", value: "Recommendation / task", variant: "purple" },
+        { label: "Immutable after publish", value: "Yes", variant: "warning" },
+      ]}
+    />
   );
 }

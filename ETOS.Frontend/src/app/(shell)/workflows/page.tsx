@@ -1,146 +1,200 @@
 import Link from "next/link";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
-import { getWorkflowDefinitionArtifacts, getWorkflowRuns } from "@/lib/etos-api";
+import { Badge, StatusBadge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { DataTable } from "@/components/ui/DataTable";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { KpiCard } from "@/components/ui/KpiCard";
+import { Notice } from "@/components/ui/Notice";
+import { PageHeader } from "@/components/ui/PageHeader";
+import {
+  getWorkflowDefinitionArtifacts,
+  getWorkflowRuns,
+  type WorkflowVersionArtifactSummary,
+} from "@/lib/etos-api";
 
 export const dynamic = "force-dynamic";
 
-function readinessLabel(state?: string | null): string {
-  if (!state) {
-    return "Unknown";
-  }
+type WorkflowRow = {
+  id: string;
+  name: string;
+  workflowKey: string;
+  scope: string;
+  version: string;
+  state: string;
+  editHref: string | null;
+  publishHref: string | null;
+};
 
-  const normalized = state.toLowerCase();
-  if (normalized.includes("publish")) {
-    return "Published";
-  }
-
-  if (normalized.includes("ready")) {
-    return "Ready";
-  }
-
-  if (normalized.includes("draft")) {
-    return "Draft";
-  }
-
-  return state;
+function readinessBucket(state?: string | null): "published" | "draft" | "blocked" | "ready" | "other" {
+  const value = (state ?? "").toLowerCase();
+  if (value.includes("publish")) return "published";
+  if (value.includes("ready")) return "ready";
+  if (value.includes("draft")) return "draft";
+  if (value.includes("block") || value.includes("fail")) return "blocked";
+  return "other";
 }
 
-export default async function WorkflowsPage() {
-  const [workflows, runs] = await Promise.all([getWorkflowDefinitionArtifacts(), getWorkflowRuns()]);
+function buildRows(workflows: WorkflowVersionArtifactSummary[]): WorkflowRow[] {
+  return workflows.map((wf) => {
+    const key = wf.workflowKey ?? null;
+    return {
+      id: wf.id,
+      name: wf.displayName ?? wf.name,
+      workflowKey: key ?? "—",
+      scope: wf.workflowScope ?? "—",
+      version: wf.latestVersionLabel ?? "No version",
+      state: wf.readinessState ?? "Unknown",
+      editHref: key ? `/workflows/${encodeURIComponent(key)}/edit` : null,
+      publishHref: key ? `/workflows/${encodeURIComponent(key)}/publish` : null,
+    };
+  });
+}
+
+type PageProps = {
+  searchParams: Promise<{ error?: string; notice?: string }>;
+};
+
+export default async function WorkflowsPage({ searchParams }: PageProps) {
+  const { error: queryError, notice } = await searchParams;
+  const [workflows, runs] = await Promise.all([
+    getWorkflowDefinitionArtifacts(),
+    getWorkflowRuns(),
+  ]);
+  const list = workflows.data ?? [];
+  const rows = buildRows(list);
+  const published = list.filter((w) => readinessBucket(w.readinessState) === "published").length;
+  const draft = list.filter((w) => readinessBucket(w.readinessState) === "draft").length;
+  const runList = runs.data ?? [];
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 24</p>
-              <h1 className="mt-2 text-4xl font-semibold">Tenant Workflows</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
-                Governed WorkflowVersion artifacts with step graphs, safe mode, preview defaults, and governed runtime
-                execution through agents, tools, policies, and optimization models.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href="/workflows/new">Create workflow</ExplorerNavLink>
-              <ExplorerNavLink href="/agents">Agents</ExplorerNavLink>
-              <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
-              <ExplorerNavLink href="/">Home</ExplorerNavLink>
-            </div>
-          </div>
-        </section>
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title="Workflow registry"
+        description="Governed WorkflowVersion artifacts with step graphs, safe mode, and runtime execution through agents, tools, and policies."
+        actions={
+          <>
+            <Link href="/workflows/new">
+              <Button type="button">Create workflow</Button>
+            </Link>
+            <Link href="/workflow-runs">
+              <Button type="button" variant="ghost">
+                Workflow runs
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
-        {workflows.error ? (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-            {workflows.error}
-          </div>
-        ) : null}
+      {queryError ? (
+        <div className="mb-4">
+          <Notice variant="danger">{queryError}</Notice>
+        </div>
+      ) : null}
+      {notice ? (
+        <div className="mb-4">
+          <Notice variant="info">{notice}</Notice>
+        </div>
+      ) : null}
+      {workflows.error ? (
+        <div className="mb-4">
+          <ErrorState error={workflows.error} />
+        </div>
+      ) : null}
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">WorkflowVersion artifacts</h2>
-          {workflows.data && workflows.data.length > 0 ? (
-            <ul className="mt-6 space-y-3">
-              {workflows.data.map((artifact) => (
-                <li key={artifact.id}>
-                  <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold">{artifact.displayName ?? artifact.name}</p>
-                        <p className="text-sm text-slate-400">
-                          {artifact.workflowKey ?? artifact.artifactType}
-                          {artifact.workflowScope ? ` · ${artifact.workflowScope}` : ""}
-                        </p>
-                      </div>
-                      <div className="text-right text-sm text-slate-400">
-                        <p>{artifact.latestVersionLabel ?? "No version"}</p>
-                        <p>{readinessLabel(artifact.readinessState)}</p>
-                      </div>
-                    </div>
-                    {artifact.workflowKey ? (
-                      <div className="mt-4 flex flex-wrap gap-3 text-sm">
-                        <Link
-                          href={`/workflows/${encodeURIComponent(artifact.workflowKey)}/edit`}
-                          className="text-cyan-300 hover:text-cyan-100"
-                        >
+      <div className="grid gap-4 md:grid-cols-4">
+        <KpiCard label="Workflows" value={list.length} hint="Tenant WorkflowVersion artifacts" />
+        <KpiCard label="Published" value={published} hint="Executable definitions" />
+        <KpiCard label="Draft" value={draft} hint="Needs mark-ready / publish" />
+        <KpiCard label="Recent runs" value={runList.length} hint="WorkflowRun records" />
+      </div>
+
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>Workflows</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {rows.length === 0 ? (
+            <EmptyState message="No tenant workflows yet. Create a draft or install a package." />
+          ) : (
+            <DataTable<WorkflowRow>
+              rows={rows}
+              rowKey={(row) => row.id}
+              emptyMessage="No workflows."
+              columns={[
+                {
+                  key: "name",
+                  header: "Name",
+                  render: (row) =>
+                    row.editHref ? (
+                      <Link href={row.editHref} className="text-etos-accent hover:underline">
+                        {row.name}
+                      </Link>
+                    ) : (
+                      <span>{row.name}</span>
+                    ),
+                },
+                {
+                  key: "key",
+                  header: "Key",
+                  render: (row) => (
+                    <span className="font-mono text-xs text-etos-ink-muted">{row.workflowKey}</span>
+                  ),
+                },
+                {
+                  key: "scope",
+                  header: "Scope",
+                  render: (row) => <Badge variant="info">{row.scope}</Badge>,
+                },
+                {
+                  key: "version",
+                  header: "Version",
+                  render: (row) => (
+                    <span className="font-mono text-xs text-etos-ink-muted">{row.version}</span>
+                  ),
+                },
+                {
+                  key: "state",
+                  header: "State",
+                  render: (row) => <StatusBadge status={row.state} />,
+                },
+                {
+                  key: "actions",
+                  header: "Actions",
+                  render: (row) => (
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {row.editHref ? (
+                        <Link href={row.editHref} className="text-etos-accent hover:underline">
                           Edit
                         </Link>
-                        <Link
-                          href={`/workflows/${encodeURIComponent(artifact.workflowKey)}/publish`}
-                          className="text-cyan-300 hover:text-cyan-100"
-                        >
+                      ) : null}
+                      {row.publishHref ? (
+                        <Link href={row.publishHref} className="text-etos-accent hover:underline">
                           Publish
                         </Link>
-                      </div>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">
-              No tenant workflows yet.{" "}
-              <Link href="/workflows/new" className="text-cyan-300 hover:text-cyan-100">
-                Create a draft workflow
-              </Link>
-              .
-            </p>
-          )}
-        </section>
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Recent workflow runs</h2>
-          {runs.error ? (
-            <p className="mt-4 text-sm text-amber-100">{runs.error}</p>
-          ) : runs.data && runs.data.length > 0 ? (
-            <ul className="mt-6 space-y-3">
-              {runs.data.slice(0, 10).map((run) => (
-                <li key={run.id}>
-                  <Link
-                    href={`/workflow-runs/${run.id}`}
-                    className="block rounded-2xl border border-slate-800 bg-slate-950 p-4 transition hover:border-cyan-300/40"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold">{run.status}</p>
-                        <p className="text-sm text-slate-400">
-                          {run.isPreview ? "Preview" : "Execute"} · workflow version {run.workflowVersionId}
-                        </p>
-                      </div>
-                      <div className="text-right text-sm text-slate-400">
-                        <p>{run.startedAt}</p>
-                        <p>{run.safeModeApplied ? "Safe mode applied" : "No safe mode"}</p>
-                      </div>
+                      ) : null}
                     </div>
-                    <p className="mt-3 line-clamp-2 text-sm text-slate-500">{run.inputSafeSummary}</p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">No workflow runs yet.</p>
+                  ),
+                },
+              ]}
+            />
           )}
-        </section>
-      </div>
+        </CardContent>
+      </Card>
+
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4 text-sm text-etos-ink-muted">
+        <summary className="cursor-pointer font-extrabold text-etos-ink">Advanced / Debug</summary>
+        <div className="mt-4 space-y-3">
+          <Link href="/workflow-runs" className="text-etos-accent hover:underline">
+            Workflow runs list ({runList.length})
+          </Link>
+          {runs.error ? <p className="text-etos-warning-fg">{runs.error}</p> : null}
+          <pre className="overflow-x-auto rounded-xl border border-etos-border bg-etos-panel p-3 text-xs">
+            {JSON.stringify(list, null, 2)}
+          </pre>
+        </div>
+      </details>
     </main>
   );
 }

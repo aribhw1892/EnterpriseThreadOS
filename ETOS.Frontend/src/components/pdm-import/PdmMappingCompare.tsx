@@ -1,6 +1,6 @@
 "use client";
 
-import { approvePdmMappingAction } from "@/app/imports/pdm/actions";
+import { approvePdmMappingAction } from "@/app/(shell)/imports/pdm/actions";
 import type { ImportPreview } from "@/lib/etos-api";
 import type { PdmColumnMapping, PdmImportFileProfile } from "@/lib/pdm-import-types";
 import { useFormStatus } from "react-dom";

@@ -36,6 +36,7 @@ async function cleanDemoDatasetAction() {
 
   await cleanDevelopmentDemoData();
   revalidatePath("/");
+  revalidatePath("/admin/foundation");
   revalidatePath("/model-artifacts");
   revalidatePath("/imports");
   revalidatePath("/documents");
@@ -74,7 +75,7 @@ function EmptyState({ message }: { message: string }) {
 
 function ErrorState({ error }: { error: string }) {
   return (
-    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+    <div className="rounded-2xl border border-amber-500/30 bg-slate-900 p-4 text-sm text-amber-100">
       {error}
     </div>
   );
@@ -386,7 +387,7 @@ function PolicyImpactCard({ impact }: { impact: ApiResult<PolicyImpact> }) {
   );
 }
 
-export default async function Home() {
+export default async function AdminFoundationPage() {
   const [health, identity, governance, artifactRegistry, classificationPolicy] = await Promise.all([
     getPlatformHealth(),
     getIdentityLists(),
@@ -397,7 +398,7 @@ export default async function Home() {
   const frontendEnvironment = process.env.NODE_ENV;
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
+    <main className="px-6 py-10 text-slate-100">
       <div className="mx-auto flex max-w-5xl flex-col gap-8">
         <section className="rounded-3xl border border-slate-800 bg-slate-900/80 p-8 shadow-2xl">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">
@@ -557,7 +558,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
+        <section className="rounded-3xl border border-cyan-400/30 bg-slate-900 p-6">
           <h2 className="text-2xl font-semibold">MVP demonstration checklist</h2>
           <p className="mt-2 text-sm text-slate-300">
             Issue 26 end-to-end flow. Run <code>scripts/run-mvp-demo.ps1</code> for backend proof, then use these
@@ -744,7 +745,7 @@ export default async function Home() {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-amber-100">
+            <div className="rounded-2xl border border-amber-500/30 bg-slate-900 p-5 text-amber-100">
               Backend health is unavailable. Start the backend at{" "}
               <code className="rounded bg-slate-950 px-2 py-1 font-mono text-sm">
                 {apiBaseUrl}

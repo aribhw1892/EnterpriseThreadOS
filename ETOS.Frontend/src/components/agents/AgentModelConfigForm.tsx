@@ -7,6 +7,8 @@ import {
   publishAgentAction,
   saveAgentModelConfigAction,
 } from "@/components/agents/agent-configure-actions";
+import { Button } from "@/components/ui/Button";
+import { Notice } from "@/components/ui/Notice";
 
 const PROVIDER_OPTIONS = ["openai", "openai-compatible", "openai-v1"] as const;
 
@@ -42,6 +44,9 @@ function emptyRow(): FallbackRow {
     triggerReason: "",
   };
 }
+
+const fieldClass =
+  "mt-2 w-full rounded-xl border border-etos-border bg-etos-panel px-3.5 py-2.5 text-sm text-etos-ink";
 
 export function AgentModelConfigForm({
   artifactId,
@@ -82,18 +87,14 @@ export function AgentModelConfigForm({
 
   return (
     <div className="space-y-6">
-      {errorMessage ? (
-        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
-          {errorMessage}
-        </p>
-      ) : null}
+      {errorMessage ? <Notice variant="danger">{errorMessage}</Notice> : null}
 
-      <p className="text-sm text-slate-400">
-        OpenAI cloud uses provider <code className="text-cyan-200">openai</code> with{" "}
-        <code className="text-cyan-200">OPENAI_API_KEY</code>. LM Studio uses{" "}
-        <code className="text-cyan-200">openai-compatible</code> with{" "}
-        <code className="text-cyan-200">OPENAI_BASE_URL</code> in your local <code className="text-cyan-200">.env</code>{" "}
-        (see <span className="text-slate-300">docs/local-development.md</span>).
+      <p className="text-sm text-etos-ink-muted">
+        OpenAI cloud uses provider <code className="font-mono text-etos-accent">openai</code> with{" "}
+        <code className="font-mono text-etos-accent">OPENAI_API_KEY</code>. LM Studio uses{" "}
+        <code className="font-mono text-etos-accent">openai-compatible</code> with{" "}
+        <code className="font-mono text-etos-accent">OPENAI_BASE_URL</code> in local{" "}
+        <code className="font-mono text-etos-accent">.env</code>.
       </p>
 
       <form action={saveAgentModelConfigAction} className="space-y-4">
@@ -104,13 +105,13 @@ export function AgentModelConfigForm({
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block text-sm">
-            <span className="font-semibold text-slate-300">Primary model provider</span>
+            <span className="font-semibold text-etos-ink">Primary model provider</span>
             <select
               name="primaryModelProviderKey"
               required
               value={providerKey}
               onChange={(event) => setProviderKey(event.target.value)}
-              className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100"
+              className={fieldClass}
             >
               {PROVIDER_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -120,7 +121,7 @@ export function AgentModelConfigForm({
             </select>
           </label>
           <label className="block text-sm">
-            <span className="font-semibold text-slate-300">Primary model id</span>
+            <span className="font-semibold text-etos-ink">Primary model id</span>
             <input
               name="primaryModelId"
               type="text"
@@ -128,33 +129,29 @@ export function AgentModelConfigForm({
               value={modelId}
               onChange={(event) => setModelId(event.target.value)}
               placeholder="gpt-4o-mini"
-              className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100"
+              className={fieldClass}
             />
           </label>
         </div>
 
         <div>
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-sm font-semibold text-slate-300">Fallback models</h3>
-            <button
-              type="button"
-              onClick={() => setRows((current) => [...current, emptyRow()])}
-              className="rounded-xl border border-slate-700 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100"
-            >
+            <h3 className="text-sm font-semibold text-etos-ink">Fallback models</h3>
+            <Button type="button" variant="ghost" onClick={() => setRows((current) => [...current, emptyRow()])}>
               Add fallback
-            </button>
+            </Button>
           </div>
           {rows.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-500">No fallback models configured.</p>
+            <p className="mt-3 text-sm text-etos-ink-muted">No fallback models configured.</p>
           ) : (
             <ul className="mt-3 space-y-3">
               {rows.map((row, index) => (
                 <li
                   key={row.key}
-                  className="grid gap-3 rounded-2xl border border-slate-800 bg-slate-950 p-4 md:grid-cols-[1fr_1fr_1fr_auto]"
+                  className="grid gap-3 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4 md:grid-cols-[1fr_1fr_1fr_auto]"
                 >
                   <label className="block text-xs">
-                    <span className="font-semibold text-slate-400">Provider</span>
+                    <span className="font-semibold text-etos-ink-muted">Provider</span>
                     <select
                       value={row.providerKey}
                       onChange={(event) =>
@@ -164,7 +161,7 @@ export function AgentModelConfigForm({
                           ),
                         )
                       }
-                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                      className="mt-1 w-full rounded-xl border border-etos-border bg-etos-panel px-3 py-2 text-sm text-etos-ink"
                     >
                       {PROVIDER_OPTIONS.map((option) => (
                         <option key={option} value={option}>
@@ -174,7 +171,7 @@ export function AgentModelConfigForm({
                     </select>
                   </label>
                   <label className="block text-xs">
-                    <span className="font-semibold text-slate-400">Model id</span>
+                    <span className="font-semibold text-etos-ink-muted">Model id</span>
                     <input
                       type="text"
                       value={row.modelId}
@@ -185,11 +182,11 @@ export function AgentModelConfigForm({
                           ),
                         )
                       }
-                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                      className="mt-1 w-full rounded-xl border border-etos-border bg-etos-panel px-3 py-2 text-sm text-etos-ink"
                     />
                   </label>
                   <label className="block text-xs">
-                    <span className="font-semibold text-slate-400">Trigger reason</span>
+                    <span className="font-semibold text-etos-ink-muted">Trigger reason</span>
                     <input
                       type="text"
                       value={row.triggerReason}
@@ -200,34 +197,29 @@ export function AgentModelConfigForm({
                           ),
                         )
                       }
-                      className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                      className="mt-1 w-full rounded-xl border border-etos-border bg-etos-panel px-3 py-2 text-sm text-etos-ink"
                     />
                   </label>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     onClick={() => setRows((current) => current.filter((_, itemIndex) => itemIndex !== index))}
-                    className="self-end rounded-xl border border-rose-500/40 px-3 py-2 text-xs font-semibold text-rose-100 transition hover:bg-rose-500/10"
                   >
                     Remove
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        <button
-          type="submit"
-          className="rounded-2xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300"
-        >
-          Save model config
-        </button>
+        <Button type="submit">Save model config</Button>
       </form>
 
-      <div className="border-t border-slate-800 pt-4">
-        <h3 className="text-sm font-semibold text-slate-300">Version lifecycle</h3>
+      <div className="border-t border-etos-border pt-4">
+        <h3 className="text-sm font-semibold text-etos-ink">Version lifecycle</h3>
         {isPublished ? (
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-etos-ink-muted">
             This version is published. Save model changes to create a draft version, then mark ready and publish.
           </p>
         ) : null}
@@ -238,12 +230,9 @@ export function AgentModelConfigForm({
               <input type="hidden" name="artifactId" value={artifactId} />
               <input type="hidden" name="versionId" value={versionId} />
               <input type="hidden" name="agentKey" value={agentKey} />
-              <button
-                type="submit"
-                className="rounded-2xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100"
-              >
+              <Button type="submit" variant="ghost">
                 Mark ready
-              </button>
+              </Button>
             </form>
           ) : null}
 
@@ -252,12 +241,7 @@ export function AgentModelConfigForm({
               <input type="hidden" name="artifactId" value={artifactId} />
               <input type="hidden" name="versionId" value={versionId} />
               <input type="hidden" name="agentKey" value={agentKey} />
-              <button
-                type="submit"
-                className="rounded-2xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:border-emerald-300"
-              >
-                Publish
-              </button>
+              <Button type="submit">Publish</Button>
             </form>
           ) : null}
         </div>

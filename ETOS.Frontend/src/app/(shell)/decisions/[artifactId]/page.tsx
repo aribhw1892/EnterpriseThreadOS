@@ -16,8 +16,8 @@ export default async function DecisionDetailPage({ params }: DecisionDetailPageP
   const summary = list.data?.find((item) => item.artifactId === artifactId);
   if (!summary && list.error) {
     return (
-      <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-        <div className="mx-auto max-w-4xl rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+      <main className="px-6 py-10 text-slate-100">
+        <div className="mx-auto max-w-4xl rounded-2xl border border-amber-500/30 bg-slate-900 p-4 text-sm text-amber-100">
           {list.error}
         </div>
       </main>
@@ -33,8 +33,8 @@ export default async function DecisionDetailPage({ params }: DecisionDetailPageP
   const detailResult = await getDecisionDetail(artifactId, versionId);
   if (!detailResult.data) {
     return (
-      <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-        <div className="mx-auto max-w-4xl rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+      <main className="px-6 py-10 text-slate-100">
+        <div className="mx-auto max-w-4xl rounded-2xl border border-amber-500/30 bg-slate-900 p-4 text-sm text-amber-100">
           {detailResult.error ?? "Decision detail could not be loaded."}
         </div>
       </main>
@@ -44,7 +44,7 @@ export default async function DecisionDetailPage({ params }: DecisionDetailPageP
   const detail = detailResult.data;
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
+    <main className="px-6 py-10 text-slate-100">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
         <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">

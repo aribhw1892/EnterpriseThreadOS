@@ -34,9 +34,9 @@ function DebugBlock({ title, value }: { title: string; value: string | null | un
   }
 
   return (
-    <details className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-      <summary className="cursor-pointer text-sm font-semibold text-cyan-200">{title}</summary>
-      <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap break-all text-xs text-slate-300">
+    <details className="rounded-xl border border-etos-border bg-etos-panel-muted p-4">
+      <summary className="cursor-pointer text-sm font-semibold text-etos-accent-cyan">{title}</summary>
+      <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap break-all text-xs text-etos-ink-muted">
         {formatJson(value)}
       </pre>
     </details>
@@ -51,7 +51,7 @@ function StatusPill({ label, tone }: { label: string; tone: "ok" | "warn" | "err
         ? "border-amber-500/40 bg-amber-500/10 text-amber-200"
         : tone === "error"
           ? "border-rose-500/40 bg-rose-500/10 text-rose-200"
-          : "border-slate-700 bg-slate-900 text-slate-300";
+          : "border-etos-border bg-etos-panel text-etos-ink-muted";
 
   return <span className={`rounded-full border px-3 py-1 text-xs font-medium ${toneClass}`}>{label}</span>;
 }
@@ -119,18 +119,18 @@ export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: Mapp
     (providerKey === "rule-based-v1" && !diagnostics?.runtimeCalled);
 
   return (
-    <section className="rounded-3xl border border-violet-400/30 bg-violet-400/5 p-6">
+    <section className="rounded-3xl border border-violet-400/30 bg-etos-panel p-6">
       <h2 className="text-2xl font-semibold">Mapping Agent Debug</h2>
-      <p className="mt-2 text-sm text-slate-300">
+      <p className="mt-2 text-sm text-etos-ink-muted">
         Run mapping preview without saving a draft mapping version. Model routing comes from the published mapping
         assistant agent configuration, not appsettings.
       </p>
 
       <div className="mt-4 flex flex-wrap items-end gap-3">
-        <label className="grid gap-1 text-sm text-slate-300">
+        <label className="grid gap-1 text-sm text-etos-ink-muted">
           Provider
           <select
-            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+            className="rounded-lg border border-etos-border bg-etos-panel-muted px-3 py-2 text-sm"
             value={providerKey}
             onChange={(event) => setProviderKey(event.target.value)}
           >
@@ -139,10 +139,10 @@ export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: Mapp
           </select>
         </label>
         {providerKey === "pydantic-ai-v1" ? (
-          <label className="grid gap-1 text-sm text-slate-300">
+          <label className="grid gap-1 text-sm text-etos-ink-muted">
             Mapping assistant agent
             <select
-              className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+              className="rounded-lg border border-etos-border bg-etos-panel-muted px-3 py-2 text-sm"
               value={mappingAgentKey}
               onChange={(event) => setMappingAgentKey(event.target.value)}
             >
@@ -169,9 +169,9 @@ export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: Mapp
       </div>
 
       {resolvedAgentKey ? (
-        <p className="mt-3 text-xs text-slate-400">
+        <p className="mt-3 text-xs text-etos-ink-muted">
           Resolved agent:{" "}
-          <Link className="text-cyan-300 underline" href={`/agents/${resolvedAgentKey}/configure`}>
+          <Link className="text-etos-accent-cyan underline" href={`/agents/${resolvedAgentKey}/configure`}>
             {resolvedAgentKey}
           </Link>
           {diagnostics?.primaryModelProviderKey ? (
@@ -242,8 +242,8 @@ export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: Mapp
           </div>
 
           {diagnostics?.traceNotes?.length ? (
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 text-xs text-slate-300">
-              <p className="font-semibold text-cyan-200">Runtime trace notes</p>
+            <div className="rounded-xl border border-etos-border bg-etos-panel-muted p-4 text-xs text-etos-ink-muted">
+              <p className="font-semibold text-etos-accent-cyan">Runtime trace notes</p>
               <ul className="mt-2 list-disc pl-5">
                 {diagnostics.traceNotes.map((note) => (
                   <li key={note}>{note}</li>
@@ -265,16 +265,16 @@ export function MappingAgentDebugPanel({ batchId, evidenceId, runPreview }: Mapp
           <DebugBlock title="Prompt template body" value={diagnostics?.promptTemplateBody} />
           <DebugBlock title="Runtime structured output" value={diagnostics?.runtimeStructuredOutputJson} />
 
-          <details className="rounded-xl border border-slate-800 bg-slate-950 p-4" open>
-            <summary className="cursor-pointer text-sm font-semibold text-cyan-200">Column suggestions</summary>
-            <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap break-all text-xs text-slate-300">
+          <details className="rounded-xl border border-etos-border bg-etos-panel-muted p-4" open>
+            <summary className="cursor-pointer text-sm font-semibold text-etos-accent-cyan">Column suggestions</summary>
+            <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap break-all text-xs text-etos-ink-muted">
               {JSON.stringify(preview.columnSuggestions, null, 2)}
             </pre>
           </details>
 
-          <details className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-            <summary className="cursor-pointer text-sm font-semibold text-cyan-200">Lifecycle suggestions</summary>
-            <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap break-all text-xs text-slate-300">
+          <details className="rounded-xl border border-etos-border bg-etos-panel-muted p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-etos-accent-cyan">Lifecycle suggestions</summary>
+            <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap break-all text-xs text-etos-ink-muted">
               {JSON.stringify(preview.lifecycleSuggestions, null, 2)}
             </pre>
           </details>

@@ -12,11 +12,17 @@ import {
   resolveGovernedChatAnchor,
   selectedTenantId,
 } from "@/lib/etos-api";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { ListItem, ListStack } from "@/components/ui/ListItem";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { PillStack, SidePanel } from "@/components/ui/SidePanel";
 import Link from "next/link";
-import { draftArtifactDetailHref } from "@/lib/etos-api";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -25,10 +31,15 @@ async function createSessionAction() {
 
   const anchor = await resolveGovernedChatAnchor();
   if (anchor.error || !anchor.data) {
-    redirect(`/chat?error=${encodeURIComponent(anchor.error ?? "Could not resolve a governed chat anchor.")}`);
+    redirect(
+      `/chat?error=${encodeURIComponent(anchor.error ?? "Could not resolve a governed chat anchor.")}`,
+    );
   }
 
-  const result = await createGovernedChatSession("Frontend governed chat", anchor.data);
+  const result = await createGovernedChatSession(
+    "Frontend governed chat",
+    anchor.data,
+  );
   if (result.error) {
     redirect(`/chat?error=${encodeURIComponent(result.error)}`);
   }
@@ -54,19 +65,26 @@ async function askTurnAction(formData: FormData) {
   }
 
   const draftArtifactKind =
-    draftKind === "QueryIntent" || draftKind === "Dashboard" || draftKind === "Report" || draftKind === "Recommendation"
+    draftKind === "QueryIntent" ||
+    draftKind === "Dashboard" ||
+    draftKind === "Report" ||
+    draftKind === "Recommendation"
       ? draftKind
       : undefined;
 
   const anchor = await resolveGovernedChatAnchor();
   if (anchor.error || !anchor.data) {
-    redirect(`/chat?error=${encodeURIComponent(anchor.error ?? "Could not resolve a governed chat anchor.")}`);
+    redirect(
+      `/chat?error=${encodeURIComponent(anchor.error ?? "Could not resolve a governed chat anchor.")}`,
+    );
   }
 
   const result = await askGovernedChatTurn(
     sessionId,
     message.trim(),
-    typeof intentKey === "string" && intentKey.length > 0 ? intentKey : anchor.data.defaultIntentKey,
+    typeof intentKey === "string" && intentKey.length > 0
+      ? intentKey
+      : anchor.data.defaultIntentKey,
     draftArtifactKind,
     anchor.data,
   );
@@ -76,116 +94,6 @@ async function askTurnAction(formData: FormData) {
 
   revalidatePath("/chat");
   redirect("/chat");
-}
-
-function ErrorState({ error }: { error: string }) {
-  return (
-    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-      {error}
-    </div>
-  );
-}
-
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4 text-sm text-slate-400">
-      {message}
-    </div>
-  );
-}
-
-function SessionCard(session: GovernedChatSessionSummary) {
-  return (
-    <article key={session.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <h3 className="font-semibold">{session.title}</h3>
-      <p className="mt-1 text-sm text-slate-400">
-        {session.turnCount} turn(s) · {new Date(session.createdAt).toLocaleString()}
-      </p>
-      {session.startGraphNodeId ? (
-        <p className="mt-2 font-mono text-xs text-slate-500">Anchor node: {session.startGraphNodeId}</p>
-      ) : null}
-      {session.documentArtifactId ? (
-        <p className="mt-2 font-mono text-xs text-slate-500">Anchor document: {session.documentArtifactId}</p>
-      ) : null}
-    </article>
-  );
-}
-
-function TurnPanel({ turn }: { turn: GovernedChatTurn }) {
-  return (
-    <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-      <div className="mb-5">
-        <h2 className="text-2xl font-semibold">Latest response</h2>
-        <p className="mt-2 text-sm text-slate-300">{turn.assistantSafeSummary}</p>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-          <h3 className="font-semibold">Evidence</h3>
-          {turn.evidence.length > 0 ? (
-            <ul className="mt-3 space-y-2 text-sm text-slate-300">
-              {turn.evidence.map((item) => (
-                <li key={item.contextId}>
-                  <span className="text-xs uppercase text-slate-500">{item.contextType}</span>
-                  <p>{item.safeSummary}</p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-3 text-sm text-slate-500">No evidence returned.</p>
-          )}
-        </div>
-        <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-          <h3 className="font-semibold">Confidence</h3>
-          <ul className="mt-3 space-y-2 text-sm text-slate-300">
-            <li>Overall: {turn.confidence.overall.toFixed(2)}</li>
-            <li>Retrieved: {turn.confidence.retrievalCount}</li>
-            <li>Allowed: {turn.confidence.allowedCount}</li>
-            <li>Denied: {turn.confidence.deniedCount}</li>
-            <li>Trust filtered: {turn.confidence.trustFilteredCount}</li>
-            <li>Denied summaries: {turn.deniedSummaryCount}</li>
-          </ul>
-          <p className="mt-3 text-xs text-slate-500">{turn.confidence.notes}</p>
-        </div>
-      </div>
-
-      <div className="mt-6 flex flex-wrap gap-3 text-sm">
-        <Link
-          href={`/ai-traces?traceId=${turn.aiTraceRecordId}`}
-          className="rounded-full border border-cyan-300 px-4 py-2 font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"
-        >
-          View AI Trace
-        </Link>
-        {turn.draftArtifact ? (
-          draftArtifactDetailHref(turn.draftArtifact.artifactType, turn.draftArtifact.artifactId) ? (
-            <Link
-              href={draftArtifactDetailHref(turn.draftArtifact.artifactType, turn.draftArtifact.artifactId)!}
-              className="rounded-full border border-cyan-300 px-4 py-2 font-semibold text-cyan-100 transition hover:bg-cyan-300 hover:text-slate-950"
-            >
-              Open draft {turn.draftArtifact.artifactType} · {turn.draftArtifact.readinessState}
-            </Link>
-          ) : (
-            <span className="rounded-full border border-slate-700 px-4 py-2 text-slate-300">
-              Draft {turn.draftArtifact.artifactType} · {turn.draftArtifact.readinessState}
-            </span>
-          )
-        ) : null}
-      </div>
-    </section>
-  );
-}
-
-function ActionButton({ action, children }: { action: () => Promise<void>; children: ReactNode }) {
-  return (
-    <form action={action}>
-      <button
-        type="submit"
-        className="rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
-      >
-        {children}
-      </button>
-    </form>
-  );
 }
 
 function renderApiError(result: ApiResult<unknown>) {
@@ -204,17 +112,31 @@ function anchorHint(anchor: GovernedChatAnchor | null): string {
   return `No trusted graph nodes yet. Using document ${anchor.documentArtifactId}. Choose document-evidence-context or promote an import on /imports for object-360-context.`;
 }
 
-async function loadLatestTurn(session: GovernedChatSessionSummary): Promise<ApiResult<GovernedChatTurn>> {
+async function loadLatestTurn(session: GovernedChatSessionSummary): Promise<{
+  turn: ApiResult<GovernedChatTurn>;
+  userMessage: string | null;
+  intentKey: string | null;
+}> {
   if (session.turnCount === 0) {
-    return { data: null, error: null };
+    return { turn: { data: null, error: null }, userMessage: null, intentKey: null };
   }
 
   const detail = await getGovernedChatSession(session.id);
   if (!detail.data || detail.data.turns.length === 0) {
-    return { data: null, error: detail.error };
+    return {
+      turn: { data: null, error: detail.error },
+      userMessage: null,
+      intentKey: null,
+    };
   }
 
-  return await getGovernedChatTurn(detail.data.turns[0].id);
+  const latest = detail.data.turns[0];
+  const turn = await getGovernedChatTurn(latest.id);
+  return {
+    turn,
+    userMessage: latest.userMessage,
+    intentKey: null,
+  };
 }
 
 type PageProps = {
@@ -226,112 +148,246 @@ export default async function ChatPage({ searchParams }: PageProps) {
   const { sessions } = await getGovernedChatLists();
   const anchor = await resolveGovernedChatAnchor();
   const activeSession = sessions.data?.[0] ?? null;
-  const latestTurn = activeSession ? await loadLatestTurn(activeSession) : { data: null, error: null };
+  const latest = activeSession
+    ? await loadLatestTurn(activeSession)
+    : { turn: { data: null, error: null }, userMessage: null, intentKey: null };
   const defaultIntent = anchor.data?.defaultIntentKey ?? "object-360-context";
+  const turn = latest.turn.data;
+  const userMessage = latest.userMessage;
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-cyan-300">Issue 15</p>
-              <h1 className="mt-2 text-3xl font-semibold">Governed Chat</h1>
-              <p className="mt-2 max-w-3xl text-sm text-slate-400">
-                Ask natural-language questions over governed retrieval context, review evidence and confidence, link to AI
-                Trace records, and optionally draft query intents, dashboards, or reports.
-              </p>
-              <p className="mt-2 text-xs text-slate-500">
-                Tenant {selectedTenantId} · User {adminUserId}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/"
-                className="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100"
-              >
-                Home
-              </Link>
-              <ActionButton action={createSessionAction}>New session</ActionButton>
-            </div>
-          </div>
-        </section>
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title="Governed chat over digital thread"
+        description="Natural-language query over trusted graph and document context with evidence, confidence, and AI Trace links."
+      />
 
-        {actionError ? <ErrorState error={actionError} /> : null}
-        {renderApiError(sessions)}
-        {renderApiError(anchor)}
+      {actionError ? <ErrorState error={actionError} /> : null}
+      {renderApiError(sessions)}
+      {renderApiError(anchor)}
+      {renderApiError(latest.turn)}
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <div className="mb-5">
-            <h2 className="text-2xl font-semibold">Sessions</h2>
-            <p className="mt-1 text-sm text-slate-400">Recent governed chat sessions for the active tenant.</p>
-          </div>
-          {sessions.data && sessions.data.length > 0 ? (
-            <div className="grid gap-3">{sessions.data.map((session) => SessionCard(session))}</div>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Conversation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {turn ? (
+              <ListStack>
+                {userMessage ? (
+                  <ListItem
+                    index="U"
+                    title={userMessage}
+                    description="User question routed to approved query intent."
+                  />
+                ) : null}
+                <div className="rounded-[14px] border border-etos-border-soft bg-etos-panel-muted p-3">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-xl bg-etos-info-bg text-sm font-black text-etos-info-fg">
+                      AI
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] font-extrabold text-etos-ink">
+                        {turn.assistantSafeSummary}
+                      </p>
+                      <p className="mt-1 text-xs leading-snug text-etos-ink-muted">
+                        Retrieved {turn.confidence.retrievalCount} · Confidence{" "}
+                        {Math.round(turn.confidence.overall * 100)}%
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {turn.confidence.retrievalCount > 0 ? (
+                          <Badge variant="success">Graph → Docs → LLM</Badge>
+                        ) : null}
+                        {turn.aiTraceRecordId ? (
+                          <Link href={`/ai-traces/${turn.aiTraceRecordId}`}>
+                            <Badge variant="info">
+                              Trace #{turn.aiTraceRecordId.slice(0, 6)}
+                            </Badge>
+                          </Link>
+                        ) : null}
+                        {turn.confidence.deniedCount > 0 ? (
+                          <Badge variant="warning">
+                            {turn.confidence.deniedCount} denied context
+                          </Badge>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ListStack>
+            ) : (
+              <EmptyState message="Create a session and send a turn to start governed chat." />
+            )}
+
+            {activeSession ? (
+              <form action={askTurnAction} className="grid gap-3 border-t border-etos-border pt-4">
+                <input type="hidden" name="sessionId" value={activeSession.id} />
+                <input type="hidden" name="intentKey" value={defaultIntent} />
+                <label className="grid gap-2 text-sm">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-etos-ink-muted">
+                    Ask follow-up
+                  </span>
+                  <textarea
+                    name="message"
+                    rows={3}
+                    required
+                    className="rounded-etos-card border border-etos-border bg-etos-panel px-4 py-3 text-etos-ink"
+                    placeholder="Ask about BOM impact, evidence gaps, or draft a dashboard…"
+                  />
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="submit" variant="primary">
+                    Send
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <form action={createSessionAction}>
+                <Button type="submit" variant="primary">
+                  Start session
+                </Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+
+        <aside className="lg:sticky lg:top-6 lg:self-start">
+          {turn ? (
+            <SidePanel title="Answer governance">
+              <PillStack
+                items={[
+                  { label: "Query intent", value: defaultIntent, variant: "info" },
+                  {
+                    label: "Retrieval strategy",
+                    value: "Graph → Docs → LLM",
+                    variant: "success",
+                  },
+                  {
+                    label: "Confidence",
+                    value: `${Math.round(turn.confidence.overall * 100)}%`,
+                    variant: turn.confidence.overall >= 0.85 ? "success" : "warning",
+                  },
+                  {
+                    label: "Evidence visibility",
+                    value: "Filtered before LLM",
+                    variant: "success",
+                  },
+                ]}
+              />
+              <div className="mt-4 h-px bg-etos-border" />
+              {activeSession ? (
+                <div className="mt-4 flex flex-col gap-2">
+                  <form action={askTurnAction}>
+                    <input type="hidden" name="sessionId" value={activeSession.id} />
+                    <input type="hidden" name="intentKey" value={defaultIntent} />
+                    <input
+                      type="hidden"
+                      name="message"
+                      value="Create a dashboard draft summarizing the recurring gaps from this conversation."
+                    />
+                    <Button
+                      type="submit"
+                      name="draftArtifactKind"
+                      value="Dashboard"
+                      variant="primary"
+                      className="w-full"
+                    >
+                      Create dashboard draft
+                    </Button>
+                  </form>
+                  <form action={askTurnAction}>
+                    <input type="hidden" name="sessionId" value={activeSession.id} />
+                    <input type="hidden" name="intentKey" value={defaultIntent} />
+                    <input
+                      type="hidden"
+                      name="message"
+                      value="Create a recommendation from the evidence in this conversation."
+                    />
+                    <Button
+                      type="submit"
+                      name="draftArtifactKind"
+                      value="Recommendation"
+                      variant="ghost"
+                      className="w-full"
+                    >
+                      Create recommendation
+                    </Button>
+                  </form>
+                  {turn.draftArtifact ? (
+                    <Link
+                      href={
+                        turn.draftArtifact.artifactType.toLowerCase().includes("dashboard")
+                          ? `/dashboards/${turn.draftArtifact.artifactId}`
+                          : turn.draftArtifact.artifactType
+                                .toLowerCase()
+                                .includes("recommend")
+                            ? `/recommendations/${turn.draftArtifact.artifactId}`
+                            : `/artifacts/${turn.draftArtifact.artifactId}`
+                      }
+                      className="text-xs font-extrabold text-etos-accent-cyan underline-offset-2 hover:underline"
+                    >
+                      Open draft {turn.draftArtifact.artifactType} →
+                    </Link>
+                  ) : null}
+                </div>
+              ) : null}
+            </SidePanel>
           ) : (
-            <EmptyState message="No chat sessions yet. Create one to start asking governed questions." />
+            <SidePanel title="Answer governance">
+              <p className="text-sm text-etos-ink-muted">
+                Send a turn to populate intent, retrieval, confidence, and draft CTAs.
+              </p>
+            </SidePanel>
           )}
-        </section>
-
-        {activeSession ? (
-          <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-            <div className="mb-5">
-              <h2 className="text-2xl font-semibold">Ask</h2>
-              <p className="mt-1 text-sm text-slate-400">Active session: {activeSession.title}</p>
-              <p className="mt-2 text-xs text-slate-500">{anchorHint(anchor.data)}</p>
-            </div>
-            <form action={askTurnAction} className="grid gap-4">
-              <input type="hidden" name="sessionId" value={activeSession.id} />
-              <label className="grid gap-2 text-sm">
-                <span className="text-slate-400">Message</span>
-                <textarea
-                  name="message"
-                  rows={3}
-                  required
-                  className="rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-100"
-                  placeholder="What parts are linked to this assembly?"
-                />
-              </label>
-              <label className="grid gap-2 text-sm">
-                <span className="text-slate-400">Intent</span>
-                <select
-                  name="intentKey"
-                  defaultValue={defaultIntent}
-                  className="rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-100"
-                >
-                  <option value="object-360-context">object-360-context</option>
-                  <option value="bom-impact-context">bom-impact-context</option>
-                  <option value="document-evidence-context">document-evidence-context</option>
-                  <option value="direct-response-v1">direct-response-v1</option>
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm">
-                <span className="text-slate-400">Optional draft artifact</span>
-                <select
-                  name="draftArtifactKind"
-                  defaultValue=""
-                  className="rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-100"
-                >
-                  <option value="">None</option>
-                  <option value="QueryIntent">Draft query intent</option>
-                  <option value="Dashboard">Draft dashboard</option>
-                  <option value="Report">Draft report</option>
-                  <option value="Recommendation">Draft recommendation</option>
-                </select>
-              </label>
-              <button
-                type="submit"
-                className="w-fit rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
-              >
-                Send governed chat turn
-              </button>
-            </form>
-          </section>
-        ) : null}
-
-        {renderApiError(latestTurn)}
-        {latestTurn.data ? <TurnPanel turn={latestTurn.data} /> : null}
+        </aside>
       </div>
+
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4 text-sm text-etos-ink-muted">
+        <summary className="cursor-pointer font-extrabold text-etos-ink">
+          Advanced / Debug
+        </summary>
+        <div className="mt-4 space-y-4 text-xs">
+          <p>
+            Tenant {selectedTenantId} · User {adminUserId}
+          </p>
+          <p>{anchorHint(anchor.data)}</p>
+          <form action={createSessionAction}>
+            <Button type="submit" variant="ghost">
+              New session
+            </Button>
+          </form>
+          {sessions.data && sessions.data.length > 0 ? (
+            <div className="space-y-2">
+              <p className="font-semibold text-etos-ink">Sessions</p>
+              {sessions.data.map((session) => (
+                <div
+                  key={session.id}
+                  className="rounded-etos-card border border-etos-border-soft bg-etos-panel p-3"
+                >
+                  <p className="font-semibold text-etos-ink">{session.title}</p>
+                  <p className="text-etos-ink-muted">
+                    {session.turnCount} turn(s) ·{" "}
+                    {new Date(session.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          {turn?.evidence && turn.evidence.length > 0 ? (
+            <div>
+              <p className="font-semibold text-etos-ink">Evidence dump</p>
+              <ul className="mt-2 space-y-1">
+                {turn.evidence.map((item) => (
+                  <li key={item.contextId}>
+                    {item.contextType}: {item.safeSummary}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      </details>
     </main>
   );
 }

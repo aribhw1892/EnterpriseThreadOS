@@ -339,12 +339,14 @@ Outcome permissions: `outcomes.read`, `outcomes.record`, `outcomes.admin`.
 The learning module currently includes:
 
 - operational `decision_learning_evidence` rows on finalize, vote, and manual outcome events.
-- `ILearningSignalRollupService` rollup to `LearningSignalArtifact` when `LearningSignals:Rollup` threshold is met (default min 3 occurrences / 30 days).
+- `ILearningSignalRollupService` rollup to `LearningSignalArtifact` when `LearningSignals:Rollup` threshold is met (default min 3 occurrences / 30 days). Manual outcome recording also triggers rollup evaluation.
+- tenant-scoped read APIs under `/api/admin/learning-signals` (`GET /`, `GET /{artifactId}`) gated by `learning_signals.read`.
+- frontend list/detail at `/learning-signals` and `/learning-signals/[artifactId]` (Govern nav).
 - placeholder draft `LearningPolicyVersion` and `LearningModelVersion` artifacts for explorer visibility (no execution).
 
 Learning permissions: `learning_signals.read`, `learning.admin`.
 
-Issue 20 tests cover decision creation on task completion, conflict resolution, manual outcomes, learning evidence, rollup idempotency, and explorer/governance-flow integration (`DecisionTests`, updated `ReviewTaskTests`, `ExplorersTests`).
+Issue 20 tests cover decision creation on task completion, conflict resolution, manual outcomes, learning evidence, rollup, and learning-signal list/detail tenant isolation (`DecisionTests`, `LearningSignalTests`, updated `ReviewTaskTests`, `ExplorersTests`).
 
 ### Capability Definitions (Issue 18.2)
 

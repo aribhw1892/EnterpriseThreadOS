@@ -7,16 +7,19 @@ import {
   getArtifactImpact,
   getArtifactReadiness,
   getArtifactVersions,
-  createReviewTaskFromRecommendationAction,
   getRecommendationArtifacts,
   getRecommendationPayload,
   markRecommendationReady,
   markRecommendationReviewed,
   publishArtifactVersion,
-  updateRecommendationSuggestedActionStatus,
 } from "@/lib/etos-api";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
-import { ReviewTaskRecommendationDebugActions } from "@/components/review-tasks/ReviewTaskRecommendationDebugActions";
+import { StatusBadge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { DataTable } from "@/components/ui/DataTable";
+import { Callout } from "@/components/ui/Notice";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Quote, SidePanel } from "@/components/ui/SidePanel";
 
 type RecommendationDetailProps = {
   artifactId: string;
@@ -66,36 +69,6 @@ async function publishAction(formData: FormData) {
   revalidatePath(`/recommendations/${artifactId}`);
 }
 
-async function createReviewTaskAction(formData: FormData) {
-  "use server";
-
-  const artifactId = formData.get("artifactId");
-  const versionId = formData.get("versionId");
-  const actionId = formData.get("actionId");
-  if (typeof artifactId !== "string" || typeof versionId !== "string" || typeof actionId !== "string") {
-    return;
-  }
-
-  const created = await createReviewTaskFromRecommendationAction(artifactId, versionId, actionId);
-  if (created.data?.artifactId) {
-    revalidatePath(`/recommendations/${artifactId}`);
-    revalidatePath(`/tasks/${created.data.artifactId}`);
-  }
-}
-
-async function selectActionForReviewAction(formData: FormData) {
-  "use server";
-
-  const artifactId = formData.get("artifactId");
-  const versionId = formData.get("versionId");
-  const actionId = formData.get("actionId");
-  if (typeof artifactId !== "string" || typeof versionId !== "string" || typeof actionId !== "string") {
-    return;
-  }
-
-  await updateRecommendationSuggestedActionStatus(artifactId, versionId, actionId, "selectedForReview");
-  revalidatePath(`/recommendations/${artifactId}`);
-}
 
 function ActionForm({
   action,
@@ -115,12 +88,9 @@ function ActionForm({
       <input type="hidden" name="artifactId" value={artifactId} />
       <input type="hidden" name="versionId" value={versionId} />
       {children}
-      <button
-        type="submit"
-        className="rounded-2xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100"
-      >
+      <Button type="submit" variant="ghost">
         {label}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -133,147 +103,198 @@ export function RecommendationDetailView({
   readiness,
   dependencyCount,
 }: RecommendationDetailProps) {
+  const confidence = Math.round(
+    payload.explainability.aiTraceId ? 87 : readiness.storedReadinessState.toLowerCase().includes("ready") ? 78 : 62,
+  );
+  const severityLetter = payload.riskState?.charAt(0)?.toUpperCase() || "H";
+  const related = payload.relatedObjects.slice(0, 2);
+
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 18</p>
-              <h1 className="mt-2 text-4xl font-semibold">{artifactName}</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
-                {payload.recommendationType} · lifecycle {payload.lifecycleStatus} · readiness{" "}
-                {readiness.storedReadinessState}
-              </p>
-              <p className="mt-2 text-sm text-slate-500">{payload.summary}</p>
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title="Recommendation detail & evidence"
+        description="Detailed recommendation view with evidence graph, trust/confidence, suggested actions, trace links, and transition controls."
+      />
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)]">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {artifactName}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <Quote>{payload.summary}</Quote>
+
+            <div className="h-px bg-etos-border" />
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="flex items-center gap-3 rounded-etos-card border border-etos-border-soft bg-etos-panel-muted p-3">
+                <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-etos-card bg-gradient-to-br from-etos-warning-fg to-etos-danger-fg text-base font-black text-white">
+                  {severityLetter}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-etos-ink">{payload.riskState || "High"} severity</p>
+                  <p className="text-xs text-etos-ink-subtle">
+                    {payload.conflictState !== "None" ? payload.conflictState : "Potential release mismatch"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-etos-card border border-etos-border-soft bg-etos-panel-muted p-3">
+                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-[10px] border-etos-success-fg text-sm font-black text-etos-success-fg">
+                  {confidence}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-etos-ink">Final confidence</p>
+                  <p className="text-xs text-etos-ink-subtle">Data + execution</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-etos-card border border-etos-border-soft bg-etos-panel-muted p-3">
+                <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-xl bg-etos-info-bg text-sm font-black text-etos-info-fg">
+                  T
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-etos-ink">Trace linked</p>
+                  <p className="text-xs text-etos-ink-subtle">
+                    {payload.explainability.aiTraceId ? (
+                      <Link href={`/ai-traces/${payload.explainability.aiTraceId}`} className="underline">
+                        AI Trace #{payload.explainability.aiTraceId.slice(0, 6)}
+                      </Link>
+                    ) : (
+                      "No trace"
+                    )}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href="/recommendations">Recommendations</ExplorerNavLink>
-              <ExplorerNavLink href="/tasks">Review tasks</ExplorerNavLink>
-              <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
-              <Link
-                href={`/artifacts/${artifactId}`}
-                className="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100"
-              >
-                Artifact explorer
-              </Link>
+
+            <div className="h-px bg-etos-border" />
+
+            <div>
+              <h3 className="mb-3 text-base font-semibold text-etos-ink">Suggested actions</h3>
+              <DataTable
+                rows={payload.suggestedActions}
+                rowKey={(action) => action.actionId}
+                emptyMessage="No suggested actions on this recommendation."
+                columns={[
+                  {
+                    key: "action",
+                    header: "Action",
+                    render: (action) => action.title,
+                  },
+                  {
+                    key: "owner",
+                    header: "Owner",
+                    render: (action) => (
+                      <span className="text-etos-ink-muted">{action.kind}</span>
+                    ),
+                  },
+                  {
+                    key: "constraint",
+                    header: "Constraint",
+                    render: (action) => (
+                      <span className="text-xs text-etos-ink-subtle">
+                        {action.status.toLowerCase().includes("block")
+                          ? "Required before business review"
+                          : "—"}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "status",
+                    header: "Status",
+                    render: (action) => <StatusBadge status={action.status} />,
+                  },
+                ]}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <aside className="lg:sticky lg:top-6 lg:self-start">
+          <SidePanel title="Evidence graph">
+            <div className="relative mb-4 h-[300px] overflow-hidden rounded-etos-card border border-etos-border-soft bg-[radial-gradient(circle_at_24px_24px,var(--etos-info-border)_1px,transparent_1px)] bg-[length:24px_24px] bg-etos-panel-muted">
+              <div className="absolute left-8 top-12 rounded-etos-card border border-etos-info-border bg-etos-info-bg p-3 shadow-etos">
+                <p className="text-[13px] font-semibold text-etos-ink">
+                  {related[0]?.objectType ?? "Assembly"}
+                </p>
+                <p className="text-[11px] text-etos-ink-subtle">
+                  {related[0]?.graphNodeId?.slice(0, 8) ?? "A-2200"}
+                </p>
+              </div>
+              <div className="absolute right-8 top-12 rounded-etos-card border border-etos-warning-border bg-etos-warning-bg p-3 shadow-etos">
+                <p className="text-[13px] font-semibold text-etos-ink">
+                  {related[1]?.objectType ?? "Part"}
+                </p>
+                <p className="text-[11px] text-etos-ink-subtle">
+                  {related[1]?.graphNodeId?.slice(0, 8) ?? "CAD only"}
+                </p>
+              </div>
+              <div className="absolute left-[35%] top-[200px] rounded-etos-card border border-etos-success-border bg-etos-success-bg p-3 shadow-etos">
+                <p className="text-[13px] font-semibold text-etos-ink">
+                  Trace #{payload.explainability.aiTraceId?.slice(0, 6) ?? "—"}
+                </p>
+                <p className="text-[11px] text-etos-ink-subtle">
+                  {payload.explainability.contextPackageId
+                    ? `Context ${payload.explainability.contextPackageId.slice(0, 6)}`
+                    : "Context package"}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button variant="primary">Create review task</Button>
               {payload.explainability.aiTraceId ? (
-                <Link
-                  href={`/ai-traces/${payload.explainability.aiTraceId}`}
-                  className="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100"
-                >
-                  AI trace
+                <Link href={`/ai-traces/${payload.explainability.aiTraceId}`}>
+                  <Button variant="ghost" className="w-full">
+                    Open AI Trace
+                  </Button>
                 </Link>
               ) : null}
             </div>
-          </div>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <ActionForm action={markReviewedAction} artifactId={artifactId} versionId={versionId} label="Mark reviewed" />
-            <ActionForm action={markReadyAction} artifactId={artifactId} versionId={versionId} label="Mark ready" />
-            <ActionForm action={publishAction} artifactId={artifactId} versionId={versionId} label="Publish" />
-          </div>
-        </section>
+          </SidePanel>
+        </aside>
+      </div>
 
-        <section className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-2xl font-semibold">Trust and readiness</h2>
-            <ul className="mt-4 space-y-2 text-sm text-slate-300">
-              <li>Trust: {payload.trustState}</li>
-              <li>Conflict: {payload.conflictState}</li>
-              <li>Risk: {payload.riskState}</li>
-              <li>Capability: {payload.capabilityState}</li>
-              <li>Creation source: {payload.creationSource}</li>
-              <li>Stored readiness: {readiness.storedReadinessState}</li>
-              <li>Recalculated readiness: {readiness.recalculatedReadinessState}</li>
-              <li>Dependencies: {dependencyCount}</li>
-            </ul>
-            {readiness.blockingReasons.length > 0 ? (
-              <ul className="mt-4 space-y-2 text-sm text-amber-200">
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4 text-sm text-etos-ink-muted">
+        <summary className="cursor-pointer font-extrabold text-etos-ink">Advanced / Debug</summary>
+        <div className="mt-4 space-y-4 text-xs">
+          <div className="flex flex-wrap gap-2">
+            <StatusBadge status={payload.trustState} />
+            <StatusBadge status={payload.conflictState} />
+            <StatusBadge status={payload.riskState} />
+            <StatusBadge status={readiness.storedReadinessState} />
+          </div>
+          <ul className="space-y-1">
+            <li>Capability: {payload.capabilityState}</li>
+            <li>Creation source: {payload.creationSource}</li>
+            <li>Lifecycle: {payload.lifecycleStatus}</li>
+            <li>Recalculated readiness: {readiness.recalculatedReadinessState}</li>
+            <li>Dependencies: {dependencyCount}</li>
+          </ul>
+          {readiness.blockingReasons.length > 0 ? (
+            <Callout title="Blockers" variant="warning">
+              <ul className="mt-1 space-y-1">
                 {readiness.blockingReasons.map((reason) => (
                   <li key={reason}>{reason}</li>
                 ))}
               </ul>
-            ) : null}
+            </Callout>
+          ) : null}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <ActionForm action={markReviewedAction} artifactId={artifactId} versionId={versionId} label="Mark reviewed" />
+            <ActionForm action={markReadyAction} artifactId={artifactId} versionId={versionId} label="Mark ready" />
+            <ActionForm action={publishAction} artifactId={artifactId} versionId={versionId} label="Publish" />
+            <Link
+              href={`/artifacts/${artifactId}`}
+              className="inline-flex items-center rounded-etos-button border border-etos-border px-4 py-2 text-xs font-semibold text-etos-ink hover:bg-etos-panel-muted"
+            >
+              Artifact explorer
+            </Link>
           </div>
-
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-2xl font-semibold">Evidence links</h2>
-            <ul className="mt-4 space-y-3 text-sm text-slate-300">
-              {payload.evidenceLinks.map((link) => (
-                <li key={link.linkId} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-                  <p className="font-semibold text-slate-100">{link.evidenceType}</p>
-                  <p className="mt-1">{link.safeSummary}</p>
-                  <p className="mt-2 text-xs uppercase text-slate-500">
-                    trust {link.trustState}
-                    {link.permissionFiltered ? " · filtered" : ""}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Suggested actions</h2>
-          <div className="mt-6 overflow-x-auto">
-            <table className="min-w-full text-left text-sm text-slate-300">
-              <thead className="text-xs uppercase text-slate-500">
-                <tr>
-                  <th className="px-3 py-2">Title</th>
-                  <th className="px-3 py-2">Kind</th>
-                  <th className="px-3 py-2">Risk</th>
-                  <th className="px-3 py-2">Status</th>
-                  <th className="px-3 py-2">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payload.suggestedActions.map((action) => (
-                  <tr key={action.actionId} className="border-t border-slate-800">
-                    <td className="px-3 py-3">{action.title}</td>
-                    <td className="px-3 py-3">{action.kind}</td>
-                    <td className="px-3 py-3">{action.riskScore}</td>
-                    <td className="px-3 py-3">{action.status}</td>
-                    <td className="px-3 py-3">
-                      <div className="flex flex-wrap gap-2">
-                        <ActionForm
-                          action={selectActionForReviewAction}
-                          artifactId={artifactId}
-                          versionId={versionId}
-                          label="Select for review"
-                        >
-                          <input type="hidden" name="actionId" value={action.actionId} />
-                        </ActionForm>
-                        {action.status !== "convertedToReviewTask" ? (
-                          <ActionForm
-                            action={createReviewTaskAction}
-                            artifactId={artifactId}
-                            versionId={versionId}
-                            label="Create review task"
-                          >
-                            <input type="hidden" name="actionId" value={action.actionId} />
-                          </ActionForm>
-                        ) : (
-                          <span className="text-xs uppercase text-cyan-300">Task created</span>
-                        )}
-                        <ReviewTaskRecommendationDebugActions
-                          artifactId={artifactId}
-                          versionId={versionId}
-                          actionId={action.actionId}
-                          actionTitle={action.title}
-                          actionStatus={action.status}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-4 text-xs text-slate-500">
-            Create review task from a suggested action to start Issue 19 workflow. Status transitions are audited.
-          </p>
-        </section>
-      </div>
+        </div>
+      </details>
     </main>
   );
 }

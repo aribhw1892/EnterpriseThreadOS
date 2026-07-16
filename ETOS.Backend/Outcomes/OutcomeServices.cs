@@ -165,7 +165,8 @@ public sealed class OutcomeService(
     ITenantContextResolver tenantContextResolver,
     IAccessPermissionService permissionService,
     IAccessDenialRecorder denialRecorder,
-    ILearningEvidenceEmitter learningEvidenceEmitter) : IOutcomeService
+    ILearningEvidenceEmitter learningEvidenceEmitter,
+    ILearningSignalRollupService learningSignalRollupService) : IOutcomeService
 {
     public async Task<RecordManualOutcomeResponse> RecordManualOutcomeAsync(
         Guid decisionArtifactId,
@@ -231,6 +232,11 @@ public sealed class OutcomeService(
             decisionArtifactId,
             payload,
             true,
+            cancellationToken);
+        await learningSignalRollupService.EvaluateAsync(
+            context.TenantId,
+            context.UserId,
+            payload,
             cancellationToken);
 
         return new RecordManualOutcomeResponse(

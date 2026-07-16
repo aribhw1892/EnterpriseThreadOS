@@ -8,6 +8,8 @@ alwaysApply: false
 
 When editing `ETOS.Frontend/`, implement the mockup pack UI without changing backend behavior.
 
+**Status:** Phases 0–5 gold. Next: UI-6.x / adjacent slate, or Issue 25. See `.docs/.prd/.ui/README.md` and `.docs/.gapAnalysis/.ui/ui-issues-gap-analysis.md`.
+
 ## Read first
 
 1. `.docs/.prd/.ui/ui-agent-implementation-guide.md`
@@ -21,17 +23,22 @@ When editing `ETOS.Frontend/`, implement the mockup pack UI without changing bac
 - **Do not** modify `ETOS.Backend/`, tests, migrations, AgentRuntime, or infra for UI work.
 - **Do not** add new backend API routes or invent fetch paths.
 - Use **only** `@/lib/etos-api` for data; extend that file only to wrap endpoints that already exist in backend.
-- Missing API → `PlaceholderPage` + disabled actions + issue blocker label — never fake success.
-- **Light and dark mode** on every screen; use `--etos-*` tokens, not hardcoded `slate-950` page shells.
+- Missing API (Issue 25 teams, settings) → `PlaceholderPage` + disabled actions — never fake success. Digital-thread `/` and `/digital-thread/timeline` use Issue 16.1 / 16.1b `/api/admin/digital-thread/*` wrappers in `etos-api`.
+- Functional but not gold (agents/workflows, governance) → **reskin** to mockup parity; do not replace with PlaceholderPage.
+- **Light and dark mode** on every screen; use `--etos-*` tokens, not hardcoded `slate-950` page shells on gold surfaces.
 - Default to **Server Components**; `"use client"` only for theme, drawer, tables, chat input, canvases.
 - Preserve tenant headers via existing etos-api transport.
 
 ## Structure
 
 - App chrome: `src/components/shell/` + `src/app/(shell)/layout.tsx`
-- Primitives: `src/components/ui/`
+- Primitives: `src/components/ui/` (17 files; gallery `/dev/ui-kit`)
 - Nav single source: `src/config/navigation.ts`
 - Blocked-feature preview data only: `src/lib/ui-fixtures/` with `data-ui-preview="true"`
+- Tools: `/tools`, `/tools/[id]/edit`, `/tool-runs`, `tools/actions.ts`
+- Agents: `/agents`, configure/test-run, `/agent-runs`, `agents/actions.ts`
+- Workflows: `/workflows`, edit canvas, publish, `/workflow-runs`, `workflows/actions.ts`, `components/workflows/WorkflowCanvas.tsx`
+- Governance: `/governance`, `components/governance/GovernanceTrendCharts.tsx` (recharts)
 
 ## Verify before finish
 

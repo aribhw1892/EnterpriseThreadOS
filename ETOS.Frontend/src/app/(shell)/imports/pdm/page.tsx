@@ -11,7 +11,7 @@ import {
   runPdmDemoImportAction,
   stagePdmBatchAction,
   uploadPdmBatchAction,
-} from "@/app/imports/pdm/actions";
+} from "@/app/(shell)/imports/pdm/actions";
 import type { ImportWizardSearchParams } from "@/lib/import-wizard/import-wizard-params";
 
 export const dynamic = "force-dynamic";

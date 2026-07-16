@@ -1,56 +1,138 @@
 import Link from "next/link";
-import { ExplorerListShell, ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
-import { GraphExplorerNodeSummary, getGraphExplorerNodes } from "@/lib/etos-api";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { ListItem, ListStack } from "@/components/ui/ListItem";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatusBadge } from "@/components/ui/Badge";
+import { getGraphExplorerNodes } from "@/lib/etos-api";
 
 export const dynamic = "force-dynamic";
 
-function GraphNodeCard(node: GraphExplorerNodeSummary) {
-  return (
-    <article className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="font-semibold">{node.objectType}</h3>
-          <p className="mt-1 text-sm text-slate-400">{node.safeSummary}</p>
-          <p className="mt-2 text-xs text-slate-500">
-            {node.graphSpace} · {node.trustState}
-          </p>
-        </div>
-        <Link href={`/graph/${node.nodeId}`} className="text-sm font-semibold text-cyan-300 hover:text-cyan-200">
-          360°
-        </Link>
-      </div>
-    </article>
-  );
-}
-
 export default async function GraphExplorerPage() {
-  const nodes = await getGraphExplorerNodes();
+  const nodes = await getGraphExplorerNodes({ limit: 25 });
+  const list = nodes.data?.nodes ?? [];
+  const first = list[0];
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h1 className="text-4xl font-semibold">Graph explorer</h1>
-              <p className="mt-3 text-slate-400">Governed graph node browse with trust and policy-filtered summaries.</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
-              <ExplorerNavLink href="/">Home</ExplorerNavLink>
-            </div>
-          </div>
-        </section>
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title="Graph explorer"
+        description="Lightweight hub into 360° context views and trusted graph promotion. Full Bloom canvas lives under Explorers."
+        actions={
+          <>
+            <Link href="/explorers/graph">
+              <Button variant="primary">Open Bloom canvas</Button>
+            </Link>
+            <Link href="/graph/promote">
+              <Button variant="ghost">Promotion</Button>
+            </Link>
+            <Link href="/explorers">
+              <Button variant="ghost">Explorers</Button>
+            </Link>
+          </>
+        }
+      />
 
-        <ExplorerListShell
-          title="Graph nodes"
-          description="Trusted production-space nodes by default."
-          result={nodes}
-          emptyMessage="No graph nodes matched the current filters."
-          renderItem={GraphNodeCard}
-          getItemKey={(node) => node.nodeId}
-        />
+      {nodes.error ? <ErrorState error={nodes.error} /> : null}
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Open 360° context</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {first ? (
+              <ListStack>
+                {list.slice(0, 5).map((node, index) => (
+                  <div
+                    key={node.nodeId}
+                    className="flex items-start justify-between gap-3 rounded-[14px] border border-etos-border-soft bg-etos-panel-muted p-3"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-xl bg-etos-info-bg text-sm font-black text-etos-info-fg">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="text-[13px] font-extrabold text-etos-ink">
+                          {node.objectType}
+                        </p>
+                        <p className="mt-1 text-xs text-etos-ink-muted">
+                          {node.safeSummary}
+                        </p>
+                        <p className="mt-1 text-[11px] text-etos-ink-subtle">
+                          {node.graphSpace} ·{" "}
+                          <StatusBadge status={String(node.trustState)} />
+                        </p>
+                      </div>
+                    </div>
+                    <Link href={`/graph/${node.nodeId}`}>
+                      <Button variant="ghost">360°</Button>
+                    </Link>
+                  </div>
+                ))}
+              </ListStack>
+            ) : (
+              <EmptyState message="No graph nodes yet. Promote a staged import first." />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Promotion & explorers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ListStack>
+              <ListItem
+                index={1}
+                title="Trusted graph promotion"
+                description="Gate ring, snapshot diff, and CAD vs EBOM heat comparison before promote."
+              />
+              <div className="flex justify-end">
+                <Link href="/graph/promote">
+                  <Button variant="primary">Open promotion</Button>
+                </Link>
+              </div>
+              <ListItem
+                index={2}
+                title="360° explorers hub"
+                description="Artifacts, documents, context packages, and cross-links into AI Trace."
+              />
+              <div className="flex justify-end">
+                <Link href="/explorers">
+                  <Button variant="ghost">Open explorers</Button>
+                </Link>
+              </div>
+            </ListStack>
+          </CardContent>
+        </Card>
       </div>
+
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4">
+        <summary className="cursor-pointer text-sm font-extrabold text-etos-ink">
+          Advanced / Debug — all nodes ({list.length})
+        </summary>
+        <ul className="mt-3 space-y-2 text-sm">
+          {list.map((node) => (
+            <li
+              key={node.nodeId}
+              className="flex items-center justify-between rounded-xl border border-etos-border-soft bg-etos-panel px-3 py-2"
+            >
+              <span>
+                {node.objectType} · {node.nodeId.slice(0, 8)}
+              </span>
+              <Link
+                href={`/graph/${node.nodeId}`}
+                className="font-extrabold text-etos-accent-cyan underline-offset-2 hover:underline"
+              >
+                Open
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </details>
     </main>
   );
 }

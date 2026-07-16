@@ -435,6 +435,68 @@ Implement Artifact Explorer, Graph Explorer, Document Explorer, Context Package 
 
 Issue 15.
 
+## Issue 16.1: Digital Thread Projection + Mission Control Wire-Up
+
+Type: AFK
+Blocked by: Issue 16
+User stories covered: 50, 51, 57 (Mission Control timeline strip)
+
+## What to build
+
+Implement a thin `DigitalThreadProjectionService` that aggregates tenant-scoped operational signals (imports, tool/agent/workflow runs, data-quality issues, recommendation creates, high-signal audit/security events, connector definitions) into Mission Control–ready read APIs. Wire Enterprise UI Mission Control (`/`) timeline, live event stream, KPIs, heatmap, top threads, and thread alerts to those APIs. Leave the full `/digital-thread/timeline` semantic-zoom canvas, SSE/SignalR live stream, branches/lineage/minimap APIs, and WebGL renderer for later UI-5.x / Issue 16.1b.
+
+Route prefix: `/api/admin/digital-thread/*`. Spec models: `References/etos_ui_mockup_pack_with_digital_thread_timeline/etos_ui_mockups/docs/DIGITAL_THREAD_TIMELINE_SPEC.md`.
+
+## Acceptance criteria
+
+- `GET /api/admin/digital-thread/summary?windowHours=24` returns connected-system counts, open-alert counts, events-per-minute (windowed rate), top threads, and optional heatmap buckets.
+- `GET /api/admin/digital-thread/systems` returns connector + import source-system projections with connection/sync status (empty tenant → empty list / zero KPIs; no invented SAP/PDM rows).
+- `GET /api/admin/digital-thread/events?from=&to=&systemId=&limit=50` returns ordered timeline events projected from real EF sources.
+- Permissions `digital_thread.read` / `digital_thread.admin` are seeded; endpoints fail closed on missing tenant/permission.
+- Mission Control `/` consumes the three APIs for timeline, stream, KPIs, heatmap, top threads, and alerts; Live button and master scrubber stay disabled with honest tooltips; AI insights stay fixture + preview.
+- `/digital-thread/timeline` remains `PlaceholderPage` until UI-5.x.
+- Tests cover tenant isolation, permission deny, windowed event ordering, and summary counts with seeded fixtures.
+
+## Explicitly deferred (shipped in Issue 16.1b)
+
+- `GET .../branches`, `.../lineage/{id}`, `.../events/{id}`, `.../minimap`
+- `STREAM .../events/stream` (SSE)
+- UI-5.1–5.3 semantic zoom canvas on `/digital-thread/timeline`
+
+## Blocked by
+
+Issue 16.
+
+## Issue 16.1b: Digital Thread Canvas Projection + Live Stream
+
+Type: AFK
+Blocked by: Issue 16.1
+User stories covered: 50, 51 (full timeline canvas)
+
+## What to build
+
+Extend `DigitalThreadProjectionService` with branch geometry, artifact lineage, event detail, minimap, and an SSE poll-delta event stream under `/api/admin/digital-thread/*`. UI-5.1–5.3 (`/digital-thread/timeline` ops canvas + Mission Control Live/scrubber) consumes these APIs. Renderer stays SVG + CSS pan-zoom (no WebGL, no SignalR).
+
+## Acceptance criteria
+
+- `GET /api/admin/digital-thread/branches?windowHours=24` returns branch clusters with deterministic `projectionPoints` (empty tenant → empty list).
+- `GET /api/admin/digital-thread/lineage/{artifactId}` returns hops from tenant `ArtifactRelationships` plus related projected events; 404 when artifact missing/wrong tenant.
+- `GET /api/admin/digital-thread/events/{eventId}` returns detail with evidence/drill routes only when source ids exist.
+- `GET /api/admin/digital-thread/minimap?windowHours=24` returns coarse systems + points for the window.
+- `GET /api/admin/digital-thread/events/stream?since=` streams `text/event-stream` deltas (auth via same headers; heartbeats; no fake SAP pulses).
+- Same fail-closed tenant + `digital_thread.read|admin|*` checks as Issue 16.1.
+- Tests cover branches empty/non-empty, lineage tenant isolation, event detail found/missing, minimap shape, and stream emit after seed.
+
+## Explicitly deferred
+
+- WebGL / `@xyflow` thread canvas
+- SignalR hubs
+- Site / product-line ontology dimensions
+
+## Blocked by
+
+Issue 16.1.
+
 ## Issue 17: Dashboard and Report Generation
 
 Type: AFK

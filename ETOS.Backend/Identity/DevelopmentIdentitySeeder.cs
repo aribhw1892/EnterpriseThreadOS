@@ -17,6 +17,7 @@ using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.IdentityResolution;
 using ETOS.Backend.Decisions;
 using ETOS.Backend.GovernanceAnalytics;
+using ETOS.Backend.DigitalThread;
 using ETOS.Backend.Learning;
 using ETOS.Backend.Outcomes;
 using ETOS.Backend.Recommendations;
@@ -159,6 +160,14 @@ public sealed class DevelopmentIdentitySeeder(
         var outcomeAdminPermission = await EnsurePermissionAsync(OutcomePermissions.Admin, "Administer tenant outcome records.", cancellationToken);
         var learningReadPermission = await EnsurePermissionAsync(LearningPermissions.Read, "Read tenant learning signal artifacts.", cancellationToken);
         var learningAdminPermission = await EnsurePermissionAsync(LearningPermissions.Admin, "Administer tenant learning records.", cancellationToken);
+        var digitalThreadReadPermission = await EnsurePermissionAsync(
+            DigitalThreadPermissions.Read,
+            "Read tenant digital thread projection summary, systems, and events.",
+            cancellationToken);
+        var digitalThreadAdminPermission = await EnsurePermissionAsync(
+            DigitalThreadPermissions.Admin,
+            "Administer tenant digital thread projection access.",
+            cancellationToken);
         var governanceAnalyticsReadPermission = await EnsurePermissionAsync(
             GovernanceAnalyticsPermissions.Read,
             "Read tenant governance analytics and KPI dashboards.",
@@ -276,6 +285,8 @@ public sealed class DevelopmentIdentitySeeder(
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, outcomeAdminPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, learningReadPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, learningAdminPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, digitalThreadReadPermission.Id, cancellationToken);
+        await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, digitalThreadAdminPermission.Id, cancellationToken);
         await EnsureRolePermissionAsync(tenant.Id, adminRole.Id, governanceAnalyticsReadPermission.Id, cancellationToken);
 
         await EnsureMembershipAsync(tenant.Id, chatRunner.Id, chatRunnerRole.Id, cancellationToken);

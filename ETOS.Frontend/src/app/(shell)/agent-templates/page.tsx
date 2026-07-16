@@ -1,75 +1,52 @@
-import Link from "next/link";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
+import { DefinitionLibraryPage } from "@/components/model/DefinitionLibraryPage";
 import { getAgentTemplateDefinitionArtifacts } from "@/lib/etos-api";
 
 export const dynamic = "force-dynamic";
 
 export default async function AgentTemplatesPage() {
   const artifacts = await getAgentTemplateDefinitionArtifacts();
+  const rows = (artifacts.data ?? []).map((artifact) => ({
+    id: artifact.id,
+    name: artifact.templateKey ?? artifact.name,
+    secondary: artifact.name,
+    versionLabel: artifact.latestVersionLabel,
+    readinessState: artifact.readinessState,
+    dependencyHint: artifact.patternCategory ?? "→ capability / policy",
+  }));
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 18.4 · Layer 6</p>
-              <h1 className="mt-2 text-4xl font-semibold">Agent Templates</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
-                Reusable agent pattern definitions composing ontology, capability, policy, prompt, output schema, and
-                retrieval references. Not tenant AgentVersion runtime records.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href="/agents">Agents</ExplorerNavLink>
-              <ExplorerNavLink href="/agent-runs">Agent runs</ExplorerNavLink>
-              <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
-              <ExplorerNavLink href="/">Home</ExplorerNavLink>
-            </div>
-          </div>
-        </section>
-
-        {artifacts.error ? (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-            {artifacts.error}
-          </div>
-        ) : null}
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">AgentTemplateVersion artifacts</h2>
-          {artifacts.data && artifacts.data.length > 0 ? (
-            <ul className="mt-6 space-y-3">
-              {artifacts.data.map((artifact) => (
-                <li key={artifact.id}>
-                  <Link
-                    href={`/agent-templates/${artifact.id}`}
-                    className="block rounded-2xl border border-slate-800 bg-slate-950 p-4 transition hover:border-cyan-300/40"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold">{artifact.name}</p>
-                        <p className="text-sm text-slate-400">
-                          {artifact.templateKey ?? artifact.artifactType}
-                          {artifact.patternCategory ? ` · ${artifact.patternCategory}` : ""}
-                        </p>
-                      </div>
-                      <div className="text-right text-sm text-slate-400">
-                        <p>{artifact.latestVersionLabel ?? "No version"}</p>
-                        <p>{artifact.readinessState ?? "Unknown"}</p>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">
-              No agent template definitions yet. Create one via the admin API or seed from a reference package in a
-              later issue.
-            </p>
-          )}
-        </section>
-      </div>
-    </main>
+    <DefinitionLibraryPage
+      title="Agent template library"
+      description="Reusable agent pattern definitions composing ontology, capability, policy, prompt, and retrieval references."
+      hrefBase="/agent-templates"
+      rows={rows}
+      error={artifacts.error}
+      emptyMessage="No agent template definitions yet."
+      primaryActionLabel="New template"
+      registryTitle="Templates"
+      showKpis={false}
+      columnLabels={{
+        name: "Template",
+        secondary: "Pattern",
+        deps: "Pinned dependencies",
+      }}
+      previewTitle="Template detail"
+      previewPills={[
+        {
+          label: "Prompt template",
+          value: rows[0]?.versionLabel ?? "Draft",
+          variant: "info",
+        },
+        { label: "Output schema", value: "Recommendation-only", variant: "purple" },
+        { label: "Allowed tools", value: "Governed gateway", variant: "teal" },
+        { label: "Safe mode", value: "Partial", variant: "warning" },
+      ]}
+      sideExtra={
+        <p className="mt-4 rounded-xl border-l-4 border-etos-info-border bg-etos-info-bg/30 p-3 text-xs text-etos-ink">
+          Templates remain drafts until publish governance passes capability, policy, and
+          package pins.
+        </p>
+      }
+    />
   );
 }

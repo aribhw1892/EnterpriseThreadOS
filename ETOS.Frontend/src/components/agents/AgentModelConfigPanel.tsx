@@ -1,5 +1,6 @@
 import type { AgentVersionDetail } from "@/lib/etos-api";
 import { AgentModelConfigForm } from "@/components/agents/AgentModelConfigForm";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 type AgentModelConfigPanelProps = {
   artifactId: string;
@@ -17,13 +18,15 @@ export function AgentModelConfigPanel({
   errorMessage,
 }: AgentModelConfigPanelProps) {
   return (
-    <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-      <h2 className="text-2xl font-semibold">Model routing</h2>
-      <p className="mt-2 text-sm text-slate-400">
-        Runtime adapter: {detail.preferredRuntimeAdapterKey} · Current readiness:{" "}
-        {detail.artifactReadinessState}
-      </p>
-      <div className="mt-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>Model routing</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="mb-4 text-sm text-etos-ink-muted">
+          Runtime adapter: {detail.preferredRuntimeAdapterKey} · Current readiness:{" "}
+          {detail.artifactReadinessState}
+        </p>
         <AgentModelConfigForm
           artifactId={artifactId}
           versionId={versionId}
@@ -34,7 +37,7 @@ export function AgentModelConfigPanel({
           fallbackModels={detail.fallbackModels}
           errorMessage={errorMessage}
         />
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }

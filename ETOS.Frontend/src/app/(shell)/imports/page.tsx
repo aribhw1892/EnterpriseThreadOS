@@ -1,728 +1,42 @@
-import {
-  ApiResult,
-  DataQualityIssue,
-  IdentityCandidateLink,
-  ImportBatch,
-  ImportBatchDetail,
-  ImportColumnMapping,
-  ImportFileEvidence,
-  ImportMappingVersion,
-  ImportPreview,
-  ImportStagingGraphRun,
-  ImportValidationIssue,
-  TrustScoreRecord,
-  approveLatestIdentityCandidate,
-  adminUserId,
-  approveLatestImportMapping,
-  createDataQualityIssueFromLatestSecurityEvent,
-  createDemoComparisonImportFlow,
-  createDemoImportFlow,
-  createManualDataQualityIssueForLatestBatch,
-  createBomComparisonForLatestStagedBatch,
-  createRecommendationFromLatestBomComparison,
-  captureTrustedGraphSnapshot,
-  generateDataQualityIssuesForLatestImport,
-  generateLatestIdentityCandidates,
-  getImportLists,
-  ImportPromotionRun,
-  MonitoringIssueTypeDefinition,
-  markLatestIdentityCandidateConflicted,
-  promoteReadyStagedImportBatch,
-  rejectLatestStagedImportBatch,
-  runIdentityResolutionDemoFlow,
-  previewImportMapping,
-  selectedTenantId,
-  stageLatestImportBatch,
-  validateLatestImportBatch,
-} from "@/lib/etos-api";
+import Link from "next/link";
 import { MappingAgentDebugPanel } from "@/components/imports/MappingAgentDebugPanel";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import type { ReactNode } from "react";
+import {
+  ActionButton,
+  BatchCard,
+  BatchDetailPanels,
+  ButtonGroup,
+  DataQualityPanel,
+  IdentityResolutionPanel,
+} from "@/components/imports/ImportHubShared";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { KpiCard } from "@/components/ui/KpiCard";
+import { ListItem, ListStack } from "@/components/ui/ListItem";
+import { Timeline, TimelineCard } from "@/components/ui/Timeline";
+import {
+  approveIdentityCandidate,
+  createBomRecommendation,
+  createComparisonImport,
+  createDemoImport,
+  createManualDataQualityIssue,
+  createSecurityEventDataQualityIssue,
+  generateDataQualityIssues,
+  generateIdentityCandidates,
+  markIdentityCandidateConflicted,
+  promoteStagedBatch,
+  rejectStagedBatch,
+  runBomComparison,
+  runIdentityDemo,
+  runMappingPreviewDebug,
+  captureTrustedSnapshot,
+  approveDraftMapping,
+  stageBatch,
+  validateBatch,
+} from "@/app/(shell)/imports/actions";
+import { getImportLists } from "@/lib/etos-api";
 
 export const dynamic = "force-dynamic";
-
-function redirectOnImportActionError(result: { error: string | null }) {
-  if (result.error) {
-    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
-  }
-}
-
-async function createDemoImport() {
-  "use server";
-
-  const result = await createDemoImportFlow();
-  if (result.error) {
-    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
-  }
-
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function createComparisonImport() {
-  "use server";
-
-  const result = await createDemoComparisonImportFlow();
-  if (result.error) {
-    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
-  }
-
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function runIdentityDemo() {
-  "use server";
-
-  const result = await runIdentityResolutionDemoFlow();
-  if (result.error) {
-    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
-  }
-
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function approveDraftMapping() {
-  "use server";
-
-  const result = await approveLatestImportMapping();
-  redirectOnImportActionError(result);
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function validateBatch() {
-  "use server";
-
-  const result = await validateLatestImportBatch();
-  redirectOnImportActionError(result);
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function stageBatch() {
-  "use server";
-
-  const result = await stageLatestImportBatch();
-  redirectOnImportActionError(result);
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function generateIdentityCandidates() {
-  "use server";
-
-  const result = await generateLatestIdentityCandidates();
-  redirectOnImportActionError(result);
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function approveIdentityCandidate() {
-  "use server";
-
-  const result = await approveLatestIdentityCandidate();
-  redirectOnImportActionError(result);
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function markIdentityCandidateConflicted() {
-  "use server";
-
-  const result = await markLatestIdentityCandidateConflicted();
-  redirectOnImportActionError(result);
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function generateDataQualityIssues() {
-  "use server";
-
-  const result = await generateDataQualityIssuesForLatestImport();
-  redirectOnImportActionError(result);
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function createManualDataQualityIssue() {
-  "use server";
-
-  const result = await createManualDataQualityIssueForLatestBatch();
-  redirectOnImportActionError(result);
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function createSecurityEventDataQualityIssue() {
-  "use server";
-
-  const result = await createDataQualityIssueFromLatestSecurityEvent();
-  redirectOnImportActionError(result);
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function promoteStagedBatch() {
-  "use server";
-
-  const result = await promoteReadyStagedImportBatch();
-  if (result.error) {
-    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
-  }
-
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function captureTrustedSnapshot() {
-  "use server";
-
-  const result = await captureTrustedGraphSnapshot();
-  if (result.error) {
-    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
-  }
-
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function runBomComparison() {
-  "use server";
-
-  const result = await createBomComparisonForLatestStagedBatch();
-  if (result.error) {
-    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
-  }
-
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function createBomRecommendation() {
-  "use server";
-
-  const result = await createRecommendationFromLatestBomComparison();
-  if (result.error) {
-    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
-  }
-
-  revalidatePath("/imports");
-  revalidatePath("/recommendations");
-  redirect("/recommendations");
-}
-
-async function rejectStagedBatch() {
-  "use server";
-
-  const result = await rejectLatestStagedImportBatch();
-  if (result.error) {
-    redirect(`/imports?error=${encodeURIComponent(result.error)}`);
-  }
-
-  revalidatePath("/imports");
-  redirect("/imports");
-}
-
-async function runMappingPreviewDebug(input: {
-  batchId: string;
-  evidenceId?: string | null;
-  suggestionProviderKey: string;
-  mappingAssistantAgentKey?: string | null;
-}): Promise<{ preview: ImportPreview | null; error: string | null }> {
-  "use server";
-
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
-  if (!tenantHeaders) {
-    return { preview: null, error: "Missing tenant or admin user environment configuration." };
-  }
-
-  const result = await previewImportMapping(
-    input.batchId,
-    {
-      evidenceId: input.evidenceId,
-      sampleRowLimit: 10,
-      suggestionProviderKey: input.suggestionProviderKey,
-      includeDiagnostics: true,
-      mappingAssistantAgentKey: input.mappingAssistantAgentKey,
-    },
-    tenantHeaders,
-  );
-
-  if (result.error) {
-    return { preview: null, error: result.error };
-  }
-
-  return { preview: result.data, error: null };
-}
-
-function formatStatus(status: string | number) {
-  if (typeof status === "number") {
-    return (
-      {
-        0: "Unverified",
-        1: "Provisional",
-        2: "Trusted",
-        3: "Conflicted",
-      }[status] ?? String(status)
-    );
-  }
-
-  return status;
-}
-
-function StatusBadge({ status }: { status: string | number }) {
-  const displayStatus = formatStatus(status);
-  const normalized = displayStatus.toLowerCase();
-  const className =
-    normalized === "staged" || normalized === "completed" || normalized === "approved" || normalized === "trusted" || normalized === "promoted"
-      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
-      : normalized === "failed" || normalized === "error" || normalized === "conflicted" || normalized === "critical"
-        ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200"
-        : normalized === "high" || normalized === "medium"
-          ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200"
-        : "bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-200";
-
-  return (
-    <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${className}`}>
-      {displayStatus}
-    </span>
-  );
-}
-
-function ErrorState({ error }: { error: string }) {
-  return (
-    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-      {error}
-    </div>
-  );
-}
-
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4 text-sm text-slate-400">
-      {message}
-    </div>
-  );
-}
-
-function ActionButton({ action, children }: { action: () => Promise<void>; children: ReactNode }) {
-  return (
-    <form action={action}>
-      <button
-        type="submit"
-        className="rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
-      >
-        {children}
-      </button>
-    </form>
-  );
-}
-
-function ButtonGroup({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-      <h2 className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300">{title}</h2>
-      <p className="mt-2 text-xs text-slate-400">{description}</p>
-      <div className="mt-4 flex flex-wrap gap-3">{children}</div>
-    </div>
-  );
-}
-
-function ListSection<T>({
-  title,
-  description,
-  items,
-  emptyMessage,
-  renderItem,
-}: {
-  title: string;
-  description: string;
-  items: T[];
-  emptyMessage: string;
-  renderItem: (item: T) => ReactNode;
-}) {
-  return (
-    <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-      <div className="mb-5">
-        <h2 className="text-2xl font-semibold">{title}</h2>
-        <p className="mt-1 text-sm text-slate-400">{description}</p>
-      </div>
-      {items.length > 0 ? <div className="grid gap-3">{items.map(renderItem)}</div> : <EmptyState message={emptyMessage} />}
-    </section>
-  );
-}
-
-function BatchCard(batch: ImportBatch) {
-  return (
-    <article key={batch.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h3 className="font-semibold">{batch.sourceSystem}</h3>
-          <p className="mt-1 text-sm text-slate-400">{batch.description ?? "No description."}</p>
-        </div>
-        <StatusBadge status={batch.status} />
-      </div>
-      <div className="mt-3 grid gap-1 text-xs text-slate-500 md:grid-cols-2">
-        <p>Model: {batch.activeModelPackageKey ?? batch.activeModelPackageVersionId}</p>
-        <p>Version: {batch.activeModelPackageVersionLabel ?? "unknown"}</p>
-        <p>Evidence: {batch.evidenceCount}</p>
-        <p>Mappings: {batch.mappingVersionCount}</p>
-        <p>Validation issues: {batch.validationIssueCount}</p>
-        <p>Staging runs: {batch.stagingRunCount}</p>
-      </div>
-    </article>
-  );
-}
-
-function EvidenceCard(evidence: ImportFileEvidence) {
-  return (
-    <article key={evidence.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <h3 className="font-semibold">{evidence.originalFileName}</h3>
-      <div className="mt-3 grid gap-1 text-xs text-slate-500">
-        <p>Checksum: {evidence.sha256Checksum}</p>
-        <p>Size: {evidence.sizeBytes} bytes</p>
-        <p>Content type: {evidence.contentType}</p>
-        <p>Audit: {evidence.auditRecordId ?? "not linked"}</p>
-      </div>
-    </article>
-  );
-}
-
-function formatColumnMapping(mapping: ImportColumnMapping) {
-  const target = mapping.canonicalAttributeKey
-    ? `${mapping.canonicalObjectType}.${mapping.canonicalAttributeKey}`
-    : mapping.isIdentityField
-      ? `${mapping.canonicalObjectType} identity`
-      : `${mapping.canonicalObjectType} unmapped`;
-
-  return `${mapping.sourceColumn} -> ${target}`;
-}
-
-function MappingCard(mapping: ImportMappingVersion) {
-  return (
-    <article key={mapping.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h3 className="font-semibold">{mapping.versionLabel}</h3>
-          <p className="mt-1 text-sm text-slate-400">{mapping.summary ?? "No summary."}</p>
-        </div>
-        <StatusBadge status={mapping.state} />
-      </div>
-      <div className="mt-3 grid gap-1 text-xs text-slate-500">
-        <p>Suggestion provider: {mapping.suggestionProvider}</p>
-        <p>{mapping.columnMappingCount} column mappings, {mapping.lifecycleMappingCount} lifecycle mappings</p>
-        <p>
-          Columns:{" "}
-          {mapping.columnMappings
-            .map(formatColumnMapping)
-            .join(", ")}
-        </p>
-      </div>
-    </article>
-  );
-}
-
-function IssueCard(issue: ImportValidationIssue) {
-  const blocksPromotion = issue.severity === "Error";
-
-  return (
-    <article key={issue.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="font-semibold">{issue.issueCode}</h3>
-        <StatusBadge status={issue.severity} />
-      </div>
-      <p className="mt-2 text-sm text-slate-300">{issue.message}</p>
-      <p className="mt-2 text-xs text-slate-500">
-        Row {issue.rowNumber ?? "n/a"} {issue.sourceColumn ? `- ${issue.sourceColumn}` : ""}
-      </p>
-      <p className={`mt-2 text-xs ${blocksPromotion ? "text-amber-300" : "text-slate-500"}`}>
-        {blocksPromotion
-          ? "Blocks promotion until fixed and the batch is re-validated."
-          : "Advisory warning only — does not block promotion."}
-      </p>
-    </article>
-  );
-}
-
-function StagingRunCard(run: ImportStagingGraphRun) {
-  return (
-    <article key={run.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="font-semibold">Run {run.id.slice(0, 8)}</h3>
-        <StatusBadge status={run.status} />
-      </div>
-      <div className="mt-3 grid gap-1 text-xs text-slate-500">
-        <p>Nodes: {run.nodeCount}</p>
-        <p>Relationships: {run.relationshipCount}</p>
-        <p>Failure: {run.failureSummary ?? "none"}</p>
-      </div>
-    </article>
-  );
-}
-
-function PromotionRunCard(run: ImportPromotionRun) {
-  return (
-    <article key={run.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="font-semibold">Promotion {run.id.slice(0, 8)}</h3>
-        <StatusBadge status={run.status} />
-      </div>
-      <div className="mt-3 grid gap-1 text-xs text-slate-500">
-        <p>Trusted nodes: {run.promotedNodeCount}</p>
-        <p>Trusted relationships: {run.promotedRelationshipCount}</p>
-        <p>Failure: {run.failureSummary ?? "none"}</p>
-      </div>
-    </article>
-  );
-}
-
-function IdentityCandidateCard(candidate: IdentityCandidateLink) {
-  return (
-    <article key={candidate.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h3 className="font-semibold">{candidate.objectType} identity link</h3>
-          <p className="mt-1 text-sm text-slate-400">
-            {candidate.sourceSystem} {candidate.sourceRecordId} {"->"} {candidate.targetSystem} {candidate.targetRecordId}
-          </p>
-        </div>
-        <StatusBadge status={candidate.state} />
-      </div>
-      <div className="mt-3 grid gap-1 text-xs text-slate-500">
-        <p>Confidence: {(candidate.confidenceScore * 100).toFixed(1)}%</p>
-        <p>Trust: {formatStatus(candidate.trustState)}</p>
-        <p>Excluded from trusted recommendations: {candidate.excludedFromTrustedRecommendations ? "yes" : "no"}</p>
-        <p>Graph relationship: {candidate.graphRelationshipId ?? "not created"}</p>
-        <p>{candidate.evidenceSummary}</p>
-      </div>
-    </article>
-  );
-}
-
-function TrustScoreCard(score: TrustScoreRecord) {
-  const breakdown = Object.entries(score.breakdown)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join(", ");
-
-  return (
-    <article key={score.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h3 className="font-semibold">{score.entityType}</h3>
-          <p className="mt-1 text-sm text-slate-400">Score {(score.score * 100).toFixed(1)}%</p>
-        </div>
-        <StatusBadge status={score.trustState} />
-      </div>
-      <div className="mt-3 grid gap-1 text-xs text-slate-500">
-        <p>Candidate: {score.identityCandidateLinkId ?? "n/a"}</p>
-        <p>Relationship: {score.graphRelationshipId ?? "not linked"}</p>
-        <p>Breakdown: {breakdown || "none"}</p>
-      </div>
-    </article>
-  );
-}
-
-function DataQualityIssueCard(issue: DataQualityIssue) {
-  const trustBreakdown = issue.trustImpacts
-    .flatMap((impact) => Object.entries(impact.breakdown).map(([key, value]) => `${key}: ${value}`))
-    .join(", ");
-  const sourceLinks = issue.sourceLinks
-    .map((link) => `${link.sourceType}${link.label ? ` (${link.label})` : ""}`)
-    .join(", ");
-
-  return (
-    <article key={issue.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h3 className="font-semibold">{issue.title}</h3>
-          <p className="mt-1 text-sm text-slate-400">
-            {issue.origin} issue on {issue.affectedEntityType}
-          </p>
-        </div>
-        <div className="flex flex-wrap justify-end gap-2">
-          <StatusBadge status={issue.severity} />
-          <StatusBadge status={issue.status} />
-        </div>
-      </div>
-      <p className="mt-3 text-sm text-slate-300">{issue.evidenceSummary}</p>
-      <div className="mt-3 grid gap-1 text-xs text-slate-500 md:grid-cols-2">
-        <p>Code: {issue.issueCode}</p>
-        <p>Priority: {issue.reviewPriority}</p>
-        <p>Trust penalty: {(issue.trustImpactPenalty * 100).toFixed(1)}%</p>
-        <p>Resulting trust: {formatStatus(issue.resultingTrustState)}</p>
-        <p>Excluded from trusted recommendations: {issue.excludedFromTrustedRecommendations ? "yes" : "no"}</p>
-        <p>Review hook: {issue.reviewTaskReady ? issue.reviewTaskHint ?? "ready" : "not ready"}</p>
-        <p>Import batch: {issue.importBatchId ?? "n/a"}</p>
-        <p>Security event: {issue.securityEventId ?? "n/a"}</p>
-        <p className="md:col-span-2">Sources: {sourceLinks || "none"}</p>
-        <p className="md:col-span-2">Trust breakdown: {trustBreakdown || "none"}</p>
-      </div>
-    </article>
-  );
-}
-
-function MonitoringPlaceholderCard(definition: MonitoringIssueTypeDefinition) {
-  return (
-    <article key={definition.id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h3 className="font-semibold">{definition.displayName}</h3>
-          <p className="mt-1 font-mono text-xs text-cyan-200">{definition.issueTypeKey}</p>
-        </div>
-        <StatusBadge status={definition.isEnabled ? "enabled" : "disabled"} />
-      </div>
-      <div className="mt-3 grid gap-1 text-xs text-slate-500">
-        <p>{definition.safeSummary}</p>
-        <p>Live source scanning: {definition.allowsLiveSourceScanning ? "enabled" : "disabled"}</p>
-      </div>
-    </article>
-  );
-}
-
-function DataQualityPanel({
-  issues,
-  monitoringPlaceholders,
-}: {
-  issues: ApiResult<DataQualityIssue[]>;
-  monitoringPlaceholders: ApiResult<MonitoringIssueTypeDefinition[]>;
-}) {
-  return (
-    <div className="grid gap-6 xl:grid-cols-2">
-      {issues.error ? (
-        <ErrorState error={issues.error} />
-      ) : (
-        <ListSection
-          title="Data Quality Issues"
-          description="Durable quality issues promoted from import validation, manual review hooks, and security events."
-          items={issues.data ?? []}
-          emptyMessage="No data quality issues have been generated for this tenant."
-          renderItem={DataQualityIssueCard}
-        />
-      )}
-      {monitoringPlaceholders.error ? (
-        <ErrorState error={monitoringPlaceholders.error} />
-      ) : (
-        <ListSection
-          title="Monitoring Placeholders"
-          description="Disabled MVP contracts for future monitoring agents that inspect existing issue types only."
-          items={monitoringPlaceholders.data ?? []}
-          emptyMessage="No monitoring placeholders are available."
-          renderItem={MonitoringPlaceholderCard}
-        />
-      )}
-    </div>
-  );
-}
-
-function FirstBatchDetail({
-  result,
-  promotionRuns,
-}: {
-  result: ApiResult<ImportBatchDetail>;
-  promotionRuns: ApiResult<ImportPromotionRun[]>;
-}) {
-  if (result.error) {
-    return <ErrorState error={result.error} />;
-  }
-
-  if (!result.data) {
-    return <EmptyState message="Create a demo import to inspect evidence, mappings, validation issues, and staging runs." />;
-  }
-
-  return (
-    <div className="grid gap-6 xl:grid-cols-2">
-      <ListSection
-        title="Raw Evidence"
-        description="Stored file evidence metadata. Raw payloads stay out of list responses."
-        items={result.data.evidence}
-        emptyMessage="No file evidence has been uploaded."
-        renderItem={EvidenceCard}
-      />
-      <ListSection
-        title="Mapping Versions"
-        description="Draft and approved import mappings generated from AI mapping preview suggestions."
-        items={result.data.mappingVersions}
-        emptyMessage="No import mappings have been created."
-        renderItem={MappingCard}
-      />
-      <ListSection
-        title="Validation Issues"
-        description="Row and column scoped failures or warnings from the active approved mapping."
-        items={result.data.validationIssues}
-        emptyMessage="No validation issues have been recorded."
-        renderItem={IssueCard}
-      />
-      <ListSection
-        title="Staging Runs"
-        description="Graph creation summaries for staging/unverified records."
-        items={result.data.stagingRuns}
-        emptyMessage="No staging graph run has been created."
-        renderItem={StagingRunCard}
-      />
-      {promotionRuns.error ? (
-        <ErrorState error={promotionRuns.error} />
-      ) : (
-        <ListSection
-          title="Promotion Runs"
-          description="Trusted graph copies created after staged records pass review gates."
-          items={promotionRuns.data ?? []}
-          emptyMessage="No promotion run has been created for the latest batch."
-          renderItem={PromotionRunCard}
-        />
-      )}
-    </div>
-  );
-}
-
-function IdentityResolutionPanel({
-  candidates,
-  trustScores,
-}: {
-  candidates: ApiResult<IdentityCandidateLink[]>;
-  trustScores: ApiResult<TrustScoreRecord[]>;
-}) {
-  if (candidates.error) {
-    return <ErrorState error={candidates.error} />;
-  }
-
-  return (
-    <div className="grid gap-6 xl:grid-cols-2">
-      <ListSection
-        title="Identity Candidates"
-        description="Reviewable source-record links generated from staged import identity fields."
-        items={candidates.data ?? []}
-        emptyMessage="No identity candidates have been generated for the latest batch."
-        renderItem={IdentityCandidateCard}
-      />
-      {trustScores.error ? (
-        <ErrorState error={trustScores.error} />
-      ) : (
-        <ListSection
-          title="Trust Scores"
-          description="Current score breakdowns for identity candidates and graph link trust state."
-          items={trustScores.data ?? []}
-          emptyMessage="No trust scores have been calculated."
-          renderItem={TrustScoreCard}
-        />
-      )}
-    </div>
-  );
-}
 
 type PageProps = {
   searchParams: Promise<{ error?: string }>;
@@ -734,143 +48,262 @@ export default async function ImportsPage({ searchParams }: PageProps) {
   const batches = lists.batches.data ?? [];
   const firstBatch = batches[0];
   const firstEvidence = lists.firstBatchDetail.data?.evidence[0];
-  const stagedBatchCount = batches.filter((batch) => batch.status === "Staged").length;
-  const promotedBatchCount = batches.filter((batch) => batch.status === "Promoted").length;
+  const stagedRows = batches.reduce(
+    (sum, batch) => sum + (batch.validationIssueCount ?? 0),
+    0,
+  );
+  const candidates = lists.firstBatchIdentityCandidates.data ?? [];
+  const reviewable = candidates.filter(
+    (c) =>
+      String(c.state).toLowerCase().includes("review") ||
+      String(c.trustState).toLowerCase().includes("review"),
+  ).length;
+  const criticalBlockers =
+    lists.dataQualityIssues.data?.filter(
+      (issue) =>
+        String(issue.severity).toLowerCase() === "critical" ||
+        String(issue.severity).toLowerCase() === "high",
+    ).length ?? 0;
+  const hasStaged = batches.some((b) => b.status === "Staged");
+  const hasMapped = batches.some(
+    (b) =>
+      b.status === "Mapped" ||
+      b.status === "MappingApproved" ||
+      b.mappingVersionCount > 0,
+  );
+  const hasPromoted = batches.some((b) => b.status === "Promoted");
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto grid max-w-7xl gap-8">
-        <header className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">
-            EnterpriseThreadOS
+    <main className="px-6 py-8 lg:px-8">
+      <div className="mb-[18px] flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-[30px] font-bold tracking-tight text-etos-ink">
+            Import hub
+          </h1>
+          <p className="mt-2 max-w-[900px] text-sm text-etos-ink-muted">
+            UI-first workflow to import source-owned CAD/PDM and ERP files into
+            staging before trusted graph promotion.
           </p>
-          <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight">Import Mapping and Staging</h1>
-              <p className="mt-3 max-w-3xl text-slate-300">
-                Upload evidence through the imports API, approve AI-assisted mapping versions, validate CSV rows,
-                and create untrusted staging graph records before later review slices promote trust.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href="/agents/import-mapping-assistant/configure">Mapping agent</ExplorerNavLink>
-              <ExplorerNavLink href="/agents">Agents</ExplorerNavLink>
-              <ExplorerNavLink href="/">Home</ExplorerNavLink>
-            </div>
-          </div>
-          <div className="mt-5 grid gap-2 text-xs text-slate-500 md:grid-cols-2">
-            <p>Admin user: {adminUserId}</p>
-            <p>Tenant: {selectedTenantId}</p>
-          </div>
-          <div className="mt-6 grid gap-4 xl:grid-cols-2">
-            <ButtonGroup
-              title="Recommended Demo"
-              description="Creates source batches, stages them, resolves identity links, then copies ready staged records into the trusted graph for governed chat and explorers."
-            >
-              <ActionButton action={runIdentityDemo}>Run identity demo</ActionButton>
-              <ActionButton action={approveIdentityCandidate}>Approve first reviewable candidate</ActionButton>
-              <ActionButton action={markIdentityCandidateConflicted}>Mark first candidate conflicted</ActionButton>
-              <ActionButton action={promoteStagedBatch}>Promote ready staged batch to trusted graph</ActionButton>
-              <ActionButton action={captureTrustedSnapshot}>Capture trusted graph snapshot</ActionButton>
-              <ActionButton action={runBomComparison}>Run BOM comparison on staged ERP batch</ActionButton>
-              <ActionButton action={createBomRecommendation}>Create recommendation from BOM comparison</ActionButton>
-              <ActionButton action={rejectStagedBatch}>Reject latest staged batch</ActionButton>
-              <ActionButton action={generateDataQualityIssues}>Generate quality issues</ActionButton>
-            </ButtonGroup>
-            <ButtonGroup
-              title="Manual Latest-Batch Tools"
-              description="These buttons intentionally operate on the newest batch only. Use them for step-by-step debugging, not the full identity demo."
-            >
-              <ActionButton action={createDemoImport}>Create CAD/PDM draft batch</ActionButton>
-              <ActionButton action={createComparisonImport}>Create ERP draft batch</ActionButton>
-              <ActionButton action={approveDraftMapping}>Approve latest draft mapping</ActionButton>
-              <ActionButton action={validateBatch}>Validate latest batch only</ActionButton>
-              <ActionButton action={stageBatch}>Stage latest batch only</ActionButton>
-              <ActionButton action={generateIdentityCandidates}>Generate candidates for latest batch</ActionButton>
-              <ActionButton action={createManualDataQualityIssue}>Create manual quality issue</ActionButton>
-              <ActionButton action={createSecurityEventDataQualityIssue}>Create issue from security event</ActionButton>
-            </ButtonGroup>
-          </div>
-        </header>
+        </div>
+        <div className="flex flex-wrap gap-2.5">
+          <Link href="/imports/new">
+            <Button variant="primary">New import</Button>
+          </Link>
+          <Link href="/imports/new">
+            <Button variant="ghost">Upload CSV/Excel</Button>
+          </Link>
+        </div>
+      </div>
 
-        {actionError ? <ErrorState error={actionError} /> : null}
+      {actionError ? (
+        <div className="mb-4">
+          <ErrorState error={actionError} />
+        </div>
+      ) : null}
 
-        <MappingAgentDebugPanel
-          batchId={firstBatch?.id}
-          evidenceId={firstEvidence?.id}
-          runPreview={runMappingPreviewDebug}
+      <div className="grid gap-4 md:grid-cols-4">
+        <KpiCard
+          label="Import batches"
+          value={batches.length}
+          hint="CAD/PDM + ERP demo"
         />
-
-        <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
-          <h2 className="text-2xl font-semibold">Trusted Graph Promotion</h2>
-          <p className="mt-2 text-sm text-slate-300">
-            Staging creates unverified graph records. Promotion copies a ready staged batch into the trusted graph space
-            used by governed chat, explorers, and object-360-context retrieval.
-          </p>
-          <div className="mt-4 grid gap-2 text-xs text-slate-400 md:grid-cols-3">
-            <p>Staged batches: {stagedBatchCount}</p>
-            <p>Promoted batches: {promotedBatchCount}</p>
-            <p>Latest promotion runs: {lists.firstBatchPromotionRuns.data?.length ?? 0}</p>
-          </div>
-          <p className="mt-3 text-xs text-slate-500">
-            After identity demo, promote the ready source batch first. ERP comparison batches stay blocked until all
-            identity candidates are approved or rejected. Validation warnings are advisory; only validation errors block
-            promotion.
-          </p>
-        </section>
-
-        <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
-          <h2 className="text-2xl font-semibold">PDM Import Wizard</h2>
-          <p className="mt-2 text-sm text-slate-300">
-            Issue 29 extract → transform → load flow for SolidWorks PDM. Import four CSV batches with package preset
-            mappings and optional AI mapping review.
-          </p>
-          <div className="mt-4">
-            <ExplorerNavLink href="/imports/pdm">Open PDM import wizard</ExplorerNavLink>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
-          <h2 className="text-2xl font-semibold">Odoo ERP Import Wizard</h2>
-          <p className="mt-2 text-sm text-slate-300">
-            Package-driven Odoo ERP import with the same seven-step flow as PDM. Import four CSV batches with preset
-            mappings, optional AI review, and cross-source identity resolution against staged PDM data.
-          </p>
-          <div className="mt-4">
-            <ExplorerNavLink href="/imports/odoo">Open Odoo ERP import wizard</ExplorerNavLink>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
-          <h2 className="text-2xl font-semibold">API Upload Support</h2>
-          <p className="mt-2 text-sm text-slate-300">
-            Multipart upload is available at <code>/api/admin/imports/batches/{"{batchId}"}/files</code>.
-            This page keeps the UI minimal and uses a small server-side CSV demo action for repeatable validation.
-          </p>
-        </section>
-
-        {lists.batches.error ? (
-          <ErrorState error={lists.batches.error} />
-        ) : (
-          <ListSection
-            title="Import Batches"
-            description="Tenant-scoped batches tied to the active published model package at creation time."
-            items={batches}
-            emptyMessage="No import batches have been created."
-            renderItem={BatchCard}
-          />
-        )}
-
-        <FirstBatchDetail result={lists.firstBatchDetail} promotionRuns={lists.firstBatchPromotionRuns} />
-        <IdentityResolutionPanel
-          candidates={lists.firstBatchIdentityCandidates}
-          trustScores={lists.firstBatchTrustScores}
+        <KpiCard
+          label="Staged rows"
+          value={stagedRows || batches.length * 0}
+          hint={hasStaged ? "Awaiting review" : "Run demo to stage"}
         />
-        <DataQualityPanel
-          issues={lists.dataQualityIssues}
-          monitoringPlaceholders={lists.monitoringPlaceholders}
+        <KpiCard
+          label="Identity candidates"
+          value={candidates.length}
+          trend={reviewable > 0 ? "warn" : "flat"}
+          trendLabel={reviewable > 0 ? String(reviewable) : undefined}
+          hint={
+            reviewable > 0
+              ? `${reviewable} require review`
+              : "No review queue"
+          }
+        />
+        <KpiCard
+          label="Critical blockers"
+          value={criticalBlockers}
+          trend={criticalBlockers > 0 ? "bad" : "flat"}
+          trendLabel={criticalBlockers > 0 ? String(criticalBlockers) : undefined}
+          hint={
+            criticalBlockers > 0
+              ? "Cannot promote until resolved"
+              : "Clear to promote"
+          }
         />
       </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Recommended demo actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ListStack>
+              <ListItem
+                index={1}
+                title="Run identity demo"
+                description="Creates CAD/PDM and ERP batches, previews mapping, validates, stages, and generates identity candidates."
+                action={runIdentityDemo}
+                actionLabel="Run"
+                actionVariant="primary"
+              />
+              <ListItem
+                index={2}
+                title="Approve first reviewable candidate"
+                description="Exercises trusted identity link path and updates trust score."
+                action={approveIdentityCandidate}
+                actionLabel="Approve"
+              />
+              <ListItem
+                index={3}
+                title="Generate quality issues"
+                description="Promotes validation findings into DataQualityIssueArtifact records."
+                action={generateDataQualityIssues}
+                actionLabel="Generate"
+              />
+            </ListStack>
+          </CardContent>
+        </Card>
+
+        <TimelineCard title="Import state">
+          <Timeline
+            items={[
+              {
+                title: "Raw import received",
+                description:
+                  batches.length > 0
+                    ? "Files stored as evidence artifacts"
+                    : "Waiting for first batch",
+              },
+              {
+                title: "Mapping preview ready",
+                description: hasMapped
+                  ? "Suggestions from active model package"
+                  : "Awaiting mapping preview",
+              },
+              {
+                title: "Staging graph created",
+                description: hasStaged
+                  ? "GraphSpace = Staging"
+                  : "Not staged yet",
+              },
+              {
+                title: "Trusted graph promotion",
+                description: hasPromoted
+                  ? "Promoted into trusted graph"
+                  : criticalBlockers > 0
+                    ? "Blocked by critical quality issue"
+                    : "Ready when staging clears blockers",
+              },
+            ]}
+          />
+        </TimelineCard>
+      </div>
+
+      {lists.batches.error ? (
+        <div className="mt-4">
+          <ErrorState error={lists.batches.error} />
+        </div>
+      ) : batches.length > 0 ? (
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Import batches</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-2">{batches.map(BatchCard)}</div>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4">
+        <summary className="cursor-pointer text-sm font-extrabold text-etos-ink">
+          Advanced / Debug
+        </summary>
+        <p className="mt-2 text-xs text-etos-ink-muted">
+          Manual latest-batch tools, Mapping Agent Debug, promotion helpers, and
+          raw panels. Not part of the primary import hub surface.
+        </p>
+        <div className="mt-4 grid gap-4 xl:grid-cols-2">
+          <ButtonGroup
+            title="Manual latest-batch tools"
+            description="Operate on the newest batch only for step-by-step debugging."
+          >
+            <ActionButton action={createDemoImport}>
+              Create CAD/PDM draft batch
+            </ActionButton>
+            <ActionButton action={createComparisonImport}>
+              Create ERP draft batch
+            </ActionButton>
+            <ActionButton action={approveDraftMapping}>
+              Approve latest draft mapping
+            </ActionButton>
+            <ActionButton action={validateBatch}>Validate latest batch</ActionButton>
+            <ActionButton action={stageBatch}>Stage latest batch</ActionButton>
+            <ActionButton action={generateIdentityCandidates}>
+              Generate candidates
+            </ActionButton>
+            <ActionButton action={markIdentityCandidateConflicted}>
+              Mark first candidate conflicted
+            </ActionButton>
+            <ActionButton action={promoteStagedBatch}>
+              Promote ready staged batch
+            </ActionButton>
+            <ActionButton action={captureTrustedSnapshot}>
+              Capture trusted graph snapshot
+            </ActionButton>
+            <ActionButton action={runBomComparison}>Run BOM comparison</ActionButton>
+            <ActionButton action={createBomRecommendation}>
+              Create recommendation from BOM
+            </ActionButton>
+            <ActionButton action={rejectStagedBatch}>
+              Reject latest staged batch
+            </ActionButton>
+            <ActionButton action={createManualDataQualityIssue}>
+              Create manual quality issue
+            </ActionButton>
+            <ActionButton action={createSecurityEventDataQualityIssue}>
+              Create issue from security event
+            </ActionButton>
+          </ButtonGroup>
+          <div className="space-y-4">
+            <Link
+              href="/imports/data-quality"
+              className="inline-block text-sm font-extrabold text-etos-accent-cyan underline-offset-2 hover:underline"
+            >
+              Data quality triage →
+            </Link>
+            <Link
+              href="/graph/promote"
+              className="ml-4 inline-block text-sm font-extrabold text-etos-accent-cyan underline-offset-2 hover:underline"
+            >
+              Promotion workspace →
+            </Link>
+            <MappingAgentDebugPanel
+              batchId={firstBatch?.id}
+              evidenceId={firstEvidence?.id}
+              runPreview={runMappingPreviewDebug}
+            />
+          </div>
+        </div>
+        <div className="mt-4 space-y-4">
+          <BatchDetailPanels
+            result={lists.firstBatchDetail}
+            promotionRuns={lists.firstBatchPromotionRuns}
+          />
+          <IdentityResolutionPanel
+            candidates={lists.firstBatchIdentityCandidates}
+            trustScores={lists.firstBatchTrustScores}
+          />
+          <DataQualityPanel
+            issues={lists.dataQualityIssues}
+            monitoringPlaceholders={lists.monitoringPlaceholders}
+          />
+        </div>
+      </details>
     </main>
   );
 }

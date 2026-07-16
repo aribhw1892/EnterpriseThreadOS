@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
-import { getOntologyLists, postWorkflowDefinition } from "@/lib/etos-api";
+import { createWorkflowAction } from "@/app/(shell)/workflows/actions";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Notice } from "@/components/ui/Notice";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { getOntologyLists } from "@/lib/etos-api";
 
 export const dynamic = "force-dynamic";
 
@@ -10,67 +13,8 @@ type PageProps = {
   searchParams: Promise<{ error?: string }>;
 };
 
-async function createWorkflowAction(formData: FormData) {
-  "use server";
-
-  const name = formData.get("name");
-  const workflowKey = formData.get("workflowKey");
-  const displayName = formData.get("displayName");
-  const workflowScope = formData.get("workflowScope");
-  const description = formData.get("description");
-  const compatibleModelPackageVersionId = formData.get("compatibleModelPackageVersionId");
-
-  if (typeof name !== "string" || name.trim().length === 0) {
-    redirect("/workflows/new?error=Name%20is%20required.");
-  }
-
-  if (typeof workflowKey !== "string" || workflowKey.trim().length === 0) {
-    redirect("/workflows/new?error=Workflow%20key%20is%20required.");
-  }
-
-  if (typeof displayName !== "string" || displayName.trim().length === 0) {
-    redirect("/workflows/new?error=Display%20name%20is%20required.");
-  }
-
-  if (typeof workflowScope !== "string" || workflowScope.trim().length === 0) {
-    redirect("/workflows/new?error=Workflow%20scope%20is%20required.");
-  }
-
-  if (
-    typeof compatibleModelPackageVersionId !== "string" ||
-    compatibleModelPackageVersionId.trim().length === 0
-  ) {
-    redirect("/workflows/new?error=A%20compatible%20model%20package%20is%20required.");
-  }
-
-  const result = await postWorkflowDefinition({
-    name: name.trim(),
-    description: typeof description === "string" && description.trim().length > 0 ? description.trim() : null,
-    workflowKey: workflowKey.trim(),
-    displayName: displayName.trim(),
-    workflowDescription:
-      typeof description === "string" && description.trim().length > 0 ? description.trim() : null,
-    workflowScope: workflowScope.trim(),
-    steps: [],
-    compatibleModelPackageVersionIds: [compatibleModelPackageVersionId.trim()],
-    safeModeEnabled: true,
-    previewModeDefault: true,
-    allowPartialCompletion: false,
-    defaultStepSafeModeBehavior: "skip",
-    triggerConfig: {
-      manualEnabled: true,
-      scheduledEnabled: false,
-      eventDrivenEnabled: false,
-    },
-  });
-
-  if (result.error || !result.data) {
-    redirect(`/workflows/new?error=${encodeURIComponent(result.error ?? "Could not create workflow.")}`);
-  }
-
-  revalidatePath("/workflows");
-  redirect(`/workflows/${encodeURIComponent(workflowKey.trim())}/edit`);
-}
+const fieldClass =
+  "mt-2 w-full rounded-xl border border-etos-border bg-etos-panel px-3.5 py-2.5 text-sm text-etos-ink";
 
 export default async function NewWorkflowPage({ searchParams }: PageProps) {
   const { error } = await searchParams;
@@ -79,115 +23,109 @@ export default async function NewWorkflowPage({ searchParams }: PageProps) {
   const activePackage = ontologyLists.activeModelPackage.data;
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 24 · Create</p>
-              <h1 className="mt-2 text-4xl font-semibold">New tenant workflow</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
-                Create a draft WorkflowVersion with governed scope, safe mode defaults, and at least one compatible
-                model package.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href="/workflows">Workflows</ExplorerNavLink>
-              <ExplorerNavLink href="/model-artifacts">Model artifacts</ExplorerNavLink>
-            </div>
-          </div>
-        </section>
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title="Create workflow"
+        description="Create a draft WorkflowVersion with governed scope, safe mode defaults, and a compatible model package. Opens the canvas editor on success."
+        actions={
+          <Link href="/workflows">
+            <Button type="button" variant="ghost">
+              Registry
+            </Button>
+          </Link>
+        }
+      />
 
-        {error ? (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-            {error}
-          </div>
-        ) : null}
+      {error ? (
+        <div className="mb-4">
+          <Notice variant="danger">{error}</Notice>
+        </div>
+      ) : null}
+      {ontologyLists.modelPackages.error ? (
+        <div className="mb-4">
+          <ErrorState error={ontologyLists.modelPackages.error} />
+        </div>
+      ) : null}
 
-        {ontologyLists.modelPackages.error ? (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-            {ontologyLists.modelPackages.error}
-          </div>
-        ) : null}
-
-        {modelPackages.length === 0 ? (
-          <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-2xl font-semibold">Model package required</h2>
-            <p className="mt-3 text-sm text-slate-400">
-              Workflow definitions require at least one compatible model package or ontology. Install the manufacturing
+      {modelPackages.length === 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Model package required</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm text-etos-ink-muted">
+            <p>
+              Workflow definitions require at least one compatible model package. Install the manufacturing
               reference package or create a model package first.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <ExplorerNavLink href="/model-artifacts">Model artifacts</ExplorerNavLink>
-              <ExplorerNavLink href="/workflows">Back to workflows</ExplorerNavLink>
-            </div>
-          </section>
-        ) : (
-          <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-2xl font-semibold">Workflow metadata</h2>
-            <form action={createWorkflowAction} className="mt-6 space-y-4">
+            <Link href="/model-artifacts" className="text-etos-accent hover:underline">
+              Model artifacts
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Workflow metadata</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form action={createWorkflowAction} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="block text-sm">
-                  <span className="font-semibold text-slate-300">Artifact name</span>
+                  <span className="font-semibold text-etos-ink">Artifact name</span>
                   <input
                     name="name"
                     type="text"
                     required
                     placeholder="Manufacturing investigation workflow"
-                    className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100"
+                    className={fieldClass}
                   />
                 </label>
                 <label className="block text-sm">
-                  <span className="font-semibold text-slate-300">Workflow key</span>
+                  <span className="font-semibold text-etos-ink">Workflow key</span>
                   <input
                     name="workflowKey"
                     type="text"
                     required
                     placeholder="manufacturing-investigation"
-                    className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100"
+                    className={fieldClass}
                   />
                 </label>
               </div>
               <label className="block text-sm">
-                <span className="font-semibold text-slate-300">Display name</span>
+                <span className="font-semibold text-etos-ink">Display name</span>
                 <input
                   name="displayName"
                   type="text"
                   required
                   placeholder="Manufacturing investigation"
-                  className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100"
+                  className={fieldClass}
                 />
               </label>
               <label className="block text-sm">
-                <span className="font-semibold text-slate-300">Description (optional)</span>
+                <span className="font-semibold text-etos-ink">Description (optional)</span>
                 <textarea
                   name="description"
                   rows={3}
                   placeholder="Governed multi-step workflow for BOM discrepancy investigation."
-                  className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100"
+                  className={fieldClass}
                 />
               </label>
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="block text-sm">
-                  <span className="font-semibold text-slate-300">Workflow scope</span>
-                  <select
-                    name="workflowScope"
-                    required
-                    defaultValue="tenant"
-                    className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100"
-                  >
+                  <span className="font-semibold text-etos-ink">Workflow scope</span>
+                  <select name="workflowScope" required defaultValue="tenant" className={fieldClass}>
                     <option value="tenant">tenant</option>
                     <option value="platform">platform</option>
                     <option value="personal">personal</option>
                   </select>
                 </label>
                 <label className="block text-sm">
-                  <span className="font-semibold text-slate-300">Compatible model package</span>
+                  <span className="font-semibold text-etos-ink">Compatible model package</span>
                   <select
                     name="compatibleModelPackageVersionId"
                     required
                     defaultValue={activePackage?.id ?? modelPackages[0]?.id ?? ""}
-                    className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100"
+                    className={fieldClass}
                   >
                     {modelPackages.map((pkg) => (
                       <option key={pkg.id} value={pkg.id}>
@@ -198,28 +136,15 @@ export default async function NewWorkflowPage({ searchParams }: PageProps) {
                   </select>
                 </label>
               </div>
-              <button
-                type="submit"
-                className="rounded-2xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300"
-              >
-                Create draft workflow
-              </button>
+              <Notice variant="info">
+                Initial create uses empty steps (`steps: []`). Edit the canvas to rearrange/delete existing steps,
+                or install package definitions that include steps.
+              </Notice>
+              <Button type="submit">Create draft workflow</Button>
             </form>
-          </section>
-        )}
-
-        <p className="text-sm text-slate-500">
-          Need governed steps first?{" "}
-          <Link href="/agents" className="text-cyan-300 hover:text-cyan-100">
-            Configure agents
-          </Link>{" "}
-          and{" "}
-          <Link href="/tools" className="text-cyan-300 hover:text-cyan-100">
-            tools
-          </Link>{" "}
-          before wiring workflow steps.
-        </p>
-      </div>
+          </CardContent>
+        </Card>
+      )}
     </main>
   );
 }

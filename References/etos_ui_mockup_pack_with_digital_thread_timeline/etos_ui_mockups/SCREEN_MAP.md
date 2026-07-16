@@ -4,13 +4,17 @@ This pack contains high-fidelity desktop mockup images for the EnterpriseThreadO
 
 ## Information architecture
 
-Persistent enterprise shell: left navigation groups Operate, Govern, Model, Build, and Admin; top bar with breadcrumb, global search, tenant context, read-only MVP badge, and user avatar. Each workspace uses cards, tables, steppers, right-side governance panels, evidence/trace links, confidence/risk badges, and explicit disabled write-action indicators.
+**Home (`/` / screen 01)** uses the **Mission Control Timeline** mockup: dark ops canvas, Mission Control–first nav (Digital Thread, Live Operations, System Health, Agents, Recommendations, Tasks & Decisions, Workflows, Reports & Dashboards, Governance, Administration), KPI strip, live thread timeline, heatmap, live event stream, and master scrubber. PNG: `images/01-command-center.png`.
+
+**Screens 02–37** keep the light enterprise shell with left navigation groups Operate, Govern, Model, Build, and Admin; top bar with breadcrumb, global search, tenant context, read-only MVP badge, and user avatar. Each workspace uses cards, tables, steppers, right-side governance panels, evidence/trace links, confidence/risk badges, and explicit disabled write-action indicators. Product shell implementation may unify nav labels later; do not invent backend APIs for Mission Control live streams until Issue 16.1 (or equivalent) exists—use placeholders/fixtures where needed.
+
+**Screens 38–40** are the deep Digital Thread Timeline family (macro / system branch / artifact lineage).
 
 ## Step-by-step flow
 
 | # | Screen | Route | Scope | Purpose | Primary action |
 |---:|---|---|---|---|---|
-| 01 | Enterprise command center | `/` | Current backend flow through Issue 18.5 | Executive landing and operational status for health, recommendations, and read-only safety boundary. | Run demo flow Export status |
+| 01 | Mission Control Timeline (home) | `/` | Digital Thread command center (replaces legacy executive landing) | Dark real-time Mission Control home: KPI strip, live digital-thread timeline, activity heatmap, agents/recommendations/decisions panels, live event stream, and master timeline scrubber. | Live / pause · filter systems · open alerts · drill into Digital Thread |
 | 02 | Model package & reference seed | `/model-artifacts` | Current backend flow through Issue 18.5 | Install and inspect the extracted manufacturing reference model package. | Create seed model package View dependencies |
 | 03 | Ontology & semantic layer detail | `/model-artifacts/ontology` | Current backend flow through Issue 18.5 | Inspect ontology semantics and AI usage metadata before publishing/impact analysis. | Create new version Impact analysis |
 | 04 | Capability definitions | `/capabilities` | Current backend flow through Issue 18.5 | Manage business capability artifacts that describe outcomes such as BOM impact analysis. | New capability Publish selected |

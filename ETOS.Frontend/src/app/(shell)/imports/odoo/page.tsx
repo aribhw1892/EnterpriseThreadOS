@@ -11,7 +11,7 @@ import {
   runOdooDemoImportAction,
   stageOdooBatchAction,
   uploadOdooBatchAction,
-} from "@/app/imports/odoo/actions";
+} from "@/app/(shell)/imports/odoo/actions";
 import type { ImportWizardSearchParams } from "@/lib/import-wizard/import-wizard-params";
 
 export const dynamic = "force-dynamic";

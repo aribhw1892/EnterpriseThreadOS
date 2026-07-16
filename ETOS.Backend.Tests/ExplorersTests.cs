@@ -101,10 +101,10 @@ public sealed class ExplorersTests
         var graph = new FilteringGraphMemoryService(context.GraphNodeId);
         var service = CreateGraphExplorerService(dbContext, context, graph);
 
-        var nodes = await service.ListNodesAsync(null, null, null, null, "published-policy", CancellationToken.None);
+        var nodes = await service.ListNodesAsync(null, null, null, null, null, "published-policy", CancellationToken.None);
 
-        Assert.Contains(nodes, node => node.NodeId == context.GraphNodeId);
-        Assert.DoesNotContain(nodes, node => node.TrustState == TrustState.Provisional.ToString());
+        Assert.Contains(nodes.Nodes, node => node.NodeId == context.GraphNodeId);
+        Assert.DoesNotContain(nodes.Nodes, node => node.TrustState == TrustState.Provisional.ToString());
     }
 
     [Fact]
@@ -115,12 +115,134 @@ public sealed class ExplorersTests
         var graph = new FilteringGraphMemoryService(context.GraphNodeId);
         var service = CreateGraphExplorerService(dbContext, context, graph, new FilteringPolicyService());
 
-        var nodes = await service.ListNodesAsync(null, null, null, 10, "published-policy", CancellationToken.None);
-        var secretNode = nodes.Single(node =>
+        var nodes = await service.ListNodesAsync(null, null, null, null, 10, "published-policy", CancellationToken.None);
+        var secretNode = nodes.Nodes.Single(node =>
             node.AllowedAttributes.Count == 0
             && node.SafeSummary.Contains("Secret", StringComparison.OrdinalIgnoreCase));
 
         Assert.Empty(secretNode.AllowedAttributes);
+    }
+
+    [Fact]
+    public async Task GraphExplorer_search_filters_nodes_and_reports_truncation()
+    {
+        await using var dbContext = CreateDbContext();
+        var context = SeedTenantUserAndDocument(dbContext);
+        var graph = new BloomGraphMemoryService(context.TenantId, context.GraphNodeId);
+        var service = CreateGraphExplorerService(dbContext, context, graph);
+
+        var result = await service.ListNodesAsync(
+            GraphSpace.Trusted,
+            TrustState.Trusted,
+            null,
+            "pump",
+            1,
+            null,
+            CancellationToken.None);
+
+        Assert.True(result.MatchCount >= 1);
+        Assert.True(result.Truncated);
+        Assert.Equal(1, result.Limit);
+        Assert.All(result.Nodes, node =>
+            Assert.Contains("pump", node.SafeSummary, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task GraphExplorer_subgraph_respects_depth_and_limit()
+    {
+        await using var dbContext = CreateDbContext();
+        var context = SeedTenantUserAndDocument(dbContext);
+        var graph = new BloomGraphMemoryService(context.TenantId, context.GraphNodeId);
+        var service = CreateGraphExplorerService(dbContext, context, graph);
+
+        var subgraph = await service.GetSubgraphAsync(
+            context.GraphNodeId,
+            depth: 2,
+            relationshipTypes: null,
+            direction: "out",
+            graphSpace: GraphSpace.Trusted,
+            trustState: TrustState.Trusted,
+            limit: 2,
+            policyKey: null,
+            CancellationToken.None);
+
+        Assert.Equal(context.GraphNodeId, subgraph.StartNodeId);
+        Assert.True(subgraph.Truncated);
+        Assert.Equal(2, subgraph.Limit);
+        Assert.Equal(2, subgraph.Depth);
+        Assert.True(subgraph.Nodes.Count <= 2);
+        Assert.Contains(subgraph.Relationships, edge =>
+            edge.RelationshipType is "HAS_BOM" or "REFERENCES");
+    }
+
+    [Fact]
+    public async Task GraphExplorer_pattern_query_matches_end_object_type()
+    {
+        await using var dbContext = CreateDbContext();
+        var context = SeedTenantUserAndDocument(dbContext);
+        var graph = new BloomGraphMemoryService(context.TenantId, context.GraphNodeId);
+        var service = CreateGraphExplorerService(dbContext, context, graph);
+
+        var result = await service.QueryPatternAsync(
+            new GraphExplorerPatternQueryRequest(
+                context.GraphNodeId,
+                "partVersion",
+                "part",
+                ["HAS_BOM"],
+                2,
+                "Trusted",
+                "Trusted",
+                null,
+                50,
+                null),
+            CancellationToken.None);
+
+        Assert.Contains(result.Nodes, node => node.NodeId == context.GraphNodeId);
+        Assert.Contains(result.Nodes, node =>
+            string.Equals(node.ObjectType, "part", StringComparison.OrdinalIgnoreCase));
+        Assert.NotEmpty(result.Relationships);
+        Assert.Equal(1, result.SeedCount);
+    }
+
+    [Fact]
+    public async Task GraphExplorer_pattern_query_rejects_empty_pattern()
+    {
+        await using var dbContext = CreateDbContext();
+        var context = SeedTenantUserAndDocument(dbContext);
+        var graph = new BloomGraphMemoryService(context.TenantId, context.GraphNodeId);
+        var service = CreateGraphExplorerService(dbContext, context, graph);
+
+        await Assert.ThrowsAsync<RequestValidationException>(() =>
+            service.QueryPatternAsync(
+                new GraphExplorerPatternQueryRequest(
+                    null,
+                    null,
+                    "part",
+                    null,
+                    2,
+                    null,
+                    null,
+                    null,
+                    50,
+                    null),
+                CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task GraphExplorer_denies_without_permission()
+    {
+        await using var dbContext = CreateDbContext();
+        var context = SeedTenantUserAndDocument(dbContext);
+        var graph = new BloomGraphMemoryService(context.TenantId, context.GraphNodeId);
+        var service = new GraphExplorerService(
+            graph,
+            new StaticTenantContextResolver(context),
+            new SelectivePermissionService(ExplorerPermissions.Read),
+            new RecordingDenialRecorder(),
+            new ExplorerPolicyFilter(new AllowAllPolicyService()));
+
+        await Assert.ThrowsAsync<TenantAccessDeniedException>(() =>
+            service.ListNodesAsync(null, null, null, null, null, null, CancellationToken.None));
     }
 
     [Fact]
@@ -796,6 +918,148 @@ public sealed class ExplorersTests
 
         public Task<GraphPromotionCopyResult> PromoteStagingAsync(Guid tenantId, IReadOnlyCollection<Guid> stagingNodeIds, IReadOnlyCollection<Guid> stagingRelationshipIds, CancellationToken cancellationToken)
             => Task.FromResult(new GraphPromotionCopyResult([], []));
+    }
+
+    private sealed class BloomGraphMemoryService(Guid tenantId, Guid startNodeId) : IGraphMemoryService
+    {
+        private readonly Guid _childNodeId = Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
+        private readonly Guid _extraNodeId = Guid.Parse("11111111-2222-3333-4444-555555555555");
+        private readonly Guid _relId = Guid.Parse("99999999-8888-7777-6666-555555555555");
+        private readonly Guid _extraRelId = Guid.Parse("aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb");
+
+        public Task<BaseNode> CreateNodeAsync(CreateGraphNodeRequest request, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<BaseNode> UpdateNodeAsync(UpdateGraphNodeRequest request, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<BaseRelationship> CreateRelationshipAsync(CreateGraphRelationshipRequest request, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public Task<BaseNode?> GetNodeAsync(Guid requestTenantId, Guid nodeId, CancellationToken cancellationToken)
+        {
+            var node = BuildNodes(requestTenantId).SingleOrDefault(item => item.NodeId == nodeId);
+            return Task.FromResult(node);
+        }
+
+        public Task<GraphTraversalResult> TraverseAsync(TraverseGraphRequest request, CancellationToken cancellationToken)
+        {
+            var nodes = BuildNodes(request.TenantId).ToDictionary(node => node.NodeId);
+            if (!nodes.TryGetValue(request.StartNodeId, out var start))
+            {
+                throw new InvalidOperationException("Traversal start node was not found for the current tenant.");
+            }
+
+            var relationships = BuildRelationships(request.TenantId)
+                .Where(relationship =>
+                    relationship.FromNodeId == request.StartNodeId
+                    || relationship.ToNodeId == request.StartNodeId
+                    || (request.MaxDepth > 1 && (
+                        relationship.FromNodeId == _childNodeId || relationship.ToNodeId == _childNodeId)))
+                .Where(relationship =>
+                    request.RelationshipTypes is null
+                    || request.RelationshipTypes.Count == 0
+                    || request.RelationshipTypes.Contains(relationship.RelationshipType, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+
+            var relatedNodes = new Dictionary<Guid, BaseNode> { [start.NodeId] = start };
+            foreach (var relationship in relationships)
+            {
+                if (nodes.TryGetValue(relationship.FromNodeId, out var from))
+                {
+                    relatedNodes[from.NodeId] = from;
+                }
+
+                if (nodes.TryGetValue(relationship.ToNodeId, out var to))
+                {
+                    relatedNodes[to.NodeId] = to;
+                }
+            }
+
+            return Task.FromResult(new GraphTraversalResult(start, relatedNodes.Values.ToList(), relationships));
+        }
+
+        public Task<GraphReadModel> ListGraphAsync(
+            Guid requestTenantId,
+            GraphSpace? graphSpace,
+            string? sourceBatchId,
+            IReadOnlyCollection<Guid>? nodeIds,
+            IReadOnlyCollection<Guid>? relationshipIds,
+            CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new GraphReadModel(BuildNodes(requestTenantId), BuildRelationships(requestTenantId)));
+        }
+
+        public Task<GraphPromotionCopyResult> PromoteStagingAsync(
+            Guid requestTenantId,
+            IReadOnlyCollection<Guid> stagingNodeIds,
+            IReadOnlyCollection<Guid> stagingRelationshipIds,
+            CancellationToken cancellationToken)
+            => Task.FromResult(new GraphPromotionCopyResult([], []));
+
+        private List<BaseNode> BuildNodes(Guid requestTenantId)
+        {
+            var now = DateTimeOffset.UtcNow;
+            return
+            [
+                new BaseNode(
+                    startNodeId,
+                    requestTenantId == Guid.Empty ? tenantId : requestTenantId,
+                    GraphSpace.Trusted,
+                    "partVersion",
+                    TrustState.Trusted,
+                    new Dictionary<string, string?> { ["classificationKey"] = "internal", ["safeSummary"] = "Trusted pump partVersion." },
+                    null,
+                    now,
+                    now),
+                new BaseNode(
+                    _childNodeId,
+                    requestTenantId == Guid.Empty ? tenantId : requestTenantId,
+                    GraphSpace.Trusted,
+                    "part",
+                    TrustState.Trusted,
+                    new Dictionary<string, string?> { ["classificationKey"] = "internal", ["safeSummary"] = "Trusted pump part." },
+                    null,
+                    now,
+                    now),
+                new BaseNode(
+                    _extraNodeId,
+                    requestTenantId == Guid.Empty ? tenantId : requestTenantId,
+                    GraphSpace.Trusted,
+                    "document",
+                    TrustState.Trusted,
+                    new Dictionary<string, string?> { ["classificationKey"] = "internal", ["safeSummary"] = "Trusted pump datasheet." },
+                    null,
+                    now,
+                    now)
+            ];
+        }
+
+        private List<BaseRelationship> BuildRelationships(Guid requestTenantId)
+        {
+            var now = DateTimeOffset.UtcNow;
+            var tid = requestTenantId == Guid.Empty ? tenantId : requestTenantId;
+            return
+            [
+                new BaseRelationship(
+                    _relId,
+                    tid,
+                    startNodeId,
+                    _childNodeId,
+                    "HAS_BOM",
+                    TrustState.Trusted,
+                    new Dictionary<string, string?> { ["safeSummary"] = "BOM edge." },
+                    null,
+                    now,
+                    now),
+                new BaseRelationship(
+                    _extraRelId,
+                    tid,
+                    startNodeId,
+                    _extraNodeId,
+                    "REFERENCES",
+                    TrustState.Trusted,
+                    new Dictionary<string, string?> { ["safeSummary"] = "Document edge." },
+                    null,
+                    now,
+                    now)
+            ];
+        }
     }
 
     private class AllowAllPolicyService : IClassificationPolicyService

@@ -2,6 +2,8 @@
 
 Use for every UI issue PR (UI-0.x through UI-6.x). All items must pass before marking an issue complete.
 
+**Program status:** Phases 0–4 **gold**. Prefer import-hub gold composition (`PageHeader`, shared primitives, Advanced/Debug demotion). Next focus: UI-6.x / adjacent slate.
+
 ---
 
 ## Scope guard
@@ -117,10 +119,20 @@ Frontend only. No backend changes.
 | --- | --- |
 | UI-0.1 | Token page in `/dev/ui-kit` |
 | UI-0.2 | All migrated routes load in shell |
-| UI-1.1 | Admin dump reachable at `/admin/foundation` |
-| UI-1.4 | Import demo flow works end-to-end through new routes |
-| UI-1.7 | Chat turn + governance panel |
-| UI-2.x | Tool run detail links from registry |
+| UI-1.1 | `/` matches Mission Control mockup (`01-command-center.png`); admin dump at `/admin/foundation`; live stream/scrubber honest if Issue 16.1 missing |
+| UI-1.2–1.3 | Model package/ontology + Layer 3–6 match import-hub gold (callout/table/side panel; KPIs + registry + preview extras) |
+| UI-1.4 | Import demo flow works end-to-end through new routes (gold bar) |
+| UI-1.5–1.6 | Promote gate/diff/heat; documents split; graph hub; 360 canvas; artifacts flowline |
+| UI-1.7 | Chat turn + governance panel + draft CTAs; AI Trace list KPIs + detail timeline |
+| UI-1.8 | Dashboard KPIs from live APIs; report outline + canvas |
+| UI-1.9 | Recommendation inbox filter + evidence detail |
+| UI-1.10 | Create tenant + user + role + membership (+ grant) on `/admin/identity`; wrappers only hit existing `/api/admin/identity/*`; tenant switcher updates headers; no OIDC |
+| UI-2.1 | `/tools` KPI + Kind table + `?kind=` Tabs; Register disabled; compatibility-scan action |
+| UI-2.2 | `/tools/[id]/edit` Mark ready / Publish / Validate / Dry-run; Save draft disabled |
+| UI-2.3 | Connector capability table + credential TraceTimeline + secret Notice |
+| UI-2.4 | Tool run KPIs + TraceTimeline + expected/actual; Execute gated; `/tool-runs` list linked from Advanced |
+| UI-3.x | **Done** — Issue 23–24 agent/workflow gold (mockups 28–34); React Flow UI-3.5; team placeholders Issue 25 |
+| UI-4.1 | **Done** — shared `KpiCard` + Recharts trends + boundary widget on `/governance` |
 | UI-5.x | If fixture canvas: label "Preview — backend Issue 16.1" |
 | UI-6.x | Playwright snapshots light+dark |
 

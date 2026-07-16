@@ -1,7 +1,14 @@
 import Link from "next/link";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
-import { AgentModelConfigPanel } from "@/components/agents/AgentModelConfigPanel";
 import { ensureMappingAgentSeedAction } from "@/components/agents/agent-configure-actions";
+import { AgentModelConfigPanel } from "@/components/agents/AgentModelConfigPanel";
+import { Badge, StatusBadge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { DataTable } from "@/components/ui/DataTable";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Notice } from "@/components/ui/Notice";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { PillStack, SidePanel } from "@/components/ui/SidePanel";
 import { getArtifactVersions, loadAgentVersionByKey } from "@/lib/etos-api";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +16,13 @@ export const dynamic = "force-dynamic";
 type PageProps = {
   params: Promise<{ agentKey: string }>;
   searchParams: Promise<{ versionId?: string; error?: string }>;
+};
+
+type CompositionRow = {
+  id: string;
+  aspect: string;
+  value: string;
+  state: string;
 };
 
 export default async function AgentConfigurePage({ params, searchParams }: PageProps) {
@@ -19,225 +33,302 @@ export default async function AgentConfigurePage({ params, searchParams }: PageP
 
   if (!loaded.data) {
     return (
-      <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-        <div className="mx-auto flex max-w-3xl flex-col gap-6">
-          <div className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-6 text-sm text-amber-100">
-            {loaded.error ?? "Agent was not found."}
-          </div>
-          <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">Recover local mapping assistant</h2>
-            <p className="mt-3 text-sm text-slate-400">
-              Tenant agent <code className="text-cyan-200">{decodedKey}</code> is seeded when the manufacturing
-              reference package installs. That step is skipped if the package was already published, or after{" "}
-              <strong className="font-semibold text-slate-300">Clean demo dataset</strong> removed artifacts.
+      <main className="px-6 py-8 lg:px-8">
+        <PageHeader
+          title={`Agent · ${decodedKey}`}
+          description="Tenant agent was not found. Seed from the manufacturing reference package or create from a template."
+        />
+        <div className="mb-4">
+          <ErrorState error={loaded.error ?? "Agent was not found."} />
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Recover local mapping assistant</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm text-etos-ink-muted">
+            <p>
+              Tenant agent <code className="font-mono text-etos-accent">{decodedKey}</code> is seeded when the
+              manufacturing reference package installs.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3">
               <form action={ensureMappingAgentSeedAction}>
                 <input type="hidden" name="agentKey" value={decodedKey} />
-                <button
-                  type="submit"
-                  className="rounded-2xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300"
-                >
-                  Install / ensure reference package
-                </button>
+                <Button type="submit">Install / ensure reference package</Button>
               </form>
-              <ExplorerNavLink href="/agents/new">Create agent from template</ExplorerNavLink>
-              <ExplorerNavLink href="/model-artifacts">Model artifacts</ExplorerNavLink>
-              <ExplorerNavLink href="/agents">Agents</ExplorerNavLink>
+              <Link href="/agents/new">
+                <Button type="button" variant="ghost">
+                  Create agent
+                </Button>
+              </Link>
             </div>
-            {error ? (
-              <p className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
-                {error}
-              </p>
-            ) : null}
-          </section>
-        </div>
+            {error ? <Notice variant="danger">{error}</Notice> : null}
+          </CardContent>
+        </Card>
       </main>
     );
   }
 
   const { detail, readiness, artifactId, versionId: selectedVersionId } = loaded.data;
   const versions = await getArtifactVersions(artifactId);
+  const isPublished = detail.artifactReadinessState.toLowerCase().includes("publish");
+  const canExecute = isPublished && !detail.safeModeEnabled;
+
+  const compositionRows: CompositionRow[] = [
+    {
+      id: "prompt",
+      aspect: "Prompt template",
+      value: detail.promptTemplate
+        ? `${detail.promptTemplate.artifactName} · ${detail.promptTemplate.versionLabel}`
+        : "—",
+      state: detail.promptTemplate?.readinessState ?? "Unset",
+    },
+    {
+      id: "model",
+      aspect: "Primary model",
+      value: `${detail.primaryModelProviderKey} / ${detail.primaryModelId}`,
+      state: detail.artifactReadinessState,
+    },
+    {
+      id: "retrieval",
+      aspect: "Retrieval",
+      value: detail.retrievalStrategy
+        ? `${detail.retrievalStrategy.strategyKey} · ${detail.retrievalStrategy.versionLabel}`
+        : "—",
+      state: detail.retrievalStrategy?.isEnabled ? "Enabled" : "Unset",
+    },
+    {
+      id: "tools",
+      aspect: "Tools",
+      value:
+        detail.referencedTools.length > 0
+          ? detail.referencedTools.map((t) => t.toolArtifactName).join(", ")
+          : "None",
+      state: `${detail.referencedTools.length} linked`,
+    },
+    {
+      id: "schema",
+      aspect: "Output schema",
+      value: detail.outputSchema
+        ? `${detail.outputSchema.artifactName} · ${detail.outputSchema.versionLabel}`
+        : "—",
+      state: detail.outputSchema?.readinessState ?? "Unset",
+    },
+    {
+      id: "fallback",
+      aspect: "Fallback models",
+      value:
+        detail.fallbackModels.length > 0
+          ? detail.fallbackModels.map((m) => m.modelId).join(", ")
+          : "None",
+      state: `${detail.fallbackModels.length}`,
+    },
+    {
+      id: "safe",
+      aspect: "Safe mode",
+      value: detail.safeModeEnabled ? "Enabled" : "Disabled",
+      state: detail.previewModeDefault ? "Preview default" : "Execute default",
+    },
+    {
+      id: "preview",
+      aspect: "Preview mode default",
+      value: detail.previewModeDefault ? "Yes" : "No",
+      state: detail.preferredRuntimeAdapterKey,
+    },
+  ];
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 23 · Configure</p>
-              <h1 className="mt-2 text-4xl font-semibold">{detail.displayName}</h1>
-              <p className="mt-3 text-slate-400">
-                {detail.agentKey} · {detail.versionLabel} · {detail.artifactReadinessState}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href={`/agents/${encodeURIComponent(detail.agentKey)}/test-run?versionId=${encodeURIComponent(selectedVersionId)}`}>
-                Test run
-              </ExplorerNavLink>
-              <ExplorerNavLink href="/agent-runs">Agent runs</ExplorerNavLink>
-              <ExplorerNavLink href="/agent-templates">Templates</ExplorerNavLink>
-              <ExplorerNavLink href="/agents">Agents</ExplorerNavLink>
-              <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
-              <ExplorerNavLink href="/">Home</ExplorerNavLink>
-            </div>
-          </div>
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title={detail.displayName}
+        description={`${detail.agentKey} · ${detail.versionLabel} · ${detail.artifactReadinessState}`}
+        actions={
+          <>
+            <Link
+              href={`/agents/${encodeURIComponent(detail.agentKey)}/test-run?versionId=${encodeURIComponent(selectedVersionId)}`}
+            >
+              <Button type="button">Run test fixture</Button>
+            </Link>
+            <Link href="/agents">
+              <Button type="button" variant="ghost">
+                Registry
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
-          {versions.data && versions.data.length > 1 ? (
-            <div className="mt-6">
-              <p className="text-sm font-semibold text-slate-400">Versions</p>
-              <ul className="mt-2 flex flex-wrap gap-2">
-                {versions.data.map((version) => {
-                  const isSelected = version.id === selectedVersionId;
-                  return (
-                    <li key={version.id}>
-                      <Link
-                        href={`/agents/${encodeURIComponent(detail.agentKey)}/configure?versionId=${encodeURIComponent(version.id)}`}
-                        className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                          isSelected
-                            ? "bg-cyan-300 text-slate-950"
-                            : "border border-slate-700 text-slate-300 hover:border-cyan-300 hover:text-cyan-100"
-                        }`}
-                      >
-                        {version.versionLabel} · {version.readinessState}
-                      </Link>
-                    </li>
-                  );
-                })}
+      {error ? (
+        <div className="mb-4">
+          <Notice variant="danger">{error}</Notice>
+        </div>
+      ) : null}
+
+      {versions.data && versions.data.length > 1 ? (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {versions.data.map((version) => {
+            const selected = version.id === selectedVersionId;
+            return (
+              <Link
+                key={version.id}
+                href={`/agents/${encodeURIComponent(detail.agentKey)}/configure?versionId=${encodeURIComponent(version.id)}`}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  selected
+                    ? "bg-etos-accent text-etos-accent-fg"
+                    : "border border-etos-border text-etos-ink-muted hover:border-etos-accent"
+                }`}
+              >
+                {version.versionLabel} · {version.readinessState}
+              </Link>
+            );
+          })}
+        </div>
+      ) : null}
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Composition</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DataTable<CompositionRow>
+                rows={compositionRows}
+                rowKey={(row) => row.id}
+                emptyMessage="No composition rows."
+                columns={[
+                  {
+                    key: "aspect",
+                    header: "Aspect",
+                    render: (row) => <span className="font-semibold text-etos-ink">{row.aspect}</span>,
+                  },
+                  {
+                    key: "value",
+                    header: "Value",
+                    render: (row) => (
+                      <span className="text-sm text-etos-ink-muted">{row.value}</span>
+                    ),
+                  },
+                  {
+                    key: "state",
+                    header: "State",
+                    render: (row) => <StatusBadge status={row.state} />,
+                  },
+                ]}
+              />
+            </CardContent>
+          </Card>
+
+          <AgentModelConfigPanel
+            artifactId={artifactId}
+            versionId={selectedVersionId}
+            agentKey={detail.agentKey}
+            detail={detail}
+            errorMessage={error ?? null}
+          />
+        </div>
+
+        <div className="space-y-4">
+          <SidePanel title="Publish rail">
+            <PillStack
+              items={[
+                {
+                  label: "Readiness",
+                  value: detail.artifactReadinessState,
+                  variant: isPublished ? "success" : "warning",
+                },
+                {
+                  label: "Safe mode",
+                  value: detail.safeModeEnabled ? "On" : "Off",
+                  variant: detail.safeModeEnabled ? "warning" : "info",
+                },
+                {
+                  label: "Risk",
+                  value: detail.derivedCapabilityRisk?.effectiveRiskLevel ?? "Pending",
+                  variant: "purple",
+                },
+                {
+                  label: "Execute",
+                  value: canExecute ? "Allowed" : "Gated",
+                  variant: canExecute ? "success" : "neutral",
+                },
+              ]}
+            />
+            {readiness.blockingReasons.length > 0 ? (
+              <ul className="mt-4 space-y-2 text-xs text-etos-warning-fg">
+                {readiness.blockingReasons.map((reason) => (
+                  <li key={reason} className="rounded-xl border border-etos-border bg-etos-panel-muted px-2 py-1.5">
+                    {reason}
+                  </li>
+                ))}
               </ul>
-            </div>
-          ) : null}
-        </section>
-
-        <AgentModelConfigPanel
-          artifactId={artifactId}
-          versionId={selectedVersionId}
-          agentKey={detail.agentKey}
-          detail={detail}
-          errorMessage={error ?? null}
-        />
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Safe mode and preview defaults</h2>
-          <ul className="mt-4 grid gap-2 text-sm text-slate-300 md:grid-cols-2">
-            <li>Safe mode enabled: {detail.safeModeEnabled ? "Yes" : "No"}</li>
-            <li>Preview mode default: {detail.previewModeDefault ? "Yes" : "No"}</li>
-          </ul>
-          {detail.blockedModeMessage ? (
-            <p className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
-              {detail.blockedModeMessage}
+            ) : (
+              <p className="mt-4 text-xs text-etos-ink-muted">No blocking readiness notes.</p>
+            )}
+            <p className="mt-4 text-xs text-etos-ink-muted">
+              Mark ready / Publish live in Model routing below. Execute stays gated until published and safe mode is
+              off.
             </p>
+          </SidePanel>
+
+          {detail.derivedCapabilityRisk ? (
+            <SidePanel title="Risk profile">
+              <PillStack
+                items={[
+                  {
+                    label: "Effective",
+                    value: detail.derivedCapabilityRisk.effectiveRiskLevel,
+                    variant: "warning",
+                  },
+                  {
+                    label: "Permission",
+                    value: detail.derivedCapabilityRisk.permissionCeiling,
+                    variant: "info",
+                  },
+                  {
+                    label: "Semantic fallback",
+                    value: detail.derivedCapabilityRisk.retrievalRisk.allowsSemanticFallback
+                      ? "Allowed"
+                      : "Blocked",
+                  },
+                  {
+                    label: "Vector fallback",
+                    value: detail.derivedCapabilityRisk.retrievalRisk.allowsVectorFallback
+                      ? "Allowed"
+                      : "Blocked",
+                  },
+                ]}
+              />
+            </SidePanel>
           ) : null}
-        </section>
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Read-only references</h2>
-          {readiness.blockingReasons.length > 0 ? (
-            <ul className="mt-4 space-y-2 text-sm text-amber-100">
-              {readiness.blockingReasons.map((reason) => (
-                <li key={reason} className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2">
-                  {reason}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-400">No blocking readiness notes for this version.</p>
-          )}
-
-          {detail.agentType ? (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-400">Agent type</h3>
-              <p className="mt-2 text-sm text-slate-300">
-                {detail.agentType.typeKey} · {detail.agentType.versionLabel} · {detail.agentType.readinessState} ·{" "}
-                {detail.agentType.riskBaseline} baseline
-              </p>
-            </div>
-          ) : null}
-
-          {detail.promptTemplate ? (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-400">Prompt template</h3>
-              <p className="mt-2 text-sm text-slate-300">
-                {detail.promptTemplate.artifactName} · {detail.promptTemplate.versionLabel} ·{" "}
-                {detail.promptTemplate.readinessState}
-              </p>
-            </div>
-          ) : null}
-
-          {detail.outputSchema ? (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-400">Output schema</h3>
-              <p className="mt-2 text-sm text-slate-300">
-                {detail.outputSchema.artifactName} · {detail.outputSchema.versionLabel} ·{" "}
-                {detail.outputSchema.readinessState}
-              </p>
-            </div>
-          ) : null}
-
-          {detail.queryIntent ? (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-400">Query intent</h3>
-              <p className="mt-2 text-sm text-slate-300">
-                {detail.queryIntent.intentKey} · {detail.queryIntent.versionLabel}
-                {detail.queryIntent.isEnabled ? "" : " · disabled"}
-              </p>
-            </div>
-          ) : null}
-
-          {detail.retrievalStrategy ? (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-400">Retrieval strategy</h3>
-              <p className="mt-2 text-sm text-slate-300">
-                {detail.retrievalStrategy.strategyKey} · {detail.retrievalStrategy.versionLabel}
-              </p>
-            </div>
-          ) : null}
-
-          {detail.referencedTools.length > 0 ? (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-400">Referenced tools</h3>
-              <ul className="mt-2 space-y-1 text-sm text-slate-300">
-                {detail.referencedTools.map((tool) => (
-                  <li key={tool.toolDefinitionVersionId}>
-                    <Link href={`/tools/${tool.toolArtifactId}`} className="text-cyan-300 hover:text-cyan-100">
-                      {tool.toolArtifactName}
-                    </Link>{" "}
-                    · {tool.versionLabel} · {tool.riskLevel} risk · {tool.readinessState}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
-          {detail.referencedSkills.length > 0 ? (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-400">Referenced skills</h3>
-              <ul className="mt-2 space-y-1 text-sm text-slate-300">
-                {detail.referencedSkills.map((skill) => (
-                  <li key={skill.skillDefinitionVersionId}>
-                    {skill.skillKey} · {skill.versionLabel} · {skill.readinessState}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </section>
-
-        {detail.derivedCapabilityRisk ? (
-          <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-2xl font-semibold">Derived capability risk</h2>
-            <ul className="mt-4 space-y-2 text-sm text-slate-300">
-              <li>Effective risk: {detail.derivedCapabilityRisk.effectiveRiskLevel}</li>
-              <li>Permission ceiling: {detail.derivedCapabilityRisk.permissionCeiling}</li>
-              <li>
-                Retrieval fallback: semantic{" "}
-                {detail.derivedCapabilityRisk.retrievalRisk.allowsSemanticFallback ? "allowed" : "blocked"}, vector{" "}
-                {detail.derivedCapabilityRisk.retrievalRisk.allowsVectorFallback ? "allowed" : "blocked"}
-              </li>
-            </ul>
-          </section>
-        ) : null}
+        </div>
       </div>
+
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4 text-sm text-etos-ink-muted">
+        <summary className="cursor-pointer font-extrabold text-etos-ink">Advanced / Debug</summary>
+        <div className="mt-4 space-y-4">
+          <form action={ensureMappingAgentSeedAction} className="flex flex-wrap gap-3">
+            <input type="hidden" name="agentKey" value={detail.agentKey} />
+            <Button type="submit" variant="ghost">
+              Re-seed mapping agent package
+            </Button>
+            <Link href="/agent-templates" className="text-etos-accent hover:underline self-center">
+              Templates
+            </Link>
+          </form>
+          {detail.referencedTools.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {detail.referencedTools.map((tool) => (
+                <Badge key={tool.toolDefinitionVersionId} variant="info">
+                  {tool.toolArtifactName}
+                </Badge>
+              ))}
+            </div>
+          ) : null}
+          <pre className="overflow-x-auto rounded-xl border border-etos-border bg-etos-panel p-3 text-xs">
+            {JSON.stringify({ detail, readiness }, null, 2)}
+          </pre>
+        </div>
+      </details>
     </main>
   );
 }

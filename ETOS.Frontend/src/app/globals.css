@@ -1,26 +1,1029 @@
 @import "tailwindcss";
 
+/*
+ * EnterpriseThreadOS design tokens (UI-0.1).
+ * Source: .docs/.prd/.ui/design-system-light-dark.md
+ * Light enterprise workspace + light sidebar; `.dark` is a deliberate second
+ * palette (navy sidebar, deep canvas), not an inversion. Ops-canvas tokens
+ * follow the same light/dark switch for Mission Control and digital-thread.
+ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces */
+  --etos-canvas: #f5f7fb;
+  --etos-canvas-gradient-from: #f7f9fc;
+  --etos-canvas-gradient-to: #edf3fb;
+  --etos-panel: #ffffff;
+  --etos-panel-muted: #f8fafc;
+  --etos-panel-elevated: rgba(255, 255, 255, 0.92);
+
+  /* Ink */
+  --etos-ink: #0f172a;
+  --etos-ink-muted: #64748b;
+  --etos-ink-subtle: #94a3b8;
+
+  /* Borders */
+  --etos-border: #d8e0ea;
+  --etos-border-soft: #e2e8f0;
+  --etos-border-panel: rgba(203, 213, 225, 0.9);
+
+  /* Sidebar — light theme */
+  --etos-nav-from: #ffffff;
+  --etos-nav-to: #f1f5f9;
+  --etos-nav-ink: #334155;
+  --etos-nav-muted: #64748b;
+  --etos-nav-section: #94a3b8;
+  --etos-nav-brand: #0f172a;
+  --etos-nav-active-ink: #0f172a;
+  --etos-nav-active-border: rgba(37, 99, 235, 0.28);
+  --etos-nav-active-bg: linear-gradient(
+    90deg,
+    rgba(14, 165, 233, 0.14),
+    rgba(124, 58, 237, 0.1)
+  );
+  --etos-nav-hover: rgba(15, 23, 42, 0.05);
+  --etos-nav-divider: rgba(15, 23, 42, 0.08);
+  --etos-nav-soon-border: rgba(15, 23, 42, 0.12);
+
+  /* Accents */
+  --etos-accent: #2563eb;
+  --etos-accent-indigo: #4f46e5;
+  --etos-accent-cyan: #0ea5e9;
+  --etos-accent-purple: #7c3aed;
+
+  /* Status — foreground / background pairs */
+  --etos-success-fg: #166534;
+  --etos-success-bg: #dcfce7;
+  --etos-success-border: #bbf7d0;
+  --etos-warning-fg: #92400e;
+  --etos-warning-bg: #fef3c7;
+  --etos-warning-border: #fde68a;
+  --etos-danger-fg: #991b1b;
+  --etos-danger-bg: #fee2e2;
+  --etos-danger-border: #fecaca;
+  --etos-info-fg: #1d4ed8;
+  --etos-info-bg: #dbeafe;
+  --etos-info-border: #bfdbfe;
+  --etos-neutral-fg: #475569;
+  --etos-neutral-bg: #f1f5f9;
+  --etos-neutral-border: #e2e8f0;
+  --etos-teal-fg: #0f766e;
+  --etos-teal-bg: #ccfbf1;
+  --etos-teal-border: #99f6e4;
+  --etos-purple-fg: #5b21b6;
+  --etos-purple-bg: #ede9fe;
+  --etos-purple-border: #ddd6fe;
+
+  /* Elevation */
+  --etos-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+
+  /* Top bar */
+  --etos-topbar-bg: rgba(255, 255, 255, 0.86);
+  --etos-topbar-blur: 20px;
+  --etos-tenant-pill-bg: #e0f2fe;
+  --etos-tenant-pill-fg: #0369a1;
+  --etos-tenant-pill-border: #bae6fd;
+
+  /* Mission Control / digital-thread ops canvas — light */
+  --etos-ops-canvas: #f5f7fb;
+  --etos-ops-panel: #ffffff;
+  --etos-ops-panel-elevated: #ffffff;
+  --etos-ops-border: #d8e0ea;
+  --etos-ops-ink: #0f172a;
+  --etos-ops-ink-muted: #64748b;
+  --etos-ops-heat-0: #e2e8f0;
+  --etos-ops-heat-1: #bae6fd;
+  --etos-ops-heat-2: #38bdf8;
+  --etos-ops-heat-3: #14b8a6;
+  --etos-ops-heat-4: #f59e0b;
+  --etos-ops-track: #e2e8f0;
+
+  /* Digital thread timeline — light workspace */
+  --etos-thread-shell-from: #ffffff;
+  --etos-thread-shell-to: #f0f5fb;
+  --etos-thread-shell-glow: rgba(37, 99, 235, 0.1);
+  --etos-thread-shell-border: #d8e0ea;
+  --etos-thread-shell-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+  --etos-thread-header-bg: rgba(255, 255, 255, 0.92);
+  --etos-thread-header-border: #e2e8f0;
+  --etos-thread-eyebrow: #0284c7;
+  --etos-thread-title: #0f172a;
+  --etos-thread-ink: #0f172a;
+  --etos-thread-ink-muted: #64748b;
+  --etos-thread-ink-subtle: #94a3b8;
+  --etos-thread-control-bg: #ffffff;
+  --etos-thread-control-border: #d8e0ea;
+  --etos-thread-control-ink: #334155;
+  --etos-thread-control-hover: rgba(37, 99, 235, 0.45);
+  --etos-thread-pill-border: #bae6fd;
+  --etos-thread-pill-ink: #0369a1;
+  --etos-thread-live-border: rgba(16, 185, 129, 0.45);
+  --etos-thread-live-ink: #059669;
+  --etos-thread-grid-line: rgba(37, 99, 235, 0.1);
+  --etos-thread-ambient-1: rgba(37, 99, 235, 0.08);
+  --etos-thread-ambient-2: rgba(14, 165, 233, 0.06);
+  --etos-thread-logo-bg: #f8fafc;
+  --etos-thread-card-bg: rgba(255, 255, 255, 0.94);
+  --etos-thread-card-border: #d8e0ea;
+  --etos-thread-card-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+  --etos-thread-marker-ring: rgba(15, 23, 42, 0.12);
+  --etos-thread-line-soft: rgba(37, 99, 235, 0.18);
+  --etos-thread-line-dash: #0284c7;
+  --etos-thread-globe-border: rgba(37, 99, 235, 0.35);
+  --etos-thread-globe-core: #dbeafe;
+  --etos-thread-globe-deep: #93c5fd;
+  --etos-thread-globe-highlight: rgba(56, 189, 248, 0.35);
+  --etos-thread-globe-orbit: rgba(37, 99, 235, 0.22);
+  --etos-thread-globe-halo: rgba(37, 99, 235, 0.08);
+  --etos-thread-globe-node: #0369a1;
+  --etos-thread-sync-ok: #059669;
+  --etos-thread-sync-warn: #d97706;
+  --etos-thread-sync-err: #dc2626;
+}
+
+.dark {
+  --etos-canvas: #0b1220;
+  --etos-canvas-gradient-from: #0a101c;
+  --etos-canvas-gradient-to: #0f172a;
+  --etos-panel: #0f172a;
+  --etos-panel-muted: #1e293b;
+  --etos-panel-elevated: rgba(15, 23, 42, 0.92);
+
+  --etos-ink: #e2e8f0;
+  --etos-ink-muted: #94a3b8;
+  --etos-ink-subtle: #64748b;
+
+  --etos-border: #334155;
+  --etos-border-soft: #1e293b;
+  --etos-border-panel: rgba(51, 65, 85, 0.9);
+
+  /* Sidebar — navy brand in dark */
+  --etos-nav-from: #101a33;
+  --etos-nav-to: #0b1224;
+  --etos-nav-ink: #dbeafe;
+  --etos-nav-muted: #93c5fd;
+  --etos-nav-section: #7da0d5;
+  --etos-nav-brand: #ffffff;
+  --etos-nav-active-ink: #ffffff;
+  --etos-nav-active-border: rgba(147, 197, 253, 0.22);
+  --etos-nav-active-bg: linear-gradient(
+    90deg,
+    rgba(14, 165, 233, 0.22),
+    rgba(124, 58, 237, 0.17)
+  );
+  --etos-nav-hover: rgba(255, 255, 255, 0.05);
+  --etos-nav-divider: rgba(255, 255, 255, 0.1);
+  --etos-nav-soon-border: rgba(255, 255, 255, 0.15);
+
+  --etos-accent: #60a5fa;
+  --etos-accent-indigo: #818cf8;
+  --etos-accent-cyan: #38bdf8;
+  --etos-accent-purple: #a78bfa;
+
+  --etos-success-fg: #6ee7b7;
+  --etos-success-bg: #052e2b;
+  --etos-success-border: #115e59;
+  --etos-warning-fg: #fcd34d;
+  --etos-warning-bg: #422006;
+  --etos-warning-border: #78350f;
+  --etos-danger-fg: #fca5a5;
+  --etos-danger-bg: #450a0a;
+  --etos-danger-border: #7f1d1d;
+  --etos-info-fg: #93c5fd;
+  --etos-info-bg: #172554;
+  --etos-info-border: #1e3a8a;
+  --etos-neutral-fg: #cbd5e1;
+  --etos-neutral-bg: #1e293b;
+  --etos-neutral-border: #334155;
+  --etos-teal-fg: #5eead4;
+  --etos-teal-bg: #042f2e;
+  --etos-teal-border: #0f766e;
+  --etos-purple-fg: #c4b5fd;
+  --etos-purple-bg: #2e1065;
+  --etos-purple-border: #5b21b6;
+
+  --etos-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
+
+  --etos-topbar-bg: rgba(15, 23, 42, 0.86);
+  --etos-tenant-pill-bg: #172554;
+  --etos-tenant-pill-fg: #93c5fd;
+  --etos-tenant-pill-border: #1e3a8a;
+
+  /* Mission Control / digital-thread ops canvas — dark */
+  --etos-ops-canvas: #070b14;
+  --etos-ops-panel: #0f172a;
+  --etos-ops-panel-elevated: #152033;
+  --etos-ops-border: #1e3a5f;
+  --etos-ops-ink: #e2e8f0;
+  --etos-ops-ink-muted: #7d93b5;
+  --etos-ops-heat-0: #1e293b;
+  --etos-ops-heat-1: #0c4a6e;
+  --etos-ops-heat-2: #0369a1;
+  --etos-ops-heat-3: #14b8a6;
+  --etos-ops-heat-4: #f59e0b;
+  --etos-ops-track: #1e293b;
+
+  /* Digital thread timeline — dark ops (mockup screen 01) */
+  --etos-thread-shell-from: #020d1a;
+  --etos-thread-shell-to: #010913;
+  --etos-thread-shell-glow: rgba(0, 107, 255, 0.14);
+  --etos-thread-shell-border: rgba(73, 135, 191, 0.19);
+  --etos-thread-shell-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 30px 70px rgba(0, 0, 0, 0.32);
+  --etos-thread-header-bg: rgba(2, 13, 27, 0.84);
+  --etos-thread-header-border: rgba(94, 158, 218, 0.13);
+  --etos-thread-eyebrow: #3da8f7;
+  --etos-thread-title: #dcebfa;
+  --etos-thread-ink: #eef8ff;
+  --etos-thread-ink-muted: #9fb6c9;
+  --etos-thread-ink-subtle: #7d96a9;
+  --etos-thread-control-bg: rgba(4, 17, 32, 0.85);
+  --etos-thread-control-border: rgba(94, 158, 218, 0.2);
+  --etos-thread-control-ink: #cdddec;
+  --etos-thread-control-hover: rgba(42, 157, 255, 0.52);
+  --etos-thread-pill-border: rgba(94, 158, 218, 0.28);
+  --etos-thread-pill-ink: #9fb6c9;
+  --etos-thread-live-border: rgba(114, 239, 139, 0.45);
+  --etos-thread-live-ink: #72ef8b;
+  --etos-thread-grid-line: rgba(52, 139, 220, 0.12);
+  --etos-thread-ambient-1: rgba(0, 116, 255, 0.12);
+  --etos-thread-ambient-2: rgba(0, 213, 255, 0.08);
+  --etos-thread-logo-bg: rgba(4, 17, 32, 0.7);
+  --etos-thread-card-bg: rgba(2, 15, 28, 0.88);
+  --etos-thread-card-border: rgba(73, 135, 191, 0.17);
+  --etos-thread-card-shadow: 0 12px 25px rgba(0, 0, 0, 0.28);
+  --etos-thread-marker-ring: rgba(218, 245, 255, 0.82);
+  --etos-thread-line-soft: rgba(26, 122, 255, 0.22);
+  --etos-thread-line-dash: #b7e9ff;
+  --etos-thread-globe-border: rgba(73, 171, 255, 0.52);
+  --etos-thread-globe-core: #01132d;
+  --etos-thread-globe-deep: rgba(0, 73, 177, 0.76);
+  --etos-thread-globe-highlight: rgba(90, 184, 255, 0.48);
+  --etos-thread-globe-orbit: rgba(50, 153, 255, 0.3);
+  --etos-thread-globe-halo: rgba(0, 114, 255, 0.09);
+  --etos-thread-globe-node: #d7f5ff;
+  --etos-thread-sync-ok: #72ef8b;
+  --etos-thread-sync-warn: #f6c85f;
+  --etos-thread-sync-err: #ff6577;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Surfaces */
+  --color-etos-canvas: var(--etos-canvas);
+  --color-etos-panel: var(--etos-panel);
+  --color-etos-panel-muted: var(--etos-panel-muted);
+  --color-etos-panel-elevated: var(--etos-panel-elevated);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Ink */
+  --color-etos-ink: var(--etos-ink);
+  --color-etos-ink-muted: var(--etos-ink-muted);
+  --color-etos-ink-subtle: var(--etos-ink-subtle);
+
+  /* Borders */
+  --color-etos-border: var(--etos-border);
+  --color-etos-border-soft: var(--etos-border-soft);
+  --color-etos-border-panel: var(--etos-border-panel);
+
+  /* Sidebar */
+  --color-etos-nav-from: var(--etos-nav-from);
+  --color-etos-nav-to: var(--etos-nav-to);
+  --color-etos-nav-ink: var(--etos-nav-ink);
+  --color-etos-nav-muted: var(--etos-nav-muted);
+  --color-etos-nav-section: var(--etos-nav-section);
+  --color-etos-nav-brand: var(--etos-nav-brand);
+  --color-etos-nav-active-ink: var(--etos-nav-active-ink);
+
+  /* Accents */
+  --color-etos-accent: var(--etos-accent);
+  --color-etos-accent-indigo: var(--etos-accent-indigo);
+  --color-etos-accent-cyan: var(--etos-accent-cyan);
+  --color-etos-accent-purple: var(--etos-accent-purple);
+
+  /* Status */
+  --color-etos-success-fg: var(--etos-success-fg);
+  --color-etos-success-bg: var(--etos-success-bg);
+  --color-etos-success-border: var(--etos-success-border);
+  --color-etos-warning-fg: var(--etos-warning-fg);
+  --color-etos-warning-bg: var(--etos-warning-bg);
+  --color-etos-warning-border: var(--etos-warning-border);
+  --color-etos-danger-fg: var(--etos-danger-fg);
+  --color-etos-danger-bg: var(--etos-danger-bg);
+  --color-etos-danger-border: var(--etos-danger-border);
+  --color-etos-info-fg: var(--etos-info-fg);
+  --color-etos-info-bg: var(--etos-info-bg);
+  --color-etos-info-border: var(--etos-info-border);
+  --color-etos-neutral-fg: var(--etos-neutral-fg);
+  --color-etos-neutral-bg: var(--etos-neutral-bg);
+  --color-etos-neutral-border: var(--etos-neutral-border);
+  --color-etos-teal-fg: var(--etos-teal-fg);
+  --color-etos-teal-bg: var(--etos-teal-bg);
+  --color-etos-teal-border: var(--etos-teal-border);
+  --color-etos-purple-fg: var(--etos-purple-fg);
+  --color-etos-purple-bg: var(--etos-purple-bg);
+  --color-etos-purple-border: var(--etos-purple-border);
+
+  /* Top bar */
+  --color-etos-topbar: var(--etos-topbar-bg);
+  --color-etos-tenant-pill-bg: var(--etos-tenant-pill-bg);
+  --color-etos-tenant-pill-fg: var(--etos-tenant-pill-fg);
+  --color-etos-tenant-pill-border: var(--etos-tenant-pill-border);
+
+  /* Ops canvas (Mission Control / digital thread) */
+  --color-etos-ops-canvas: var(--etos-ops-canvas);
+  --color-etos-ops-panel: var(--etos-ops-panel);
+  --color-etos-ops-panel-elevated: var(--etos-ops-panel-elevated);
+  --color-etos-ops-border: var(--etos-ops-border);
+  --color-etos-ops-ink: var(--etos-ops-ink);
+  --color-etos-ops-ink-muted: var(--etos-ops-ink-muted);
+  --color-etos-ops-heat-0: var(--etos-ops-heat-0);
+  --color-etos-ops-heat-1: var(--etos-ops-heat-1);
+  --color-etos-ops-heat-2: var(--etos-ops-heat-2);
+  --color-etos-ops-heat-3: var(--etos-ops-heat-3);
+  --color-etos-ops-heat-4: var(--etos-ops-heat-4);
+  --color-etos-ops-track: var(--etos-ops-track);
+
+  /* Elevation + radii */
+  --shadow-etos: var(--etos-shadow);
+  --radius-etos-card: 18px;
+  --radius-etos-button: 12px;
+
+  /* Typography */
+  --font-sans: var(--font-inter);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--etos-canvas);
+  color: var(--etos-ink);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ── Digital Thread Timeline (Mission Control ops canvas) ── */
+
+.thread-shell {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--etos-thread-shell-border);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 50% 46%, var(--etos-thread-shell-glow), transparent 32%),
+    linear-gradient(
+      180deg,
+      var(--etos-thread-shell-from) 0%,
+      var(--etos-thread-shell-to) 100%
+    );
+  color: var(--etos-thread-ink);
+  box-shadow: var(--etos-thread-shell-shadow);
+}
+
+.thread-header {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--etos-thread-header-border);
+  background: var(--etos-thread-header-bg);
+  backdrop-filter: blur(16px);
+}
+
+.thread-eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  color: var(--etos-thread-eyebrow);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+}
+
+.thread-preview-pill,
+.thread-live-pill {
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  border: 1px solid var(--etos-thread-pill-border);
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--etos-thread-pill-ink);
+}
+
+.thread-live-pill {
+  border-color: var(--etos-thread-live-border);
+  color: var(--etos-thread-live-ink);
+}
+
+.thread-title {
+  margin: 0;
+  color: var(--etos-thread-title);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.thread-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.thread-select,
+.thread-filter-button {
+  height: 32px;
+  border: 1px solid var(--etos-thread-control-border);
+  border-radius: 8px;
+  background: var(--etos-thread-control-bg);
+  color: var(--etos-thread-control-ink);
+  font-size: 11px;
+  outline: none;
+}
+
+.thread-select {
+  min-width: 158px;
+  padding: 0 32px 0 12px;
+}
+
+.thread-filter-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+.thread-filter-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.thread-filter-button:hover:not(:disabled),
+.thread-select:hover {
+  border-color: var(--etos-thread-control-hover);
+}
+
+.thread-viewport {
+  position: relative;
+  min-width: 1278px;
+  height: 386px;
+  overflow: hidden;
+}
+
+.ambient-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.55;
+  background-image:
+    linear-gradient(var(--etos-thread-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--etos-thread-grid-line) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+.dark .ambient-grid {
+  opacity: 0.12;
+}
+
+.ambient-light {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+.ambient-light-one {
+  top: 50px;
+  left: 18%;
+  width: 234px;
+  height: 120px;
+  background: var(--etos-thread-ambient-1);
+}
+
+.ambient-light-two {
+  top: 80px;
+  right: 14%;
+  width: 270px;
+  height: 130px;
+  background: var(--etos-thread-ambient-2);
+}
+
+.timeline-line {
+  position: absolute;
+  z-index: 5;
+  top: 108px;
+  left: 0;
+  width: 100%;
+  height: 162px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.timeline-line-soft {
+  stroke: var(--etos-thread-line-soft);
+}
+
+.timeline-line-dash {
+  stroke: var(--etos-thread-line-dash);
+}
+
+.timeline-content {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  height: 100%;
+  min-width: 1278px;
+  padding: 11px 9px 0;
+}
+
+.timeline-column {
+  position: relative;
+  display: flex;
+  min-width: 140px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.system-heading {
+  position: absolute;
+  top: 2px;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.system-logo {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid;
+  border-radius: 11px;
+  background: var(--etos-thread-logo-bg);
+}
+
+.system-logo-image {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.system-name {
+  min-height: 22px;
+  margin: 5px 0 0;
+  padding: 0 4px;
+  color: var(--etos-thread-ink);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 12px;
+}
+
+.system-time {
+  margin: 0;
+  color: var(--etos-thread-ink-muted);
+  font-size: 9px;
+}
+
+.system-status {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 2px;
+  color: var(--etos-thread-ink-subtle);
+  font-size: 9px;
+}
+
+.system-status-ok {
+  color: var(--etos-thread-sync-ok);
+}
+
+.system-status-warn {
+  color: var(--etos-thread-sync-warn);
+}
+
+.system-status-err {
+  color: var(--etos-thread-sync-err);
+}
+
+.timeline-marker {
+  --event-color: #1685ff;
+
+  position: absolute;
+  z-index: 12;
+  /* `top` set per column in JS so cores sit on the SVG curve */
+  top: 176px;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.marker-core {
+  position: relative;
+  z-index: 2;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--etos-thread-marker-ring);
+  border-radius: 999px;
+  background: var(--event-color);
+  box-shadow:
+    0 0 6px color-mix(in srgb, var(--event-color) 40%, white),
+    0 0 14px var(--event-color),
+    0 0 26px color-mix(in srgb, var(--event-color) 55%, transparent);
+}
+
+.marker-pulse {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--event-color);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--event-color) 26%, transparent);
+  box-shadow: 0 0 20px var(--event-color);
+  animation: markerPulse 2.2s ease-out infinite;
+}
+
+.timeline-marker:hover {
+  transform: scale(1.12);
+}
+
+.timeline-marker.is-selected .marker-core {
+  width: 14px;
+  height: 14px;
+}
+
+.timeline-connector {
+  --event-color: #1685ff;
+
+  position: absolute;
+  z-index: 8;
+  /* `top`/`height` set per column in JS from marker → card */
+  top: 196px;
+  width: 1px;
+  height: 44px;
+  background: linear-gradient(
+    to bottom,
+    var(--event-color),
+    color-mix(in srgb, var(--event-color) 25%, transparent)
+  );
+  box-shadow: 0 0 8px color-mix(in srgb, var(--event-color) 50%, transparent);
+}
+
+.connector-dot {
+  position: absolute;
+  bottom: -4px;
+  left: -3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--event-color);
+  box-shadow: 0 0 10px var(--event-color);
+}
+
+.event-card {
+  --event-color: #1685ff;
+
+  position: absolute;
+  top: 240px;
+  display: flex;
+  width: 122px;
+  min-height: 83px;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;
+  border: 1px solid var(--etos-thread-card-border);
+  border-radius: 7px;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--event-color) 8%, transparent),
+      transparent 52%
+    ),
+    var(--etos-thread-card-bg);
+  padding: 10px 9px 9px 12px;
+  text-align: left;
+  box-shadow:
+    var(--etos-thread-card-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.event-card:hover,
+.event-card.is-selected {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--event-color) 60%, transparent);
+  box-shadow:
+    0 14px 30px color-mix(in srgb, var(--etos-thread-ink) 12%, transparent),
+    0 0 18px color-mix(in srgb, var(--event-color) 16%, transparent);
+}
+
+.event-card-accent {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  width: 2px;
+  border-radius: 0 4px 4px 0;
+  background: var(--event-color);
+  box-shadow: 0 0 12px var(--event-color);
+}
+
+.event-time {
+  color: var(--event-color);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.event-title {
+  margin-top: 6px;
+  color: var(--etos-thread-ink);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.event-description {
+  color: var(--etos-thread-ink-muted);
+  font-size: 10px;
+  line-height: 15px;
+}
+
+.digital-globe {
+  position: absolute;
+  z-index: 2;
+  top: 8px;
+  left: 50%;
+  width: 260px;
+  height: 260px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.globe-sphere {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  width: 190px;
+  height: 190px;
+  overflow: hidden;
+  transform: translateX(-50%);
+  border: 1px solid var(--etos-thread-globe-border);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 34%, var(--etos-thread-globe-highlight), transparent 17%),
+    radial-gradient(
+      circle at 53% 60%,
+      var(--etos-thread-globe-deep),
+      var(--etos-thread-globe-core) 70%
+    );
+  box-shadow:
+    inset -22px -12px 42px color-mix(in srgb, var(--etos-thread-ink) 18%, transparent),
+    inset 10px 5px 30px color-mix(in srgb, var(--etos-thread-eyebrow) 20%, transparent),
+    0 0 24px color-mix(in srgb, var(--etos-thread-eyebrow) 35%, transparent),
+    0 0 70px color-mix(in srgb, var(--etos-thread-eyebrow) 18%, transparent);
+}
+
+.globe-grid {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  opacity: 0.48;
+}
+
+.globe-grid-horizontal {
+  background: repeating-radial-gradient(
+    ellipse at center,
+    transparent 0 16px,
+    color-mix(in srgb, var(--etos-thread-eyebrow) 32%, transparent) 17px 18px
+  );
+}
+
+.globe-grid-vertical {
+  background:
+    linear-gradient(
+      90deg,
+      transparent 48%,
+      color-mix(in srgb, var(--etos-thread-eyebrow) 42%, transparent) 50%,
+      transparent 52%
+    ),
+    repeating-linear-gradient(
+      76deg,
+      transparent 0 33px,
+      color-mix(in srgb, var(--etos-thread-eyebrow) 20%, transparent) 34px 35px
+    );
+}
+
+.globe-continent {
+  position: absolute;
+  top: 42px;
+  left: 54px;
+  width: 92px;
+  height: 75px;
+  transform: rotate(-10deg);
+  border-radius: 58% 42% 64% 36% / 44% 47% 53% 56%;
+  background:
+    radial-gradient(
+      circle at 35% 35%,
+      color-mix(in srgb, var(--etos-thread-eyebrow) 32%, transparent),
+      transparent 20%
+    ),
+    color-mix(in srgb, var(--etos-thread-eyebrow) 27%, transparent);
+  filter: blur(1px);
+  clip-path: polygon(
+    7% 26%,
+    24% 11%,
+    53% 8%,
+    78% 26%,
+    97% 46%,
+    71% 58%,
+    63% 88%,
+    40% 76%,
+    17% 89%,
+    20% 55%
+  );
+}
+
+.globe-shine {
+  position: absolute;
+  top: 14px;
+  left: 25px;
+  width: 94px;
+  height: 67px;
+  transform: rotate(-30deg);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--etos-thread-ink) 8%, transparent);
+  filter: blur(14px);
+}
+
+.globe-orbit {
+  position: absolute;
+  top: 92px;
+  left: 50%;
+  border: 1px solid var(--etos-thread-globe-orbit);
+  border-radius: 50%;
+  transform: translateX(-50%) rotateX(70deg);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--etos-thread-eyebrow) 18%, transparent);
+}
+
+.globe-orbit-one {
+  width: 250px;
+  height: 85px;
+}
+
+.globe-orbit-two {
+  top: 102px;
+  width: 220px;
+  height: 68px;
+}
+
+.globe-orbit-three {
+  top: 112px;
+  width: 180px;
+  height: 52px;
+}
+
+.globe-halo {
+  position: absolute;
+  left: 50%;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  filter: blur(24px);
+}
+
+.globe-halo-one {
+  top: 22px;
+  width: 200px;
+  height: 200px;
+  background: var(--etos-thread-globe-halo);
+}
+
+.globe-halo-two {
+  top: 48px;
+  width: 250px;
+  height: 150px;
+  background: color-mix(in srgb, var(--etos-thread-eyebrow) 5%, transparent);
+}
+
+.globe-node {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--etos-thread-globe-node);
+  box-shadow:
+    0 0 5px color-mix(in srgb, var(--etos-thread-globe-node) 70%, white),
+    0 0 11px var(--etos-thread-eyebrow);
+}
+
+.globe-node-1 { top: 28%; left: 28%; }
+.globe-node-2 { top: 22%; left: 55%; }
+.globe-node-3 { top: 39%; left: 72%; }
+.globe-node-4 { top: 50%; left: 34%; }
+.globe-node-5 { top: 61%; left: 60%; }
+.globe-node-6 { top: 75%; left: 43%; }
+.globe-node-7 { top: 34%; left: 47%; }
+.globe-node-8 { top: 66%; left: 78%; }
+.globe-node-9 { top: 48%; left: 16%; }
+.globe-node-10 { top: 80%; left: 63%; }
+.globe-node-11 { top: 15%; left: 41%; }
+.globe-node-12 { top: 55%; left: 87%; }
+
+@keyframes markerPulse {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.85;
+  }
+
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .thread-shell {
+    overflow-x: auto;
+  }
+
+  .thread-header {
+    position: sticky;
+    left: 0;
+    min-width: 100%;
+  }
+}
+
+/* Immersive ops canvas for /digital-thread/timeline (screens 38–40). */
+.digital-thread-canvas {
+  background: #050a12;
+}
+
+.digital-thread-canvas-nebula {
+  background:
+    radial-gradient(ellipse 55% 40% at 18% 48%, rgba(14, 165, 233, 0.14), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 72% 42%, rgba(56, 189, 248, 0.16), transparent 68%),
+    radial-gradient(ellipse 40% 30% at 88% 50%, rgba(125, 211, 252, 0.22), transparent 65%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(2, 132, 199, 0.08), transparent 60%);
+}
+
+.digital-thread-canvas-stars {
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(226, 232, 240, 0.55), transparent),
+    radial-gradient(1px 1px at 28% 62%, rgba(186, 230, 253, 0.4), transparent),
+    radial-gradient(1.5px 1.5px at 41% 22%, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1px 1px at 55% 78%, rgba(125, 211, 252, 0.45), transparent),
+    radial-gradient(1px 1px at 67% 14%, rgba(226, 232, 240, 0.3), transparent),
+    radial-gradient(1.5px 1.5px at 81% 66%, rgba(186, 230, 253, 0.5), transparent),
+    radial-gradient(1px 1px at 93% 28%, rgba(255, 255, 255, 0.28), transparent),
+    radial-gradient(1px 1px at 8% 84%, rgba(56, 189, 248, 0.35), transparent),
+    radial-gradient(1px 1px at 48% 44%, rgba(226, 232, 240, 0.22), transparent);
+  opacity: 0.85;
+}
+
+:root:not(.dark) .digital-thread-canvas {
+  background: var(--etos-ops-canvas);
+}
+
+:root:not(.dark) .digital-thread-canvas-nebula {
+  background:
+    radial-gradient(ellipse 55% 40% at 18% 48%, rgba(14, 165, 233, 0.08), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 72% 42%, rgba(56, 189, 248, 0.1), transparent 68%),
+    radial-gradient(ellipse 40% 30% at 88% 50%, rgba(2, 132, 199, 0.08), transparent 65%);
+}
+
+:root:not(.dark) .digital-thread-canvas-stars {
+  opacity: 0.25;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker-pulse {
+    animation: none;
+  }
+
+  .event-card,
+  .timeline-marker {
+    transition: none;
+  }
 }

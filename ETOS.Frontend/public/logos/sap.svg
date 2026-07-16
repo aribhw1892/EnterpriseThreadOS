@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="10" fill="#061018"/>
+  <rect x="8" y="16" width="32" height="14" rx="3" fill="#119df5"/>
+  <text x="24" y="26.5" text-anchor="middle" fill="#fff" font-size="9" font-family="system-ui,sans-serif" font-weight="800">SAP</text>
+  <text x="24" y="41" text-anchor="middle" fill="#8ecfff" font-size="6" font-family="system-ui,sans-serif" font-weight="700">S/4</text>
+</svg>

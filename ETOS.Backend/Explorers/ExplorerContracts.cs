@@ -152,6 +152,48 @@ public sealed record GraphExplorerRelationshipResponse(
     string TrustState,
     string SafeSummary);
 
+public sealed record GraphExplorerNodeListResponse(
+    IReadOnlyCollection<GraphExplorerNodeSummaryResponse> Nodes,
+    bool Truncated,
+    int Limit,
+    int MatchCount);
+
+public sealed record GraphExplorerSubgraphEdgeResponse(
+    Guid RelationshipId,
+    string RelationshipType,
+    Guid FromNodeId,
+    Guid ToNodeId,
+    string TrustState,
+    string SafeSummary);
+
+public sealed record GraphExplorerSubgraphResponse(
+    Guid StartNodeId,
+    IReadOnlyCollection<GraphExplorerNodeSummaryResponse> Nodes,
+    IReadOnlyCollection<GraphExplorerSubgraphEdgeResponse> Relationships,
+    bool Truncated,
+    int Depth,
+    int Limit);
+
+public sealed record GraphExplorerPatternQueryRequest(
+    Guid? StartNodeId,
+    string? StartObjectType,
+    string? EndObjectType,
+    IReadOnlyCollection<string>? RelationshipTypes,
+    int? MaxDepth,
+    string? GraphSpace,
+    string? TrustState,
+    string? Search,
+    int? Limit,
+    string? PolicyKey);
+
+public sealed record GraphExplorerPatternQueryResponse(
+    IReadOnlyCollection<GraphExplorerNodeSummaryResponse> Nodes,
+    IReadOnlyCollection<GraphExplorerSubgraphEdgeResponse> Relationships,
+    bool Truncated,
+    int Depth,
+    int Limit,
+    int SeedCount);
+
 public sealed record ContextPackageExplorerSummaryResponse(
     Guid PackageId,
     Guid RetrievalRunId,

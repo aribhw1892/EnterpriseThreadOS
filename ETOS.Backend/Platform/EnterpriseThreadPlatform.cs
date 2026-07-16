@@ -28,6 +28,7 @@ using ETOS.Backend.OptimizationModels;
 using ETOS.Backend.Packages;
 using ETOS.Backend.Recommendations;
 using ETOS.Backend.Decisions;
+using ETOS.Backend.DigitalThread;
 using ETOS.Backend.Learning;
 using ETOS.Backend.Outcomes;
 using ETOS.Backend.ReviewTasks;
@@ -254,6 +255,9 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IOutcomeService, OutcomeService>();
         services.AddScoped<ILearningEvidenceEmitter, LearningEvidenceEmitter>();
         services.AddScoped<ILearningSignalRollupService, LearningSignalRollupService>();
+        services.AddScoped<ILearningSignalService, LearningSignalService>();
+        services.AddScoped<IDigitalThreadProjectionService, DigitalThreadProjectionService>();
+        services.Configure<DigitalThreadOptions>(configuration.GetSection(DigitalThreadOptions.SectionName));
         services.Configure<LearningSignalRollupOptions>(configuration.GetSection(LearningSignalRollupOptions.SectionName));
         services.AddScoped<ISqlGovernanceMetricsProvider, SqlGovernanceMetricsProvider>();
         services.AddScoped<IGraphGovernanceMetricsProvider, GraphGovernanceMetricsProvider>();

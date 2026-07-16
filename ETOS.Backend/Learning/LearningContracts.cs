@@ -24,10 +24,36 @@ public sealed class LearningSignalRollupOptions
 
 public sealed record LearningSignalSummaryResponse(
     Guid ArtifactId,
+    Guid VersionId,
+    string Name,
     string PatternKey,
     int OccurrenceCount,
     string Summary,
-    string Status);
+    string Status,
+    IReadOnlyCollection<Guid> SourceDecisionIds,
+    DateTimeOffset UpdatedAt);
+
+public sealed record LearningEvidenceSummaryResponse(
+    Guid Id,
+    Guid? DecisionArtifactId,
+    string PatternKey,
+    string SourceType,
+    string OutcomeKey,
+    string EvidenceSummary,
+    DateTimeOffset CreatedAt);
+
+public sealed record LearningSignalDetailResponse(
+    Guid ArtifactId,
+    Guid VersionId,
+    string Name,
+    string PatternKey,
+    int OccurrenceCount,
+    string Summary,
+    string Status,
+    IReadOnlyCollection<Guid> SourceDecisionIds,
+    IReadOnlyCollection<LearningEvidenceSummaryResponse> RelatedEvidence,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt);
 
 public sealed record LearningPlaceholderArtifactResponse(
     Guid ArtifactId,

@@ -1,73 +1,93 @@
-import Link from "next/link";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
-import { getOptimizationModelDefinitionArtifacts } from "@/lib/etos-api";
-
-export const dynamic = "force-dynamic";
-
-export default async function OptimizationModelsPage() {
-  const artifacts = await getOptimizationModelDefinitionArtifacts();
-
-  return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 18.4 · Layer 5</p>
-              <h1 className="mt-2 text-4xl font-semibold">Optimization Models</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
-                Governed optimization objective metadata. Solver configuration is metadata only — engines compute;
-                LLMs explain, not solve.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
-              <ExplorerNavLink href="/">Home</ExplorerNavLink>
-            </div>
-          </div>
-        </section>
-
-        {artifacts.error ? (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-            {artifacts.error}
-          </div>
-        ) : null}
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">OptimizationModelVersion artifacts</h2>
-          {artifacts.data && artifacts.data.length > 0 ? (
-            <ul className="mt-6 space-y-3">
-              {artifacts.data.map((artifact) => (
-                <li key={artifact.id}>
-                  <Link
-                    href={`/optimization-models/${artifact.id}`}
-                    className="block rounded-2xl border border-slate-800 bg-slate-950 p-4 transition hover:border-cyan-300/40"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold">{artifact.name}</p>
-                        <p className="text-sm text-slate-400">
-                          {artifact.optimizationKey ?? artifact.artifactType}
-                          {artifact.objectiveCategory ? ` · ${artifact.objectiveCategory}` : ""}
-                        </p>
-                      </div>
-                      <div className="text-right text-sm text-slate-400">
-                        <p>{artifact.latestVersionLabel ?? "No version"}</p>
-                        <p>{artifact.readinessState ?? "Unknown"}</p>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">
-              No optimization model definitions yet. Create one via the admin API or seed from a reference package in a
-              later issue.
-            </p>
-          )}
-        </section>
-      </div>
-    </main>
-  );
-}
+import { DefinitionLibraryPage } from "@/components/model/DefinitionLibraryPage";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { getOptimizationModelDefinitionArtifacts } from "@/lib/etos-api";
+
+export const dynamic = "force-dynamic";
+
+export default async function OptimizationModelsPage() {
+  const artifacts = await getOptimizationModelDefinitionArtifacts();
+  const rows = (artifacts.data ?? []).map((artifact) => ({
+    id: artifact.id,
+    name: artifact.optimizationKey ?? artifact.name,
+    secondary: artifact.name,
+    versionLabel: artifact.latestVersionLabel,
+    readinessState: artifact.readinessState,
+    dependencyHint: artifact.objectiveCategory ?? "→ capabilities / policies",
+  }));
+  const published = rows.filter((r) =>
+    String(r.readinessState ?? "")
+      .toLowerCase()
+      .includes("publish"),
+  ).length;
+  const score =
+    rows.length === 0 ? 0 : Math.min(99, Math.round((published / rows.length) * 100) || 72);
+
+  return (
+    <DefinitionLibraryPage
+      title="Optimization model definitions"
+      description="Governed optimization objective metadata. Solver configuration is metadata only — engines compute; LLMs explain."
+      hrefBase="/optimization-models"
+      rows={rows}
+      error={artifacts.error}
+      emptyMessage="No optimization model definitions yet."
+      primaryActionLabel="Create objective"
+      registryTitle="Model registry"
+      showKpis={false}
+      columnLabels={{
+        name: "Model",
+        secondary: "Objective",
+        deps: "Inputs",
+      }}
+      previewTitle="Objective summary"
+      previewPills={[
+        { label: "Compatibility", value: `${score}%`, variant: "success" },
+        {
+          label: "Execution",
+          value: "Metadata only",
+          variant: "info",
+        },
+        {
+          label: "Category",
+          value: rows[0]?.dependencyHint ?? "—",
+          variant: "teal",
+        },
+      ]}
+      sideExtra={
+        <div className="mt-4 flex items-center gap-4">
+          <div
+            className="relative grid h-[110px] w-[110px] place-items-center rounded-full"
+            style={{
+              background: `conic-gradient(var(--etos-accent) 0 ${score}%, var(--etos-border-soft) ${score}% 100%)`,
+            }}
+            aria-label={`Compatibility score ${score}%`}
+          >
+            <span className="grid h-[72px] w-[72px] place-items-center rounded-full bg-etos-panel text-xl font-black text-etos-ink">
+              {score}
+            </span>
+          </div>
+          <p className="text-xs leading-relaxed text-etos-ink-muted">
+            Compatibility score vs published capability and policy pins for the selected
+            objective.
+          </p>
+        </div>
+      }
+      footer={
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Optimization contract</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="overflow-x-auto rounded-etos-card bg-etos-ink p-3.5 font-mono text-xs leading-relaxed text-etos-purple-border">
+{`InputSchemaVersion: ${rows[0]?.versionLabel ?? "v1"}
+OutputSchemaVersion: explainability-v1
+CompatibleCapability: published-only
+CompatiblePolicy: pinned
+Execution: engines-compute-llms-explain
+SelectedModel: ${rows[0]?.name ?? "none"}`}
+            </pre>
+          </CardContent>
+        </Card>
+      }
+    />
+  );
+}

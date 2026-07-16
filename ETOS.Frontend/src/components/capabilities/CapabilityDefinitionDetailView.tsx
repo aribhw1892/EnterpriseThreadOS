@@ -64,7 +64,7 @@ function ActionForm({
       <input type="hidden" name="versionId" value={versionId} />
       <button
         type="submit"
-        className="rounded-2xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100"
+        className="inline-flex items-center rounded-etos-button border border-etos-border px-4 py-2 text-sm font-semibold text-etos-ink transition hover:bg-etos-panel-muted"
       >
         {label}
       </button>
@@ -80,24 +80,24 @@ export function CapabilityDefinitionDetailView({
   readiness,
 }: CapabilityDefinitionDetailProps) {
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
+    <main className="">
+      <div className="flex flex-col gap-6">
+        <section className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 18.2</p>
+              <p className="text-sm uppercase tracking-wide text-etos-accent-cyan">Issue 18.2</p>
               <h1 className="mt-2 text-4xl font-semibold">{artifactName}</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
+              <p className="mt-3 max-w-3xl text-etos-ink-muted">
                 Capability version {detail.versionLabel} · {readiness.storedReadinessState}
               </p>
-              {detail.description ? <p className="mt-2 text-sm text-slate-500">{detail.description}</p> : null}
+              {detail.description ? <p className="mt-2 text-sm text-etos-ink-subtle">{detail.description}</p> : null}
             </div>
             <div className="flex flex-wrap gap-3">
               <ExplorerNavLink href="/capabilities">Capabilities</ExplorerNavLink>
               <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
               <Link
                 href={`/artifacts/${artifactId}`}
-                className="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100"
+                className="rounded-full border border-etos-border px-4 py-2 text-sm font-semibold text-etos-ink transition hover:border-etos-accent hover:text-etos-accent"
               >
                 Artifact explorer
               </Link>
@@ -110,26 +110,26 @@ export function CapabilityDefinitionDetailView({
         </section>
 
         <section className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
             <h2 className="text-2xl font-semibold">Outcome</h2>
-            <dl className="mt-4 space-y-3 text-sm text-slate-300">
+            <dl className="mt-4 space-y-3 text-sm text-etos-ink">
               <div>
-                <dt className="text-slate-500">Capability key</dt>
+                <dt className="text-etos-ink-subtle">Capability key</dt>
                 <dd>{detail.capabilityKey}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Outcome category</dt>
+                <dt className="text-etos-ink-subtle">Outcome category</dt>
                 <dd>{detail.outcomeCategory}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Outcome summary</dt>
+                <dt className="text-etos-ink-subtle">Outcome summary</dt>
                 <dd>{detail.outcomeSummary}</dd>
               </div>
             </dl>
             {Object.keys(detail.outcomeMetadata).length > 0 ? (
               <div className="mt-4">
-                <h3 className="text-sm font-semibold text-slate-400">Outcome metadata</h3>
-                <ul className="mt-2 space-y-1 text-sm text-slate-300">
+                <h3 className="text-sm font-semibold text-etos-ink-muted">Outcome metadata</h3>
+                <ul className="mt-2 space-y-1 text-sm text-etos-ink">
                   {Object.entries(detail.outcomeMetadata).map(([key, value]) => (
                     <li key={key}>
                       {key}: {value}
@@ -140,15 +140,15 @@ export function CapabilityDefinitionDetailView({
             ) : null}
           </div>
 
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
             <h2 className="text-2xl font-semibold">Readiness</h2>
-            <ul className="mt-4 space-y-2 text-sm text-slate-300">
+            <ul className="mt-4 space-y-2 text-sm text-etos-ink">
               <li>Stored: {readiness.storedReadinessState}</li>
               <li>Recalculated: {readiness.recalculatedReadinessState}</li>
               <li>Policy risk: {readiness.policyRiskStatus}</li>
             </ul>
             {readiness.blockingReasons.length > 0 ? (
-              <ul className="mt-4 space-y-1 text-sm text-amber-200">
+              <ul className="mt-4 space-y-1 text-sm text-etos-warning-fg">
                 {readiness.blockingReasons.map((reason) => (
                   <li key={reason}>{reason}</li>
                 ))}
@@ -158,50 +158,50 @@ export function CapabilityDefinitionDetailView({
         </section>
 
         <section className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
             <h2 className="text-2xl font-semibold">Compatible model packages</h2>
             {detail.compatibleModelPackages.length > 0 ? (
-              <ul className="mt-4 space-y-3 text-sm text-slate-300">
+              <ul className="mt-4 space-y-3 text-sm text-etos-ink">
                 {detail.compatibleModelPackages.map((item) => (
-                  <li key={item.modelPackageVersionId} className="rounded-2xl border border-slate-800 bg-slate-950 p-3">
+                  <li key={item.modelPackageVersionId} className="rounded-etos-card border border-etos-border-soft bg-etos-panel p-3">
                     <p className="font-semibold">{item.name}</p>
-                    <p className="text-slate-400">
+                    <p className="text-etos-ink-muted">
                       {item.key} · {item.versionLabel} · {item.state}
                     </p>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="mt-4 text-sm text-slate-500">No model package references.</p>
+              <p className="mt-4 text-sm text-etos-ink-subtle">No model package references.</p>
             )}
           </div>
 
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
             <h2 className="text-2xl font-semibold">Compatible ontologies</h2>
             {detail.compatibleOntologies.length > 0 ? (
-              <ul className="mt-4 space-y-3 text-sm text-slate-300">
+              <ul className="mt-4 space-y-3 text-sm text-etos-ink">
                 {detail.compatibleOntologies.map((item) => (
-                  <li key={item.ontologyVersionId} className="rounded-2xl border border-slate-800 bg-slate-950 p-3">
+                  <li key={item.ontologyVersionId} className="rounded-etos-card border border-etos-border-soft bg-etos-panel p-3">
                     <p className="font-semibold">{item.key}</p>
-                    <p className="text-slate-400">
+                    <p className="text-etos-ink-muted">
                       {item.versionLabel} · {item.state}
                     </p>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="mt-4 text-sm text-slate-500">No ontology references.</p>
+              <p className="mt-4 text-sm text-etos-ink-subtle">No ontology references.</p>
             )}
           </div>
         </section>
 
         {(detail.suggestedQueryIntentRefs.length > 0 || detail.futureExtensionPlaceholders.length > 0) && (
-          <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
+          <section className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
             <h2 className="text-2xl font-semibold">Future wiring placeholders</h2>
             {detail.suggestedQueryIntentRefs.length > 0 ? (
               <div className="mt-4">
-                <h3 className="text-sm font-semibold text-slate-400">Suggested query intents</h3>
-                <ul className="mt-2 space-y-1 text-sm text-slate-300">
+                <h3 className="text-sm font-semibold text-etos-ink-muted">Suggested query intents</h3>
+                <ul className="mt-2 space-y-1 text-sm text-etos-ink">
                   {detail.suggestedQueryIntentRefs.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
@@ -210,8 +210,8 @@ export function CapabilityDefinitionDetailView({
             ) : null}
             {detail.futureExtensionPlaceholders.length > 0 ? (
               <div className="mt-4">
-                <h3 className="text-sm font-semibold text-slate-400">Extension placeholders</h3>
-                <ul className="mt-2 space-y-1 text-sm text-slate-300">
+                <h3 className="text-sm font-semibold text-etos-ink-muted">Extension placeholders</h3>
+                <ul className="mt-2 space-y-1 text-sm text-etos-ink">
                   {detail.futureExtensionPlaceholders.map((item) => (
                     <li key={item}>{item}</li>
                   ))}

@@ -1,57 +1,97 @@
 import Link from "next/link";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
+import { Button } from "@/components/ui/Button";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 const explorerCards = [
-  { href: "/artifacts", title: "Artifacts", description: "Browse governed BaseArtifact records and open 360° views." },
-  { href: "/graph", title: "Graph", description: "Explore trusted graph nodes with policy-filtered summaries." },
-  { href: "/documents", title: "Documents", description: "Document artifacts with links into graph and context views." },
-  { href: "/context-packages", title: "Context packages", description: "Retrieval runs and assembled governed context packages." },
-  { href: "/ai-traces", title: "AI traces", description: "Existing AI Trace explorer with cross-links from 360 views." },
-  { href: "/governance", title: "Governance", description: "Platform-defined governance KPIs, trends, high-risk recommendations, and audit visibility (Issue 21)." },
-  { href: "/decisions", title: "Decisions", description: "Decision explorer with filters for status, conflict, evidence, and outcomes." },
-  { href: "/dashboards", title: "Dashboards", description: "Chat-generated dashboard templates with governed preview and export." },
-  { href: "/reports", title: "Reports", description: "Chat-generated report templates with governed preview and export." },
-  { href: "/recommendations", title: "Recommendations", description: "Evidence-backed recommendations with suggested actions and readiness workflow." },
-  { href: "/tasks", title: "Review tasks", description: "Governed review task inbox with factory debug harness, chains, assignment, and completion flows (Issue 19)." },
-  { href: "/capabilities", title: "Capabilities", description: "Business outcome definitions pinned to published ontology and model packages." },
-  { href: "/business-policies", title: "Business policies", description: "Layer 4 business constraint policies referencing published capabilities and packages." },
-  { href: "/optimization-models", title: "Optimization models", description: "Layer 5 optimization objective metadata pinned to capabilities, policies, and packages." },
-  { href: "/agent-templates", title: "Agent templates", description: "Layer 6 reusable agent patterns composing ontology, capability, policy, and retrieval references." },
-  { href: "/agents", title: "Agents", description: "Tenant AgentVersion records with model routing, safe mode, preview defaults, and configure/test-run flows." },
-  { href: "/agent-runs", title: "Agent runs", description: "Governed agent execution history with AI Trace and ToolRun cross-links." },
-  { href: "/tools", title: "Tool registry", description: "Governed tools, skills, connectors, dry-run metadata, and ToolRun execution records." },
+  {
+    href: "/explorers/graph",
+    title: "Full graph explorer",
+    description: "Bloom-like Sigma canvas with search, pattern query, filters, and metadata.",
+    primary: true,
+  },
+  {
+    href: "/graph",
+    title: "Graph & 360°",
+    description: "Pick a node for 360° context panels, or open trusted promotion.",
+    primary: true,
+  },
+  {
+    href: "/artifacts",
+    title: "Artifacts",
+    description: "Registry, dependency flowline, and readiness gates.",
+    primary: true,
+  },
+  {
+    href: "/graph/promote",
+    title: "Graph promote",
+    description: "Snapshot, BOM compare, promote staged imports with DQ blockers.",
+    primary: true,
+  },
+  {
+    href: "/documents",
+    title: "Documents",
+    description: "Document memory explorer with side-panel detail.",
+  },
+  {
+    href: "/ai-traces",
+    title: "AI traces",
+    description: "Retrieval audits with timeline and export packages.",
+  },
+  {
+    href: "/recommendations",
+    title: "Recommendations",
+    description: "Evidence-backed inbox with risk filters.",
+  },
+  {
+    href: "/learning-signals",
+    title: "Learning signals",
+    description: "Tenant rollups from repeated decision evidence patterns.",
+  },
+  {
+    href: "/dashboards",
+    title: "Dashboards",
+    description: "Builder preview with publish readiness rail.",
+  },
+  {
+    href: "/reports",
+    title: "Reports",
+    description: "Outline + canvas wire preview.",
+  },
+  {
+    href: "/model-artifacts",
+    title: "Model packages",
+    description: "Active package callout and boundary pills.",
+  },
 ];
 
 export default function ExplorersHubPage() {
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 16</p>
-              <h1 className="mt-2 text-4xl font-semibold">Explorers</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
-                Tenant-filtered explorer hub for artifacts, graph nodes, documents, context packages, AI traces,
-                recommendations, review tasks, and decision foundation records.
-              </p>
-            </div>
-            <ExplorerNavLink href="/">Home</ExplorerNavLink>
-          </div>
-        </section>
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title="Explorers"
+        description="Tenant-filtered hub into 360° context, artifacts, graph promotion, and Operate surfaces — without inventing a new mockup."
+        actions={
+          <Link href="/">
+            <Button variant="ghost">Mission Control</Button>
+          </Link>
+        }
+      />
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {explorerCards.map((card) => (
-            <Link
-              key={card.href}
-              href={card.href}
-              className="rounded-3xl border border-slate-800 bg-slate-900 p-6 transition hover:border-cyan-300/40"
-            >
-              <h2 className="text-xl font-semibold">{card.title}</h2>
-              <p className="mt-2 text-sm text-slate-400">{card.description}</p>
-            </Link>
-          ))}
-        </section>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {explorerCards.map((card) => (
+          <Link
+            key={card.href}
+            href={card.href}
+            className={`rounded-etos-card border p-5 shadow-etos transition hover:border-etos-accent ${
+              card.primary
+                ? "border-etos-info-border bg-gradient-to-br from-etos-info-bg/40 to-etos-panel-elevated"
+                : "border-etos-border-panel bg-etos-panel-elevated"
+            }`}
+          >
+            <h2 className="text-lg font-extrabold text-etos-ink">{card.title}</h2>
+            <p className="mt-2 text-sm text-etos-ink-muted">{card.description}</p>
+          </Link>
+        ))}
       </div>
     </main>
   );

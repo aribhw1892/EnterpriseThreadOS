@@ -18,7 +18,7 @@ function isReviewableIdentityCandidate(state: string): boolean {
 
 function ErrorState({ error }: { error: string }) {
   return (
-    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+    <div className="rounded-2xl border border-amber-500/30 bg-slate-900 p-4 text-sm text-amber-100">
       {error}
     </div>
   );
@@ -358,7 +358,7 @@ export async function ImportWizardContent({ slug, searchParams: params, actions 
           ) : null}
 
           {step === "7" ? (
-            <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
+            <section className="rounded-3xl border border-cyan-400/30 bg-slate-900 p-6">
               <h2 className="text-2xl font-semibold">{config.completeTitle}</h2>
               <p className="mt-2 text-sm text-slate-300">{config.completeDescription}</p>
               <p className="mt-3 text-xs text-slate-500">

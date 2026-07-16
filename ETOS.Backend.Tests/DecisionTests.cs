@@ -337,12 +337,16 @@ public sealed class DecisionTests
     }
 
     private static OutcomeService CreateOutcomeService(EnterpriseThreadDbContext dbContext, TestContext context)
-        => new(
+    {
+        var rollupOptions = Options.Create(new LearningSignalRollupOptions());
+        return new(
             dbContext,
             new StaticTenantContextResolver(context),
             new AllowAllPermissionService(),
             new RecordingDenialRecorder(),
-            new LearningEvidenceEmitter(dbContext));
+            new LearningEvidenceEmitter(dbContext),
+            new LearningSignalRollupService(dbContext, rollupOptions));
+    }
 
     private static ReviewTaskFactory CreateReviewTaskFactory(EnterpriseThreadDbContext dbContext, TestContext context)
         => new(

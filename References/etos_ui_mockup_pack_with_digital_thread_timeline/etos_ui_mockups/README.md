@@ -1,7 +1,7 @@
 # EnterpriseThreadOS UI Mockup Pack
 Generated enterprise UI/UX mockups for the full flow through Issue 18.5, Issues 22-25, and the interactive Digital Thread Timeline view addendum.
 ## Screens
-- 01. **Enterprise command center** — `/` — `images/01-command-center.png`
+- 01. **Mission Control Timeline (home)** — `/` — `images/01-command-center.png` (canonical). Legacy executive landing archived as `images/01-command-center-legacy-executive.png`.
 - 02. **Model package & reference seed** — `/model-artifacts` — `images/02-reference-model-package.png`
 - 03. **Ontology & semantic layer detail** — `/model-artifacts/ontology` — `images/03-ontology-semantic-layer.png`
 - 04. **Capability definitions** — `/capabilities` — `images/04-capability-definitions.png`
@@ -44,7 +44,8 @@ Generated enterprise UI/UX mockups for the full flow through Issue 18.5, Issues 
 - 40. **Digital thread timeline — artifact lineage zoom** — `/digital-thread/timeline/AX-440/P-1842?zoom=450` — `images/40-digital-thread-artifact-lineage-zoom.png`
 
 ## UX principles applied
-- Enterprise shell with persistent navigation, breadcrumb, search, tenant context, and read-only MVP boundary.
+- **Home (`/`):** Mission Control Timeline — dark real-time digital-thread command center (`01-command-center.png`).
+- Enterprise shell (screens 02–37) with persistent navigation, breadcrumb, search, tenant context, and read-only MVP boundary.
 - Wizard/stepper for imports; tables with filters-ready structure; detail side panels for evidence/governance.
 - All AI/agent/workflow screens expose trace, confidence, schema, policy, and audit state.
 - Source-system writes are visibly disabled; platform-owned overlays are actionable.

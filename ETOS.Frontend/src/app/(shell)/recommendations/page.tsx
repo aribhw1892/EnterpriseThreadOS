@@ -1,75 +1,214 @@
 import Link from "next/link";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
-import { getRecommendationArtifacts } from "@/lib/etos-api";
+import { Badge, StatusBadge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { DataTable } from "@/components/ui/DataTable";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { KpiCard } from "@/components/ui/KpiCard";
+import { PageHeader } from "@/components/ui/PageHeader";
+import {
+  getRecommendationArtifacts,
+  type RecommendationArtifactSummary,
+} from "@/lib/etos-api";
 
 export const dynamic = "force-dynamic";
 
-export default async function RecommendationsPage() {
+function isBlocked(artifact: RecommendationArtifactSummary) {
+  const readiness = (artifact.readinessState ?? "").toLowerCase();
+  const lifecycle = (artifact.lifecycleStatus ?? "").toLowerCase();
+  return (
+    readiness.includes("block") ||
+    readiness.includes("denied") ||
+    readiness.includes("conflict") ||
+    lifecycle.includes("block") ||
+    lifecycle.includes("conflict")
+  );
+}
+
+function isTrusted(artifact: RecommendationArtifactSummary) {
+  const readiness = (artifact.readinessState ?? "").toLowerCase();
+  const lifecycle = (artifact.lifecycleStatus ?? "").toLowerCase();
+  return (
+    readiness.includes("publish") ||
+    readiness.includes("ready") ||
+    readiness.includes("trusted") ||
+    lifecycle.includes("publish") ||
+    lifecycle.includes("approved")
+  );
+}
+
+function isHighRisk(artifact: RecommendationArtifactSummary) {
+  const type = (artifact.recommendationType ?? "").toLowerCase();
+  const readiness = (artifact.readinessState ?? "").toLowerCase();
+  return (
+    isBlocked(artifact) ||
+    type.includes("high") ||
+    type.includes("risk") ||
+    readiness.includes("review") ||
+    readiness.includes("warn")
+  );
+}
+
+function trustLabel(artifact: RecommendationArtifactSummary) {
+  if (isBlocked(artifact)) {
+    return { label: "Blocked", variant: "danger" as const };
+  }
+  if (isTrusted(artifact)) {
+    return { label: "Ready", variant: "success" as const };
+  }
+  return { label: "Review", variant: "warning" as const };
+}
+
+type PageProps = {
+  searchParams: Promise<{ filter?: string }>;
+};
+
+export default async function RecommendationsPage({ searchParams }: PageProps) {
+  const { filter } = await searchParams;
   const artifacts = await getRecommendationArtifacts();
+  const all = artifacts.data ?? [];
+  const draft = all.filter((a) =>
+    (a.readinessState ?? "").toLowerCase().includes("draft"),
+  );
+  const ready = all.filter(isTrusted);
+  const blocked = all.filter(isBlocked);
+  const highRisk = all.filter(isHighRisk);
+
+  const displayRows = filter === "high-risk" ? highRisk : all;
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 18</p>
-              <h1 className="mt-2 text-4xl font-semibold">Recommendations</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
-                Evidence-backed recommendation artifacts with embedded suggested actions, trust/conflict rules, and
-                readiness workflow.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href="/tasks">Review tasks</ExplorerNavLink>
-              <ExplorerNavLink href="/chat">Governed Chat</ExplorerNavLink>
-              <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
-              <ExplorerNavLink href="/">Home</ExplorerNavLink>
-            </div>
-          </div>
-        </section>
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title="Recommendation inbox"
+        description="Evidence-backed recommendations created from BOM comparison, data quality, chat, dashboards, and future agents."
+        actions={
+          <>
+            <Link href="/chat">
+              <Button variant="primary">Create recommendation</Button>
+            </Link>
+            <Link
+              href={
+                filter === "high-risk"
+                  ? "/recommendations"
+                  : "/recommendations?filter=high-risk"
+              }
+            >
+              <Button variant="ghost">
+                {filter === "high-risk" ? "Clear filter" : "Filter high risk"}
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
-        {artifacts.error ? (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-            {artifacts.error}
-          </div>
-        ) : null}
+      {artifacts.error ? <ErrorState error={artifacts.error} /> : null}
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">RecommendationVersion artifacts</h2>
-          {artifacts.data && artifacts.data.length > 0 ? (
-            <ul className="mt-6 space-y-3">
-              {artifacts.data.map((artifact) => (
-                <li key={artifact.id}>
-                  <Link
-                    href={`/recommendations/${artifact.id}`}
-                    className="block rounded-2xl border border-slate-800 bg-slate-950 p-4 transition hover:border-cyan-300/40"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold">{artifact.name}</p>
-                        <p className="text-sm text-slate-400">
-                          {artifact.recommendationType ?? artifact.artifactType}
-                          {artifact.lifecycleStatus ? ` · ${artifact.lifecycleStatus}` : ""}
-                        </p>
-                      </div>
-                      <div className="text-right text-sm text-slate-400">
-                        <p>{artifact.latestVersionLabel ?? "No version"}</p>
-                        <p>{artifact.readinessState ?? "Unknown"}</p>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">
-              No recommendations yet. Create one from governed chat, data quality issues, BOM comparison, or manual API
-              create.
-            </p>
-          )}
-        </section>
+      <div className="mb-4 grid gap-4 md:grid-cols-4">
+        <KpiCard label="Draft" value={draft.length} hint="Awaiting evidence review" />
+        <KpiCard label="Ready" value={ready.length} hint="Can create review tasks" />
+        <KpiCard
+          label="Blocked"
+          value={blocked.length}
+          trend="bad"
+          trendLabel={blocked.length.toString()}
+          hint="Conflicted/unverified evidence"
+        />
+        <KpiCard
+          label="High risk"
+          value={highRisk.length}
+          trend="warn"
+          trendLabel={highRisk.length.toString()}
+          hint="Needs owner assignment"
+        />
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            Recommendations
+            {filter === "high-risk" ? (
+              <span className="ml-2 text-sm font-normal text-etos-warning-fg">
+                · high risk filter
+              </span>
+            ) : null}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {displayRows.length > 0 ? (
+            <DataTable<RecommendationArtifactSummary>
+              rows={displayRows}
+              rowKey={(row) => row.id}
+              emptyMessage="No recommendations match the filter."
+              columns={[
+                {
+                  key: "name",
+                  header: "Recommendation",
+                  render: (row) => (
+                    <Link
+                      href={`/recommendations/${row.id}`}
+                      className="font-extrabold text-etos-accent hover:underline"
+                    >
+                      {row.name}
+                    </Link>
+                  ),
+                },
+                {
+                  key: "type",
+                  header: "Type",
+                  render: (row) => (
+                    <span className="text-etos-ink-muted">
+                      {row.recommendationType ?? row.artifactType}
+                    </span>
+                  ),
+                },
+                {
+                  key: "evidence",
+                  header: "Evidence",
+                  render: () => (
+                    <span className="text-xs text-etos-ink-subtle">
+                      Graph, import, trace
+                    </span>
+                  ),
+                },
+                {
+                  key: "trust",
+                  header: "Trust",
+                  render: (row) => {
+                    const trust = trustLabel(row);
+                    return <Badge variant={trust.variant}>{trust.label}</Badge>;
+                  },
+                },
+                {
+                  key: "state",
+                  header: "State",
+                  render: (row) =>
+                    row.readinessState ? (
+                      <StatusBadge status={row.readinessState} />
+                    ) : (
+                      <StatusBadge status="unknown" />
+                    ),
+                },
+              ]}
+            />
+          ) : (
+            <EmptyState message="No recommendations yet. Create one from governed chat, data quality, BOM comparison, or API." />
+          )}
+        </CardContent>
+      </Card>
+
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4 text-sm text-etos-ink-muted">
+        <summary className="cursor-pointer font-extrabold text-etos-ink">
+          Advanced / Debug
+        </summary>
+        <div className="mt-4 space-y-2 text-xs">
+          <p>Total: {all.length}</p>
+          <p>
+            Draft: {draft.length} · Ready: {ready.length} · Blocked:{" "}
+            {blocked.length} · High risk: {highRisk.length}
+          </p>
+        </div>
+      </details>
     </main>
   );
 }

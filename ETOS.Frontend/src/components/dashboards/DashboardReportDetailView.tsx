@@ -90,7 +90,7 @@ function ActionForm({
       <input type="hidden" name="versionId" value={versionId} />
       <button
         type="submit"
-        className="rounded-2xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100"
+        className="inline-flex items-center rounded-etos-button border border-etos-border px-4 py-2 text-sm font-semibold text-etos-ink transition hover:bg-etos-panel-muted"
       >
         {label}
       </button>
@@ -112,40 +112,79 @@ export function DashboardReportDetailView({
   const title = kind === "dashboard" ? "Dashboard" : "Report";
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
+    <main className="">
+      <div className="flex flex-col gap-6">
+        <section className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 17</p>
+              <p className="text-sm uppercase tracking-wide text-etos-accent-cyan">Issue 17</p>
               <h1 className="mt-2 text-4xl font-semibold">{artifactName}</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
+              <p className="mt-3 max-w-3xl text-etos-ink-muted">
                 {title} version {template.versionLabel} · {readiness.storedReadinessState}
               </p>
-              {template.summary ? <p className="mt-2 text-sm text-slate-500">{template.summary}</p> : null}
+              {template.summary ? <p className="mt-2 text-sm text-etos-ink-subtle">{template.summary}</p> : null}
             </div>
             <div className="flex flex-wrap gap-3">
               <ExplorerNavLink href={listHref}>{title}s</ExplorerNavLink>
               <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
               <Link
                 href={`/artifacts/${artifactId}`}
-                className="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100"
+                className="rounded-full border border-etos-border px-4 py-2 text-sm font-semibold text-etos-ink transition hover:border-etos-accent hover:text-etos-accent"
               >
                 Artifact explorer
               </Link>
             </div>
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
-            <ActionForm action={markReadyAction} kind={kind} artifactId={artifactId} versionId={versionId} label="Mark ready" />
-            <ActionForm action={publishAction} kind={kind} artifactId={artifactId} versionId={versionId} label="Publish" />
+            <ActionForm
+              action={markReadyAction}
+              kind={kind}
+              artifactId={artifactId}
+              versionId={versionId}
+              label="Save draft / Mark ready"
+            />
+            <ActionForm
+              action={publishAction}
+              kind={kind}
+              artifactId={artifactId}
+              versionId={versionId}
+              label="Request publish"
+            />
             <ActionForm action={exportAction} kind={kind} artifactId={artifactId} versionId={versionId} label="Export JSON" />
           </div>
         </section>
 
+        <section className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
+          <h2 className="text-2xl font-semibold text-etos-ink">Widget grid preview</h2>
+          <p className="mt-2 text-sm text-etos-ink-muted">
+            Layout placeholder for builder canvas. Blocks map from template definitions.
+          </p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {template.blocks.length > 0 ? (
+              template.blocks.map((block) => (
+                <div
+                  key={block.blockId}
+                  className="flex min-h-[120px] flex-col justify-between rounded-etos-card border border-dashed border-etos-border bg-etos-panel-muted p-4"
+                >
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-etos-ink-subtle">{block.kind}</p>
+                    <p className="mt-1 font-semibold text-etos-ink">{block.title}</p>
+                  </div>
+                  <p className="text-xs text-etos-ink-muted">
+                    {block.kpiKey ? `KPI ${block.kpiKey}` : block.queryIntentRef ?? "Widget slot"}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-etos-ink-muted sm:col-span-2 xl:col-span-3">No template blocks yet.</p>
+            )}
+          </div>
+        </section>
+
         <section className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
             <h2 className="text-2xl font-semibold">Readiness</h2>
-            <ul className="mt-4 space-y-2 text-sm text-slate-300">
+            <ul className="mt-4 space-y-2 text-sm text-etos-ink">
               <li>Stored: {readiness.storedReadinessState}</li>
               <li>Recalculated: {readiness.recalculatedReadinessState}</li>
               <li>Compatibility: {readiness.compatibilityStatus}</li>
@@ -153,49 +192,49 @@ export function DashboardReportDetailView({
               <li>Dependencies: {dependencyCount}</li>
             </ul>
             {readiness.blockingReasons.length > 0 ? (
-              <ul className="mt-4 space-y-2 text-sm text-amber-200">
+              <ul className="mt-4 space-y-2 text-sm text-etos-warning-fg">
                 {readiness.blockingReasons.map((reason) => (
                   <li key={reason}>{reason}</li>
                 ))}
               </ul>
             ) : (
-              <p className="mt-4 text-sm text-slate-500">No publish blockers from readiness recalculation.</p>
+              <p className="mt-4 text-sm text-etos-ink-subtle">No publish blockers from readiness recalculation.</p>
             )}
           </div>
 
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
+          <div className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
             <h2 className="text-2xl font-semibold">Template blocks</h2>
-            <ul className="mt-4 space-y-3 text-sm text-slate-300">
+            <ul className="mt-4 space-y-3 text-sm text-etos-ink">
               {template.blocks.map((block) => (
-                <li key={block.blockId} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-                  <p className="font-semibold text-slate-100">{block.title}</p>
-                  <p className="text-xs uppercase text-slate-500">{block.kind}</p>
-                  {block.queryIntentRef ? <p className="mt-1 text-xs text-slate-400">Intent: {block.queryIntentRef}</p> : null}
-                  {block.kpiKey ? <p className="mt-1 text-xs text-slate-400">KPI: {block.kpiKey}</p> : null}
+                <li key={block.blockId} className="rounded-etos-card border border-etos-border-soft bg-etos-panel p-4">
+                  <p className="font-semibold text-etos-ink">{block.title}</p>
+                  <p className="text-xs uppercase text-etos-ink-subtle">{block.kind}</p>
+                  {block.queryIntentRef ? <p className="mt-1 text-xs text-etos-ink-muted">Intent: {block.queryIntentRef}</p> : null}
+                  {block.kpiKey ? <p className="mt-1 text-xs text-etos-ink-muted">KPI: {block.kpiKey}</p> : null}
                 </li>
               ))}
             </ul>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
+        <section className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
           <h2 className="text-2xl font-semibold">Governed preview</h2>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-sm text-etos-ink-muted">
             Preview runs through governed query only. Allowed {preview.filterSummary.allowedContextTotal} · Denied{" "}
             {preview.filterSummary.deniedContextTotal}
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {preview.blocks.map((block) => (
-              <article key={block.blockId} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+              <article key={block.blockId} className="rounded-etos-card border border-etos-border-soft bg-etos-panel p-4">
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="font-semibold">{block.title}</h3>
-                  <span className="rounded-full border border-slate-700 px-3 py-1 text-xs uppercase text-slate-400">
+                  <span className="rounded-full border border-etos-border px-3 py-1 text-xs uppercase text-etos-ink-muted">
                     {block.status}
                   </span>
                 </div>
-                <p className="mt-3 text-sm text-slate-300">{block.safeSummary}</p>
+                <p className="mt-3 text-sm text-etos-ink">{block.safeSummary}</p>
                 {block.kind === "governed_query" ? (
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-etos-ink-subtle">
                     Allowed {block.allowedCount} · Denied {block.deniedCount}
                   </p>
                 ) : null}
@@ -203,6 +242,36 @@ export function DashboardReportDetailView({
             ))}
           </div>
         </section>
+
+        {kind === "report" ? (
+          <section className="rounded-etos-card border border-etos-border-panel bg-etos-panel-elevated p-6 shadow-etos">
+            <h2 className="text-2xl font-semibold text-etos-ink">Evidence appendix</h2>
+            <p className="mt-2 text-sm text-etos-ink-muted">
+              Report evidence drawn from governed preview blocks and filter summary.
+            </p>
+            <ul className="mt-4 space-y-3 text-sm">
+              {preview.blocks.map((block) => (
+                <li
+                  key={`evidence-${block.blockId}`}
+                  className="rounded-etos-card border border-etos-border-soft bg-etos-panel p-4"
+                >
+                  <p className="font-semibold text-etos-ink">{block.title}</p>
+                  <p className="mt-1 text-etos-ink-muted">{block.safeSummary}</p>
+                  <p className="mt-2 text-xs text-etos-ink-subtle">
+                    Status {block.status}
+                    {block.kind === "governed_query"
+                      ? ` · allowed ${block.allowedCount} · denied ${block.deniedCount}`
+                      : ""}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs text-etos-ink-subtle">
+              Filter totals: allowed {preview.filterSummary.allowedContextTotal} · denied{" "}
+              {preview.filterSummary.deniedContextTotal}
+            </p>
+          </section>
+        ) : null}
       </div>
     </main>
   );

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="10" fill="#1a0a0c"/>
+  <path d="M10 30h28v6H10z" fill="#ef233c"/>
+  <path d="M14 22h24v6H14z" fill="#ff4d63"/>
+  <path d="M18 14h20v6H18z" fill="#ff7a8a"/>
+  <text x="24" y="41" text-anchor="middle" fill="#ffb3bc" font-size="6" font-family="system-ui,sans-serif" font-weight="700">SW</text>
+</svg>

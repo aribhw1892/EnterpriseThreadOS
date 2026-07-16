@@ -1346,6 +1346,62 @@ export type GraphExplorerRelationship = {
   safeSummary: string;
 };
 
+export type GraphExplorerNodeList = {
+  nodes: GraphExplorerNodeSummary[];
+  truncated: boolean;
+  limit: number;
+  matchCount: number;
+};
+
+export type GraphExplorerSubgraphEdge = {
+  relationshipId: string;
+  relationshipType: string;
+  fromNodeId: string;
+  toNodeId: string;
+  trustState: string;
+  safeSummary: string;
+};
+
+export type GraphExplorerSubgraph = {
+  startNodeId: string;
+  nodes: GraphExplorerNodeSummary[];
+  relationships: GraphExplorerSubgraphEdge[];
+  truncated: boolean;
+  depth: number;
+  limit: number;
+};
+
+export type GraphExplorerPatternQueryRequest = {
+  startNodeId?: string | null;
+  startObjectType?: string | null;
+  endObjectType?: string | null;
+  relationshipTypes?: string[] | null;
+  maxDepth?: number | null;
+  graphSpace?: string | null;
+  trustState?: string | null;
+  search?: string | null;
+  limit?: number | null;
+  policyKey?: string | null;
+};
+
+export type GraphExplorerPatternQuery = {
+  nodes: GraphExplorerNodeSummary[];
+  relationships: GraphExplorerSubgraphEdge[];
+  truncated: boolean;
+  depth: number;
+  limit: number;
+  seedCount: number;
+};
+
+export type GraphExplorerNodeQuery = {
+  graphSpace?: string;
+  trustState?: string;
+  objectType?: string;
+  search?: string;
+  limit?: number;
+  policyKey?: string;
+};
+
 export type ContextPackageExplorerSummary = {
   packageId: string;
   retrievalRunId: string;
@@ -1537,6 +1593,39 @@ export const selectedTenantId =
   process.env.NEXT_PUBLIC_ETOS_TENANT_ID ??
   "22222222-2222-2222-2222-222222222222";
 
+/** Cookie key for UI-1.10 active tenant switcher (server-readable). */
+export const ETOS_TENANT_COOKIE = "etos-tenant-id";
+
+/**
+ * Resolves the active tenant id for API headers.
+ * Preference: `etos-tenant-id` cookie, then env `NEXT_PUBLIC_ETOS_TENANT_ID`.
+ */
+export async function resolveSelectedTenantId(): Promise<string> {
+  try {
+    const { cookies } = await import("next/headers");
+    const store = await cookies();
+    const fromCookie = store.get(ETOS_TENANT_COOKIE)?.value?.trim();
+    if (fromCookie) {
+      return fromCookie;
+    }
+  } catch {
+    // Outside a Next.js request (e.g. build-time); fall through to env.
+  }
+
+  return selectedTenantId;
+}
+
+/** Persist active tenant for subsequent server-side API calls in this browser session. */
+export async function setActiveTenantId(tenantId: string): Promise<void> {
+  const { cookies } = await import("next/headers");
+  const store = await cookies();
+  store.set(ETOS_TENANT_COOKIE, tenantId, {
+    path: "/",
+    sameSite: "lax",
+    httpOnly: true,
+  });
+}
+
 // --- Page loaders (server components call these to hydrate admin pages) ---
 
 /** Unauthenticated health probe for the home page. */
@@ -1555,7 +1644,8 @@ export async function getIdentityLists() {
   });
 
   const activeUserId = adminUserId ?? users.data?.[0]?.id;
-  const activeTenantId = selectedTenantId ?? tenants.data?.[0]?.id;
+  const activeTenantId =
+    (await resolveSelectedTenantId()) || tenants.data?.[0]?.id;
   const tenantHeaders =
     activeUserId && activeTenantId
       ? { userId: activeUserId, tenantId: activeTenantId }
@@ -1587,12 +1677,116 @@ export async function getIdentityLists() {
   };
 }
 
+// --- Identity Admin creates (UI-1.10) ---
+
+export async function createTenant(body: {
+  identifier: string;
+  name: string;
+  description?: string | null;
+}): Promise<ApiResult<Tenant>> {
+  return await postApi<Tenant>(
+    "/api/admin/identity/tenants",
+    {
+      identifier: body.identifier,
+      name: body.name,
+      description: body.description ?? null,
+    },
+    { userId: adminUserId },
+  );
+}
+
+export async function createUser(body: {
+  userName: string;
+  email: string;
+  displayName?: string | null;
+  password?: string | null;
+  id?: string | null;
+}): Promise<ApiResult<IdentityUser>> {
+  return await postApi<IdentityUser>(
+    "/api/admin/identity/users",
+    {
+      id: body.id ?? null,
+      userName: body.userName,
+      email: body.email,
+      displayName: body.displayName ?? null,
+      password: body.password ?? null,
+    },
+    { userId: adminUserId },
+  );
+}
+
+export async function createRole(body: {
+  name: string;
+  description?: string | null;
+}): Promise<ApiResult<TenantRole>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<TenantRole>();
+  }
+
+  return await postApi<TenantRole>(
+    "/api/admin/identity/roles",
+    {
+      name: body.name,
+      description: body.description ?? null,
+    },
+    tenantHeaders,
+  );
+}
+
+export async function createMembership(body: {
+  userId: string;
+  tenantRoleId: string;
+  expiresAt?: string | null;
+}): Promise<ApiResult<TenantMembership>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<TenantMembership>();
+  }
+
+  return await postApi<TenantMembership>(
+    "/api/admin/identity/memberships",
+    {
+      userId: body.userId,
+      tenantRoleId: body.tenantRoleId,
+      expiresAt: body.expiresAt ?? null,
+    },
+    tenantHeaders,
+  );
+}
+
+export async function createGrant(body: {
+  userId: string;
+  permissionKey: string;
+  kind: string;
+  expiresAt?: string | null;
+  justification?: string | null;
+}): Promise<ApiResult<AccessGrant>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<AccessGrant>();
+  }
+
+  const kindNormalized = body.kind.trim().toLowerCase();
+  const kindValue =
+    kindNormalized === "temporary" || kindNormalized === "0" ? 0 : 1;
+
+  return await postApi<AccessGrant>(
+    "/api/admin/identity/grants",
+    {
+      userId: body.userId,
+      permissionKey: body.permissionKey,
+      kind: kindValue,
+      expiresAt: body.expiresAt ?? null,
+      justification: body.justification ?? null,
+    },
+    tenantHeaders,
+  );
+}
+
 /** Governance page: recent audit records and security events. */
 export async function getGovernanceLists() {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
 
   const [auditRecords, securityEvents] = tenantHeaders
     ? await Promise.all([
@@ -1611,7 +1805,7 @@ export async function getGovernanceLists() {
 }
 
 export async function getGovernanceDashboard(windowDays?: number): Promise<ApiResult<GovernanceDashboard>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<GovernanceDashboard>();
   }
@@ -1624,7 +1818,7 @@ export async function getGovernanceKpiTrends(
   kpiKey: string,
   windowDays?: number,
 ): Promise<ApiResult<GovernanceKpiTrend>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<GovernanceKpiTrend>();
   }
@@ -1644,7 +1838,7 @@ export async function getGovernanceKpiTrends(
 export async function getHighRiskRecommendations(
   limit?: number,
 ): Promise<ApiResult<HighRiskRecommendationSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<HighRiskRecommendationSummary[]>();
   }
@@ -1658,10 +1852,7 @@ export async function getHighRiskRecommendations(
 
 /** Artifact registry page: artifacts plus first artifact's versions, relationships, dependencies. */
 export async function getArtifactRegistryLists() {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
 
   const artifacts = tenantHeaders
     ? await fetchApi<Artifact[]>("/api/admin/artifacts", tenantHeaders)
@@ -1703,10 +1894,7 @@ export async function getArtifactRegistryLists() {
 
 /** Classification page: schemes, policies, rules, and impact for first published policy. */
 export async function getClassificationPolicyLists() {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
 
   const [schemes, policies, rules] = tenantHeaders
     ? await Promise.all([
@@ -1738,10 +1926,7 @@ export async function getClassificationPolicyLists() {
 
 /** Model-artifacts page: ontology layers, model packages, and active published package. */
 export async function getOntologyLists() {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
 
   const [ontologyVersions, semanticLayers, lifecycleVocabularies, attributeSchemas, modelPackages, activeModelPackage] =
     tenantHeaders
@@ -1801,10 +1986,7 @@ export async function previewImportMapping(
 
 /** Imports page: batches, first batch detail, identity candidates, trust scores, data quality. */
 export async function getImportLists() {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
 
   const batches = tenantHeaders
     ? await fetchApi<ImportBatch[]>("/api/admin/imports/batches", tenantHeaders)
@@ -1851,10 +2033,7 @@ export async function getImportLists() {
 
 /** Documents page: document list, first document detail, CAD parsing status, data quality issues. */
 export async function getDocumentLists() {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
 
   const documents = tenantHeaders
     ? await fetchApi<DocumentArtifact[]>("/api/admin/documents", tenantHeaders)
@@ -1885,10 +2064,7 @@ export async function getDocumentLists() {
 
 /** Governed query page: retrieval run summaries and latest run detail with context package. */
 export async function getGovernedQueryLists() {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
 
   const runs = tenantHeaders
     ? await fetchApi<RetrievalRunSummary[]>("/api/admin/governed-query/runs", tenantHeaders)
@@ -1906,10 +2082,7 @@ export async function getGovernedQueryLists() {
 
 /** AI Trace page: trace list and latest trace detail. */
 export async function getAiTraceLists() {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
 
   const traces = tenantHeaders
     ? await fetchApi<AiTraceSummary[]>("/api/admin/ai-traces", tenantHeaders)
@@ -1925,14 +2098,21 @@ export async function getAiTraceLists() {
   };
 }
 
+/** GET /api/admin/ai-traces/{traceId} — single trace detail. */
+export async function getAiTraceDetail(traceId: string): Promise<ApiResult<AiTraceDetail>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<AiTraceDetail>();
+  }
+
+  return await fetchApi<AiTraceDetail>(`/api/admin/ai-traces/${traceId}`, tenantHeaders);
+}
+
 // --- Governed query, AI Trace export, and chat actions ---
 
 /** POST export; returns filename and byte size (not the file body). */
 export async function exportAiTrace(traceId: string): Promise<ApiResult<{ fileName: string; sizeBytes: number }>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ fileName: string; sizeBytes: number }>();
   }
@@ -1978,10 +2158,7 @@ export async function runGovernedQueryForGraphNode(
   startGraphNodeId: string,
   intentKey = "object-360-context",
 ): Promise<ApiResult<RetrievalRun>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<RetrievalRun>();
   }
@@ -2006,10 +2183,7 @@ export async function runGovernedQueryForDocument(
   documentArtifactId: string,
   intentKey = "document-evidence-context",
 ): Promise<ApiResult<RetrievalRun>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<RetrievalRun>();
   }
@@ -2039,7 +2213,7 @@ export async function runDemoGovernedQueryFlow(): Promise<ApiResult<RetrievalRun
     return { data: null, error: graphNodes.error };
   }
 
-  const trustedNode = graphNodes.data?.[0];
+  const trustedNode = graphNodes.data?.nodes?.[0];
   if (trustedNode) {
     return await runGovernedQueryForGraphNode(trustedNode.nodeId);
   }
@@ -2065,10 +2239,7 @@ export async function runDemoGovernedQueryFlow(): Promise<ApiResult<RetrievalRun
 export async function getGovernedChatLists(): Promise<{
   sessions: ApiResult<GovernedChatSessionSummary[]>;
 }> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
 
   const sessions = tenantHeaders
     ? await fetchApi<GovernedChatSessionSummary[]>("/api/admin/governed-chat/sessions", tenantHeaders)
@@ -2093,7 +2264,7 @@ export async function resolveGovernedChatAnchor(): Promise<ApiResult<GovernedCha
     return { data: null, error: graphNodes.error };
   }
 
-  const trustedNode = graphNodes.data?.[0];
+  const trustedNode = graphNodes.data?.nodes?.[0];
   if (trustedNode) {
     return {
       data: {
@@ -2129,10 +2300,7 @@ export async function createGovernedChatSession(
   title?: string,
   anchor?: GovernedChatAnchor,
 ): Promise<ApiResult<GovernedChatSessionSummary>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<GovernedChatSessionSummary>();
   }
@@ -2160,10 +2328,7 @@ export async function askGovernedChatTurn(
   draftArtifactKind?: "QueryIntent" | "Dashboard" | "Report" | "Recommendation",
   anchor?: GovernedChatAnchor,
 ): Promise<ApiResult<GovernedChatTurn>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<GovernedChatTurn>();
   }
@@ -2208,10 +2373,7 @@ export async function askGovernedChatTurn(
 export async function getGovernedChatSession(
   sessionId: string,
 ): Promise<ApiResult<GovernedChatSessionDetail>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<GovernedChatSessionDetail>();
   }
@@ -2223,10 +2385,7 @@ export async function getGovernedChatSession(
 }
 
 export async function getGovernedChatTurn(turnId: string): Promise<ApiResult<GovernedChatTurn>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<GovernedChatTurn>();
   }
@@ -2245,10 +2404,7 @@ export type CleanDevelopmentDemoDataResult = {
 
 /** Development-only reset for tenant demo data created through UI seed buttons. Preserves identity foundation. */
 export async function cleanDevelopmentDemoData(): Promise<ApiResult<CleanDevelopmentDemoDataResult>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<CleanDevelopmentDemoDataResult>();
   }
@@ -2264,10 +2420,7 @@ export async function cleanDevelopmentDemoData(): Promise<ApiResult<CleanDevelop
 
 /** Model artifacts page seed button. Installs the manufacturing reference package from repo content. */
 export async function createCanonicalModelSeed(): Promise<ApiResult<ModelPackageVersion>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ModelPackageVersion>();
   }
@@ -2298,10 +2451,7 @@ async function fetchReferencePackageDemoCsv(importName: "flat-part-import" | "bo
     "P-100,released,12.50",
     "P-200,in-review,-21.00",
   ].join("\n");
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return fallback;
   }
@@ -2331,10 +2481,7 @@ export async function createDemoImportFlow(): Promise<ApiResult<ImportMappingVer
 
 /** Documents page: create spec artifact, upload version, link to latest import batch. */
 export async function createDemoDocumentFlow(): Promise<ApiResult<DocumentArtifactDetail>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DocumentArtifactDetail>();
   }
@@ -2401,10 +2548,7 @@ export async function createDemoDocumentFlow(): Promise<ApiResult<DocumentArtifa
 
 /** Request vector indexing for the newest document version (placeholder provider). */
 export async function requestLatestDocumentVectorIndex(): Promise<ApiResult<DocumentVectorIndexRecord>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DocumentVectorIndexRecord>();
   }
@@ -2428,10 +2572,7 @@ export async function requestLatestDocumentVectorIndex(): Promise<ApiResult<Docu
 
 /** Create a manual data-quality issue tied to the latest document extraction. */
 export async function createExtractionIssueForLatestDocument(): Promise<ApiResult<DataQualityIssue>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DataQualityIssue>();
   }
@@ -2462,10 +2603,7 @@ export async function createDemoComparisonImportFlow(): Promise<ApiResult<Import
 
 /** Full identity demo: two staged imports then candidate generation on the ERP batch. */
 export async function runIdentityResolutionDemoFlow(): Promise<ApiResult<IdentityCandidateGeneration>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<IdentityCandidateGeneration>();
   }
@@ -2556,10 +2694,7 @@ async function createDemoImportForSource(
   sourceSystem: string,
   description: string,
 ): Promise<ApiResult<ImportMappingVersion>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportMappingVersion>();
   }
@@ -2701,10 +2836,7 @@ async function createPreparedDemoImportForSource(
 // --- Import pipeline admin actions (operate on "latest" batch from getImportLists) ---
 
 export async function approveLatestImportMapping(): Promise<ApiResult<ImportMappingVersion>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportMappingVersion>();
   }
@@ -2727,10 +2859,7 @@ export async function approveLatestImportMapping(): Promise<ApiResult<ImportMapp
 }
 
 export async function validateLatestImportBatch(): Promise<ApiResult<ImportValidation>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportValidation>();
   }
@@ -2745,10 +2874,7 @@ export async function validateLatestImportBatch(): Promise<ApiResult<ImportValid
 }
 
 export async function stageLatestImportBatch(): Promise<ApiResult<ImportStagingGraphRun>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportStagingGraphRun>();
   }
@@ -2774,10 +2900,7 @@ function hasBlockingValidationIssues(issues: ImportValidationIssue[]): boolean {
 
 /** Promote the newest staged batch that passes identity and validation gates. */
 export async function promoteReadyStagedImportBatch(): Promise<ApiResult<ImportPromotionRun>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportPromotionRun>();
   }
@@ -2837,10 +2960,7 @@ export async function promoteReadyStagedImportBatch(): Promise<ApiResult<ImportP
 
 /** Reject the newest staged batch and record a decision summary. */
 export async function rejectLatestStagedImportBatch(): Promise<ApiResult<{ id: string; importBatchId: string }>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ id: string; importBatchId: string }>();
   }
@@ -2860,16 +2980,23 @@ export async function rejectLatestStagedImportBatch(): Promise<ApiResult<{ id: s
 
 // --- PDM import wizard (batch-scoped; additive helpers) ---
 
-function resolveTenantHeaders():
-  | { userId: string; tenantId: string }
-  | undefined {
-  return adminUserId && selectedTenantId
-    ? { userId: adminUserId, tenantId: selectedTenantId }
-    : undefined;
+/** Cookie-aware tenant headers (UI-1.10). Falls back to env tenant. */
+export async function resolveTenantHeaders():
+  Promise<{ userId: string; tenantId: string } | undefined> {
+  if (!adminUserId) {
+    return undefined;
+  }
+
+  const tenantId = await resolveSelectedTenantId();
+  if (!tenantId) {
+    return undefined;
+  }
+
+  return { userId: adminUserId, tenantId };
 }
 
 export async function getImportBatchDetail(batchId: string): Promise<ApiResult<ImportBatchDetail>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportBatchDetail>();
   }
@@ -2882,7 +3009,7 @@ export async function createImportBatch(input: {
   description: string;
   modelPackageKey?: string;
 }): Promise<ApiResult<ImportBatch>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportBatch>();
   }
@@ -2903,7 +3030,7 @@ export async function uploadImportBatchFile(
   csv: string,
   fileName: string,
 ): Promise<ApiResult<{ evidence: ImportFileEvidence }>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ evidence: ImportFileEvidence }>();
   }
@@ -2929,7 +3056,7 @@ export async function createImportMappingVersion(input: {
   lifecycleMappings: ImportFileProfile["lifecycleMappings"];
   structuralRelationshipType?: string | null;
 }): Promise<ApiResult<ImportMappingVersion>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportMappingVersion>();
   }
@@ -2952,7 +3079,7 @@ export async function approveImportMapping(
   mappingId: string,
   input: { summary: string; structuralRelationshipType?: string | null },
 ): Promise<ApiResult<ImportMappingVersion>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportMappingVersion>();
   }
@@ -2968,7 +3095,7 @@ export async function approveImportMapping(
 }
 
 export async function validateImportBatch(batchId: string): Promise<ApiResult<ImportValidation>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportValidation>();
   }
@@ -2977,7 +3104,7 @@ export async function validateImportBatch(batchId: string): Promise<ApiResult<Im
 }
 
 export async function stageImportBatch(batchId: string): Promise<ApiResult<ImportStagingGraphRun>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportStagingGraphRun>();
   }
@@ -2988,7 +3115,7 @@ export async function stageImportBatch(batchId: string): Promise<ApiResult<Impor
 export async function getIdentityCandidatesForBatch(
   batchId: string,
 ): Promise<ApiResult<IdentityCandidateLink[]>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<IdentityCandidateLink[]>();
   }
@@ -2999,10 +3126,24 @@ export async function getIdentityCandidatesForBatch(
   );
 }
 
+export async function getTrustScoresForBatch(
+  batchId: string,
+): Promise<ApiResult<TrustScoreRecord[]>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<TrustScoreRecord[]>();
+  }
+
+  return await fetchApi<TrustScoreRecord[]>(
+    `/api/admin/identity-resolution/batches/${batchId}/trust-scores`,
+    tenantHeaders,
+  );
+}
+
 export async function generateIdentityCandidatesForBatch(
   batchId: string,
 ): Promise<ApiResult<IdentityCandidateGeneration>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<IdentityCandidateGeneration>();
   }
@@ -3018,7 +3159,7 @@ export async function approveIdentityCandidate(
   candidateId: string,
   rationale = "Approved from the PDM import wizard.",
 ): Promise<ApiResult<IdentityCandidateLink>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<IdentityCandidateLink>();
   }
@@ -3034,7 +3175,7 @@ export async function approveAllIdentityCandidatesForBatch(
   batchId: string,
   rationale = "Approved all reviewable candidates from the import wizard.",
 ): Promise<ApiResult<ApproveAllIdentityCandidates>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ApproveAllIdentityCandidates>();
   }
@@ -3050,7 +3191,7 @@ export async function markIdentityCandidateConflicted(
   candidateId: string,
   rationale = "Marked conflicted from the PDM import wizard.",
 ): Promise<ApiResult<IdentityCandidateLink>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<IdentityCandidateLink>();
   }
@@ -3063,7 +3204,7 @@ export async function markIdentityCandidateConflicted(
 }
 
 export async function promoteImportBatch(batchId: string): Promise<ApiResult<ImportPromotionRun>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportPromotionRun>();
   }
@@ -3075,7 +3216,7 @@ export async function previewBatchMapping(
   batchId: string,
   evidenceId: string,
 ): Promise<ApiResult<ImportPreview>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportPreview>();
   }
@@ -3104,7 +3245,7 @@ export async function runImportBatch(input: {
   mappingSource: ImportMappingSource;
   preview?: ImportPreview | null;
 }): Promise<ApiResult<ImportBatchResult>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportBatchResult>();
   }
@@ -3252,7 +3393,7 @@ export async function promoteImportBatches(
   batchIds: string[],
   sourceLabel: string,
 ): Promise<ApiResult<ImportPromotionRun[]>> {
-  const tenantHeaders = resolveTenantHeaders();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ImportPromotionRun[]>();
   }
@@ -3308,10 +3449,7 @@ export async function promotePdmImportBatches(batchIds: string[]): Promise<ApiRe
 
 /** Capture a trusted graph snapshot for MVP demo verification. */
 export async function captureTrustedGraphSnapshot(): Promise<ApiResult<GraphSnapshot>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<GraphSnapshot>();
   }
@@ -3325,10 +3463,7 @@ export async function captureTrustedGraphSnapshot(): Promise<ApiResult<GraphSnap
 
 /** Run BOM comparison on the newest staged ERP batch. */
 export async function createBomComparisonForLatestStagedBatch(): Promise<ApiResult<BomComparisonRun>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<BomComparisonRun>();
   }
@@ -3346,10 +3481,7 @@ export async function createBomComparisonForLatestStagedBatch(): Promise<ApiResu
 
 /** Create a recommendation artifact from the latest BOM comparison run. */
 export async function createRecommendationFromLatestBomComparison(): Promise<ApiResult<CreateRecommendationResult>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<CreateRecommendationResult>();
   }
@@ -3388,10 +3520,7 @@ export async function executePublishedWorkflowByKey(
 
 /** Generate identity candidates for the latest import batch. */
 export async function generateLatestIdentityCandidates(): Promise<ApiResult<IdentityCandidateGeneration>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<IdentityCandidateGeneration>();
   }
@@ -3410,10 +3539,7 @@ export async function generateLatestIdentityCandidates(): Promise<ApiResult<Iden
 }
 
 export async function approveLatestIdentityCandidate(): Promise<ApiResult<IdentityCandidateLink>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<IdentityCandidateLink>();
   }
@@ -3432,10 +3558,7 @@ export async function approveLatestIdentityCandidate(): Promise<ApiResult<Identi
 }
 
 export async function markLatestIdentityCandidateConflicted(): Promise<ApiResult<IdentityCandidateLink>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<IdentityCandidateLink>();
   }
@@ -3454,10 +3577,7 @@ export async function markLatestIdentityCandidateConflicted(): Promise<ApiResult
 }
 
 export async function generateDataQualityIssuesForLatestImport(): Promise<ApiResult<DataQualityIssueGeneration>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DataQualityIssueGeneration>();
   }
@@ -3484,10 +3604,7 @@ export async function generateDataQualityIssuesForLatestImport(): Promise<ApiRes
 }
 
 export async function createDataQualityIssueFromLatestSecurityEvent(): Promise<ApiResult<DataQualityIssue>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DataQualityIssue>();
   }
@@ -3506,10 +3623,7 @@ export async function createDataQualityIssueFromLatestSecurityEvent(): Promise<A
 }
 
 export async function createManualDataQualityIssueForLatestBatch(): Promise<ApiResult<DataQualityIssue>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DataQualityIssue>();
   }
@@ -3548,7 +3662,7 @@ export async function getContextView360(
   anchorId: string,
   policyKey?: string | null,
 ): Promise<ApiResult<ContextView360>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ContextView360>();
   }
@@ -3565,7 +3679,7 @@ export async function getGovernanceFlow(
   anchorKind: string,
   anchorId: string,
 ): Promise<ApiResult<GovernanceFlow>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<GovernanceFlow>();
   }
@@ -3575,7 +3689,7 @@ export async function getGovernanceFlow(
 }
 
 export async function getExplorerArtifacts(): Promise<ApiResult<ArtifactExplorerSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ArtifactExplorerSummary[]>();
   }
@@ -3583,17 +3697,78 @@ export async function getExplorerArtifacts(): Promise<ApiResult<ArtifactExplorer
   return await fetchApi<ArtifactExplorerSummary[]>("/api/admin/explorers/artifacts", tenantHeaders);
 }
 
-export async function getGraphExplorerNodes(): Promise<ApiResult<GraphExplorerNodeSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+export async function getGraphExplorerNodes(
+  query: GraphExplorerNodeQuery = {},
+): Promise<ApiResult<GraphExplorerNodeList>> {
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
-    return missingContext<GraphExplorerNodeSummary[]>();
+    return missingContext<GraphExplorerNodeList>();
   }
 
-  return await fetchApi<GraphExplorerNodeSummary[]>("/api/admin/explorers/graph/nodes", tenantHeaders);
+  const params = new URLSearchParams();
+  if (query.graphSpace) {
+    params.set("graphSpace", query.graphSpace);
+  }
+  if (query.trustState) {
+    params.set("trustState", query.trustState);
+  }
+  if (query.objectType) {
+    params.set("objectType", query.objectType);
+  }
+  if (query.search) {
+    params.set("search", query.search);
+  }
+  if (query.limit != null) {
+    params.set("limit", String(query.limit));
+  }
+  if (query.policyKey) {
+    params.set("policyKey", query.policyKey);
+  }
+
+  const suffix = params.size > 0 ? `?${params.toString()}` : "";
+  return await fetchApi<GraphExplorerNodeList>(
+    `/api/admin/explorers/graph/nodes${suffix}`,
+    tenantHeaders,
+  );
+}
+
+export async function searchGraphExplorerNodes(
+  query: GraphExplorerNodeQuery = {},
+): Promise<ApiResult<GraphExplorerNodeList>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<GraphExplorerNodeList>();
+  }
+
+  const params = new URLSearchParams();
+  if (query.graphSpace) {
+    params.set("graphSpace", query.graphSpace);
+  }
+  if (query.trustState) {
+    params.set("trustState", query.trustState);
+  }
+  if (query.objectType) {
+    params.set("objectType", query.objectType);
+  }
+  if (query.search) {
+    params.set("search", query.search);
+  }
+  if (query.limit != null) {
+    params.set("limit", String(query.limit));
+  }
+  if (query.policyKey) {
+    params.set("policyKey", query.policyKey);
+  }
+
+  const suffix = params.size > 0 ? `?${params.toString()}` : "";
+  return await fetchApi<GraphExplorerNodeList>(
+    `/api/admin/explorers/graph/search${suffix}`,
+    tenantHeaders,
+  );
 }
 
 export async function getGraphExplorerNode(nodeId: string): Promise<ApiResult<GraphExplorerNodeDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<GraphExplorerNodeDetail>();
   }
@@ -3601,8 +3776,86 @@ export async function getGraphExplorerNode(nodeId: string): Promise<ApiResult<Gr
   return await fetchApi<GraphExplorerNodeDetail>(`/api/admin/explorers/graph/nodes/${nodeId}`, tenantHeaders);
 }
 
+export async function getGraphExplorerRelationships(
+  nodeId: string,
+  direction: "in" | "out" | "both" = "both",
+): Promise<ApiResult<GraphExplorerRelationship[]>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<GraphExplorerRelationship[]>();
+  }
+
+  const query = direction === "both" ? "" : `?direction=${encodeURIComponent(direction)}`;
+  return await fetchApi<GraphExplorerRelationship[]>(
+    `/api/admin/explorers/graph/nodes/${nodeId}/relationships${query}`,
+    tenantHeaders,
+  );
+}
+
+export async function getGraphExplorerSubgraph(
+  nodeId: string,
+  options: {
+    depth?: number;
+    relationshipTypes?: string;
+    direction?: string;
+    graphSpace?: string;
+    trustState?: string;
+    limit?: number;
+    policyKey?: string;
+  } = {},
+): Promise<ApiResult<GraphExplorerSubgraph>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<GraphExplorerSubgraph>();
+  }
+
+  const params = new URLSearchParams();
+  if (options.depth != null) {
+    params.set("depth", String(options.depth));
+  }
+  if (options.relationshipTypes) {
+    params.set("relationshipTypes", options.relationshipTypes);
+  }
+  if (options.direction) {
+    params.set("direction", options.direction);
+  }
+  if (options.graphSpace) {
+    params.set("graphSpace", options.graphSpace);
+  }
+  if (options.trustState) {
+    params.set("trustState", options.trustState);
+  }
+  if (options.limit != null) {
+    params.set("limit", String(options.limit));
+  }
+  if (options.policyKey) {
+    params.set("policyKey", options.policyKey);
+  }
+
+  const suffix = params.size > 0 ? `?${params.toString()}` : "";
+  return await fetchApi<GraphExplorerSubgraph>(
+    `/api/admin/explorers/graph/nodes/${nodeId}/subgraph${suffix}`,
+    tenantHeaders,
+  );
+}
+
+export async function postGraphExplorerPatternQuery(
+  body: GraphExplorerPatternQueryRequest,
+): Promise<ApiResult<GraphExplorerPatternQuery>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<GraphExplorerPatternQuery>();
+  }
+
+  return await postApi<GraphExplorerPatternQuery>(
+    "/api/admin/explorers/graph/pattern-query",
+    body,
+    tenantHeaders,
+  );
+}
+
 export async function getContextPackageExplorerList(): Promise<ApiResult<ContextPackageExplorerSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ContextPackageExplorerSummary[]>();
   }
@@ -3613,7 +3866,7 @@ export async function getContextPackageExplorerList(): Promise<ApiResult<Context
 export async function getContextPackageExplorerDetail(
   packageId: string,
 ): Promise<ApiResult<ContextPackageExplorerDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ContextPackageExplorerDetail>();
   }
@@ -3627,7 +3880,7 @@ export async function getContextPackageExplorerDetail(
 export async function getDecisionExplorerList(
   filters: DecisionExplorerFilters = {},
 ): Promise<ApiResult<DecisionExplorerItem[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DecisionExplorerItem[]>();
   }
@@ -3648,10 +3901,7 @@ export async function getDecisionExplorerList(
 // --- Dashboard and report artifact APIs ---
 
 export async function getDashboardArtifacts(): Promise<ApiResult<DashboardReportArtifactSummary[]>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DashboardReportArtifactSummary[]>();
   }
@@ -3660,10 +3910,7 @@ export async function getDashboardArtifacts(): Promise<ApiResult<DashboardReport
 }
 
 export async function getReportArtifacts(): Promise<ApiResult<DashboardReportArtifactSummary[]>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DashboardReportArtifactSummary[]>();
   }
@@ -3676,10 +3923,7 @@ export async function getDashboardReportTemplate(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<DashboardReportTemplate>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DashboardReportTemplate>();
   }
@@ -3698,10 +3942,7 @@ export async function previewDashboardReport(
     policyKey?: string | null;
   } = {},
 ): Promise<ApiResult<DashboardReportPreview>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DashboardReportPreview>();
   }
@@ -3719,10 +3960,7 @@ export async function markDashboardReportReady(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>();
   }
@@ -3733,10 +3971,7 @@ export async function markDashboardReportReady(
 
 /** Shared artifact lifecycle endpoints used by multiple artifact detail pages. */
 export async function getArtifactVersions(artifactId: string): Promise<ApiResult<ArtifactVersion[]>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ArtifactVersion[]>();
   }
@@ -3748,10 +3983,7 @@ export async function getArtifactReadiness(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<ArtifactReadiness>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ArtifactReadiness>();
   }
@@ -3766,10 +3998,7 @@ export async function getArtifactImpact(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<ArtifactImpact>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ArtifactImpact>();
   }
@@ -3785,10 +4014,7 @@ export async function publishArtifactVersion(
   versionId: string,
   summary?: string,
 ): Promise<ApiResult<PublishArtifactVersionResult>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<PublishArtifactVersionResult>();
   }
@@ -3805,10 +4031,7 @@ export async function exportDashboardReport(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<{ fileName: string; sizeBytes: number }>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ fileName: string; sizeBytes: number }>();
   }
@@ -3889,10 +4112,7 @@ export function draftArtifactDetailHref(artifactType: string, artifactId: string
 // --- Recommendation artifact APIs ---
 
 export async function getRecommendationArtifacts(): Promise<ApiResult<RecommendationArtifactSummary[]>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<RecommendationArtifactSummary[]>();
   }
@@ -3904,10 +4124,7 @@ export async function getRecommendationPayload(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<RecommendationPayload>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<RecommendationPayload>();
   }
@@ -3922,10 +4139,7 @@ export async function markRecommendationReviewed(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; lifecycleStatus: string; validationNotes: string[] }>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; lifecycleStatus: string; validationNotes: string[] }>();
   }
@@ -3937,10 +4151,7 @@ export async function markRecommendationReady(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; trustState: string; conflictState: string; validationNotes: string[] }>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; readinessState: string; trustState: string; conflictState: string; validationNotes: string[] }>();
   }
@@ -3954,10 +4165,7 @@ export async function updateRecommendationSuggestedActionStatus(
   actionId: string,
   status: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; actionId: string; status: string }>> {
-  const tenantHeaders =
-    adminUserId && selectedTenantId
-      ? { userId: adminUserId, tenantId: selectedTenantId }
-      : undefined;
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; actionId: string; status: string }>();
   }
@@ -4042,7 +4250,7 @@ export type ReviewTaskPayload = {
 };
 
 export async function getReviewTaskArtifacts(): Promise<ApiResult<ReviewTaskArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ReviewTaskArtifactSummary[]>();
   }
@@ -4054,7 +4262,7 @@ export async function getReviewTaskPayload(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<ReviewTaskPayload>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ReviewTaskPayload>();
   }
@@ -4070,7 +4278,7 @@ export async function createReviewTaskFromRecommendationAction(
   versionId: string,
   actionId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
   }
@@ -4087,7 +4295,7 @@ export async function addReviewTaskComment(
   versionId: string,
   body: string,
 ): Promise<ApiResult<unknown>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<unknown>();
   }
@@ -4112,7 +4320,7 @@ export async function completeReviewTask(
     unblockedTaskArtifactIds: string[];
   }>
 > {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{
       artifactId: string;
@@ -4133,7 +4341,7 @@ export async function completeReviewTask(
 }
 
 export async function listDecisions(): Promise<ApiResult<DecisionExplorerItem[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DecisionExplorerItem[]>();
   }
@@ -4145,7 +4353,7 @@ export async function getDecisionDetail(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<DecisionDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DecisionDetail>();
   }
@@ -4159,7 +4367,7 @@ export async function castDecisionVote(
   vote: DecisionVoteKind,
   comment?: string,
 ): Promise<ApiResult<unknown>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<unknown>();
   }
@@ -4172,7 +4380,7 @@ export async function addDecisionComment(
   versionId: string,
   body: string,
 ): Promise<ApiResult<unknown>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<unknown>();
   }
@@ -4193,12 +4401,356 @@ export async function recordManualOutcome(
     recommendationArtifactId?: string;
   },
 ): Promise<ApiResult<unknown>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<unknown>();
   }
 
   return await postApi(`/api/admin/decisions/${artifactId}/versions/${versionId}/outcomes`, request, tenantHeaders);
+}
+
+export type LearningSignalSummary = {
+  artifactId: string;
+  versionId: string;
+  name: string;
+  patternKey: string;
+  occurrenceCount: number;
+  summary: string;
+  status: string;
+  sourceDecisionIds: string[];
+  updatedAt: string;
+};
+
+export type LearningEvidenceSummary = {
+  id: string;
+  decisionArtifactId?: string | null;
+  patternKey: string;
+  sourceType: string;
+  outcomeKey: string;
+  evidenceSummary: string;
+  createdAt: string;
+};
+
+export type LearningSignalDetail = {
+  artifactId: string;
+  versionId: string;
+  name: string;
+  patternKey: string;
+  occurrenceCount: number;
+  summary: string;
+  status: string;
+  sourceDecisionIds: string[];
+  relatedEvidence: LearningEvidenceSummary[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LearningSignalFilters = {
+  status?: string;
+  patternKey?: string;
+};
+
+export async function listLearningSignals(
+  filters: LearningSignalFilters = {},
+): Promise<ApiResult<LearningSignalSummary[]>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<LearningSignalSummary[]>();
+  }
+
+  const query = new URLSearchParams();
+  if (filters.status) query.set("status", filters.status);
+  if (filters.patternKey) query.set("patternKey", filters.patternKey);
+  const suffix = query.size > 0 ? `?${query.toString()}` : "";
+
+  return await fetchApi<LearningSignalSummary[]>(
+    `/api/admin/learning-signals${suffix}`,
+    tenantHeaders,
+  );
+}
+
+export async function getLearningSignalDetail(
+  artifactId: string,
+): Promise<ApiResult<LearningSignalDetail>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<LearningSignalDetail>();
+  }
+
+  return await fetchApi<LearningSignalDetail>(
+    `/api/admin/learning-signals/${artifactId}`,
+    tenantHeaders,
+  );
+}
+
+export type DigitalThreadTopThread = {
+  id: string;
+  label: string;
+  eventCount: number;
+};
+
+export type DigitalThreadHeatmapBucket = {
+  systemId: string;
+  bucketStartUtc: string;
+  eventCount: number;
+};
+
+export type DigitalThreadOpenAlertCounts = {
+  dataQualityOpen: number;
+  securityHighOrCritical: number;
+  failedRuns: number;
+  total: number;
+};
+
+export type DigitalThreadSummary = {
+  connectedSystemCount: number;
+  healthySystemCount: number;
+  warningSystemCount: number;
+  downSystemCount: number;
+  eventsLastMinute: number;
+  openAlertCounts: DigitalThreadOpenAlertCounts;
+  topThreads: DigitalThreadTopThread[];
+  heatmapBuckets: DigitalThreadHeatmapBucket[];
+  windowHours: number;
+  generatedAtUtc: string;
+};
+
+export type DigitalThreadSystem = {
+  systemId: string;
+  displayName: string;
+  systemType: string;
+  connectionStatus: string;
+  lastEventAtUtc?: string | null;
+  eventCount24h: number;
+  syncStatus: string;
+};
+
+export type DigitalThreadEvent = {
+  eventId: string;
+  timestampUtc: string;
+  sourceSystemId: string;
+  sourceSystemName: string;
+  eventType: string;
+  title: string;
+  description: string;
+  artifactId?: string | null;
+  trustState: string;
+  syncStatus: string;
+  severity?: string | null;
+  traceId?: string | null;
+  recommendationId?: string | null;
+};
+
+export type DigitalThreadEventParams = {
+  from?: string;
+  to?: string;
+  systemId?: string;
+  limit?: number;
+};
+
+export type DigitalThreadSettings = {
+  useLiveProjection: boolean;
+};
+
+export async function getDigitalThreadSettings(): Promise<
+  ApiResult<DigitalThreadSettings>
+> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<DigitalThreadSettings>();
+  }
+
+  return await fetchApi<DigitalThreadSettings>(
+    "/api/admin/digital-thread/settings",
+    tenantHeaders,
+  );
+}
+
+export async function getDigitalThreadSummary(
+  windowHours = 24,
+): Promise<ApiResult<DigitalThreadSummary>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<DigitalThreadSummary>();
+  }
+
+  const query = windowHours ? `?windowHours=${windowHours}` : "";
+  return await fetchApi<DigitalThreadSummary>(
+    `/api/admin/digital-thread/summary${query}`,
+    tenantHeaders,
+  );
+}
+
+export async function getDigitalThreadSystems(): Promise<
+  ApiResult<DigitalThreadSystem[]>
+> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<DigitalThreadSystem[]>();
+  }
+
+  return await fetchApi<DigitalThreadSystem[]>(
+    "/api/admin/digital-thread/systems",
+    tenantHeaders,
+  );
+}
+
+export async function getDigitalThreadEvents(
+  params: DigitalThreadEventParams = {},
+): Promise<ApiResult<DigitalThreadEvent[]>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<DigitalThreadEvent[]>();
+  }
+
+  const query = new URLSearchParams();
+  if (params.from) query.set("from", params.from);
+  if (params.to) query.set("to", params.to);
+  if (params.systemId) query.set("systemId", params.systemId);
+  if (params.limit) query.set("limit", String(params.limit));
+  const suffix = query.size > 0 ? `?${query.toString()}` : "";
+
+  return await fetchApi<DigitalThreadEvent[]>(
+    `/api/admin/digital-thread/events${suffix}`,
+    tenantHeaders,
+  );
+}
+
+export type DigitalThreadProjectionPoint = {
+  x: number;
+  y: number;
+};
+
+export type DigitalThreadBranch = {
+  branchId: string;
+  systemIds: string[];
+  timeStartUtc: string;
+  timeEndUtc: string;
+  eventCount: number;
+  health: string;
+  trustScore?: number | null;
+  projectionPoints: DigitalThreadProjectionPoint[];
+};
+
+export type DigitalThreadLineageHop = {
+  fromArtifactId: string;
+  fromLabel: string;
+  toArtifactId: string;
+  toLabel: string;
+  relationshipType: string;
+  trustState: string;
+};
+
+export type DigitalThreadLineage = {
+  artifactId: string;
+  label: string;
+  hops: DigitalThreadLineageHop[];
+  relatedEvents: DigitalThreadEvent[];
+};
+
+export type DigitalThreadEvidenceLink = {
+  linkType: string;
+  label: string;
+  href?: string | null;
+  safeSummary?: string | null;
+};
+
+export type DigitalThreadDrillRoute = {
+  routeType: string;
+  label: string;
+  href: string;
+};
+
+export type DigitalThreadEventDetail = DigitalThreadEvent & {
+  policySafeSummary?: string | null;
+  dataQualitySafeSummary?: string | null;
+  evidenceLinks: DigitalThreadEvidenceLink[];
+  drillRoutes: DigitalThreadDrillRoute[];
+};
+
+export type DigitalThreadMinimapSystem = {
+  systemId: string;
+  displayName: string;
+  connectionStatus: string;
+  x: number;
+  y: number;
+};
+
+export type DigitalThreadMinimap = {
+  windowHours: number;
+  windowStartUtc: string;
+  windowEndUtc: string;
+  systems: DigitalThreadMinimapSystem[];
+  coarsePoints: DigitalThreadProjectionPoint[];
+};
+
+export type DigitalThreadBranchParams = {
+  windowHours?: number;
+  from?: string;
+  to?: string;
+};
+
+export async function getDigitalThreadBranches(
+  params: DigitalThreadBranchParams = {},
+): Promise<ApiResult<DigitalThreadBranch[]>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<DigitalThreadBranch[]>();
+  }
+
+  const query = new URLSearchParams();
+  if (params.windowHours) query.set("windowHours", String(params.windowHours));
+  if (params.from) query.set("from", params.from);
+  if (params.to) query.set("to", params.to);
+  const suffix = query.size > 0 ? `?${query.toString()}` : "";
+
+  return await fetchApi<DigitalThreadBranch[]>(
+    `/api/admin/digital-thread/branches${suffix}`,
+    tenantHeaders,
+  );
+}
+
+export async function getDigitalThreadLineage(
+  artifactId: string,
+): Promise<ApiResult<DigitalThreadLineage>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<DigitalThreadLineage>();
+  }
+
+  return await fetchApi<DigitalThreadLineage>(
+    `/api/admin/digital-thread/lineage/${artifactId}`,
+    tenantHeaders,
+  );
+}
+
+export async function getDigitalThreadEventDetail(
+  eventId: string,
+): Promise<ApiResult<DigitalThreadEventDetail>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<DigitalThreadEventDetail>();
+  }
+
+  return await fetchApi<DigitalThreadEventDetail>(
+    `/api/admin/digital-thread/events/${encodeURIComponent(eventId)}`,
+    tenantHeaders,
+  );
+}
+
+export async function getDigitalThreadMinimap(
+  windowHours = 24,
+): Promise<ApiResult<DigitalThreadMinimap>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<DigitalThreadMinimap>();
+  }
+
+  const query = windowHours ? `?windowHours=${windowHours}` : "";
+  return await fetchApi<DigitalThreadMinimap>(
+    `/api/admin/digital-thread/minimap${query}`,
+    tenantHeaders,
+  );
 }
 
 export type ReviewTaskTemplateArtifactSummary = {
@@ -4226,7 +4778,7 @@ export type ReviewTaskAccessRequest = {
 };
 
 export async function listDataQualityIssues(): Promise<ApiResult<DataQualityIssue[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<DataQualityIssue[]>();
   }
@@ -4235,7 +4787,7 @@ export async function listDataQualityIssues(): Promise<ApiResult<DataQualityIssu
 }
 
 export async function listSecurityEvents(limit = 25): Promise<ApiResult<SecurityEvent[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<SecurityEvent[]>();
   }
@@ -4244,7 +4796,7 @@ export async function listSecurityEvents(limit = 25): Promise<ApiResult<Security
 }
 
 export async function listAccessRequests(): Promise<ApiResult<ReviewTaskAccessRequest[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ReviewTaskAccessRequest[]>();
   }
@@ -4257,7 +4809,7 @@ export async function createAccessRequest(input: {
   permissionKey: string;
   reason: string;
 }): Promise<ApiResult<ReviewTaskAccessRequest>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ReviewTaskAccessRequest>();
   }
@@ -4266,7 +4818,7 @@ export async function createAccessRequest(input: {
 }
 
 export async function getReviewTaskTemplateArtifacts(): Promise<ApiResult<ReviewTaskTemplateArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ReviewTaskTemplateArtifactSummary[]>();
   }
@@ -4285,7 +4837,7 @@ export async function createManualReviewTask(input: {
   trustState?: string;
   conflictState?: string;
 }): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
   }
@@ -4296,7 +4848,7 @@ export async function createManualReviewTask(input: {
 export async function createReviewTaskFromDataQualityIssue(
   issueId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
   }
@@ -4307,7 +4859,7 @@ export async function createReviewTaskFromDataQualityIssue(
 export async function createReviewTaskFromSecurityEvent(
   eventId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
   }
@@ -4318,7 +4870,7 @@ export async function createReviewTaskFromSecurityEvent(
 export async function createReviewTaskFromAccessRequest(
   requestId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
   }
@@ -4334,7 +4886,7 @@ export async function assignReviewTask(
     assignedRoleKey?: string | null;
   },
 ): Promise<ApiResult<unknown>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<unknown>();
   }
@@ -4347,7 +4899,7 @@ export async function updateReviewTaskStatus(
   versionId: string,
   input: { status: string; blockingReason?: string | null },
 ): Promise<ApiResult<unknown>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<unknown>();
   }
@@ -4359,7 +4911,7 @@ export async function createReviewTaskEscalation(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; versionLabel: string; status: string }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; versionLabel: string; status: string }>();
   }
@@ -4415,7 +4967,7 @@ export type CapabilityDefinitionDetail = {
 };
 
 export async function getCapabilityDefinitionArtifacts(): Promise<ApiResult<CapabilityDefinitionArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<CapabilityDefinitionArtifactSummary[]>();
   }
@@ -4427,7 +4979,7 @@ export async function getCapabilityDefinitionDetail(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<CapabilityDefinitionDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<CapabilityDefinitionDetail>();
   }
@@ -4442,7 +4994,7 @@ export async function markCapabilityDefinitionReady(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>();
   }
@@ -4459,7 +5011,7 @@ export async function publishCapabilityDefinition(
   versionId: string,
   summary?: string,
 ): Promise<ApiResult<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>();
   }
@@ -4528,7 +5080,7 @@ export type BusinessPolicyDefinitionDetail = {
 };
 
 export async function getBusinessPolicyDefinitionArtifacts(): Promise<ApiResult<BusinessPolicyDefinitionArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<BusinessPolicyDefinitionArtifactSummary[]>();
   }
@@ -4540,7 +5092,7 @@ export async function getBusinessPolicyDefinitionDetail(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<BusinessPolicyDefinitionDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<BusinessPolicyDefinitionDetail>();
   }
@@ -4555,7 +5107,7 @@ export async function markBusinessPolicyDefinitionReady(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>();
   }
@@ -4572,7 +5124,7 @@ export async function publishBusinessPolicyDefinition(
   versionId: string,
   summary?: string,
 ): Promise<ApiResult<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>();
   }
@@ -4653,7 +5205,7 @@ export type OptimizationModelDefinitionDetail = {
 };
 
 export async function getOptimizationModelDefinitionArtifacts(): Promise<ApiResult<OptimizationModelDefinitionArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<OptimizationModelDefinitionArtifactSummary[]>();
   }
@@ -4665,7 +5217,7 @@ export async function getOptimizationModelDefinitionDetail(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<OptimizationModelDefinitionDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<OptimizationModelDefinitionDetail>();
   }
@@ -4680,7 +5232,7 @@ export async function markOptimizationModelDefinitionReady(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>();
   }
@@ -4697,7 +5249,7 @@ export async function publishOptimizationModelDefinition(
   versionId: string,
   summary?: string,
 ): Promise<ApiResult<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>();
   }
@@ -4800,7 +5352,7 @@ export type AgentTemplateDefinitionDetail = {
 };
 
 export async function getAgentTemplateDefinitionArtifacts(): Promise<ApiResult<AgentTemplateDefinitionArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<AgentTemplateDefinitionArtifactSummary[]>();
   }
@@ -4812,7 +5364,7 @@ export async function getAgentTemplateDefinitionDetail(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<AgentTemplateDefinitionDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<AgentTemplateDefinitionDetail>();
   }
@@ -4827,7 +5379,7 @@ export async function markAgentTemplateDefinitionReady(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>();
   }
@@ -4844,7 +5396,7 @@ export async function publishAgentTemplateDefinition(
   versionId: string,
   summary?: string,
 ): Promise<ApiResult<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>();
   }
@@ -5017,7 +5569,7 @@ export type ToolRunDetail = {
 };
 
 export async function getToolDefinitionArtifacts(): Promise<ApiResult<ToolDefinitionArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ToolDefinitionArtifactSummary[]>();
   }
@@ -5026,7 +5578,7 @@ export async function getToolDefinitionArtifacts(): Promise<ApiResult<ToolDefini
 }
 
 export async function getSkillDefinitionArtifacts(): Promise<ApiResult<SkillDefinitionArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<SkillDefinitionArtifactSummary[]>();
   }
@@ -5035,7 +5587,7 @@ export async function getSkillDefinitionArtifacts(): Promise<ApiResult<SkillDefi
 }
 
 export async function getConnectorDefinitionArtifacts(): Promise<ApiResult<ConnectorDefinitionArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ConnectorDefinitionArtifactSummary[]>();
   }
@@ -5047,7 +5599,7 @@ export async function getToolDefinitionDetail(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<ToolDefinitionDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ToolDefinitionDetail>();
   }
@@ -5062,7 +5614,7 @@ export async function getConnectorDefinitionDetail(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<ConnectorDefinitionDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ConnectorDefinitionDetail>();
   }
@@ -5074,7 +5626,7 @@ export async function getConnectorDefinitionDetail(
 }
 
 export async function getToolRuns(): Promise<ApiResult<ToolRunSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ToolRunSummary[]>();
   }
@@ -5083,12 +5635,125 @@ export async function getToolRuns(): Promise<ApiResult<ToolRunSummary[]>> {
 }
 
 export async function getToolRunDetail(runId: string): Promise<ApiResult<ToolRunDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<ToolRunDetail>();
   }
 
   return await fetchApi<ToolRunDetail>(`/api/admin/tool-runs/${runId}`, tenantHeaders);
+}
+
+export type ToolCompatibilityScanResult = {
+  artifactId: string;
+  versionId: string;
+  isCompatible: boolean;
+  blockingNotes: string[];
+};
+
+export type ToolExecutionResult = {
+  toolRunId: string;
+  status: string;
+  outputSafeSummaryJson?: string | null;
+  aiTraceRecordId?: string | null;
+  auditRecordId?: string | null;
+  validationNotes: string[];
+};
+
+export type ToolExecutionRequestBody = {
+  inputJson?: string | null;
+  parentAgentRunId?: string | null;
+  parentWorkflowRunId?: string | null;
+};
+
+export async function markToolDefinitionReady(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<{ artifactId: string; versionId: string; readinessState: string; validationNotes: string[] }>();
+  }
+
+  return await postApi(
+    `/api/admin/tools/${artifactId}/versions/${versionId}/mark-ready`,
+    {},
+    tenantHeaders,
+  );
+}
+
+export async function publishToolDefinition(
+  artifactId: string,
+  versionId: string,
+  summary?: string,
+): Promise<ApiResult<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<{ succeeded: boolean; readinessState: string; blockingReasons: string[]; artifactId: string; versionId: string }>();
+  }
+
+  return await postApi(
+    `/api/admin/tools/${artifactId}/versions/${versionId}/publish`,
+    { summary: summary ?? null },
+    tenantHeaders,
+  );
+}
+
+export async function compatibilityScanToolDefinition(
+  artifactId: string,
+  versionId: string,
+): Promise<ApiResult<ToolCompatibilityScanResult>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ToolCompatibilityScanResult>();
+  }
+
+  return await postApi<ToolCompatibilityScanResult>(
+    `/api/admin/tools/${artifactId}/versions/${versionId}/compatibility-scan`,
+    {},
+    tenantHeaders,
+  );
+}
+
+export async function dryRunToolDefinition(
+  artifactId: string,
+  versionId: string,
+  request?: ToolExecutionRequestBody,
+): Promise<ApiResult<ToolExecutionResult>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ToolExecutionResult>();
+  }
+
+  return await postApi<ToolExecutionResult>(
+    `/api/admin/tools/${artifactId}/versions/${versionId}/dry-run`,
+    {
+      inputJson: request?.inputJson ?? "{}",
+      parentAgentRunId: request?.parentAgentRunId ?? null,
+      parentWorkflowRunId: request?.parentWorkflowRunId ?? null,
+    },
+    tenantHeaders,
+  );
+}
+
+export async function executeToolDefinition(
+  artifactId: string,
+  versionId: string,
+  request?: ToolExecutionRequestBody,
+): Promise<ApiResult<ToolExecutionResult>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<ToolExecutionResult>();
+  }
+
+  return await postApi<ToolExecutionResult>(
+    `/api/admin/tools/${artifactId}/versions/${versionId}/execute`,
+    {
+      inputJson: request?.inputJson ?? "{}",
+      parentAgentRunId: request?.parentAgentRunId ?? null,
+      parentWorkflowRunId: request?.parentWorkflowRunId ?? null,
+    },
+    tenantHeaders,
+  );
 }
 
 // --- Agent type definitions (Issue 23) ---
@@ -5333,7 +5998,7 @@ export type CreateAgentDefinitionResponse = {
 };
 
 export async function getAgentTypeDefinitionArtifacts(): Promise<ApiResult<AgentTypeDefinitionArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<AgentTypeDefinitionArtifactSummary[]>();
   }
@@ -5345,7 +6010,7 @@ export async function getAgentTypeDefinitionDetail(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<AgentTypeDefinitionDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<AgentTypeDefinitionDetail>();
   }
@@ -5357,7 +6022,7 @@ export async function getAgentTypeDefinitionDetail(
 }
 
 export async function getAgentDefinitionArtifacts(): Promise<ApiResult<AgentVersionArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<AgentVersionArtifactSummary[]>();
   }
@@ -5369,7 +6034,7 @@ export async function getAgentDefinitionDetail(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<AgentVersionDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<AgentVersionDetail>();
   }
@@ -5430,7 +6095,7 @@ export async function loadAgentVersionByKey(
 export async function postAgentFromTemplate(
   request: CreateAgentFromTemplateRequest,
 ): Promise<ApiResult<CreateAgentDefinitionResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<CreateAgentDefinitionResponse>();
   }
@@ -5441,7 +6106,7 @@ export async function postAgentFromTemplate(
 export async function postAgentFromPrompt(
   request: CreateAgentFromPromptRequest,
 ): Promise<ApiResult<CreateAgentDefinitionResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<CreateAgentDefinitionResponse>();
   }
@@ -5468,7 +6133,7 @@ export async function postAgentModelConfig(
   versionId: string,
   request: UpdateAgentModelConfigRequest,
 ): Promise<ApiResult<UpdateAgentModelConfigResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<UpdateAgentModelConfigResponse>();
   }
@@ -5484,7 +6149,7 @@ export async function markAgentDefinitionReady(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<MarkAgentDefinitionReadyResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<MarkAgentDefinitionReadyResponse>();
   }
@@ -5508,7 +6173,7 @@ export async function publishAgentDefinition(
   versionId: string,
   summary?: string,
 ): Promise<ApiResult<PublishAgentDefinitionResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<PublishAgentDefinitionResponse>();
   }
@@ -5533,7 +6198,7 @@ export async function postAgentPreview(
   versionId: string,
   request: AgentExecutionRequest,
 ): Promise<ApiResult<AgentExecutionResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<AgentExecutionResponse>();
   }
@@ -5550,7 +6215,7 @@ export async function postAgentTestRun(
   versionId: string,
   request: AgentExecutionRequest,
 ): Promise<ApiResult<AgentExecutionResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<AgentExecutionResponse>();
   }
@@ -5567,7 +6232,7 @@ export async function postAgentExecute(
   versionId: string,
   request: AgentExecutionRequest,
 ): Promise<ApiResult<AgentExecutionResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<AgentExecutionResponse>();
   }
@@ -5580,7 +6245,7 @@ export async function postAgentExecute(
 }
 
 export async function getAgentRuns(): Promise<ApiResult<AgentRunSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<AgentRunSummary[]>();
   }
@@ -5589,7 +6254,7 @@ export async function getAgentRuns(): Promise<ApiResult<AgentRunSummary[]>> {
 }
 
 export async function getAgentRunDetail(runId: string): Promise<ApiResult<AgentRunDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<AgentRunDetail>();
   }
@@ -5819,6 +6484,39 @@ export type CreateWorkflowDefinitionResponse = {
   versionLabel: string;
 };
 
+export type CreateWorkflowDefinitionVersionRequest = {
+  versionLabel: string;
+  summary?: string | null;
+  workflowKey: string;
+  displayName: string;
+  workflowDescription?: string | null;
+  workflowScope: string;
+  steps?: WorkflowStepDefinition[] | null;
+  inputSchemaVersionId?: string | null;
+  outputSchemaVersionId?: string | null;
+  referencedAgentVersionIds?: string[] | null;
+  referencedToolDefinitionVersionIds?: string[] | null;
+  referencedBusinessPolicyDefinitionVersionIds?: string[] | null;
+  referencedOptimizationModelVersionIds?: string[] | null;
+  compatibleModelPackageVersionIds?: string[] | null;
+  compatibleOntologyVersionIds?: string[] | null;
+  safeModeEnabled: boolean;
+  previewModeDefault: boolean;
+  blockedModeMessage?: string | null;
+  allowPartialCompletion: boolean;
+  defaultStepSafeModeBehavior: string;
+  triggerConfig?: WorkflowTriggerConfig | null;
+  approvalRequirements?: string[] | null;
+  compatibilityTestNotes?: string[] | null;
+  compatibilityFixtureKeys?: string[] | null;
+};
+
+export type CreateWorkflowDefinitionVersionResponse = {
+  artifactId: string;
+  versionId: string;
+  versionLabel: string;
+};
+
 export type MarkWorkflowDefinitionReadyResponse = {
   artifactId: string;
   versionId: string;
@@ -5836,7 +6534,7 @@ export type PublishWorkflowDefinitionResponse = {
 };
 
 export async function getWorkflowDefinitionArtifacts(): Promise<ApiResult<WorkflowVersionArtifactSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<WorkflowVersionArtifactSummary[]>();
   }
@@ -5848,7 +6546,7 @@ export async function getWorkflowDefinitionDetail(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<WorkflowVersionDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<WorkflowVersionDetail>();
   }
@@ -5912,7 +6610,7 @@ export async function loadWorkflowVersionByKey(
 export async function postWorkflowDefinition(
   request: CreateWorkflowDefinitionRequest,
 ): Promise<ApiResult<CreateWorkflowDefinitionResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<CreateWorkflowDefinitionResponse>();
   }
@@ -5920,11 +6618,27 @@ export async function postWorkflowDefinition(
   return await postApi<CreateWorkflowDefinitionResponse>("/api/admin/workflows", request, tenantHeaders);
 }
 
+export async function postWorkflowDefinitionVersion(
+  artifactId: string,
+  request: CreateWorkflowDefinitionVersionRequest,
+): Promise<ApiResult<CreateWorkflowDefinitionVersionResponse>> {
+  const tenantHeaders = await resolveTenantHeaders();
+  if (!tenantHeaders) {
+    return missingContext<CreateWorkflowDefinitionVersionResponse>();
+  }
+
+  return await postApi<CreateWorkflowDefinitionVersionResponse>(
+    `/api/admin/workflows/${artifactId}/versions`,
+    request,
+    tenantHeaders,
+  );
+}
+
 export async function postWorkflowMarkReady(
   artifactId: string,
   versionId: string,
 ): Promise<ApiResult<MarkWorkflowDefinitionReadyResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<MarkWorkflowDefinitionReadyResponse>();
   }
@@ -5941,7 +6655,7 @@ export async function postWorkflowPublish(
   versionId: string,
   summary?: string,
 ): Promise<ApiResult<PublishWorkflowDefinitionResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<PublishWorkflowDefinitionResponse>();
   }
@@ -5958,7 +6672,7 @@ export async function postWorkflowPreview(
   versionId: string,
   request: WorkflowExecutionRequest,
 ): Promise<ApiResult<WorkflowExecutionResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<WorkflowExecutionResponse>();
   }
@@ -5975,7 +6689,7 @@ export async function postWorkflowTestRun(
   versionId: string,
   request: WorkflowExecutionRequest,
 ): Promise<ApiResult<WorkflowExecutionResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<WorkflowExecutionResponse>();
   }
@@ -5992,7 +6706,7 @@ export async function postWorkflowExecute(
   versionId: string,
   request: WorkflowExecutionRequest,
 ): Promise<ApiResult<WorkflowExecutionResponse>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<WorkflowExecutionResponse>();
   }
@@ -6005,7 +6719,7 @@ export async function postWorkflowExecute(
 }
 
 export async function getWorkflowRuns(): Promise<ApiResult<WorkflowRunSummary[]>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<WorkflowRunSummary[]>();
   }
@@ -6014,7 +6728,7 @@ export async function getWorkflowRuns(): Promise<ApiResult<WorkflowRunSummary[]>
 }
 
 export async function getWorkflowRunDetail(runId: string): Promise<ApiResult<WorkflowRunDetail>> {
-  const tenantHeaders = tenantHeadersOrNull();
+  const tenantHeaders = await resolveTenantHeaders();
   if (!tenantHeaders) {
     return missingContext<WorkflowRunDetail>();
   }
@@ -6023,15 +6737,6 @@ export async function getWorkflowRunDetail(runId: string): Promise<ApiResult<Wor
 }
 
 // --- HTTP transport layer ---
-
-/** Returns tenant headers when env vars are set; otherwise null. */
-function tenantHeadersOrNull(): { userId: string; tenantId: string } | null {
-  if (!adminUserId || !selectedTenantId) {
-    return null;
-  }
-
-  return { userId: adminUserId, tenantId: selectedTenantId };
-}
 
 /** Shared fetch wrapper: ETOS headers, no-store cache, uniform `{ data, error }` results. */
 async function fetchApi<T>(

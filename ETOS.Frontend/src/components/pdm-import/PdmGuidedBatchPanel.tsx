@@ -5,7 +5,7 @@ import {
   loadPdmAiPreviewAction,
   stagePdmBatchAction,
   uploadPdmBatchAction,
-} from "@/app/imports/pdm/actions";
+} from "@/app/(shell)/imports/pdm/actions";
 import type { ImportPreview } from "@/lib/etos-api";
 import type { PdmImportFileProfile } from "@/lib/pdm-import-types";
 import { PdmMappingCompare } from "@/components/pdm-import/PdmMappingCompare";

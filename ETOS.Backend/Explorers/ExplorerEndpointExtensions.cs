@@ -30,11 +30,37 @@ public static class ExplorerEndpointExtensions
             GraphSpace? graphSpace,
             TrustState? trustState,
             string? objectType,
+            string? search,
             int? limit,
             string? policyKey,
             IGraphExplorerService service,
             CancellationToken cancellationToken) =>
-            await ExecuteAsync(() => service.ListNodesAsync(graphSpace, trustState, objectType, limit, policyKey, cancellationToken)));
+            await ExecuteAsync(() => service.ListNodesAsync(
+                graphSpace,
+                trustState,
+                objectType,
+                search,
+                limit,
+                policyKey,
+                cancellationToken)));
+
+        group.MapGet("/graph/search", async (
+            GraphSpace? graphSpace,
+            TrustState? trustState,
+            string? objectType,
+            string? search,
+            int? limit,
+            string? policyKey,
+            IGraphExplorerService service,
+            CancellationToken cancellationToken) =>
+            await ExecuteAsync(() => service.ListNodesAsync(
+                graphSpace,
+                trustState,
+                objectType,
+                search,
+                limit,
+                policyKey,
+                cancellationToken)));
 
         group.MapGet("/graph/nodes/{nodeId:guid}", async (
             Guid nodeId,
@@ -50,6 +76,34 @@ public static class ExplorerEndpointExtensions
             IGraphExplorerService service,
             CancellationToken cancellationToken) =>
             await ExecuteAsync(() => service.ListRelationshipsAsync(nodeId, direction, policyKey, cancellationToken)));
+
+        group.MapGet("/graph/nodes/{nodeId:guid}/subgraph", async (
+            Guid nodeId,
+            int? depth,
+            string? relationshipTypes,
+            string? direction,
+            GraphSpace? graphSpace,
+            TrustState? trustState,
+            int? limit,
+            string? policyKey,
+            IGraphExplorerService service,
+            CancellationToken cancellationToken) =>
+            await ExecuteAsync(() => service.GetSubgraphAsync(
+                nodeId,
+                depth,
+                relationshipTypes,
+                direction,
+                graphSpace,
+                trustState,
+                limit,
+                policyKey,
+                cancellationToken)));
+
+        group.MapPost("/graph/pattern-query", async (
+            GraphExplorerPatternQueryRequest request,
+            IGraphExplorerService service,
+            CancellationToken cancellationToken) =>
+            await ExecuteAsync(() => service.QueryPatternAsync(request, cancellationToken)));
 
         group.MapGet("/context-packages", async (
             IContextPackageExplorerService service,

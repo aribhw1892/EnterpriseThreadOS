@@ -17,8 +17,8 @@ export default async function OptimizationModelDefinitionDetailPage({ params, se
 
   if (!detail.data) {
     return (
-      <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-amber-500/30 bg-amber-500/10 p-6 text-sm text-amber-100">
+      <main className="px-6 py-10 text-slate-100">
+        <div className="mx-auto max-w-3xl rounded-3xl border border-amber-500/30 bg-slate-900 p-6 text-sm text-amber-100">
           {detail.error ?? "Optimization model definition was not found."}
         </div>
       </main>

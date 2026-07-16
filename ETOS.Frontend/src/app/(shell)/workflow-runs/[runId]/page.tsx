@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { KpiCard } from "@/components/ui/KpiCard";
+import { Notice } from "@/components/ui/Notice";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { PillStack, SidePanel } from "@/components/ui/SidePanel";
+import { TraceTimeline, type TraceTimelineStep } from "@/components/ui/TraceTimeline";
 import { getWorkflowRunDetail } from "@/lib/etos-api";
 
 export const dynamic = "force-dynamic";
@@ -14,187 +21,172 @@ export default async function WorkflowRunDetailPage({ params }: PageProps) {
 
   if (!run.data) {
     return (
-      <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-amber-500/30 bg-amber-500/10 p-6 text-sm text-amber-100">
-          {run.error ?? "Workflow run was not found."}
-        </div>
+      <main className="px-6 py-8 lg:px-8">
+        <PageHeader title="Workflow run" description="Run not found." />
+        <ErrorState error={run.error ?? "Workflow run was not found."} />
       </main>
     );
   }
 
   const detail = run.data;
+  const safeEvents = detail.safeModeEvents;
+  const mode = detail.isPreview ? "Preview" : "Execute";
+
+  const timeline: TraceTimelineStep[] = [
+    {
+      id: "start",
+      title: "WorkflowRun started",
+      description: `Mode ${mode} · version ${detail.workflowVersionId}`,
+      status: "Pass",
+      meta: new Date(detail.startedAt).toLocaleString(),
+    },
+    ...safeEvents.map((event) => ({
+      id: event.id,
+      title: `Safe mode · ${event.stepKey}`,
+      description: `${event.eventKind}: ${event.reason}`,
+      status: "Filtered",
+      meta: new Date(event.createdAt).toLocaleString(),
+      href: event.agentRunId
+        ? `/agent-runs/${event.agentRunId}`
+        : event.toolRunId
+          ? `/tool-runs/${event.toolRunId}`
+          : null,
+    })),
+    {
+      id: "complete",
+      title: "Run completion",
+      description: `Status: ${detail.status}${detail.partialCompletion ? " · partial" : ""}`,
+      status: detail.status,
+      meta: detail.completedAt ? new Date(detail.completedAt).toLocaleString() : undefined,
+      href: detail.aiTraceRecordId ? `/ai-traces/${detail.aiTraceRecordId}` : null,
+    },
+  ];
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 24 · Workflow run</p>
-              <h1 className="mt-2 text-4xl font-semibold">{detail.status}</h1>
-              <p className="mt-3 font-mono text-sm text-slate-400">{detail.id}</p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href="/workflows">Workflows</ExplorerNavLink>
-              <ExplorerNavLink href="/agents">Agents</ExplorerNavLink>
-            </div>
-          </div>
-        </section>
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title={`Workflow run · ${detail.status}`}
+        description={detail.id}
+        actions={
+          <>
+            <Link href="/workflow-runs">
+              <Button type="button" variant="ghost">
+                All runs
+              </Button>
+            </Link>
+            <Link href="/workflows">
+              <Button type="button" variant="ghost">
+                Workflows
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Run status</h2>
-          <ul className="mt-4 space-y-2 text-sm text-slate-300">
-            <li>Mode: {detail.isPreview ? "Preview" : "Execute"}</li>
-            <li>Safe mode applied: {detail.safeModeApplied ? "Yes" : "No"}</li>
-            <li>Partial completion: {detail.partialCompletion ? "Yes" : "No"}</li>
-            <li>Workflow version: {detail.workflowVersionId}</li>
-            <li>Started: {detail.startedAt}</li>
-            {detail.completedAt ? <li>Completed: {detail.completedAt}</li> : null}
-          </ul>
-        </section>
+      {detail.safeModeApplied ? (
+        <div className="mb-4">
+          <Notice variant="warning">
+            Safe mode applied on this run. Source writes remain blocked (SAFE = 0).
+          </Notice>
+        </div>
+      ) : null}
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Safe mode events</h2>
-          {detail.safeModeEvents.length > 0 ? (
-            <ul className="mt-4 space-y-3">
-              {detail.safeModeEvents.map((event) => (
-                <li
-                  key={event.id}
-                  className="rounded-2xl border border-slate-800 bg-slate-950 p-4 text-sm text-slate-300"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-semibold text-slate-100">
-                      {event.stepKey} · {event.eventKind}
-                    </p>
-                    <p className="text-xs text-slate-500">{event.createdAt}</p>
-                  </div>
-                  <p className="mt-2">{event.reason}</p>
-                  {event.policyRuleKey ? <p className="mt-1 text-slate-400">Policy rule: {event.policyRuleKey}</p> : null}
-                  {event.blockedAction ? (
-                    <p className="mt-1 text-slate-400">Blocked action: {event.blockedAction}</p>
-                  ) : null}
-                  <div className="mt-3 flex flex-wrap gap-3 text-xs">
-                    {event.agentRunId ? (
-                      <Link href={`/agent-runs/${event.agentRunId}`} className="text-cyan-300 hover:text-cyan-100">
-                        Agent run {event.agentRunId}
-                      </Link>
-                    ) : null}
-                    {event.toolRunId ? (
-                      <Link href={`/tool-runs/${event.toolRunId}`} className="text-cyan-300 hover:text-cyan-100">
-                        Tool run {event.toolRunId}
-                      </Link>
-                    ) : null}
-                    {event.reviewTaskArtifactId ? (
-                      <Link href="/tasks" className="text-cyan-300 hover:text-cyan-100">
-                        Review task {event.reviewTaskArtifactId}
-                      </Link>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">No safe mode events recorded for this run.</p>
-          )}
-        </section>
+      <div className="grid gap-4 md:grid-cols-4">
+        <KpiCard label="Run" value={`${detail.id.slice(0, 8)}…`} hint="WorkflowRun id" />
+        <KpiCard
+          label="Safe-mode events"
+          value={safeEvents.length}
+          trend={safeEvents.length > 0 ? "bad" : "flat"}
+          hint="Blocked / skipped steps"
+        />
+        <KpiCard
+          label="Partial"
+          value={detail.partialCompletion ? "Yes" : "No"}
+          hint="Allow partial completion"
+        />
+        <KpiCard label="Source writes" value={0} hint="SAFE — enterprise writes blocked" />
+      </div>
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Safe summaries</h2>
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-400">Input</h3>
-              <pre className="mt-2 overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950 p-4 text-xs text-slate-300">
-                {detail.inputSafeSummaryJson}
-              </pre>
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Execution steps</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <TraceTimeline steps={timeline} />
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div>
+                <h3 className="text-sm font-semibold text-etos-ink">Input</h3>
+                <pre className="mt-2 overflow-x-auto rounded-xl border border-etos-border bg-etos-panel-muted p-3 text-xs">
+                  {detail.inputSafeSummaryJson}
+                </pre>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-etos-ink">Output</h3>
+                <pre className="mt-2 overflow-x-auto rounded-xl border border-etos-border bg-etos-panel-muted p-3 text-xs">
+                  {detail.outputSafeSummaryJson ?? "No output summary."}
+                </pre>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-semibold text-slate-400">Output</h3>
-              <pre className="mt-2 overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950 p-4 text-xs text-slate-300">
-                {detail.outputSafeSummaryJson ?? "No output summary."}
-              </pre>
-            </div>
-          </div>
-          {detail.stepResultsJson ? (
-            <div className="mt-4">
-              <h3 className="text-sm font-semibold text-slate-400">Step results</h3>
-              <pre className="mt-2 overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950 p-4 text-xs text-slate-300">
-                {detail.stepResultsJson}
-              </pre>
-            </div>
-          ) : null}
-          {detail.inheritedRiskSnapshotJson ? (
-            <div className="mt-4">
-              <h3 className="text-sm font-semibold text-slate-400">Inherited risk snapshot</h3>
-              <pre className="mt-2 overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950 p-4 text-xs text-slate-300">
-                {detail.inheritedRiskSnapshotJson}
-              </pre>
-            </div>
-          ) : null}
-          {detail.runtimeTrustRecalculationJson ? (
-            <div className="mt-4">
-              <h3 className="text-sm font-semibold text-slate-400">Runtime trust recalculation</h3>
-              <pre className="mt-2 overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950 p-4 text-xs text-slate-300">
-                {detail.runtimeTrustRecalculationJson}
-              </pre>
-            </div>
-          ) : null}
-        </section>
+          </CardContent>
+        </Card>
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Trace links</h2>
-          <ul className="mt-4 space-y-2 text-sm text-slate-300">
+        <SidePanel title="Safe mode & links">
+          <PillStack
+            items={[
+              { label: "Mode", value: mode, variant: "info" },
+              {
+                label: "Safe mode",
+                value: detail.safeModeApplied ? "Applied" : "Off",
+                variant: detail.safeModeApplied ? "warning" : "success",
+              },
+              {
+                label: "Child agents",
+                value: String(detail.childAgentRunIds.length),
+              },
+              {
+                label: "Child tools",
+                value: String(detail.childToolRunIds.length),
+              },
+            ]}
+          />
+          <ul className="mt-4 space-y-2 text-sm">
             {detail.aiTraceRecordId ? (
               <li>
-                AI trace:{" "}
-                <Link href="/ai-traces" className="text-cyan-300 hover:text-cyan-100">
-                  {detail.aiTraceRecordId}
+                <Link
+                  href={`/ai-traces/${detail.aiTraceRecordId}`}
+                  className="text-etos-accent hover:underline"
+                >
+                  AI Trace
                 </Link>
               </li>
             ) : (
-              <li>No AI trace linked yet.</li>
+              <li className="text-etos-ink-muted">No AI Trace linked.</li>
             )}
-            {detail.auditRecordId ? <li>Audit record: {detail.auditRecordId}</li> : null}
+            {detail.childAgentRunIds.map((id) => (
+              <li key={id}>
+                <Link href={`/agent-runs/${id}`} className="text-etos-accent hover:underline">
+                  Agent run {id.slice(0, 8)}…
+                </Link>
+              </li>
+            ))}
+            {detail.childToolRunIds.map((id) => (
+              <li key={id}>
+                <Link href={`/tool-runs/${id}`} className="text-etos-accent hover:underline">
+                  Tool run {id.slice(0, 8)}…
+                </Link>
+              </li>
+            ))}
           </ul>
-        </section>
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Child runs</h2>
-          <div className="mt-4 grid gap-6 lg:grid-cols-2">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-400">Agent runs</h3>
-              {detail.childAgentRunIds.length > 0 ? (
-                <ul className="mt-2 space-y-2 text-sm text-slate-300">
-                  {detail.childAgentRunIds.map((agentRunId) => (
-                    <li key={agentRunId}>
-                      <Link href={`/agent-runs/${agentRunId}`} className="text-cyan-300 hover:text-cyan-100">
-                        {agentRunId}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-2 text-sm text-slate-500">No child agent runs.</p>
-              )}
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-slate-400">Tool runs</h3>
-              {detail.childToolRunIds.length > 0 ? (
-                <ul className="mt-2 space-y-2 text-sm text-slate-300">
-                  {detail.childToolRunIds.map((toolRunId) => (
-                    <li key={toolRunId}>
-                      <Link href={`/tool-runs/${toolRunId}`} className="text-cyan-300 hover:text-cyan-100">
-                        {toolRunId}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-2 text-sm text-slate-500">No child tool runs.</p>
-              )}
-            </div>
-          </div>
-        </section>
+        </SidePanel>
       </div>
+
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4 text-sm text-etos-ink-muted">
+        <summary className="cursor-pointer font-extrabold text-etos-ink">Advanced / Debug</summary>
+        <pre className="mt-4 overflow-x-auto rounded-xl border border-etos-border bg-etos-panel p-3 text-xs">
+          {JSON.stringify(detail, null, 2)}
+        </pre>
+      </details>
     </main>
   );
 }

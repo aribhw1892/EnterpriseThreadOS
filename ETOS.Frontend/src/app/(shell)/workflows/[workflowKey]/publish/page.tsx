@@ -1,138 +1,47 @@
 import Link from "next/link";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
 import {
-  getArtifactVersions,
-  loadWorkflowVersionByKey,
-  postWorkflowExecute,
-  postWorkflowMarkReady,
-  postWorkflowPublish,
-} from "@/lib/etos-api";
+  executeWorkflowAction,
+  markWorkflowReadyAction,
+  publishWorkflowAction,
+  workflowTestRunAction,
+} from "@/app/(shell)/workflows/actions";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { DataTable } from "@/components/ui/DataTable";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { KpiCard } from "@/components/ui/KpiCard";
+import { Notice } from "@/components/ui/Notice";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { PillStack, SidePanel } from "@/components/ui/SidePanel";
+import { getArtifactVersions, loadWorkflowVersionByKey } from "@/lib/etos-api";
 
 export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ workflowKey: string }>;
-  searchParams: Promise<{ versionId?: string; error?: string; success?: string }>;
+  searchParams: Promise<{ versionId?: string; error?: string; notice?: string; success?: string }>;
 };
 
-async function markReadyAction(formData: FormData) {
-  "use server";
+type CheckRow = {
+  id: string;
+  check: string;
+  result: string;
+};
 
-  const artifactId = formData.get("artifactId");
-  const versionId = formData.get("versionId");
-  const workflowKey = formData.get("workflowKey");
-
-  if (
-    typeof artifactId !== "string" ||
-    typeof versionId !== "string" ||
-    typeof workflowKey !== "string" ||
-    artifactId.length === 0 ||
-    versionId.length === 0
-  ) {
-    redirect("/workflows?error=Workflow%20context%20was%20missing.");
-  }
-
-  const result = await postWorkflowMarkReady(artifactId, versionId);
-  if (result.error || !result.data) {
-    redirect(
-      `/workflows/${encodeURIComponent(workflowKey)}/publish?versionId=${encodeURIComponent(versionId)}&error=${encodeURIComponent(result.error ?? "Mark ready failed.")}`,
-    );
-  }
-
-  revalidatePath("/workflows");
-  redirect(
-    `/workflows/${encodeURIComponent(workflowKey)}/publish?versionId=${encodeURIComponent(versionId)}&success=Workflow%20marked%20ready.`,
-  );
-}
-
-async function publishAction(formData: FormData) {
-  "use server";
-
-  const artifactId = formData.get("artifactId");
-  const versionId = formData.get("versionId");
-  const workflowKey = formData.get("workflowKey");
-  const summary = formData.get("summary");
-
-  if (
-    typeof artifactId !== "string" ||
-    typeof versionId !== "string" ||
-    typeof workflowKey !== "string" ||
-    artifactId.length === 0 ||
-    versionId.length === 0
-  ) {
-    redirect("/workflows?error=Workflow%20context%20was%20missing.");
-  }
-
-  const result = await postWorkflowPublish(
-    artifactId,
-    versionId,
-    typeof summary === "string" && summary.trim().length > 0 ? summary.trim() : undefined,
-  );
-  if (result.error || !result.data) {
-    redirect(
-      `/workflows/${encodeURIComponent(workflowKey)}/publish?versionId=${encodeURIComponent(versionId)}&error=${encodeURIComponent(result.error ?? "Publish failed.")}`,
-    );
-  }
-
-  if (!result.data.succeeded) {
-    const blocking = result.data.blockingReasons.join("; ");
-    redirect(
-      `/workflows/${encodeURIComponent(workflowKey)}/publish?versionId=${encodeURIComponent(versionId)}&error=${encodeURIComponent(blocking || "Publish blocked.")}`,
-    );
-  }
-
-  revalidatePath("/workflows");
-  redirect(`/workflows/${encodeURIComponent(workflowKey)}/edit?versionId=${encodeURIComponent(versionId)}`);
-}
-
-async function executeAction(formData: FormData) {
-  "use server";
-
-  const artifactId = formData.get("artifactId");
-  const versionId = formData.get("versionId");
-  const workflowKey = formData.get("workflowKey");
-  const structuredInputJson = formData.get("structuredInputJson");
-
-  if (
-    typeof artifactId !== "string" ||
-    typeof versionId !== "string" ||
-    typeof workflowKey !== "string" ||
-    artifactId.length === 0 ||
-    versionId.length === 0
-  ) {
-    redirect("/workflows?error=Workflow%20context%20was%20missing.");
-  }
-
-  const result = await postWorkflowExecute(artifactId, versionId, {
-    structuredInputJson:
-      typeof structuredInputJson === "string" && structuredInputJson.trim().length > 0
-        ? structuredInputJson.trim()
-        : null,
-  });
-  if (result.error || !result.data) {
-    redirect(
-      `/workflows/${encodeURIComponent(workflowKey)}/publish?versionId=${encodeURIComponent(versionId)}&error=${encodeURIComponent(result.error ?? "Workflow execute failed.")}`,
-    );
-  }
-
-  revalidatePath("/workflows");
-  redirect(`/workflow-runs/${result.data.workflowRunId}`);
-}
+const fieldClass =
+  "mt-2 w-full rounded-xl border border-etos-border bg-etos-panel px-3.5 py-2.5 text-sm text-etos-ink";
 
 export default async function WorkflowPublishPage({ params, searchParams }: PageProps) {
   const { workflowKey } = await params;
-  const { versionId, error, success } = await searchParams;
+  const { versionId, error, notice, success } = await searchParams;
   const decodedKey = decodeURIComponent(workflowKey);
   const loaded = await loadWorkflowVersionByKey(decodedKey, versionId);
 
   if (!loaded.data) {
     return (
-      <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-amber-500/30 bg-amber-500/10 p-6 text-sm text-amber-100">
-          {loaded.error ?? "Workflow was not found."}
-        </div>
+      <main className="px-6 py-8 lg:px-8">
+        <PageHeader title="Publish review" description="Workflow not found." />
+        <ErrorState error={loaded.error ?? "Workflow was not found."} />
       </main>
     );
   }
@@ -140,207 +49,253 @@ export default async function WorkflowPublishPage({ params, searchParams }: Page
   const { detail, readiness, artifactId, versionId: selectedVersionId } = loaded.data;
   const versions = await getArtifactVersions(artifactId);
   const derivedRisk = detail.derivedCapabilityRisk;
+  const isPublished = detail.artifactReadinessState.toLowerCase().includes("publish");
+  const infoNotice = notice ?? success;
+
+  const checks: CheckRow[] = [
+    {
+      id: "blockers",
+      check: "Readiness blockers",
+      result:
+        readiness.blockingReasons.length === 0
+          ? "Pass"
+          : `${readiness.blockingReasons.length} blocking`,
+    },
+    {
+      id: "risk",
+      check: "Derived capability risk",
+      result: derivedRisk?.effectiveRiskLevel ?? "Pending mark-ready",
+    },
+    {
+      id: "safe",
+      check: "Safe mode",
+      result: detail.safeModeEnabled ? "Enabled" : "Disabled",
+    },
+    {
+      id: "steps",
+      check: "Step count",
+      result: String(detail.steps.length),
+    },
+    {
+      id: "compat",
+      check: "Compatibility notes",
+      result:
+        detail.compatibilityTestNotes.length > 0
+          ? `${detail.compatibilityTestNotes.length} notes`
+          : "None",
+    },
+  ];
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 24 · Publish</p>
-              <h1 className="mt-2 text-4xl font-semibold">{detail.displayName}</h1>
-              <p className="mt-3 text-slate-400">
-                {detail.workflowKey} · {detail.versionLabel} · {detail.artifactReadinessState}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink
-                href={`/workflows/${encodeURIComponent(detail.workflowKey)}/edit?versionId=${encodeURIComponent(selectedVersionId)}`}
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title={`Publish · ${detail.displayName}`}
+        description={`${detail.workflowKey} · ${detail.versionLabel} · ${detail.artifactReadinessState}`}
+        actions={
+          <Link
+            href={`/workflows/${encodeURIComponent(detail.workflowKey)}/edit?versionId=${encodeURIComponent(selectedVersionId)}`}
+          >
+            <Button type="button" variant="ghost">
+              Edit canvas
+            </Button>
+          </Link>
+        }
+      />
+
+      {error ? (
+        <div className="mb-4">
+          <Notice variant="danger">{error}</Notice>
+        </div>
+      ) : null}
+      {infoNotice ? (
+        <div className="mb-4">
+          <Notice variant="info">{infoNotice}</Notice>
+        </div>
+      ) : null}
+
+      {versions.data && versions.data.length > 1 ? (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {versions.data.map((version) => {
+            const selected = version.id === selectedVersionId;
+            return (
+              <Link
+                key={version.id}
+                href={`/workflows/${encodeURIComponent(detail.workflowKey)}/publish?versionId=${encodeURIComponent(version.id)}`}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  selected
+                    ? "bg-etos-accent text-etos-accent-fg"
+                    : "border border-etos-border text-etos-ink-muted hover:border-etos-accent"
+                }`}
               >
-                Edit
-              </ExplorerNavLink>
-              <ExplorerNavLink href="/workflows">Workflows</ExplorerNavLink>
-            </div>
-          </div>
+                {version.versionLabel} · {version.readinessState}
+              </Link>
+            );
+          })}
+        </div>
+      ) : null}
 
-          {versions.data && versions.data.length > 1 ? (
-            <div className="mt-6">
-              <p className="text-sm font-semibold text-slate-400">Versions</p>
-              <ul className="mt-2 flex flex-wrap gap-2">
-                {versions.data.map((version) => {
-                  const isSelected = version.id === selectedVersionId;
-                  return (
-                    <li key={version.id}>
-                      <Link
-                        href={`/workflows/${encodeURIComponent(detail.workflowKey)}/publish?versionId=${encodeURIComponent(version.id)}`}
-                        className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                          isSelected
-                            ? "bg-cyan-300 text-slate-950"
-                            : "border border-slate-700 text-slate-300 hover:border-cyan-300 hover:text-cyan-100"
-                        }`}
-                      >
-                        {version.versionLabel} · {version.readinessState}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ) : null}
-        </section>
+      <div className="grid gap-4 md:grid-cols-4">
+        <KpiCard
+          label="Effective risk"
+          value={derivedRisk?.effectiveRiskLevel ?? "—"}
+          hint="From mark-ready"
+        />
+        <KpiCard
+          label="Permission ceiling"
+          value={derivedRisk?.permissionCeiling ?? "—"}
+          hint="Inherited trust"
+        />
+        <KpiCard label="Steps" value={detail.steps.length} hint="Governed step graph" />
+        <KpiCard
+          label="Publish state"
+          value={isPublished ? "Published" : detail.artifactReadinessState}
+          hint="Lifecycle"
+        />
+      </div>
 
-        {error ? (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-            {error}
-          </div>
-        ) : null}
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Publish checks</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <DataTable<CheckRow>
+              rows={checks}
+              rowKey={(row) => row.id}
+              emptyMessage="No checks."
+              columns={[
+                {
+                  key: "check",
+                  header: "Check",
+                  render: (row) => <span className="font-semibold text-etos-ink">{row.check}</span>,
+                },
+                {
+                  key: "result",
+                  header: "Result",
+                  render: (row) => <span className="text-etos-ink-muted">{row.result}</span>,
+                },
+              ]}
+            />
 
-        {success ? (
-          <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-sm text-cyan-100">
-            {success}
-          </div>
-        ) : null}
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Derived capability risk review</h2>
-          {derivedRisk ? (
-            <ul className="mt-4 space-y-2 text-sm text-slate-300">
-              <li>Effective risk level: {derivedRisk.effectiveRiskLevel}</li>
-              <li>Permission ceiling: {derivedRisk.permissionCeiling}</li>
-              {derivedRisk.toolRiskContributions.length > 0 ? (
-                <li>
-                  Tool risk contributions:{" "}
-                  {derivedRisk.toolRiskContributions
-                    .map((item) => `${item.toolDefinitionVersionId} (${item.riskLevel})`)
-                    .join(", ")}
-                </li>
-              ) : (
-                <li>No tool risk contributions recorded.</li>
-              )}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-400">
-              Derived risk is calculated when the workflow is marked ready. Mark ready below to refresh the risk
-              snapshot.
-            </p>
-          )}
-
-          {detail.referencedTools.length > 0 ? (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-400">Referenced tools</h3>
-              <ul className="mt-2 space-y-1 text-sm text-slate-300">
-                {detail.referencedTools.map((tool) => (
-                  <li key={tool.toolDefinitionVersionId}>
-                    {tool.toolArtifactName} · {tool.riskLevel} · {tool.readinessState}
+            {readiness.blockingReasons.length > 0 ? (
+              <ul className="space-y-2 text-sm text-etos-warning-fg">
+                {readiness.blockingReasons.map((reason) => (
+                  <li key={reason} className="rounded-xl border border-etos-border bg-etos-panel-muted px-3 py-2">
+                    {reason}
                   </li>
                 ))}
               </ul>
-            </div>
-          ) : null}
-        </section>
+            ) : null}
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Readiness blockers</h2>
-          {readiness.blockingReasons.length > 0 ? (
-            <ul className="mt-4 space-y-2 text-sm text-amber-100">
-              {readiness.blockingReasons.map((reason) => (
-                <li key={reason} className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2">
-                  {reason}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-400">No blocking readiness notes for this version.</p>
-          )}
-
-          {detail.compatibilityTestNotes.length > 0 ? (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-400">Compatibility test notes</h3>
-              <ul className="mt-2 space-y-1 text-sm text-slate-300">
-                {detail.compatibilityTestNotes.map((note) => (
-                  <li key={note}>{note}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </section>
-
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Lifecycle actions</h2>
-          <div className="mt-6 flex flex-col gap-6 lg:flex-row">
-            <form action={markReadyAction} className="flex-1 space-y-4 rounded-2xl border border-slate-800 bg-slate-950 p-4">
-              <h3 className="font-semibold">Mark ready</h3>
-              <p className="text-sm text-slate-400">
-                Validates dependencies and computes derived capability risk before publish.
-              </p>
-              <input type="hidden" name="artifactId" value={artifactId} />
-              <input type="hidden" name="versionId" value={selectedVersionId} />
-              <input type="hidden" name="workflowKey" value={detail.workflowKey} />
-              <button
-                type="submit"
-                className="rounded-2xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300"
+            <div className="flex flex-wrap gap-3">
+              <form action={markWorkflowReadyAction}>
+                <input type="hidden" name="artifactId" value={artifactId} />
+                <input type="hidden" name="versionId" value={selectedVersionId} />
+                <input type="hidden" name="workflowKey" value={detail.workflowKey} />
+                <Button type="submit" variant="ghost">
+                  Mark ready
+                </Button>
+              </form>
+              <form action={publishWorkflowAction} className="flex flex-wrap items-end gap-3">
+                <input type="hidden" name="artifactId" value={artifactId} />
+                <input type="hidden" name="versionId" value={selectedVersionId} />
+                <input type="hidden" name="workflowKey" value={detail.workflowKey} />
+                <label className="block text-sm">
+                  <span className="font-semibold text-etos-ink">Summary</span>
+                  <input
+                    name="summary"
+                    type="text"
+                    placeholder="Initial publish"
+                    className={fieldClass}
+                  />
+                </label>
+                <Button type="submit">Publish</Button>
+              </form>
+              <Button
+                type="button"
+                disabled
+                title="Request changes has no backend endpoint yet."
               >
-                Mark ready
-              </button>
-            </form>
+                Request changes
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-            <form action={publishAction} className="flex-1 space-y-4 rounded-2xl border border-slate-800 bg-slate-950 p-4">
-              <h3 className="font-semibold">Publish</h3>
-              <p className="text-sm text-slate-400">
-                Publishes the workflow version when readiness checks pass.
-              </p>
+        <SidePanel title="Runtime trust">
+          <PillStack
+            items={[
+              {
+                label: "Manual trigger",
+                value: detail.triggerConfig.manualEnabled ? "On" : "Off",
+                variant: "info",
+              },
+              {
+                label: "Partial completion",
+                value: detail.allowPartialCompletion ? "Allowed" : "Off",
+              },
+              {
+                label: "Default safe mode",
+                value: detail.defaultStepSafeModeBehavior,
+                variant: "warning",
+              },
+              {
+                label: "Tools",
+                value: String(detail.referencedTools.length),
+              },
+            ]}
+          />
+          <p className="mt-4 text-xs text-etos-ink-muted">
+            Request changes is disabled — no backend support. Use edit + mark-ready cycle instead.
+          </p>
+        </SidePanel>
+      </div>
+
+      {isPublished ? (
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Execute published workflow</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form action={executeWorkflowAction} className="space-y-4">
               <input type="hidden" name="artifactId" value={artifactId} />
               <input type="hidden" name="versionId" value={selectedVersionId} />
               <input type="hidden" name="workflowKey" value={detail.workflowKey} />
               <label className="block text-sm">
-                <span className="font-semibold text-slate-300">Publish summary (optional)</span>
-                <input
-                  name="summary"
-                  type="text"
-                  placeholder="Initial publish for manufacturing investigation"
-                  className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100"
-                />
-              </label>
-              <button
-                type="submit"
-                className="rounded-2xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300"
-              >
-                Publish workflow
-              </button>
-            </form>
-          </div>
-        </section>
-
-        {detail.artifactReadinessState.toLowerCase().includes("publish") ? (
-          <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
-            <h2 className="text-2xl font-semibold">Execute published workflow</h2>
-            <p className="mt-2 text-sm text-slate-300">
-              Manual MVP demo execution for <code>{detail.workflowKey}</code>. Uses governed in-process workflow
-              runtime and links to the workflow run detail page.
-            </p>
-            <form action={executeAction} className="mt-6 space-y-4">
-              <input type="hidden" name="artifactId" value={artifactId} />
-              <input type="hidden" name="versionId" value={selectedVersionId} />
-              <input type="hidden" name="workflowKey" value={detail.workflowKey} />
-              <label className="block text-sm">
-                <span className="font-semibold text-slate-300">Structured input JSON (optional)</span>
+                <span className="font-semibold text-etos-ink">Structured input JSON (optional)</span>
                 <textarea
                   name="structuredInputJson"
                   rows={4}
                   defaultValue={`{"intentKey":"bom-impact-context","queryText":"Investigate BOM impact for assembly A-100."}`}
-                  className="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 font-mono text-xs text-slate-100"
+                  className={`${fieldClass} font-mono text-xs`}
                 />
               </label>
-              <button
-                type="submit"
-                className="rounded-2xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300"
-              >
-                Execute workflow
-              </button>
+              <Button type="submit">Execute workflow</Button>
             </form>
-          </section>
-        ) : null}
-      </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="mt-4">
+          <Notice variant="info">Execute is available only after the workflow version is published.</Notice>
+        </div>
+      )}
+
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4 text-sm text-etos-ink-muted">
+        <summary className="cursor-pointer font-extrabold text-etos-ink">Advanced / Debug</summary>
+        <div className="mt-4 space-y-4">
+          <form action={workflowTestRunAction}>
+            <input type="hidden" name="artifactId" value={artifactId} />
+            <input type="hidden" name="versionId" value={selectedVersionId} />
+            <input type="hidden" name="workflowKey" value={detail.workflowKey} />
+            <Button type="submit" variant="ghost">
+              Workflow test-run
+            </Button>
+          </form>
+          <pre className="overflow-x-auto rounded-xl border border-etos-border bg-etos-panel p-3 text-xs">
+            {JSON.stringify({ detail, readiness, derivedRisk }, null, 2)}
+          </pre>
+        </div>
+      </details>
     </main>
   );
 }

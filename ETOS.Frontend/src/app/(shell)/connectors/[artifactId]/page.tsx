@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
+import { Badge } from "@/components/ui/Badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { DataTable } from "@/components/ui/DataTable";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Notice } from "@/components/ui/Notice";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { TraceTimeline } from "@/components/ui/TraceTimeline";
 import {
   ApiResult,
   ConnectorDefinitionDetail,
@@ -13,6 +19,14 @@ export const dynamic = "force-dynamic";
 type PageProps = {
   params: Promise<{ artifactId: string }>;
   searchParams: Promise<{ versionId?: string }>;
+};
+
+type CapabilityRow = {
+  id: string;
+  capability: string;
+  mode: string;
+  credentialBehavior: string;
+  status: string;
 };
 
 async function loadConnectorDefinitionDetail(
@@ -56,95 +70,187 @@ async function loadConnectorDefinitionDetail(
   };
 }
 
-export default async function ConnectorDefinitionDetailPage({ params, searchParams }: PageProps) {
+function buildCapabilityRows(detail: ConnectorDefinitionDetail): CapabilityRow[] {
+  const operations =
+    detail.supportedOperations.length > 0
+      ? detail.supportedOperations
+      : ["Declared connector surface"];
+
+  return operations.map((operation, index) => {
+    const writeLike =
+      detail.writesExternalSystem ||
+      /create|update|write|delete|mutate/i.test(operation);
+    const enabled = detail.executionEnabled && !writeLike;
+
+    return {
+      id: `${operation}-${index}`,
+      capability: operation,
+      mode: writeLike
+        ? "Write connector"
+        : detail.callsExternalSystem
+          ? "Read connector"
+          : "Internal",
+      credentialBehavior: writeLike
+        ? "Disabled contract only"
+        : detail.callsExternalSystem
+          ? "Short-lived scoped token"
+          : "No source mutation",
+      status: writeLike
+        ? "Disabled"
+        : enabled
+          ? "Enabled"
+          : detail.disabledReason ?? "Disabled",
+    };
+  });
+}
+
+export default async function ConnectorDefinitionDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { artifactId } = await params;
   const { versionId } = await searchParams;
   const loaded = await loadConnectorDefinitionDetail(artifactId, versionId);
 
   if (!loaded.data) {
     return (
-      <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-        <div className="mx-auto max-w-3xl rounded-3xl border border-amber-500/30 bg-amber-500/10 p-6 text-sm text-amber-100">
-          {loaded.error ?? "Connector definition was not found."}
-        </div>
+      <main className="px-6 py-8 lg:px-8">
+        <ErrorState error={loaded.error ?? "Connector definition was not found."} />
+        <p className="mt-4 text-sm">
+          <Link href="/tools" className="text-etos-accent hover:underline">
+            Back to registry
+          </Link>
+        </p>
       </main>
     );
   }
 
   const { detail } = loaded.data;
+  const rows = buildCapabilityRows(detail);
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 22 · Connector</p>
-              <h1 className="mt-2 text-4xl font-semibold">{loaded.data.artifactName}</h1>
-              <p className="mt-3 text-slate-400">
-                {detail.connectorKey} · {detail.connectorKind} · {detail.versionLabel}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <ExplorerNavLink href="/tools">Tools</ExplorerNavLink>
-              <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
-            </div>
-          </div>
-        </section>
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title="Connector detail & credential boundary"
+        description={`${loaded.data.artifactName} — read-only connector design with tenant-aware scoped credential issuance and disabled write-capable contracts.`}
+      />
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Execution boundary</h2>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
-                detail.executionEnabled
-                  ? "bg-emerald-500/20 text-emerald-200"
-                  : "bg-amber-500/20 text-amber-200"
-              }`}
-            >
-              {detail.executionEnabled ? "Execution enabled" : "Execution disabled"}
-            </span>
-            {detail.writesExternalSystem ? (
-              <span className="rounded-full bg-rose-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-rose-200">
-                Write-capable contract
-              </span>
-            ) : null}
-          </div>
-          {detail.disabledReason ? (
-            <p className="mt-4 text-sm text-amber-100">{detail.disabledReason}</p>
-          ) : null}
-        </section>
+      {!detail.executionEnabled || detail.writesExternalSystem ? (
+        <div className="mb-4">
+          <Notice variant="warning">
+            {detail.disabledReason ??
+              (detail.writesExternalSystem
+                ? "Write-capable connector contracts stay disabled in MVP."
+                : "Connector execution is currently disabled.")}
+          </Notice>
+        </div>
+      ) : null}
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Credential boundary</h2>
-          <ul className="mt-4 space-y-2 text-sm text-slate-300">
-            <li>Credential scope key: {detail.credentialScopeKey}</li>
-            <li>Secret reference key: {detail.secretReferenceKey}</li>
-            <li className="text-slate-400">
-              Raw secret material is never returned through tool runs or connector APIs.
-            </li>
-          </ul>
-        </section>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Connector definition</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-sm text-etos-ink-muted">
+              {detail.connectorKey} · {detail.connectorKind} · {detail.versionLabel} ·{" "}
+              {detail.artifactReadinessState}
+            </p>
+            <DataTable<CapabilityRow>
+              rows={rows}
+              rowKey={(row) => row.id}
+              emptyMessage="No supported operations declared."
+              columns={[
+                {
+                  key: "capability",
+                  header: "Capability",
+                  render: (row) => row.capability,
+                },
+                {
+                  key: "mode",
+                  header: "Mode",
+                  render: (row) => (
+                    <span className="text-etos-ink-muted">{row.mode}</span>
+                  ),
+                },
+                {
+                  key: "credential",
+                  header: "Credential behavior",
+                  render: (row) => (
+                    <span className="text-etos-ink-muted">{row.credentialBehavior}</span>
+                  ),
+                },
+                {
+                  key: "status",
+                  header: "Status",
+                  render: (row) => (
+                    <Badge
+                      variant={
+                        row.status.toLowerCase().includes("enable") ? "success" : "danger"
+                      }
+                    >
+                      {row.status}
+                    </Badge>
+                  ),
+                },
+              ]}
+            />
+          </CardContent>
+        </Card>
 
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-2xl font-semibold">Supported operations</h2>
-          {detail.supportedOperations.length > 0 ? (
-            <ul className="mt-4 space-y-1 text-sm text-slate-300">
-              {detail.supportedOperations.map((operation) => (
-                <li key={operation}>{operation}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">No supported operations declared.</p>
-          )}
-        </section>
-
-        <p className="text-sm text-slate-500">
-          <Link href="/tools" className="text-cyan-300 hover:text-cyan-100">
-            Back to tool registry
-          </Link>
-        </p>
+        <Card>
+          <CardHeader>
+            <CardTitle>Credential issuance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TraceTimeline
+              steps={[
+                {
+                  id: "gateway",
+                  title: "Tool Gateway",
+                  description: "Policy, tenant, tool, connector checks",
+                  status: "Gate",
+                  meta: `Scope: ${detail.credentialScopeKey}`,
+                },
+                {
+                  id: "secret",
+                  title: "Secret Provider",
+                  description: "Issues scoped token; never raw secret",
+                  status: "Scoped",
+                  meta: `Ref: ${detail.secretReferenceKey}`,
+                },
+                {
+                  id: "connector",
+                  title: "Connector",
+                  description: detail.writesExternalSystem
+                    ? "Write path remains contract-only"
+                    : "Receives token for read-only call",
+                  status: detail.writesExternalSystem ? "Write disabled" : "Read only",
+                },
+              ]}
+            />
+          </CardContent>
+        </Card>
       </div>
+
+      <Notice className="mt-4" variant="info">
+        Secret values, API keys, passwords, and tokens are never stored in AgentRun,
+        WorkflowRun, ToolRun, AI Trace, or audit payloads.
+      </Notice>
+
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4 text-sm text-etos-ink-muted">
+        <summary className="cursor-pointer font-extrabold text-etos-ink">
+          Advanced / Debug
+        </summary>
+        <div className="mt-4 space-y-3">
+          <Link href="/tools" className="text-etos-accent hover:underline">
+            Back to registry
+          </Link>
+          <pre className="overflow-x-auto rounded-xl border border-etos-border bg-etos-panel p-3 text-xs">
+            {JSON.stringify(detail, null, 2)}
+          </pre>
+        </div>
+      </details>
     </main>
   );
 }

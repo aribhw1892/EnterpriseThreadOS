@@ -403,7 +403,7 @@ npm run dev
 Pop-Location
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3000`. The home page is the **Mission Control Timeline** (dark ops dashboard with wired KPIs; timeline/heatmap/event-stream widgets are labeled preview fixtures until the digital-thread backend exists). All product routes render inside the enterprise shell (navy sidebar + topbar) with a light/dark theme toggle. The developer admin foundation dump (identity, governance, artifact registry, classification lists, demo reset) moved from `/` to `http://localhost:3000/admin/foundation`. A UI primitive gallery is available at `http://localhost:3000/dev/ui-kit` in development builds.
 
 Open `http://localhost:3000/model-artifacts` to inspect and seed the manufacturing reference model package. The `Create seed model package` action calls `POST /api/admin/development/install-reference-package` with package key `etos-manufacturing-reference`, publishing ontology layers, import/query profiles, and governed capability/policy/optimization/agent-template seeds from `[packages/manufacturing-reference/](../packages/manufacturing-reference/)`. Re-running the action is safe for the same tenant: when the model package is already published, the installer ensures missing reference artifacts and the tenant mapping assistant agent without republishing the package.
 
@@ -444,9 +444,13 @@ Review task admin APIs (dev headers required):
 
 Completed review tasks create a `DecisionArtifact` via `POST .../complete` and return `decisionArtifactId` when creation succeeds.
 
+Open `http://localhost:3000/learning-signals` to browse tenant-scoped `LearningSignalArtifact` rollups (pattern key, occurrence count, status, source decisions). Detail pages live at `/learning-signals/[artifactId]`. Signals appear after the rollup threshold is met (`LearningSignals:Rollup` in backend `appsettings.json`, default min 3 evidence rows / 30 days). Requires `learning_signals.read` (seeded on the local admin role). API: `GET /api/admin/learning-signals` and `GET /api/admin/learning-signals/{artifactId}`.
+
+Open `http://localhost:3000/decisions` for the decision explorer and detail pages (votes, comments, manual outcomes).
+
 Open `http://localhost:3000/capabilities`, `/business-policies`, `/optimization-models`, and `/agent-templates` to list and inspect Layer 3–6 governed artifact definitions installed from the reference package or created through admin APIs.
 
-The current frontend shell renders backend environment, infrastructure health, minimal identity admin lists, tenant-filtered audit/security event lists, artifact registry lists, classification/policy lists, model artifact admin screens, import admin screens, governed chat, explorers, dashboards/reports, recommendations, review tasks, and Layer 3–6 artifact shells from the backend.
+The current frontend renders everything inside the enterprise shell: Mission Control home (`/`), backend environment and infrastructure health plus minimal identity admin lists at `/admin/foundation`, tenant-filtered audit/security event lists, artifact registry lists, classification/policy lists, model artifact admin screens, import admin screens, governed chat, explorers, dashboards/reports, recommendations, review tasks, decisions, learning signals, governance analytics, and Layer 3–6 artifact shells from the backend. Routes without backend support (`/digital-thread/timeline`, `/agent-teams`, `/admin/settings`) render honest placeholder pages with blocker issue labels.
 
 Expected `/imports` identity-demo result:
 

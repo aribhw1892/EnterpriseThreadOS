@@ -1,174 +1,457 @@
 import Link from "next/link";
-import { ExplorerNavLink } from "@/components/explorers/ExplorerListShell";
 import {
+  GovernanceTrendCharts,
+  type GovernanceTrendSeries,
+} from "@/components/governance/GovernanceTrendCharts";
+import { Badge, badgeVariantForStatus } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { KpiCard } from "@/components/ui/KpiCard";
+import { Notice } from "@/components/ui/Notice";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { PillStack, SidePanel } from "@/components/ui/SidePanel";
+import {
+  getConnectorDefinitionArtifacts,
   getGovernanceDashboard,
   getGovernanceKpiTrends,
   getGovernanceLists,
-  GovernanceKpiValue,
+  type AuditRecord,
+  type GovernanceKpiValue,
+  type HighRiskRecommendationSummary,
+  type SecurityEvent,
 } from "@/lib/etos-api";
 
 export const dynamic = "force-dynamic";
 
-const trendKpiKeys = [
-  "decision_throughput",
+const TREND_SUPPORTED_KEYS = [
+  "open_reviews",
   "blocked_decisions",
+  "decision_throughput",
   "outcome_verification_rate",
   "learning_signal_rate",
 ] as const;
 
-function KpiCard({ kpi }: { kpi: GovernanceKpiValue }) {
-  return (
-    <article className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-      <p className="text-xs uppercase tracking-wide text-slate-500">{kpi.kpiKey}</p>
-      <h3 className="mt-1 text-lg font-semibold">{kpi.title}</h3>
-      <p className="mt-2 text-3xl font-semibold text-cyan-300">
-        {kpi.status === "deferred" ? "Deferred" : (kpi.formattedValue ?? kpi.value ?? "—")}
-      </p>
-      <p className="mt-1 text-xs text-slate-500">{kpi.source}</p>
-    </article>
-  );
+const TREND_TITLES: Record<(typeof TREND_SUPPORTED_KEYS)[number], string> = {
+  open_reviews: "Open reviews",
+  blocked_decisions: "Blocked decisions",
+  decision_throughput: "Decision throughput",
+  outcome_verification_rate: "Outcome verification",
+  learning_signal_rate: "Learning signals",
+};
+
+const AUDIT_DESIGN_CHECKS = [
+  { label: "Tenant filtering", value: "Enforced", variant: "success" as const },
+  { label: "Classification filtering", value: "Before LLM", variant: "success" as const },
+  { label: "Artifact immutability", value: "Published versions", variant: "success" as const },
+  { label: "Execution records", value: "Safe summaries", variant: "info" as const },
+  { label: "Raw secrets", value: "Never stored", variant: "danger" as const },
+];
+
+type GovernanceEventRow = {
+  id: string;
+  kind: "audit" | "security" | "recommendation";
+  event: string;
+  actor: string;
+  scope: string;
+  result: string;
+  resultVariant: ReturnType<typeof badgeVariantForStatus>;
+  href?: string | null;
+};
+
+function kpiDisplayValue(kpi: GovernanceKpiValue) {
+  if (kpi.status === "deferred") {
+    return "Deferred";
+  }
+  return kpi.formattedValue ?? kpi.value ?? "—";
 }
 
+function buildEventRows(
+  auditRecords: AuditRecord[],
+  securityEvents: SecurityEvent[],
+  highRisk: HighRiskRecommendationSummary[],
+): GovernanceEventRow[] {
+  const auditRows: GovernanceEventRow[] = auditRecords.map((record) => ({
+    id: `audit-${record.id}`,
+    kind: "audit",
+    event: record.action,
+    actor: record.userId ?? "System",
+    scope: record.sourceObjectType
+      ? `${record.sourceObjectType}${record.sourceObjectId ? ` ${record.sourceObjectId.slice(0, 8)}` : ""}`
+      : record.policyName ?? "Audit",
+    result: record.result,
+    resultVariant: badgeVariantForStatus(record.result),
+    href: null,
+  }));
+
+  const securityRows: GovernanceEventRow[] = securityEvents.map((event) => ({
+    id: `security-${event.id}`,
+    kind: "security",
+    event: event.eventType,
+    actor: event.userId ?? "Unknown",
+    scope: event.sourceAction || event.safeSummary.slice(0, 48) || "Security",
+    result: event.severity,
+    resultVariant: badgeVariantForStatus(event.severity),
+    href: event.reviewTaskReady ? "/tasks" : null,
+  }));
+
+  const recRows: GovernanceEventRow[] = highRisk.map((item) => ({
+    id: `rec-${item.artifactId}`,
+    kind: "recommendation",
+    event: item.title,
+    actor: "Recommendation",
+    scope: item.lifecycleStatus,
+    result: item.riskState,
+    resultVariant: badgeVariantForStatus(item.riskState),
+    href: item.contextViewRoute,
+  }));
+
+  return [...securityRows, ...auditRows, ...recRows].slice(0, 12);
+}
+
+const eventColumns: DataTableColumn<GovernanceEventRow>[] = [
+  {
+    key: "event",
+    header: "Event",
+    render: (row) =>
+      row.href ? (
+        <Link href={row.href} className="text-etos-accent hover:underline">
+          {row.event}
+        </Link>
+      ) : (
+        row.event
+      ),
+  },
+  {
+    key: "actor",
+    header: "Actor",
+    render: (row) => <span className="font-normal text-etos-ink-muted">{row.actor}</span>,
+  },
+  {
+    key: "scope",
+    header: "Scope",
+    render: (row) => <span className="font-normal text-etos-ink-muted">{row.scope}</span>,
+  },
+  {
+    key: "result",
+    header: "Result",
+    render: (row) => (
+      <Badge variant={row.resultVariant} className="normal-case tracking-normal">
+        {row.result}
+      </Badge>
+    ),
+  },
+];
+
 export default async function GovernanceDashboardPage() {
-  const [dashboard, governance, throughputTrend] = await Promise.all([
-    getGovernanceDashboard(),
+  const [dashboard, governance, connectors, ...trendResults] = await Promise.all([
+    getGovernanceDashboard(14),
     getGovernanceLists(),
-    getGovernanceKpiTrends("decision_throughput", 14),
+    getConnectorDefinitionArtifacts(),
+    ...TREND_SUPPORTED_KEYS.map((kpiKey) => getGovernanceKpiTrends(kpiKey, 14)),
   ]);
 
+  const kpis = dashboard.data?.kpis ?? [];
+  const highRisk = dashboard.data?.highRiskRecommendations ?? [];
+  const graphSupplements = dashboard.data?.graphSupplements;
+  const auditList = governance.auditRecords.data ?? [];
+  const securityList = governance.securityEvents.data ?? [];
+  const connectorList = connectors.data ?? [];
+
+  const writeDisabledCount = connectorList.filter((c) => c.executionEnabled === false).length;
+  const eventRows = buildEventRows(auditList, securityList, highRisk);
+
+  const trendSeries: GovernanceTrendSeries[] = TREND_SUPPORTED_KEYS.map((kpiKey, index) => {
+    const result = trendResults[index];
+    const fromDashboard = kpis.find((kpi) => kpi.kpiKey === kpiKey);
+    return {
+      kpiKey,
+      title: fromDashboard?.title ?? TREND_TITLES[kpiKey],
+      points: result?.data?.points ?? [],
+      error: result?.error ?? null,
+    };
+  });
+
+  const visibleKpis = kpis.filter((kpi) => kpi.kpiKey !== "tenant_custom_kpi" || kpi.status === "deferred");
+
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-cyan-300">Issue 21</p>
-              <h1 className="mt-2 text-4xl font-semibold">Governance dashboard</h1>
-              <p className="mt-3 max-w-3xl text-slate-400">
-                Platform-defined governance KPIs, high-risk recommendations, audit visibility, and trend analytics
-                derived from governed review, decision, outcome, and learning records.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <ExplorerNavLink href="/decisions">Decisions</ExplorerNavLink>
-              <ExplorerNavLink href="/tasks">Review tasks</ExplorerNavLink>
-              <ExplorerNavLink href="/explorers">Explorers</ExplorerNavLink>
-              <ExplorerNavLink href="/">Home</ExplorerNavLink>
-            </div>
-          </div>
-        </section>
-
-        {dashboard.error ? (
-          <section className="rounded-2xl border border-rose-900/60 bg-rose-950/30 p-4 text-rose-200">
-            {dashboard.error}
-          </section>
-        ) : null}
-
-        {dashboard.data ? (
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title="Governance & audit dashboard"
+        description="Cross-cutting enterprise dashboard for approvals, audit, security events, runtime records, and read-only boundary verification."
+        actions={
           <>
-            <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {dashboard.data.kpis.map((kpi) => (
-                <KpiCard key={kpi.kpiKey} kpi={kpi} />
-              ))}
-            </section>
-
-            {dashboard.data.graphSupplements ? (
-              <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                <h2 className="text-xl font-semibold">Graph supplements</h2>
-                <p className="mt-2 text-sm text-slate-400">
-                  Max decision chain depth: {dashboard.data.graphSupplements.maxDecisionChainDepth} · Unresolved upstream
-                  reviews: {dashboard.data.graphSupplements.unresolvedUpstreamReviewCount}
-                </p>
-              </section>
-            ) : null}
-
-            <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <h2 className="text-xl font-semibold">High-risk recommendations</h2>
-              {dashboard.data.highRiskRecommendations.length === 0 ? (
-                <p className="mt-3 text-sm text-slate-400">No actionable high-risk recommendations.</p>
-              ) : (
-                <ul className="mt-4 space-y-3">
-                  {dashboard.data.highRiskRecommendations.map((item) => (
-                    <li key={item.artifactId} className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold">{item.title}</p>
-                          <p className="mt-1 text-xs text-slate-500">
-                            {item.riskState} · {item.lifecycleStatus}
-                          </p>
-                        </div>
-                        <Link href={item.contextViewRoute} className="text-sm font-semibold text-cyan-300 hover:text-cyan-200">
-                          Open
-                        </Link>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
+            <Button
+              type="button"
+              disabled
+              title="No export audit summary endpoint in MVP — use Advanced JSON or AI Trace explorer."
+            >
+              Export audit summary
+            </Button>
+            <Link
+              href="#security-events"
+              className="inline-flex items-center gap-2 rounded-etos-button border border-etos-border bg-etos-panel-muted px-3.5 py-2.5 text-[13px] font-extrabold text-etos-ink hover:bg-etos-panel"
+            >
+              View security events
+            </Link>
           </>
-        ) : null}
+        }
+      />
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-xl font-semibold">Decision throughput trend (14 days)</h2>
-          {throughputTrend.error ? (
-            <p className="mt-3 text-sm text-rose-300">{throughputTrend.error}</p>
-          ) : throughputTrend.data ? (
-            <div className="mt-4 overflow-x-auto">
-              <table className="min-w-full text-left text-sm">
-                <thead className="text-slate-400">
-                  <tr>
-                    <th className="pb-2 pr-4">Day</th>
-                    <th className="pb-2">Throughput</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {throughputTrend.data.points.map((point) => (
-                    <tr key={point.bucketStart} className="border-t border-slate-800">
-                      <td className="py-2 pr-4">{new Date(point.bucketStart).toLocaleDateString()}</td>
-                      <td className="py-2">{point.value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : null}
-          <p className="mt-3 text-xs text-slate-500">
-            Additional trend keys: {trendKpiKeys.join(", ")}
-          </p>
-        </section>
+      {dashboard.error ? (
+        <div className="mb-4">
+          <ErrorState error={dashboard.error} />
+        </div>
+      ) : null}
 
-        <section className="grid gap-6 lg:grid-cols-2">
-          <article className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">Recent audit records</h2>
-            {governance.auditRecords.error ? (
-              <p className="mt-3 text-sm text-rose-300">{governance.auditRecords.error}</p>
-            ) : (
-              <ul className="mt-4 space-y-2 text-sm text-slate-300">
-                {(governance.auditRecords.data ?? []).map((record) => (
-                  <li key={record.id} className="rounded-lg border border-slate-800 bg-slate-950 p-3">
-                    {record.action} · {record.result}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </article>
-          <article className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">Recent security events</h2>
-            {governance.securityEvents.error ? (
-              <p className="mt-3 text-sm text-rose-300">{governance.securityEvents.error}</p>
-            ) : (
-              <ul className="mt-4 space-y-2 text-sm text-slate-300">
-                {(governance.securityEvents.data ?? []).map((event) => (
-                  <li key={event.id} className="rounded-lg border border-slate-800 bg-slate-950 p-3">
-                    {event.eventType} · {event.severity}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </article>
-        </section>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+        {visibleKpis.map((kpi) => (
+          <KpiCard
+            key={kpi.kpiKey}
+            label={kpi.title}
+            value={kpiDisplayValue(kpi)}
+            hint={kpi.status === "deferred" ? "Deferred platform KPI" : kpi.source}
+          />
+        ))}
+        <KpiCard
+          label="Write actions"
+          value={0}
+          trend="up"
+          trendLabel="SAFE"
+          hint="MVP boundary — source writes disabled"
+        />
       </div>
+
+      <Notice variant="info" className="mt-4">
+        Trace exports: use{" "}
+        <Link href="/ai-traces" className="font-semibold underline">
+          AI Trace explorer
+        </Link>{" "}
+        — no live export-count KPI in Issue 21.
+      </Notice>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Governance events</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {governance.auditRecords.error || governance.securityEvents.error ? (
+              <ErrorState
+                error={
+                  governance.auditRecords.error ??
+                  governance.securityEvents.error ??
+                  "Failed to load governance events."
+                }
+              />
+            ) : eventRows.length === 0 ? (
+              <EmptyState message="No recent audit, security, or high-risk recommendation events." />
+            ) : (
+              <DataTable
+                columns={eventColumns}
+                rows={eventRows}
+                rowKey={(row) => row.id}
+                emptyMessage="No governance events."
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="flex flex-col gap-4">
+          <SidePanel title="Audit design checks">
+            <PillStack items={AUDIT_DESIGN_CHECKS} />
+          </SidePanel>
+          <SidePanel title="Read-only boundary">
+            <PillStack
+              items={[
+                { label: "Source writes", value: "0 SAFE", variant: "success" },
+                {
+                  label: "Write-disabled connectors",
+                  value: connectors.error
+                    ? "Unavailable"
+                    : `${writeDisabledCount} / ${connectorList.length}`,
+                  variant: writeDisabledCount > 0 || connectorList.length === 0 ? "success" : "warning",
+                },
+                {
+                  label: "Execution enabled",
+                  value: connectors.error
+                    ? "—"
+                    : String(connectorList.filter((c) => c.executionEnabled === true).length),
+                  variant: "neutral",
+                },
+              ]}
+            />
+            {connectors.error ? (
+              <Notice variant="warning" className="mt-3">
+                Connector flags unavailable: {connectors.error}
+              </Notice>
+            ) : null}
+          </SidePanel>
+        </div>
+      </div>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Trends (14 days)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <GovernanceTrendCharts series={trendSeries} />
+        </CardContent>
+      </Card>
+
+      <div id="security-events" className="mt-6 grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent security events</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {governance.securityEvents.error ? (
+              <ErrorState error={governance.securityEvents.error} />
+            ) : securityList.length === 0 ? (
+              <EmptyState message="No recent security events." />
+            ) : (
+              <DataTable
+                columns={[
+                  {
+                    key: "event",
+                    header: "Event",
+                    render: (row: SecurityEvent) => row.eventType,
+                  },
+                  {
+                    key: "severity",
+                    header: "Severity",
+                    render: (row: SecurityEvent) => (
+                      <Badge variant={badgeVariantForStatus(row.severity)} className="normal-case tracking-normal">
+                        {row.severity}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    key: "summary",
+                    header: "Summary",
+                    render: (row: SecurityEvent) => (
+                      <span className="font-normal text-etos-ink-muted">{row.safeSummary}</span>
+                    ),
+                  },
+                  {
+                    key: "drill",
+                    header: "Drill",
+                    render: (row: SecurityEvent) =>
+                      row.reviewTaskReady ? (
+                        <Link href="/tasks" className="text-etos-accent hover:underline">
+                          Review tasks
+                        </Link>
+                      ) : (
+                        <span className="font-normal text-etos-ink-subtle">—</span>
+                      ),
+                  },
+                ]}
+                rows={securityList}
+                rowKey={(row) => row.id}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>High-risk recommendations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {highRisk.length === 0 ? (
+              <EmptyState message="No actionable high-risk recommendations." />
+            ) : (
+              <DataTable
+                columns={[
+                  {
+                    key: "title",
+                    header: "Recommendation",
+                    render: (row: HighRiskRecommendationSummary) => (
+                      <Link href={row.contextViewRoute} className="text-etos-accent hover:underline">
+                        {row.title}
+                      </Link>
+                    ),
+                  },
+                  {
+                    key: "risk",
+                    header: "Risk",
+                    render: (row: HighRiskRecommendationSummary) => (
+                      <Badge variant={badgeVariantForStatus(row.riskState)} className="normal-case tracking-normal">
+                        {row.riskState}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    key: "status",
+                    header: "Status",
+                    render: (row: HighRiskRecommendationSummary) => (
+                      <span className="font-normal text-etos-ink-muted">{row.lifecycleStatus}</span>
+                    ),
+                  },
+                ]}
+                rows={highRisk}
+                rowKey={(row) => row.artifactId}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {graphSupplements ? (
+        <Notice variant="info" className="mt-6">
+          Graph supplements — max decision chain depth: {graphSupplements.maxDecisionChainDepth} · Unresolved
+          upstream reviews: {graphSupplements.unresolvedUpstreamReviewCount}
+        </Notice>
+      ) : null}
+
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4 text-sm text-etos-ink-muted">
+        <summary className="cursor-pointer font-extrabold text-etos-ink">Advanced / Debug</summary>
+        <div className="mt-4 space-y-4">
+          <div className="flex flex-wrap gap-3">
+            <Link href="/decisions" className="text-etos-accent hover:underline">
+              Decisions
+            </Link>
+            <Link href="/tasks" className="text-etos-accent hover:underline">
+              Review tasks
+            </Link>
+            <Link href="/learning-signals" className="text-etos-accent hover:underline">
+              Learning signals
+            </Link>
+            <Link href="/ai-traces" className="text-etos-accent hover:underline">
+              AI traces
+            </Link>
+            <Link href="/explorers" className="text-etos-accent hover:underline">
+              Explorers
+            </Link>
+          </div>
+          <div>
+            <p className="mb-2 font-semibold text-etos-ink">Dashboard</p>
+            <pre className="overflow-x-auto rounded-xl border border-etos-border bg-etos-panel p-3 text-xs">
+              {JSON.stringify(dashboard, null, 2)}
+            </pre>
+          </div>
+          <div>
+            <p className="mb-2 font-semibold text-etos-ink">Lists</p>
+            <pre className="overflow-x-auto rounded-xl border border-etos-border bg-etos-panel p-3 text-xs">
+              {JSON.stringify(governance, null, 2)}
+            </pre>
+          </div>
+          <div>
+            <p className="mb-2 font-semibold text-etos-ink">Trends</p>
+            <pre className="overflow-x-auto rounded-xl border border-etos-border bg-etos-panel p-3 text-xs">
+              {JSON.stringify(trendSeries, null, 2)}
+            </pre>
+          </div>
+          <div>
+            <p className="mb-2 font-semibold text-etos-ink">Connectors (boundary)</p>
+            <pre className="overflow-x-auto rounded-xl border border-etos-border bg-etos-panel p-3 text-xs">
+              {JSON.stringify(connectors, null, 2)}
+            </pre>
+          </div>
+        </div>
+      </details>
     </main>
   );
 }

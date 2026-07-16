@@ -2,6 +2,8 @@
 
 **Scope:** `ETOS.Frontend/` only. **Do not change backend behavior** while executing the UI program.
 
+**Program status:** Phases **0–5 gold** (shell + Operate/Model + Tool registry + Agents/workflows + Governance + Digital thread canvas). Next: UI-6.x / adjacent slate reskins, or Issue 25. See `README.md` and `.docs/.gapAnalysis/.ui/ui-issues-gap-analysis.md`.
+
 Read this document before any UI issue from `engineering-execution-ui-issues.md`.
 
 ---
@@ -15,9 +17,10 @@ Read this document before any UI issue from `engineering-execution-ui-issues.md`
 | 3 | `design-system-light-dark.md` | Tokens, components, theme rules |
 | 4 | `ui-screen-api-map.md` | Screen → route → existing API helpers |
 | 5 | `ui-delivery-checklist.md` | Done definition per PR |
-| 6 | `References/.../etos_ui_mockups/index.html` | Visual source of truth |
-| 7 | `References/.../etos_ui_mockups/SCREEN_MAP.md` | Routes and primary actions |
-| 8 | `ETOS.Frontend/AGENTS.md` | Next.js 16 project notes |
+| 6 | `.docs/.gapAnalysis/.ui/ui-issues-gap-analysis.md` | Current codebase depth vs backlog |
+| 7 | `References/.../etos_ui_mockups/index.html` | Visual source of truth |
+| 8 | `References/.../etos_ui_mockups/SCREEN_MAP.md` | Routes and primary actions |
+| 9 | `ETOS.Frontend/AGENTS.md` | Next.js 16 project notes |
 
 **Do not** read `.docs/.prd/engineering-execution-issues.md` to justify backend work during UI slices. Use it only to understand which surfaces must stay placeholder/disabled.
 
@@ -37,12 +40,15 @@ Read this document before any UI issue from `engineering-execution-ui-issues.md`
 ### Allowed
 
 - All work in `ETOS.Frontend/` (components, routes, styles, tests, config)
-- New npm dependencies listed in UI issues (shadcn, next-themes, TanStack, etc.)
-- **Thin** additions to `src/lib/etos-api.ts` that call **existing** backend endpoints only (e.g. extract `getAiTraceDetail(traceId)` from inline fetch pattern)
-- `src/lib/ui-fixtures/` — static mock data for **placeholder routes only** (agents, workflows, digital thread until backend exists)
+- New npm dependencies listed in UI issues (`next-themes`, TanStack Table, React Flow for UI-3.5, Recharts for UI-4.1 — landed, etc.)
+- **Thin** additions to `src/lib/etos-api.ts` that call **existing** backend endpoints only
+- `src/lib/ui-fixtures/` — static mock data for **blocked** routes / deferred widgets only (AI insights, teams); Mission Control digital-thread strip is live via Issue 16.1 — never fake agent/workflow success
+- `src/lib/digital-thread-map.ts` — maps `/api/admin/digital-thread/*` DTOs → Mission Control + canvas scene
+- `src/lib/digital-thread-stream.ts` — fetch ReadableStream SSE client for `events/stream`
+- `src/components/digital-thread/` — timeline canvas, minimap, filters, scrubber, inspector, live client
 - Moving/refactoring existing pages into `src/app/(shell)/` without URL changes
-- Server Actions that call **existing** `etos-api.ts` functions already used today
-- Playwright/visual tests under `ETOS.Frontend/e2e/` or repo test folder if frontend-only
+- Server Actions that call **existing** `etos-api.ts` functions
+- Playwright/visual tests under `ETOS.Frontend/` if frontend-only
 
 ### When API data is missing
 
@@ -50,8 +56,9 @@ Use this decision tree:
 
 1. **Endpoint exists, field missing** → Show em dash or “Not provided by API”; do not invent values.
 2. **Endpoint exists for list but not detail route** → Add page that calls existing detail fetch if available; else link to list row data only.
-3. **No endpoint (agents, workflows, timeline, tasks, governance KPIs)** → `PlaceholderPage` with mockup screenshot, blocker issue id, disabled primary actions.
-4. **Layout-only mockup fields (search omnibar, avatar menu)** → UI shell with non-functional or scoped stub (search → “Coming soon” toast).
+3. **No endpoint (agent teams Issue 25, settings)** → `PlaceholderPage` with mockup screenshot, blocker issue id, disabled primary actions. Digital-thread canvas uses Issue 16.1b APIs.
+4. **Functional but not gold (adjacent slate dumps: tasks/decisions/foundation)** → Reskin to mockup parity; do **not** replace with PlaceholderPage.
+5. **Layout-only mockup fields (search omnibar)** → Disabled control + tooltip (“Coming soon” / no API).
 
 ---
 
@@ -65,13 +72,16 @@ ETOS.Frontend/src/app/
   globals.css                # Design tokens
   (shell)/
     layout.tsx               # AppShell wraps children
-    page.tsx                 # Command center (UI-1.1)
+    page.tsx                 # Mission Control Timeline home (UI-1.1)
     imports/...
-    admin/foundation/        # Moved dev admin dump from old /
-  (bare)/                    # Optional: routes without shell (none today)
+    tools/...                # UI-2.x registry + edit
+    tool-runs/...            # UI-2.4
+    admin/foundation/        # Dev admin dump
+    admin/identity/          # UI-1.10 create tenants/users/access
+  dev/ui-kit/                # Primitive gallery (dev)
 ```
 
-Migrate existing `src/app/*/page.tsx` into `(shell)/` **without changing URLs**.
+All product routes live under `(shell)/` **without changing URLs**.
 
 ### Server vs client
 
@@ -80,7 +90,7 @@ Migrate existing `src/app/*/page.tsx` into `(shell)/` **without changing URLs**.
 | Page data load via `etos-api.ts` | Theme toggle, sidebar drawer |
 | Static layout, badges from props | TanStack Table sort/filter |
 | Server Actions for forms | Chat input, timeline canvas |
-| | React Flow workflow canvas (Phase 3) |
+| | ~~React Flow workflow canvas (UI-3.5)~~ **done** (`@xyflow/react`) |
 
 Keep client islands small; pass serializable props from server parent.
 
@@ -91,10 +101,11 @@ Keep client islands small; pass serializable props from server parent.
 - Preserve headers: `X-ETOS-User-Id`, `X-ETOS-Tenant-Id` via existing transport helpers.
 - Handle `ApiResult`: render `ErrorState` on `error`, `EmptyState` on empty `data`.
 
-### Styling
+### Styling / gold bar
 
 - Use tokens from `design-system-light-dark.md` (`bg-etos-panel`, `text-etos-ink`, etc.).
 - **No** new hardcoded `bg-slate-950` on pages after UI-0.1.
+- Gold composition pattern: `PageHeader` + `KpiCard` strip + card-row `DataTable` / split + `SidePanel`/`PillStack` + Advanced/Debug demotion.
 - Sidebar uses navy tokens in **both** themes.
 - Verify every new component in light **and** dark before marking done.
 
@@ -102,10 +113,11 @@ Keep client islands small; pass serializable props from server parent.
 
 ```
 src/components/
-  shell/           AppShell, Sidebar, Topbar, Breadcrumb, ThemeToggle
-  ui/              Badge, Button, Card, KpiCard, DataTable, PageHeader, …
-  placeholders/    PlaceholderPage, BlockedFeatureCallout
-  [feature]/       explorers/, recommendations/, … (existing)
+  shell/           AppShell, Sidebar, Topbar, ThemeToggle, ThemeProvider
+  ui/              17 primitives (Badge, Button, Card, KpiCard, DataTable, Tabs,
+                   Stepper, TraceTimeline, GovernancePanel, Notice, SidePanel, …)
+  placeholders/    PlaceholderPage
+  [feature]/       explorers/, recommendations/, imports/, admin/, …
 src/config/
   navigation.ts    Single nav source for sidebar + placeholders
 src/lib/
@@ -113,69 +125,65 @@ src/lib/
   ui-fixtures/     Preview data for blocked routes only
 ```
 
+Gallery: `/dev/ui-kit` (development builds).
+
+---
+
+## Admin identity (UI-1.10) — shipped
+
+`/admin/identity` create forms use existing `POST /api/admin/identity/*` only. Cookie tenant switcher for `X-ETOS-Tenant-Id`. No OIDC login portal.
+
+---
+
+## Tool registry (UI-2.x) — shipped
+
+- `/tools` — Kind-column registry + `?kind=` Tabs
+- `/tools/[artifactId]/edit` — Mark ready / Publish / Validate / Dry-run; Save draft disabled
+- `/connectors/[artifactId]` — capability table + credential TraceTimeline
+- `/tool-runs`, `/tool-runs/[runId]` — list + trace detail; Execute gated
+- Wrappers: `markToolDefinitionReady`, `publishToolDefinition`, `compatibilityScanToolDefinition`, `dryRunToolDefinition`, `executeToolDefinition`
+- Server actions: `src/app/(shell)/tools/actions.ts`
+
 ---
 
 ## Phase 0 Implementation Sequence
 
-Execute in order; do not skip.
-
-### Step 1 — UI-0.1 Tokens + theme
-
-1. Add `next-themes`, configure `class` on `<html>`.
-2. Implement CSS variables in `globals.css` per `design-system-light-dark.md`.
-3. Map `@theme inline` for Tailwind 4 utilities.
-4. Add `ThemeProvider` + `ThemeToggle`.
-
-### Step 2 — UI-0.3 Component primitives
-
-1. Init shadcn/ui (or hand-roll minimal set if shadcn init blocked).
-2. Build `Badge`, `Card`, `Button`, `PageHeader`, `EmptyState`, `ErrorState`, `KpiCard`.
-3. Add `/dev/ui-kit` page (dev only, `NODE_ENV === development`).
-
-### Step 3 — UI-0.2 Shell
-
-1. `navigation.ts` from SCREEN_MAP groups.
-2. `AppShell` with sidebar + topbar.
-3. `(shell)/layout.tsx` wraps all product routes.
-4. Move pages into `(shell)/`; smoke test all links.
-
-### Step 4 — UI-0.4 Placeholders
-
-1. `PlaceholderPage` component with mockup image from `References/.../images/`.
-2. Wire nav items for unimplemented backend features.
+~~Execute in order~~ — **complete**. Historical order for reference: UI-0.1 tokens → UI-0.3 primitives → UI-0.2 shell → UI-0.4 placeholders.
 
 ---
 
-## Reskinning an Existing Page
+## Reskinning an Existing Page (gold pass)
 
 1. Open matching mockup: `References/.../html/NN-*.html` and `.png`.
 2. Find route in `ui-screen-api-map.md`; use listed `get*()` helpers only.
-3. Replace page wrapper with `PageHeader` + token-based layout inside shell.
+3. Replace slate dump with `PageHeader` + token-based layout inside shell.
 4. Extract repeated blocks to feature components under `src/components/`.
-5. Delete page-local duplicate `StatusBadge` / `ErrorState` in favor of `ui/`.
+5. Demote raw JSON / debug dumps under Advanced/Debug.
 6. Run checklist in `ui-delivery-checklist.md`.
 
-**Do not** change server action behavior—only layout, copy, and navigation structure. Splitting `/imports` into sub-routes may **move** existing server actions into route-specific files but must call the same `etos-api.ts` functions.
+**Do not** change server action behavior—only layout, copy, and navigation structure. Splitting routes may **move** existing server actions but must call the same `etos-api.ts` functions.
 
 ---
 
 ## Placeholder Pages (backend not ready)
 
-Required for: `/agents/*`, `/workflows/*`, `/agent-teams/*`, `/digital-thread/*`, `/tasks`, parts of `/governance` until Issue 21.
+Required today for: `/agent-teams`, `/admin/settings`.  
+`/digital-thread/timeline` is implemented (UI-5.1–5.3).  
+**Not** for `/agents/*` or `/workflows/*` (Issue 23–24 shells exist — reskin instead).
 
 Template:
 
 ```tsx
 <PlaceholderPage
-  mockupSrc="/mockups/28-agent-builder.png"  // or public copy of reference image
-  title="Agent builder"
-  issueBlocker="Issue 23"
-  description="Backend AgentVersion execution not available in MVP UI slice."
-  primaryAction={{ label: "Create agent", disabled: true, reason: "Requires Issue 23" }}
+  mockupSrc="/mockups/35-agent-team-builder.png"
+  title="Agent teams"
+  issueBlocker="Issue 25"
+  description="Multi-agent team orchestration not available until Issue 25."
+  primaryAction={{ label: "Create team", disabled: true, reason: "Requires Issue 25" }}
 />
 ```
 
-Optional: import types from `ui-fixtures/agents.ts` for **read-only preview** subcomponents marked with `data-ui-preview="true"`.
+Optional: fixtures marked `data-ui-preview="true"` for Mission Control / digital-thread preview only.
 
 ---
 
@@ -193,7 +201,8 @@ export type NavItem = {
 };
 ```
 
-Shell renders all items; `implemented: false` still navigates (to placeholder). Never hide future nav entries.
+Shell renders all items; `implemented: false` still navigates (to placeholder). Never hide future nav entries.  
+Today: Teams + Digital Thread + Settings = `implemented: false`; Tools + Agents + Workflows = `true`.
 
 ---
 
@@ -223,7 +232,7 @@ npm run build
 Pop-Location
 ```
 
-Optional when e2e added:
+Optional:
 
 ```powershell
 npx playwright test
@@ -239,10 +248,12 @@ No `dotnet test` required for pure UI PRs unless you accidentally touched backen
 | --- | --- |
 | New backend endpoint for KPI | Derive KPI from existing `getPlatformHealth`, `getRecommendationArtifacts`, etc. |
 | Hardcode tenant name “Acme” | Use tenant from `getIdentityLists()` or env fallback |
-| Dark-only styling | Test light mode; use tokens |
+| Dark-only / slate dump on gold surface | Test light mode; use `--etos-*` tokens + shared primitives |
 | Giant client page | Server load data; client only for interactivity |
 | Copy backend entity fields not in DTO | Use typed fields from `etos-api.ts` only |
-| Implement agent run execution | Placeholder until Issue 23 |
+| Replace `/agents` with PlaceholderPage | Wrong — Issues 23–24 shipped; reskin to mockup 28–31 |
+| Fake Register tool / Save draft success | Keep disabled + Advanced note (UI-2.2 honesty) |
+| Enable write connectors in UI | Stay disabled with MVP reason |
 
 ---
 

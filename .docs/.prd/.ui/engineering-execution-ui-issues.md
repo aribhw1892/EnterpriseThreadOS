@@ -18,12 +18,12 @@ Digital thread spec: `References/.../etos_ui_mockups/docs/DIGITAL_THREAD_TIMELIN
 
 This backlog turns the 40-screen EnterpriseThreadOS mockup pack into a phased, implementable UI program aligned with the existing Next.js 16 frontend (`ETOS.Frontend/`), backend APIs, and engineering issue dependencies.
 
-The mockups define a **persistent enterprise shell** (sidebar + top bar), **light-first workspace** with navy navigation, and **semantic status/risk/governance affordances** on every AI, import, tool, agent, and audit surface. The current frontend is a functional developer shell: route-per-feature pages, inline Tailwind, dark slate styling only, no shared layout, and no component library.
+The mockups define a **persistent enterprise shell** (sidebar + top bar), **light-first workspace** with navy navigation, and **semantic status/risk/governance affordances** on every AI, import, tool, agent, and audit surface. **Phases 0–5 are gold** (shell, Operate/Model, Tool registry, Agents/workflows, Governance dashboard, Digital thread canvas). Remaining work is Phase 6 visual QA, adjacent slate reskins, and Issue 25 teams.
 
 **Non-negotiable for this program:**
 
 - Light and dark mode on every screen, user-toggleable with system preference as default.
-- Architecture-honest UI: no fake integrations; disabled states for write connectors, agent/workflow surfaces until backend issues land.
+- Architecture-honest UI: no fake integrations; disabled states for write connectors and blocked surfaces (Issue 25 teams, Issue 16.1 timeline).
 - Reuse existing `etos-api.ts` fetch helpers and server-component data loading unless interactivity requires client islands.
 - Governance visibility: trust, confidence, policy, trace, audit, and read-only MVP boundary visible in shell and detail panels.
 
@@ -33,23 +33,30 @@ The mockups define a **persistent enterprise shell** (sidebar + top bar), **ligh
 
 | Area | Mockup target | Current implementation | Gap |
 | --- | --- | --- | --- |
-| App shell | Sidebar (Operate/Govern/Model/Build/Admin), top bar, breadcrumb, search, tenant pill, MVP badge | None; each page is standalone | Full shell missing |
-| Theme | Light workspace + navy sidebar; dark equivalent | Hardcoded `bg-slate-950`; `prefers-color-scheme` only in `globals.css` | Design tokens + toggle |
-| Home `/` | Command center KPIs, flow status, governance watch | Admin foundation dump | Replace layout + wire KPIs |
-| Model `/model-artifacts` | Package seed + ontology detail | Basic list/actions | Wizard/detail routes |
-| Layer 3–6 | Polished list + detail with publish/impact | Minimal list + detail views | Shell + tables + panels |
-| Imports | Hub + wizard sub-routes (mapping, staging, identity, DQ) | Single long page with server actions | Route split + stepper |
-| Graph | Promotion + snapshot diff | List + node detail only | Promotion UI |
-| Explorers | 360° rich layout + artifact explorer | Basic components exist | Layout polish + unified IA |
-| Chat / traces | Split conversation + governance panel; trace detail | Thin pages; no `/ai-traces/[id]` | Panels + detail route |
-| Dashboards / reports | Builder preview with approval CTAs | List + detail | Preview layout |
-| Recommendations | Inbox filters + evidence detail | Basic list + detail | Inbox UX |
-| Tools (Issue 22) | Registry tabs, editor, connector boundary, run trace | List pages exist | Editor + trace layout |
-| Agents 23–25 | Builder, config, runs, workflow canvas, teams | Not implemented | Blocked on backend |
-| Governance | Audit dashboard KPIs | Audit on home only | Dedicated `/governance` |
-| Digital thread | Interactive timeline (screens 38–40) | Not implemented | Issue 16.1 + backend projection |
+| App shell | Sidebar (Operate/Govern/Model/Build/Admin), top bar, breadcrumb, search, tenant pill, MVP badge | **Gold (UI-0.2)** | Topbar health dot deferred |
+| Theme | Light workspace + navy sidebar; dark equivalent | **Gold (UI-0.1)** | — |
+| Shared primitives | KPI, Tabs, Stepper, TraceTimeline, DataTable, … | **Gold (UI-0.3)** | Standalone FlowLine optional |
+| Home `/` | Mission Control Timeline | **Gold (UI-1.1 + Issue 16.1 + UI-5.3)** | AI insights still fixture |
+| Admin identity | Create tenant / user / role / membership / grant | **Gold (UI-1.10)** | No membership explorer table |
+| Model `/model-artifacts` | Package seed + ontology detail | **Gold (UI-1.2)** | Impact analysis CTA disabled |
+| Layer 3–6 | Polished list + detail with publish/impact | **Gold (UI-1.3)** | — |
+| Imports | Hub + wizard sub-routes | **Gold (UI-1.4)** | Some steps still use latest-batch helpers |
+| Graph / docs | Promotion + snapshot diff + documents | **Gold (UI-1.5–1.6)** | — |
+| Explorers | 360° rich layout + artifact explorer | **Gold (UI-1.6)** | — |
+| Chat / traces | Split conversation + governance; trace detail | **Gold (UI-1.7)** | — |
+| Dashboards / reports | Builder preview with approval CTAs | **Gold (UI-1.8)** | Save/approve CTAs disabled |
+| Recommendations | Inbox filters + evidence detail | **Gold (UI-1.9)** | — |
+| Tools (Issue 22) | Registry tabs, editor, connector boundary, run trace | **Gold (UI-2.1–2.4)** | Register/Save draft disabled; schemas read-only |
+| Agents / workflows 23–24 | Builder, config, runs, workflow canvas | **Gold** (UI-3.1–3.7) | `@xyflow/react`; create-version save |
+| Agent teams 25 | Team builder + runs | Placeholder `/agent-teams` + `/agent-team-runs/[runId]` | Issue 25 |
+| Governance | Audit dashboard KPIs + charts | **Gold (UI-4.1)** | Recharts trends; Export disabled |
+| Decisions | Explorer + detail votes/outcomes | Functional `/decisions` | Slate reskin still open |
+| Learning signals | Tenant rollup list + detail | ✅ `/learning-signals` | `listLearningSignals` / `getLearningSignalDetail` |
+| Digital thread | Interactive timeline (screens 38–40) | **Gold (UI-5.1–5.3 + Issue 16.1b)** | SVG canvas; site/product-line filters disabled |
 
-**Existing routes to preserve and reskin:** `/`, `/model-artifacts`, `/capabilities`, `/business-policies`, `/optimization-models`, `/agent-templates`, `/imports`, `/documents`, `/graph`, `/explorers`, `/artifacts`, `/chat`, `/ai-traces`, `/dashboards`, `/reports`, `/recommendations`, `/tools`, `/connectors/[artifactId]`, `/tool-runs/[runId]`, `/decisions`, `/context-packages`.
+**Gold routes (preserve + polish only):** `/`, `/model-artifacts`, `/model-artifacts/ontology`, `/capabilities`, `/business-policies`, `/optimization-models`, `/agent-templates`, `/imports` (+ wizard sub-routes), `/documents`, `/graph`, `/graph/promote`, `/explorers`, `/explorers/360/[anchorId]`, `/artifacts`, `/chat`, `/ai-traces`, `/dashboards`, `/reports`, `/recommendations`, `/learning-signals`, `/admin/identity`, `/tools`, `/tools/[artifactId]/edit`, `/connectors/[artifactId]`, `/tool-runs`, `/tool-runs/[runId]`, `/governance`, `/digital-thread/timeline`.
+
+**Still slate / mockup-parity next:** `/tasks`, `/decisions`, `/context-packages`, `/admin/foundation`.
 
 ---
 
@@ -69,7 +76,7 @@ Align with engineering issue library guidance (Issues 16–21):
 | `next-themes` | Light/dark/system theme with `class` strategy on `<html>` |
 | `@xyflow/react` or Canvas/WebGL lib | Digital thread timeline renderer (Issue UI-5.x) |
 
-Install incrementally per phase; do not add agent/workflow libraries until Phase 3.
+Install incrementally per phase; React Flow landed in Phase 3; Recharts landed in Phase 4 (`GovernanceTrendCharts`).
 
 ---
 
@@ -77,7 +84,7 @@ Install incrementally per phase; do not add agent/workflow libraries until Phase
 
 ### Token model
 
-Define CSS custom properties in `ETOS.Frontend/src/app/globals.css` and map through Tailwind 4 `@theme inline`. Mockup light tokens (from `01-command-center.html`) become the canonical light palette; derive dark equivalents by inverting surface/ink relationships while keeping semantic colors stable.
+Define CSS custom properties in `ETOS.Frontend/src/app/globals.css` and map through Tailwind 4 `@theme inline`. Mockup light tokens (from screens 02–37 HTML, e.g. legacy `01-command-center-legacy-executive.html`) become the canonical light workspace palette; derive dark equivalents by inverting surface/ink relationships while keeping semantic colors stable. **Home Mission Control (screen 01 PNG)** and digital-thread screens 38–40 use a deeper ops canvas (near-black / navy) — treat as a dedicated surface family, same semantic status colors.
 
 | Token | Light | Dark | Usage |
 | --- | --- | --- | --- |
@@ -103,7 +110,7 @@ Define CSS custom properties in `ETOS.Frontend/src/app/globals.css` and map thro
 - Default: `prefers-color-scheme` via `next-themes` `defaultTheme="system"`.
 - Persist user choice in `localStorage` key `etos-theme`.
 - Shell sidebar stays **navy in both modes** (brand anchor); content canvas switches light/dark.
-- Digital thread timeline (screens 38–40) uses a **deeper canvas** in both modes; mockup dark navy is the reference for that feature area only.
+- Home Mission Control (screen 01) and digital thread timeline (screens 38–40) use a **deeper ops canvas**; mockup dark navy is the reference for those surfaces. Other product routes stay light-first workspace + navy sidebar.
 - Status badges must meet WCAG AA contrast in both modes; do not rely on color alone—pair with label text.
 - All new components consume tokens (`bg-surface-panel`, `text-ink-primary`, etc.), not raw `slate-*` classes.
 
@@ -143,11 +150,12 @@ flowchart TD
 
 ## Phase 0 — Foundation
 
-### UI-0.1: Design Tokens, Theme Provider, and Tailwind Mapping
+### UI-0.1: Design Tokens, Theme Provider, and Tailwind Mapping ✅ Implemented
 
 **Blocked by:** None  
 **Engineering dependency:** None  
-**Mockup reference:** All screens (shared CSS in `html/*.html`)
+**Mockup reference:** All screens (shared CSS in `html/*.html`)  
+**Status:** Implemented — `--etos-*` tokens (`:root` + `.dark` + ops-canvas family) in `globals.css` with Tailwind 4 `@theme inline` mapping, `next-themes` provider (`storageKey="etos-theme"`, system default), **Inter** font. Migrated pages keep inner dark cards until per-page reskin (UI-1.2+).
 
 **What to build**
 
@@ -165,11 +173,12 @@ flowchart TD
 
 ---
 
-### UI-0.2: Enterprise App Shell (Sidebar + Topbar + Breadcrumb)
+### UI-0.2: Enterprise App Shell (Sidebar + Topbar + Breadcrumb) ✅ Implemented
 
 **Blocked by:** UI-0.1  
 **Engineering dependency:** Issue 2 (tenant context display)  
-**Mockup reference:** Screen 01 — persistent chrome
+**Mockup reference:** Screen 01 — persistent chrome  
+**Status:** Implemented — `AppShell`/`Sidebar`/`Topbar`/`ThemeToggle` in `src/components/shell/`, all product routes moved into `src/app/(shell)/` (URLs unchanged), breadcrumb from pathname, disabled global search, tenant pill from `getIdentityLists()`, Read-only MVP badge, mobile drawer, skip link.
 
 **What to build**
 
@@ -193,11 +202,12 @@ flowchart TD
 
 ---
 
-### UI-0.3: Shared UI Component Library
+### UI-0.3: Shared UI Component Library ⚠️ Partially implemented
 
 **Blocked by:** UI-0.1  
 **Engineering dependency:** None  
-**Mockup reference:** Badges, cards, KPIs, tables, steppers, tabs, trace timeline, callouts across screens 01–27
+**Mockup reference:** Badges, cards, KPIs, tables, steppers, tabs, trace timeline, callouts across screens 01–27  
+**Status:** Core primitives implemented (hand-rolled, token-based, no shadcn init): `Badge`/`StatusBadge`, `Card` family, `Button` (primary/ghost/danger), `PageHeader`, `KpiCard` (incl. ops variant), `EmptyState`, `ErrorState`, simple `DataTable`; gallery at `/dev/ui-kit` (dev only). Remaining: `Stepper`, `Tabs`, `GovernancePanel`, `TraceTimeline`, `FlowLine`, `Notice/Callout`, TanStack `DataTable` — land with their owning Phase 1–2 issues.
 
 **What to build in `src/components/ui/`**
 
@@ -225,17 +235,18 @@ flowchart TD
 
 ---
 
-### UI-0.4: Navigation IA and Placeholder Policy
+### UI-0.4: Navigation IA and Placeholder Policy ✅ Implemented
 
 **Blocked by:** UI-0.2  
 **Engineering dependency:** Issues 19–25 for Govern/Build placeholders  
-**Mockup reference:** SCREEN_MAP information architecture
+**Mockup reference:** SCREEN_MAP information architecture  
+**Status:** Implemented — `src/config/navigation.ts` (`NavItem` contract, Operate/Govern/Model/Build/Admin groups), `PlaceholderPage` component with mockup thumbnail + blocker badge + disabled CTA, placeholder routes `/digital-thread/timeline` (Issue 16.1), `/agent-teams` (Issue 25), `/admin/identity` (UI-1.10), `/admin/settings` (static). Mockup PNGs copied to `ETOS.Frontend/public/mockups/`. No dead sidebar links.
 
 **What to build**
 
 - Central nav config: `src/config/navigation.ts` with `href`, `label`, `group`, `requiredIssue`, `implemented`.
 - Placeholder page template: explains mockup intent, backend blocker, link to engineering issue, screenshot from mockup pack.
-- Unimplemented routes: `/tasks`, `/governance` (partial), `/agents/*`, `/workflows/*`, `/agent-teams/*`, `/digital-thread/*`, `/admin/*`, `/imports/new`, sub-routes.
+- Unimplemented routes: `/tasks`, `/governance` (partial), `/agents/*`, `/workflows/*`, `/agent-teams/*`, `/digital-thread/*`, `/admin/settings` (static), `/imports/new`, sub-routes. `/admin/foundation` + `/admin/identity` are real (UI-1.1 / UI-1.10).
 
 **Acceptance criteria**
 
@@ -248,32 +259,39 @@ flowchart TD
 
 Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pages; add missing routes.
 
-### UI-1.1: Enterprise Command Center (`/`)
+### UI-1.1: Mission Control Timeline home (`/`) ✅ Implemented
 
-**Blocked by:** UI-0.2, UI-0.3  
-**Engineering dependency:** Issues 1, 3, 13, 18, 21 (KPIs)  
-**Mockup:** 01 — `/`
+**Blocked by:** UI-0.2, UI-0.3
+**Engineering dependency:** Issues 1, 3, 13, 18, 21 (KPIs); Issue 16.1 + 16.1b digital-thread projection + SSE
+**Mockup:** 01 — `images/01-command-center.png` (Mission Control Timeline). Legacy executive landing: `images/01-command-center-legacy-executive.png` (archive only).
+**Status:** Implemented — `/` is a dark ops-canvas Mission Control page. Wired KPIs: thread health (`getPlatformHealth`), systems connected + events/min (`getDigitalThreadSystems` / `getDigitalThreadSummary`), recommendations, agent runs, open decisions, data quality. Timeline, heatmap, top threads, live event stream, and thread alerts consume `/api/admin/digital-thread/*` via `digital-thread-map.ts` (no fixture fallback on API error). Live button + master scrubber enabled via SSE (`MissionControlLiveChrome` + `digital-thread-stream.ts`). AI insights remain fixture + preview. Admin dump at `/admin/foundation`.
 
 **What to build**
 
-- KPI row: backend health (from `getPlatformHealth`), open recommendations count, context package stats, write actions = 0.
-- Operational flow line: Import → Staging → Identity → Trusted Graph → Chat/Dashboards → Recommendations.
-- Status table: model package, imports, chat, agentic layer readiness.
-- Governance watch timeline: recent audit/security events.
-- Actions: **Run demo flow** (link to scripted flow doc), **Export status** (JSON download of health snapshot).
+- Dark Mission Control layout matching screen 01 regions:
+  - KPI strip: thread health, systems connected, events/min, recommendations, active agents, open decisions (wire from existing list/health APIs where possible; em dash / fixture otherwise).
+  - Digital Thread Timeline — live view panel (systems + event callouts); **fixture or disabled Live** until digital-thread APIs exist.
+  - Thread activity heatmap, top active threads, system status donut.
+  - Bottom panels: active agents, recommendations, decisions summary, data quality, AI insights.
+  - Right rail: live event stream + thread alerts.
+  - Master timeline scrubber + sidebar time controls (Live / range).
+- Nav labels may follow Mission Control IA on home; product-wide sidebar still lands via UI-0.2 (Operate/Govern/… or unified mapping — document choice in PR).
+- Admin foundation lists move to `/admin/foundation` without losing functionality.
 
 **Acceptance criteria**
 
-- Matches mockup layout structure; live data where APIs exist, em dash when not.
-- Admin foundation lists move to `/admin/foundation` without losing functionality.
+- Matches Mission Control mockup layout structure; live data where APIs exist, honest placeholders when not.
+- No fake live stream success without backend; scrubber/stream marked preview when using fixtures (`data-ui-preview="true"`).
+- `/admin/foundation` reachable from Admin nav.
 
 ---
 
-### UI-1.2: Model Package & Ontology (`/model-artifacts`, `/model-artifacts/ontology`)
+### UI-1.2: Model Package & Ontology (`/model-artifacts`, `/model-artifacts/ontology`) ✅ Implemented
 
 **Blocked by:** UI-0.3  
 **Engineering dependency:** Issue 7, 18.5  
 **Mockup:** 02, 03
+**Status:** Gold — mockup-parity composition matching import hub (callout + package table + boundaries pill-stack); `/model-artifacts/ontology` split catalog + detail; Advanced/Debug for raw version dumps.
 
 **What to build**
 
@@ -283,11 +301,12 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 
 ---
 
-### UI-1.3: Layer 3–6 Definition Libraries
+### UI-1.3: Layer 3–6 Definition Libraries ✅ Implemented
 
 **Blocked by:** UI-0.3  
 **Engineering dependency:** Issues 18.2–18.4  
 **Mockup:** 04–07 — `/capabilities`, `/business-policies`, `/optimization-models`, `/agent-templates`
+**Status:** Gold — `DefinitionLibraryPage` (KPI + registry + preview SidePanel) with per-mockup extras: policy composition flow (05), optimization donut + contract well (06), template pill-stack (07).
 
 **What to build**
 
@@ -297,11 +316,12 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 
 ---
 
-### UI-1.4: Import Hub & Wizard Sub-Routes
+### UI-1.4: Import Hub & Wizard Sub-Routes ✅ Implemented
 
 **Blocked by:** UI-0.3  
 **Engineering dependency:** Issues 8–10  
 **Mockup:** 08–13
+**Status:** Gold — mockup 08 hub is the gold bar (title + New import/Upload, 4 KPIs, numbered demo list, Import state timeline); wizard routes 09–13 with Source→Mapping→Validate→Identity→Commit stepper; Mapping Agent Debug demoted to Advanced/Debug; `actions.ts` unchanged.
 
 **What to build**
 
@@ -320,11 +340,12 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 
 ---
 
-### UI-1.5: Trusted Graph Promotion & Document Explorer
+### UI-1.5: Trusted Graph Promotion & Document Explorer ✅ Implemented
 
 **Blocked by:** UI-0.3  
 **Engineering dependency:** Issues 11, 12  
 **Mockup:** 14, 15 — `/graph/promote`, `/documents`
+**Status:** Gold — `/graph/promote` gate + diff + BOM heat table (mockup 14); `/documents` split table + side panel (mockup 15); dumps in Advanced.
 
 **What to build**
 
@@ -333,11 +354,12 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 
 ---
 
-### UI-1.6: Graph Explorer & 360° Context
+### UI-1.6: Graph Explorer & 360° Context ✅ Implemented
 
 **Blocked by:** UI-0.3  
 **Engineering dependency:** Issue 16  
 **Mockup:** 16, 23 — `/explorers/360/[anchorId]`, `/artifacts`
+**Status:** Gold — `/graph` lightweight hub into 360/promote; `/explorers/360/[anchorId]` canvas + context panels (mockup 16); artifacts registry + flowline + readiness rail (mockup 23); explorers hub points at gold surfaces.
 
 **What to build**
 
@@ -347,11 +369,12 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 
 ---
 
-### UI-1.7: Governed Chat & AI Trace Detail
+### UI-1.7: Governed Chat & AI Trace Detail ✅ Implemented
 
 **Blocked by:** UI-0.3  
 **Engineering dependency:** Issues 14, 15  
 **Mockup:** 17, 18 — `/chat`, `/ai-traces/[traceId]`
+**Status:** Gold — chat conversation + Answer Governance side panel with draft CTAs (mockup 17); AI Trace list KPIs + card-row; `/ai-traces/[traceId]` timeline + access rail (mockup 18); demo export demoted.
 
 **What to build**
 
@@ -361,11 +384,12 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 
 ---
 
-### UI-1.8: Dashboard & Report Builder Preview
+### UI-1.8: Dashboard & Report Builder Preview ✅ Implemented
 
 **Blocked by:** UI-0.3  
 **Engineering dependency:** Issue 17  
 **Mockup:** 19, 20
+**Status:** Gold — dashboards KPI strip wired to DQ/recommendations/tasks + spark/table + publish readiness rail (mockup 19); reports outline + canvas preview (mockup 20).
 
 **What to build**
 
@@ -374,11 +398,12 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 
 ---
 
-### UI-1.9: Recommendation Inbox & Detail
+### UI-1.9: Recommendation Inbox & Detail ✅ Implemented
 
 **Blocked by:** UI-0.3  
 **Engineering dependency:** Issue 18  
 **Mockup:** 21, 22
+**Status:** Gold — 4 KPI cards + server card-row `DataTable` inbox with high-risk filter (mockup 21); detail evidence/actions + related-object side panel (mockup 22); publish/debug demoted.
 
 **What to build**
 
@@ -387,100 +412,161 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 
 ---
 
+### UI-1.10: Identity Admin — Create Tenants, Users & Access (`/admin/identity`) ✅ Implemented
+
+**Blocked by:** UI-0.2, UI-0.3, UI-1.1 (foundation route exists)  
+**Engineering dependency:** Issue 2 (backend identity APIs already shipped)  
+**Mockup:** No dedicated pack screen — use Admin nav + Mission Control **Administration** intent; layout follows light-shell cards/tables from screens 02–37.  
+**Constraint:** Frontend-only. Call existing `POST /api/admin/identity/*` only. No OIDC/login UI (still env / header identity).
+**Status:** Implemented — tabbed create forms, `createTenant`/`createUser`/`createRole`/`createMembership`/`createGrant` wrappers, cookie tenant switcher (`etos-tenant-id`), nav marked implemented.
+**Routes**
+
+| Route | Purpose |
+| --- | --- |
+| `/admin/foundation` | Keep dump lists + demo reset (from UI-1.1) |
+| `/admin/identity` | Primary identity workspace: tabs + create forms |
+| `/admin/identity?tab=tenants\|users\|roles\|memberships\|grants` | Deep-link tabs |
+
+**Nav:** Admin → **Identity** (`/admin/identity`), Admin → **Foundation** (`/admin/foundation`).
+
+**What to build**
+
+1. **`etos-api.ts` thin wrappers** (existing endpoints only):
+   - `createTenant({ identifier, name, description? })` → `POST /api/admin/identity/tenants`
+   - `createUser({ userName, email, displayName?, password?, id? })` → `POST /api/admin/identity/users`
+   - `createRole({ name, description? })` → `POST /api/admin/identity/roles` (tenant-scoped via current headers)
+   - `createMembership({ userId, tenantRoleId, expiresAt? })` → `POST /api/admin/identity/memberships`
+   - `createGrant({ userId, permissionKey, kind, expiresAt?, justification? })` → `POST /api/admin/identity/grants`
+   - Optional same slice: `createPermission`, `assignRolePermission`, `createAccessRequest` if list UX needs them
+   - Reuse `getIdentityLists()` for tables after mutate + `revalidatePath`
+
+2. **Identity page UI**
+   - Tabs: Tenants | Users | Roles | Memberships | Grants
+   - Each tab: DataTable of current list + **Create** panel/dialog (PageHeader + form)
+   - Server Actions for creates; surface `ApiResult.error` / validation messages
+   - After create tenant: show success callout that current user may have been auto-added as Tenant Admin (backend behavior when caller headers present)
+
+3. **Active tenant switcher (dev/MVP)**
+   - Topbar or Identity page control: pick tenant from `getIdentityLists().tenants`
+   - Persist selection for subsequent API calls (cookie / `localStorage` + server-readable preference — match existing `etos-api` header pattern; do **not** invent new backend session API)
+   - Document: switching tenant changes `X-ETOS-Tenant-Id` for this browser session; not full multi-tenant SSO
+
+4. **Out of scope for UI-1.10**
+   - Login / logout / OIDC / password-reset product UI
+   - Keycloak or external IdP
+   - Delete/deactivate tenant-user lifecycle (unless GET already implies and a POST/PATCH exists — do not add backend)
+   - Settings branding pages (`/admin/settings` stays static placeholder)
+
+**Happy-path demo script (acceptance)**
+
+1. Open `/admin/identity` as seeded admin headers.  
+2. Create tenant `acme-demo-2` / name “Acme Demo 2”.  
+3. Create user `steward@example.com`.  
+4. Create role `Data Steward` (under active tenant).  
+5. Create membership: user → role.  
+6. Optional: create grant `identity.admin` or use role permissions.  
+7. Switch active tenant to new tenant; Identity lists refresh for that tenant context.  
+8. Foundation dump still works at `/admin/foundation`.
+
+**Acceptance criteria**
+
+- [x] Can create tenant, user, role, membership, grant from UI without curling APIs.
+- [x] No new backend routes; wrappers only call paths in `IdentityEndpointExtensions`.
+- [x] Validation errors from backend shown in UI (duplicate identifier, missing fields).
+- [x] Password field optional on create user; helper text: “Platform identity only — not a login portal.”
+- [x] Light + dark readable; forms use shared `Button` / inputs from UI-0.3.
+- [ ] Playwright or manual checklist: create tenant + user + membership happy path.
+
+---
+
 ## Phase 2 — Tool Registry UX (Mockups 24–27)
 
 **Engineering dependency:** Issue 22 (implemented)
 
-### UI-2.1: Tool, Skill & Connector Registry (`/tools`)
+### UI-2.1: Tool, Skill & Connector Registry (`/tools`) ✅ Implemented (gold)
 
 **Mockup:** 24
 
-- Tabbed registry: Tools | Skills | Connectors.
-- Compatibility scan action, dry-run indicators, risk level column.
+- Tabbed registry: Tools | Skills | Connectors (`?kind=` Tabs on unified Kind-column table).
+- Compatibility scan action, risk level column, KPI strip; Register tool disabled (create wizard deferred).
 
-### UI-2.2: Tool Definition Editor (`/tools/[artifactId]/edit`)
+### UI-2.2: Tool Definition Editor (`/tools/[artifactId]/edit`) ✅ Implemented (gold)
 
 **Mockup:** 25
 
-- Schema JSON editor, risk metadata, allowlists, validation preview.
-- Save draft / Mark ready actions.
+- Split Definition + Schema references (read-only schema wells); Mark ready / Publish / Validate / Dry-run wired.
+- Save draft disabled with Advanced note; detail route redirects to `/edit`.
 
-### UI-2.3: Connector Credential Boundary (`/connectors/[artifactId]`)
+### UI-2.3: Connector Credential Boundary (`/connectors/[artifactId]`) ✅ Implemented (gold)
 
 **Mockup:** 26
 
-- Reshell existing connector detail: scoped credential path diagram, write-disabled banner.
+- Capability `DataTable` + credential issuance `TraceTimeline` + secret Notice; write-disabled banner when applicable.
 
-### UI-2.4: Tool Run & Dry-Run Trace (`/tool-runs/[runId]`)
+### UI-2.4: Tool Run & Dry-Run Trace (`/tool-runs/[runId]`) ✅ Implemented (gold)
 
 **Mockup:** 27
 
-- Trace timeline, expected vs actual output, classification filter summary, audit links.
+- Trace timeline, expected vs actual summaries, gated Execute rail, AI Trace link; `/tool-runs` list for discoverability.
 
 ---
 
 ## Phase 3 — Agentic Platform UX (Mockups 28–36)
 
-**Blocked by:** Engineering Issues 23, 24, 25  
-**Do not implement interactive flows until backend accepts agent/workflow/team runs.**
+**Engineering dependency:** Issues 23–24 **implemented** (functional shells); Issue 25 **deferred** (teams).  
+**Do not invent new backend endpoints.** Reskin existing agent/workflow routes to mockup parity; keep teams as placeholders until Issue 25.
 
-| Issue | Route | Mockup |
-| --- | --- | --- |
-| UI-3.1 | `/agents/new` | 28 Agent builder |
-| UI-3.2 | `/agents/[agentKey]/configure` | 29 Advanced configuration |
-| UI-3.3 | `/agents/[agentKey]/test-run` | 30 Test run |
-| UI-3.4 | `/agent-runs`, `/agent-runs/[runId]` | 31 Runs explorer |
-| UI-3.5 | `/workflows/new`, `/workflows/[key]/edit` | 32 Workflow canvas (React Flow) |
-| UI-3.6 | `/workflows/[key]/publish` | 33 Publish risk review |
-| UI-3.7 | `/workflow-runs/[runId]` | 34 Safe mode trace |
-| UI-3.8 | `/agent-teams/new` | 35 Team builder |
-| UI-3.9 | `/agent-team-runs/[runId]` | 36 Delegation & consensus |
+| Issue | Route | Mockup | Codebase status |
+| --- | --- | --- | --- |
+| UI-3.1 | `/agents`, `/agents/new` | 28 Agent builder | **Gold** — registry KPIs + template/prompt Tabs |
+| UI-3.2 | `/agents/[agentKey]/configure` | 29 Advanced configuration | **Gold** — composition table + publish rail |
+| UI-3.3 | `/agents/[agentKey]/test-run` | 30 Test run | **Gold** — preview/test/gated execute + TraceTimeline |
+| UI-3.4 | `/agent-runs`, `/agent-runs/[runId]` | 31 Runs explorer | **Gold** — DataTable + KPI/timeline detail |
+| UI-3.5 | `/workflows/new`, `/workflows/[key]/edit` | 32 Workflow canvas | **Gold** — `@xyflow/react`; Save draft → create-version |
+| UI-3.6 | `/workflows/[key]/publish` | 33 Publish risk review | **Gold** — checks + mark-ready/publish/execute |
+| UI-3.7 | `/workflow-runs`, `/workflow-runs/[runId]` | 34 Safe mode trace | **Gold** — list + safe-mode TraceTimeline |
+| UI-3.8 | `/agent-teams` | 35 Team builder | PlaceholderPage (Issue 25) |
+| UI-3.9 | `/agent-team-runs/[runId]` | 36 Delegation & consensus | PlaceholderPage (Issue 25) |
 
-**Placeholder rule until backend ready:** show mockup screenshot, architecture summary, link to Issue 23/24/25 plan.
+**Placeholder rule for Issue 25 only:** show mockup screenshot, architecture summary, link to Issue 25. Do **not** replace working Issue 23–24 agent/workflow pages with placeholders.
 
 ---
 
 ## Phase 4 — Governance Dashboard (Mockup 37)
 
-### UI-4.1: Governance & Audit Dashboard (`/governance`)
+### UI-4.1: Governance & Audit Dashboard (`/governance`) — **Done (gold)**
 
 **Blocked by:** UI-0.2  
 **Engineering dependency:** Issues 3, 19, 21  
 **Mockup:** 37
 
-**What to build**
+**Shipped**
 
-- KPI cards: approvals pending, audit events 24h, security events, trace exports.
-- Charts: trend lines for denials, policy violations (Recharts/Tremor).
-- Tables: recent audit records, security events with drill-through.
-- Read-only boundary verification widget (write actions = 0, connector write flags).
+- Shared `KpiCard` strip from live Issue 21 keys + honest Write actions = 0 SAFE.
+- Recharts `GovernanceTrendCharts` for TrendSupported keys (14-day window).
+- Card-row `DataTable` governance/security/high-risk events; `SidePanel` audit design checks + connector boundary.
+- Export audit summary disabled; Trace exports → `/ai-traces` Notice (no invent count).
 
 ---
 
-## Phase 5 — Digital Thread Timeline (Mockups 38–40)
+## Phase 5 — Digital Thread Timeline (Mockups 38–40) ✅ Implemented
 
-**Engineering dependency:** Issue 16.1 (proposed in mockup pack; add to main backlog when approved)
+**Engineering dependency:** Issue 16.1 + Issue 16.1b (shipped)
 
-### UI-5.1: Timeline Shell & Semantic Zoom Canvas
+### UI-5.1: Timeline Shell & Semantic Zoom Canvas ✅
 
 **Mockup:** 38–40 — `/digital-thread/timeline`
+**Status:** Implemented — ops-canvas SVG pan-zoom (`DigitalThreadCanvas`), minimap, filter bar (site/product-line disabled + tooltip), scrubber. Consumes Issue 16.1b `branches` / `minimap` / `events` / `summary` / `systems`.
 
-- Full-bleed canvas inside shell (deeper nav canvas treatment).
-- Zoom levels 5–25%, 25–200%, 200–600% with level-appropriate overlays.
-- Minimap, time scrubber, live/pause, fit-to-view.
-- Filter bar: time range, site, product line, system, event type, trust state.
+### UI-5.2: Event Inspector & Drill-Through ✅
 
-### UI-5.2: Event Inspector & Drill-Through
+**Status:** Implemented — `DigitalThreadEventInspector` SidePanel via `getDigitalThreadEventDetail`; drill links to `/explorers/360/`, `/ai-traces/`, `/artifacts/` when ids present (API fields only).
 
-- Right panel: selected event details, confidence, policy, DQ, evidence links.
-- Drill-through to `/explorers/360/`, `/ai-traces/`, `/artifacts/` with permission checks.
+### UI-5.3: Live Stream Client ✅
 
-### UI-5.3: Live Stream Client
+**Status:** Implemented — fetch ReadableStream SSE client (`digital-thread-stream.ts`); Live on timeline + Mission Control; pulse append without viewport reset.
 
-- SSE or SignalR client hook; incremental pulse animation without viewport reset.
-- Debounced refetch on zoom/pan/filter change.
-
-**Backend contract:** implement `DigitalThreadProjectionService` per `DIGITAL_THREAD_TIMELINE_SPEC.md` before UI-5.1 goes live.
+**Backend contract:** Issue 16.1b `DigitalThreadProjectionService` + `/api/admin/digital-thread/{branches,lineage,events/{id},minimap,events/stream}` (SVG renderer; no WebGL / SignalR).
 
 ---
 
@@ -524,6 +610,7 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 | UI-1.1 | UI-0.2, UI-0.3 | 1, 3, 18, 21 |
 | UI-1.4 | UI-0.3 | 8–10 |
 | UI-1.7 | UI-0.3 | 14, 15 |
+| UI-1.10 | UI-0.2, UI-0.3, UI-1.1 | 2 (APIs exist) |
 | UI-2.x | UI-0.3 | 22 |
 | UI-3.x | UI-0.4 | 23–25 |
 | UI-4.1 | UI-0.2 | 3, 21 |
@@ -534,16 +621,14 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 
 ## Suggested Execution Order
 
-1. **UI-0.1 → UI-0.3 → UI-0.2 → UI-0.4** (foundation sprint, ~1–2 weeks)
-2. **UI-1.1** command center (validates shell + KPIs)
-3. **UI-1.4** import wizard split (highest UX pain today)
-4. **UI-1.7, UI-1.9** chat + recommendations (demo-critical path)
-5. **UI-1.2–UI-1.3, UI-1.5–UI-1.6, UI-1.8** parallel reskin pass
-6. **UI-2.x** when Issue 22 UI parity needed
-7. **UI-4.1** governance dashboard
-8. **UI-5.x** after backend Issue 16.1 API exists
-9. **UI-3.x** locked until Issues 23–25 land
-10. **UI-6.x** continuous from Phase 1 onward
+1. ~~**UI-0.x foundation**~~ — **done**
+2. ~~**UI-1.x Operate & Model**~~ — **done (gold)**
+3. ~~**UI-2.x Tool registry**~~ — **done (gold)**
+4. ~~**UI-3.x** agent/workflow mockup parity~~ **done** (teams still Issue 25 placeholders)
+5. ~~**UI-4.1** governance dashboard charts + reskin~~ — **done (gold)**
+6. **UI-6.x** Playwright light+dark snapshots on gold routes (continuous)
+7. **UI-5.x** only after backend Issue 16.1 API exists
+8. **UI-3.8–3.9** only after Issue 25
 
 ---
 
@@ -555,6 +640,7 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 - [ ] E2E demo flow (`.docs/.prd/` + mockup `issues-1-18-e2e-flow` doc) completable entirely through reshelled UI.
 - [ ] No raw `slate-950` hardcoding in page files; tokens only.
 - [ ] Playwright smoke covers command center, imports hub, chat, recommendations, tools registry in both themes.
+- [ ] Identity Admin (UI-1.10): create tenant + user + membership from `/admin/identity` without API tools.
 - [ ] Digital thread timeline reaches mockup parity when Issue 16.1 backend is available.
 
 ---
@@ -564,28 +650,34 @@ Maps to implemented backend Issues 1–18.5. Reskin and restructure existing pag
 ```
 ETOS.Frontend/
   src/app/(shell)/layout.tsx
-  src/app/(shell)/page.tsx                    # command center
-  src/app/(shell)/admin/foundation/page.tsx   # moved admin dump
-  src/app/(shell)/imports/[batchId]/mapping/page.tsx
-  src/app/(shell)/digital-thread/timeline/page.tsx
-  src/components/shell/AppShell.tsx
-  src/components/shell/Sidebar.tsx
-  src/components/shell/Topbar.tsx
-  src/components/ui/*                         # design system
-  src/config/navigation.ts
-  src/config/theme-tokens.css                 # optional split from globals.css
+  src/app/(shell)/page.tsx                         # Mission Control (UI-1.1) — shipped
+  src/app/(shell)/admin/foundation/page.tsx        # shipped
+  src/app/(shell)/admin/identity/page.tsx          # UI-1.10 — shipped
+  src/app/(shell)/tools/[artifactId]/edit/page.tsx # UI-2.2 — shipped
+  src/app/(shell)/tool-runs/page.tsx               # UI-2.4 list — shipped
+  src/app/(shell)/tools/actions.ts                 # tool mark-ready/publish/scan/dry-run/execute — shipped
+  src/components/admin/IdentityCreateForms.tsx     # shipped
+  src/app/(shell)/imports/[batchId]/mapping/page.tsx  # shipped
+  src/app/(shell)/digital-thread/timeline/page.tsx # placeholder — shipped
+  src/components/shell/*                           # shipped
+  src/components/ui/*                              # 17 primitives — shipped
+  src/config/navigation.ts                         # shipped
 ```
+
+Phase 4 gold landed (UI-4.1 governance + Recharts). Phase 5 gold landed (UI-5.1–5.3 + Issue 16.1b). Next: UI-6.x visual QA / adjacent slate reskins; Issue 25 for interactive teams.
 
 ---
 
 ## Open Questions
 
-1. **Typography:** Inter (mockup) vs Geist (current)—product decision in UI-0.1.
+1. **Typography:** **Decided (UI-0.1)** — **Inter** via `next/font/google` (`--font-inter`), replacing Geist, for mockup parity and one product family.
 2. **Issue 16.1:** add Digital Thread Timeline to main `.docs/.prd/engineering-execution-issues.md` or track UI-only until backend scoped?
-3. **Auth UI:** mockups show avatar/tenant; full OIDC login shell deferred—use env-based dev identity until Issue 2 login UI scoped?
+3. **Auth UI:** mockups show avatar/tenant; full OIDC login shell deferred—use env-based / header identity. **UI-1.10** adds create + tenant switcher only, not login portal.
 4. **Global search:** mockup search is omnibar; backend unified search API does not exist—placeholder vs scoped artifact search?
-5. **Admin foundation:** keep on `/` for developers or move to `/admin/foundation` when UI-1.1 ships?
+5. **Admin foundation:** **Decided** — developer dump at `/admin/foundation`; `/` is Mission Control Timeline.
+6. **Identity create:** **Decided** — **UI-1.10** on `/admin/identity` using existing Issue 2 APIs — **shipped**.
+7. **Tool create wizard:** deferred — Register tool / Save draft stay disabled until a create POST UI is explicitly scoped.
 
 ---
 
-*Generated from mockup pack analysis against `ETOS.Frontend` as of Issue 22 backend scope. Update this backlog when engineering issues 23–25 and 16.1 are merged into the main PRD.*
+*Updated 2026-07-16 against `ETOS.Frontend` after Phase 0–5 gold (UI-0.x … UI-5.3 + Issue 16.1b). Next: UI-6.x / adjacent slate; Issue 25 for teams.*

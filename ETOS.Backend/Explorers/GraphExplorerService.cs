@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using ETOS.Backend.AiTrace;
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Decisions;
@@ -13,10 +13,11 @@ namespace ETOS.Backend.Explorers;
 
 public interface IGraphExplorerService
 {
-    Task<IReadOnlyCollection<GraphExplorerNodeSummaryResponse>> ListNodesAsync(
+    Task<GraphExplorerNodeListResponse> ListNodesAsync(
         GraphSpace? graphSpace,
         TrustState? trustState,
         string? objectType,
+        string? search,
         int? limit,
         string? policyKey,
         CancellationToken cancellationToken);
@@ -31,6 +32,21 @@ public interface IGraphExplorerService
         string? direction,
         string? policyKey,
         CancellationToken cancellationToken);
+
+    Task<GraphExplorerSubgraphResponse> GetSubgraphAsync(
+        Guid nodeId,
+        int? depth,
+        string? relationshipTypes,
+        string? direction,
+        GraphSpace? graphSpace,
+        TrustState? trustState,
+        int? limit,
+        string? policyKey,
+        CancellationToken cancellationToken);
+
+    Task<GraphExplorerPatternQueryResponse> QueryPatternAsync(
+        GraphExplorerPatternQueryRequest request,
+        CancellationToken cancellationToken);
 }
 
 public sealed class GraphExplorerService(
@@ -41,12 +57,18 @@ public sealed class GraphExplorerService(
     ExplorerPolicyFilter policyFilter) : IGraphExplorerService
 {
     private const int DefaultLimit = 25;
-    private const int MaxLimit = 100;
+    private const int MaxListLimit = 100;
+    private const int DefaultSubgraphLimit = 100;
+    private const int MaxSubgraphLimit = 250;
+    private const int DefaultDepth = 2;
+    private const int MaxDepth = 5;
+    private const int MaxPatternSeeds = 20;
 
-    public async Task<IReadOnlyCollection<GraphExplorerNodeSummaryResponse>> ListNodesAsync(
+    public async Task<GraphExplorerNodeListResponse> ListNodesAsync(
         GraphSpace? graphSpace,
         TrustState? trustState,
         string? objectType,
+        string? search,
         int? limit,
         string? policyKey,
         CancellationToken cancellationToken)
@@ -56,6 +78,7 @@ public sealed class GraphExplorerService(
             ExplorerPermissions.GraphExplorer,
             cancellationToken);
 
+        var resolvedLimit = NormalizeListLimit(limit);
         var resolvedSpace = graphSpace ?? GraphSpace.Trusted;
         var minimumTrust = trustState ?? (resolvedSpace == GraphSpace.Staging ? TrustState.Provisional : TrustState.Trusted);
         var graph = await graphMemoryService.ListGraphAsync(
@@ -66,28 +89,22 @@ public sealed class GraphExplorerService(
             null,
             cancellationToken);
 
-        var filteredNodes = graph.Nodes
+        var matched = graph.Nodes
             .Where(node => ExplorerPolicyFilter.MeetsTrustFilter(node, minimumTrust))
             .Where(node => string.IsNullOrWhiteSpace(objectType)
                 || string.Equals(node.ObjectType, objectType.Trim(), StringComparison.OrdinalIgnoreCase))
-            .Take(NormalizeLimit(limit))
+            .Where(node => MatchesSearch(node, search))
             .ToList();
 
-        var responses = new List<GraphExplorerNodeSummaryResponse>();
-        foreach (var node in filteredNodes)
+        var truncated = matched.Count > resolvedLimit;
+        var page = matched.Take(resolvedLimit).ToList();
+        var responses = new List<GraphExplorerNodeSummaryResponse>(page.Count);
+        foreach (var node in page)
         {
-            var filtered = await policyFilter.FilterNodeAsync(node, policyKey, cancellationToken);
-            responses.Add(new GraphExplorerNodeSummaryResponse(
-                node.NodeId,
-                node.ObjectType,
-                node.TrustState.ToString(),
-                node.GraphSpace.ToString(),
-                filtered.SafeSummary,
-                node.SourceReference?.SourceBatchId,
-                filtered.AllowedAttributes));
+            responses.Add(await MapNodeSummaryAsync(node, policyKey, cancellationToken));
         }
 
-        return responses;
+        return new GraphExplorerNodeListResponse(responses, truncated, resolvedLimit, matched.Count);
     }
 
     public async Task<GraphExplorerNodeDetailResponse> GetNodeAsync(
@@ -175,14 +192,445 @@ public sealed class GraphExplorerService(
         return responses;
     }
 
-    private static int NormalizeLimit(int? limit)
+    public async Task<GraphExplorerSubgraphResponse> GetSubgraphAsync(
+        Guid nodeId,
+        int? depth,
+        string? relationshipTypes,
+        string? direction,
+        GraphSpace? graphSpace,
+        TrustState? trustState,
+        int? limit,
+        string? policyKey,
+        CancellationToken cancellationToken)
+    {
+        var context = await RequirePermissionAsync(
+            "explorers.graph.nodes.subgraph",
+            ExplorerPermissions.GraphExplorer,
+            cancellationToken);
+
+        var resolvedDepth = NormalizeDepth(depth, DefaultDepth);
+        var resolvedLimit = NormalizeSubgraphLimit(limit);
+        var relTypes = ParseRelationshipTypes(relationshipTypes);
+        var allowedTrust = ResolveAllowedTrustStates(trustState);
+        var normalizedDirection = string.IsNullOrWhiteSpace(direction)
+            ? "out"
+            : direction.Trim().ToLowerInvariant();
+
+        _ = await graphMemoryService.GetNodeAsync(context.TenantId, nodeId, cancellationToken)
+            ?? throw new RequestValidationException("Graph node was not found.");
+
+        var traversal = await graphMemoryService.TraverseAsync(
+            new TraverseGraphRequest(
+                context.TenantId,
+                nodeId,
+                graphSpace,
+                resolvedDepth,
+                relTypes,
+                allowedTrust),
+            cancellationToken);
+
+        var relationships = FilterRelationshipsByDirection(traversal.Relationships, nodeId, normalizedDirection);
+        var nodeMap = traversal.Nodes.ToDictionary(node => node.NodeId);
+        if (!nodeMap.ContainsKey(traversal.StartNode.NodeId))
+        {
+            nodeMap[traversal.StartNode.NodeId] = traversal.StartNode;
+        }
+
+        var orderedNodeIds = new List<Guid> { nodeId };
+        foreach (var relationship in relationships)
+        {
+            if (!orderedNodeIds.Contains(relationship.FromNodeId))
+            {
+                orderedNodeIds.Add(relationship.FromNodeId);
+            }
+
+            if (!orderedNodeIds.Contains(relationship.ToNodeId))
+            {
+                orderedNodeIds.Add(relationship.ToNodeId);
+            }
+        }
+
+        foreach (var candidateId in nodeMap.Keys)
+        {
+            if (!orderedNodeIds.Contains(candidateId))
+            {
+                orderedNodeIds.Add(candidateId);
+            }
+        }
+
+        var truncated = orderedNodeIds.Count > resolvedLimit;
+        var keptIds = orderedNodeIds.Take(resolvedLimit).ToHashSet();
+        var nodeResponses = new List<GraphExplorerNodeSummaryResponse>();
+        foreach (var keptId in keptIds)
+        {
+            if (!nodeMap.TryGetValue(keptId, out var node))
+            {
+                continue;
+            }
+
+            nodeResponses.Add(await MapNodeSummaryAsync(node, policyKey, cancellationToken));
+        }
+
+        var edgeResponses = relationships
+            .Where(edge => keptIds.Contains(edge.FromNodeId) && keptIds.Contains(edge.ToNodeId))
+            .Select(MapEdge)
+            .ToList();
+
+        return new GraphExplorerSubgraphResponse(
+            nodeId,
+            nodeResponses,
+            edgeResponses,
+            truncated,
+            resolvedDepth,
+            resolvedLimit);
+    }
+
+    public async Task<GraphExplorerPatternQueryResponse> QueryPatternAsync(
+        GraphExplorerPatternQueryRequest request,
+        CancellationToken cancellationToken)
+    {
+        var context = await RequirePermissionAsync(
+            "explorers.graph.pattern_query",
+            ExplorerPermissions.GraphExplorer,
+            cancellationToken);
+
+        if (request.StartNodeId is null
+            && string.IsNullOrWhiteSpace(request.StartObjectType)
+            && string.IsNullOrWhiteSpace(request.Search))
+        {
+            throw new RequestValidationException(
+                "Pattern query requires startNodeId, startObjectType, or search.");
+        }
+
+        var resolvedDepth = NormalizeDepth(request.MaxDepth, DefaultDepth);
+        var resolvedLimit = NormalizeSubgraphLimit(request.Limit);
+        var resolvedSpace = ParseGraphSpace(request.GraphSpace) ?? GraphSpace.Trusted;
+        var parsedTrust = ParseTrustState(request.TrustState);
+        var minimumTrust = parsedTrust
+            ?? (resolvedSpace == GraphSpace.Staging ? TrustState.Provisional : TrustState.Trusted);
+        var allowedTrust = ResolveAllowedTrustStates(parsedTrust);
+        var relTypes = request.RelationshipTypes?
+            .Where(type => !string.IsNullOrWhiteSpace(type))
+            .Select(type => type.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var seeds = await ResolvePatternSeedsAsync(
+            context.TenantId,
+            request.StartNodeId,
+            request.StartObjectType,
+            request.Search,
+            resolvedSpace,
+            minimumTrust,
+            cancellationToken);
+
+        if (seeds.Count == 0)
+        {
+            return new GraphExplorerPatternQueryResponse([], [], false, resolvedDepth, resolvedLimit, 0);
+        }
+
+        var nodeMap = new Dictionary<Guid, BaseNode>();
+        var edgeMap = new Dictionary<Guid, BaseRelationship>();
+
+        foreach (var seed in seeds)
+        {
+            nodeMap[seed.NodeId] = seed;
+            var traversal = await graphMemoryService.TraverseAsync(
+                new TraverseGraphRequest(
+                    context.TenantId,
+                    seed.NodeId,
+                    resolvedSpace,
+                    resolvedDepth,
+                    relTypes is { Length: > 0 } ? relTypes : null,
+                    allowedTrust),
+                cancellationToken);
+
+            foreach (var node in traversal.Nodes)
+            {
+                nodeMap[node.NodeId] = node;
+            }
+
+            nodeMap[traversal.StartNode.NodeId] = traversal.StartNode;
+
+            foreach (var relationship in traversal.Relationships)
+            {
+                edgeMap[relationship.RelationshipId] = relationship;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.EndObjectType))
+        {
+            var endType = request.EndObjectType.Trim();
+            var endNodeIds = nodeMap.Values
+                .Where(node => string.Equals(node.ObjectType, endType, StringComparison.OrdinalIgnoreCase))
+                .Select(node => node.NodeId)
+                .ToHashSet();
+            var seedIds = seeds.Select(seed => seed.NodeId).ToHashSet();
+
+            if (endNodeIds.Count == 0)
+            {
+                // No end-type match: return seeds only.
+                edgeMap.Clear();
+                nodeMap = nodeMap
+                    .Where(pair => seedIds.Contains(pair.Key))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value);
+            }
+            else
+            {
+                var keepNodes = new HashSet<Guid>(seedIds);
+                keepNodes.UnionWith(endNodeIds);
+                foreach (var edge in edgeMap.Values)
+                {
+                    if (keepNodes.Contains(edge.FromNodeId) || keepNodes.Contains(edge.ToNodeId))
+                    {
+                        keepNodes.Add(edge.FromNodeId);
+                        keepNodes.Add(edge.ToNodeId);
+                    }
+                }
+
+                edgeMap = edgeMap
+                    .Where(pair => keepNodes.Contains(pair.Value.FromNodeId) && keepNodes.Contains(pair.Value.ToNodeId))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value);
+                nodeMap = nodeMap
+                    .Where(pair => keepNodes.Contains(pair.Key))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value);
+            }
+        }
+
+        var orderedNodes = nodeMap.Values
+            .OrderBy(node => seeds.Any(seed => seed.NodeId == node.NodeId) ? 0 : 1)
+            .ThenBy(node => node.ObjectType, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var truncated = orderedNodes.Count > resolvedLimit;
+        var keptNodes = orderedNodes.Take(resolvedLimit).ToList();
+        var keptIds = keptNodes.Select(node => node.NodeId).ToHashSet();
+
+        var nodeResponses = new List<GraphExplorerNodeSummaryResponse>(keptNodes.Count);
+        foreach (var node in keptNodes)
+        {
+            nodeResponses.Add(await MapNodeSummaryAsync(node, request.PolicyKey, cancellationToken));
+        }
+
+        var edgeResponses = edgeMap.Values
+            .Where(edge => keptIds.Contains(edge.FromNodeId) && keptIds.Contains(edge.ToNodeId))
+            .Select(MapEdge)
+            .ToList();
+
+        return new GraphExplorerPatternQueryResponse(
+            nodeResponses,
+            edgeResponses,
+            truncated,
+            resolvedDepth,
+            resolvedLimit,
+            seeds.Count);
+    }
+
+    private async Task<IReadOnlyList<BaseNode>> ResolvePatternSeedsAsync(
+        Guid tenantId,
+        Guid? startNodeId,
+        string? startObjectType,
+        string? search,
+        GraphSpace graphSpace,
+        TrustState minimumTrust,
+        CancellationToken cancellationToken)
+    {
+        if (startNodeId is Guid seedId)
+        {
+            var seed = await graphMemoryService.GetNodeAsync(tenantId, seedId, cancellationToken)
+                ?? throw new RequestValidationException("Pattern start node was not found.");
+            return [seed];
+        }
+
+        var graph = await graphMemoryService.ListGraphAsync(
+            tenantId,
+            graphSpace,
+            null,
+            null,
+            null,
+            cancellationToken);
+
+        return graph.Nodes
+            .Where(node => ExplorerPolicyFilter.MeetsTrustFilter(node, minimumTrust))
+            .Where(node => string.IsNullOrWhiteSpace(startObjectType)
+                || string.Equals(node.ObjectType, startObjectType.Trim(), StringComparison.OrdinalIgnoreCase))
+            .Where(node => MatchesSearch(node, search))
+            .Take(MaxPatternSeeds)
+            .ToList();
+    }
+
+    private async Task<GraphExplorerNodeSummaryResponse> MapNodeSummaryAsync(
+        BaseNode node,
+        string? policyKey,
+        CancellationToken cancellationToken)
+    {
+        var filtered = await policyFilter.FilterNodeAsync(node, policyKey, cancellationToken);
+        return new GraphExplorerNodeSummaryResponse(
+            node.NodeId,
+            node.ObjectType,
+            node.TrustState.ToString(),
+            node.GraphSpace.ToString(),
+            filtered.SafeSummary,
+            node.SourceReference?.SourceBatchId,
+            filtered.AllowedAttributes);
+    }
+
+    private static GraphExplorerSubgraphEdgeResponse MapEdge(BaseRelationship relationship)
+    {
+        var summary = relationship.Attributes.TryGetValue("safeSummary", out var value) && !string.IsNullOrWhiteSpace(value)
+            ? value.Trim()
+            : $"{relationship.RelationshipType} relationship.";
+        return new GraphExplorerSubgraphEdgeResponse(
+            relationship.RelationshipId,
+            relationship.RelationshipType,
+            relationship.FromNodeId,
+            relationship.ToNodeId,
+            relationship.TrustState.ToString(),
+            summary);
+    }
+
+    private static IReadOnlyCollection<BaseRelationship> FilterRelationshipsByDirection(
+        IReadOnlyCollection<BaseRelationship> relationships,
+        Guid focusNodeId,
+        string normalizedDirection)
+    {
+        // Neo4j GraphMemory traverse is outgoing-path oriented; "out"/"both" return traversal edges.
+        if (normalizedDirection is "both" or "out")
+        {
+            return relationships;
+        }
+
+        if (normalizedDirection == "in")
+        {
+            return relationships
+                .Where(relationship => relationship.ToNodeId == focusNodeId)
+                .ToList();
+        }
+
+        return relationships;
+    }
+
+    private static bool MatchesSearch(BaseNode node, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            return true;
+        }
+
+        var term = search.Trim();
+        if (node.NodeId.ToString().Contains(term, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (node.ObjectType.Contains(term, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var summary = ExplorerPolicyFilter.ResolveSafeSummary(node);
+        if (summary.Contains(term, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        foreach (var attribute in node.Attributes)
+        {
+            if (!string.IsNullOrWhiteSpace(attribute.Value)
+                && attribute.Value.Contains(term, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static IReadOnlyCollection<string>? ParseRelationshipTypes(string? relationshipTypes)
+    {
+        if (string.IsNullOrWhiteSpace(relationshipTypes))
+        {
+            return null;
+        }
+
+        var parsed = relationshipTypes
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(type => !string.IsNullOrWhiteSpace(type))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        return parsed.Length == 0 ? null : parsed;
+    }
+
+    private static GraphSpace? ParseGraphSpace(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        return Enum.TryParse<GraphSpace>(value.Trim(), ignoreCase: true, out var parsed)
+            ? parsed
+            : throw new RequestValidationException($"Unknown graphSpace '{value}'.");
+    }
+
+    private static TrustState? ParseTrustState(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        return Enum.TryParse<TrustState>(value.Trim(), ignoreCase: true, out var parsed)
+            ? parsed
+            : throw new RequestValidationException($"Unknown trustState '{value}'.");
+    }
+
+    private static IReadOnlyCollection<TrustState> ResolveAllowedTrustStates(TrustState? trustState)
+    {
+        if (trustState is null)
+        {
+            return [TrustState.Trusted, TrustState.Provisional];
+        }
+
+        return trustState.Value switch
+        {
+            TrustState.Trusted => [TrustState.Trusted],
+            TrustState.Provisional => [TrustState.Provisional, TrustState.Trusted],
+            TrustState.Unverified => [TrustState.Unverified, TrustState.Provisional, TrustState.Trusted],
+            TrustState.Conflicted => [TrustState.Conflicted, TrustState.Trusted, TrustState.Provisional],
+            _ => [TrustState.Trusted, TrustState.Provisional]
+        };
+    }
+
+    private static int NormalizeListLimit(int? limit)
     {
         if (limit is null or <= 0)
         {
             return DefaultLimit;
         }
 
-        return Math.Min(limit.Value, MaxLimit);
+        return Math.Min(limit.Value, MaxListLimit);
+    }
+
+    private static int NormalizeSubgraphLimit(int? limit)
+    {
+        if (limit is null or <= 0)
+        {
+            return DefaultSubgraphLimit;
+        }
+
+        return Math.Min(limit.Value, MaxSubgraphLimit);
+    }
+
+    private static int NormalizeDepth(int? depth, int fallback)
+    {
+        if (depth is null or <= 0)
+        {
+            return fallback;
+        }
+
+        return Math.Clamp(depth.Value, 1, MaxDepth);
     }
 
     private async Task<ActiveTenantContext> RequirePermissionAsync(

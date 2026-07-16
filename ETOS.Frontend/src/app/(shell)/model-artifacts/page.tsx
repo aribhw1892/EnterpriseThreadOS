@@ -1,15 +1,19 @@
 import {
   ApiResult,
-  AttributeSchemaVersion,
-  LifecycleVocabularyVersion,
   ModelPackageVersion,
-  OntologyVersion,
-  SemanticLayerVersion,
-  adminUserId,
   createCanonicalModelSeed,
   getOntologyLists,
-  selectedTenantId,
 } from "@/lib/etos-api";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { DataTable } from "@/components/ui/DataTable";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatusBadge } from "@/components/ui/Badge";
+import { Callout } from "@/components/ui/Notice";
+import { PillStack, SidePanel } from "@/components/ui/SidePanel";
+import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import type { ReactNode } from "react";
 
@@ -20,39 +24,16 @@ async function publishSeedModelPackage() {
 
   await createCanonicalModelSeed();
   revalidatePath("/model-artifacts");
+  revalidatePath("/model-artifacts/ontology");
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const normalized = status.toLowerCase();
-  const className =
-    normalized === "published"
-      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
-      : normalized === "draft"
-        ? "bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-200"
-        : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200";
-
-  return (
-    <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${className}`}>
-      {status}
-    </span>
-  );
-}
-
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4 text-sm text-slate-400">
-      {message}
-    </div>
-  );
-}
-
-function ErrorState({ error }: { error: string }) {
-  return (
-    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-      {error}
-    </div>
-  );
-}
+type PackageRow = {
+  id: string;
+  artifact: string;
+  version: string;
+  readiness: string;
+  health: string;
+};
 
 function ListSection<T>({
   title,
@@ -68,20 +49,21 @@ function ListSection<T>({
   renderItem: (item: T) => ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-      <div className="mb-5">
-        <h2 className="text-2xl font-semibold">{title}</h2>
-        <p className="mt-1 text-sm text-slate-400">{description}</p>
-      </div>
-
-      {result.error ? (
-        <ErrorState error={result.error} />
-      ) : result.data && result.data.length > 0 ? (
-        <div className="grid gap-3">{result.data.map(renderItem)}</div>
-      ) : (
-        <EmptyState message={emptyMessage} />
-      )}
-    </section>
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <p className="text-sm text-etos-ink-muted">{description}</p>
+      </CardHeader>
+      <CardContent>
+        {result.error ? (
+          <ErrorState error={result.error} />
+        ) : result.data && result.data.length > 0 ? (
+          <div className="grid gap-3">{result.data.map(renderItem)}</div>
+        ) : (
+          <EmptyState message={emptyMessage} />
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -103,15 +85,15 @@ function VersionCard({
   footer?: ReactNode;
 }) {
   return (
-    <article key={id} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+    <article key={id} className="rounded-etos-card border border-etos-border-soft bg-etos-panel p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h3 className="font-semibold">{title}</h3>
-          <p className="mt-1 text-sm text-slate-400">{subtitle}</p>
+          <h3 className="font-semibold text-etos-ink">{title}</h3>
+          <p className="mt-1 text-sm text-etos-ink-muted">{subtitle}</p>
         </div>
         <StatusBadge status={status} />
       </div>
-      <div className="mt-3 grid gap-1 text-xs text-slate-500">
+      <div className="mt-3 grid gap-1 text-xs text-etos-ink-subtle">
         <p>{summary ?? "No summary."}</p>
         <p>{new Date(createdAt).toLocaleString()}</p>
         {footer}
@@ -120,177 +102,253 @@ function VersionCard({
   );
 }
 
-function OntologyCard(version: OntologyVersion) {
-  return (
-    <VersionCard
-      key={version.id}
-      id={version.id}
-      title={`${version.key} ${version.versionLabel}`}
-      subtitle={`${version.objectTypeCount} object types, ${version.relationshipTypeCount} relationships, ${version.bomRelationshipCount} BOM definitions`}
-      status={version.state}
-      summary={version.summary}
-      createdAt={version.createdAt}
-    />
-  );
-}
-
-function SemanticLayerCard(version: SemanticLayerVersion) {
-  return (
-    <VersionCard
-      key={version.id}
-      id={version.id}
-      title={`${version.key} ${version.versionLabel}`}
-      subtitle={`Ontology ${version.ontologyVersionLabel ?? version.ontologyVersionId}`}
-      status={version.state}
-      summary={version.summary}
-      createdAt={version.createdAt}
-    />
-  );
-}
-
-function LifecycleCard(version: LifecycleVocabularyVersion) {
-  return (
-    <VersionCard
-      key={version.id}
-      id={version.id}
-      title={`${version.key} ${version.versionLabel}`}
-      subtitle={`${version.stateCount} states, ${version.transitionCount} transitions`}
-      status={version.state}
-      summary={version.summary}
-      createdAt={version.createdAt}
-    />
-  );
-}
-
-function AttributeSchemaCard(version: AttributeSchemaVersion) {
-  return (
-    <VersionCard
-      key={version.id}
-      id={version.id}
-      title={`${version.key} ${version.versionLabel}`}
-      subtitle={`${version.attributeCount} attributes for ontology ${version.ontologyVersionLabel ?? version.ontologyVersionId}`}
-      status={version.state}
-      summary={version.summary}
-      createdAt={version.createdAt}
-    />
-  );
-}
-
-function ModelPackageCard(version: ModelPackageVersion) {
-  return (
-    <VersionCard
-      key={version.id}
-      id={version.id}
-      title={`${version.name} ${version.versionLabel}`}
-      subtitle={version.key}
-      status={version.state}
-      summary={version.summary}
-      createdAt={version.createdAt}
-      footer={
-        <>
-          <p>Ontology: {version.ontologyVersionLabel ?? version.ontologyVersionId}</p>
-          <p>Semantic layer: {version.semanticLayerVersionLabel ?? version.semanticLayerVersionId}</p>
-          <p>Lifecycle: {version.lifecycleVocabularyVersionLabel ?? version.lifecycleVocabularyVersionId}</p>
-          <p>Attributes: {version.attributeSchemaVersionLabel ?? version.attributeSchemaVersionId}</p>
-        </>
-      }
-    />
-  );
-}
-
 export default async function ModelArtifactsPage() {
   const lists = await getOntologyLists();
   const activePackage = lists.activeModelPackage.data;
+  const ontology = lists.ontologyVersions.data?.[0];
+  const semantic = lists.semanticLayers.data?.[0];
+
+  const packageRows: PackageRow[] = activePackage
+    ? [
+        {
+          id: "ontology",
+          artifact: "OntologyVersion",
+          version: activePackage.ontologyVersionLabel ?? "—",
+          readiness: ontology?.state ?? "Published",
+          health: ontology
+            ? `${ontology.objectTypeCount} object types · ${ontology.relationshipTypeCount} relationships`
+            : "Bound in package",
+        },
+        {
+          id: "semantic",
+          artifact: "SemanticLayerVersion",
+          version: activePackage.semanticLayerVersionLabel ?? "—",
+          readiness: semantic?.state ?? "Published",
+          health: "AI descriptions complete",
+        },
+        {
+          id: "package",
+          artifact: "ModelPackageVersion",
+          version: activePackage.versionLabel,
+          readiness: activePackage.state,
+          health: "Bound to new import batches",
+        },
+        {
+          id: "lifecycle",
+          artifact: "LifecycleVocabularyVersion",
+          version: activePackage.lifecycleVocabularyVersionLabel ?? "—",
+          readiness: "Seeded",
+          health: "Approval-aware transitions",
+        },
+        {
+          id: "attributes",
+          artifact: "AttributeSchemaVersion",
+          version: activePackage.attributeSchemaVersionLabel ?? "—",
+          readiness: "Seeded",
+          health: "Search + AI metadata",
+        },
+      ]
+    : [];
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto grid max-w-7xl gap-8">
-        <header className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">
-            EnterpriseThreadOS
-          </p>
-          <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight">Canonical Model Artifacts</h1>
-              <p className="mt-3 max-w-3xl text-slate-300">
-                Draft, preview, publish, and inspect tenant ontology versions, semantic graph mappings,
-                lifecycle vocabularies, attribute schemas, and model packages.
-              </p>
-            </div>
+    <main className="px-6 py-8 lg:px-8">
+      <PageHeader
+        title="Model package & reference seed"
+        description="Publish and inspect the active manufacturing reference package extracted from platform core assumptions."
+        actions={
+          <>
             <form action={publishSeedModelPackage}>
-              <button
-                type="submit"
-                className="rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
-              >
+              <Button type="submit" variant="primary">
                 Create seed model package
-              </button>
+              </Button>
             </form>
-          </div>
-          <div className="mt-5 grid gap-2 text-xs text-slate-500 md:grid-cols-2">
-            <p>Admin user: {adminUserId}</p>
-            <p>Tenant: {selectedTenantId}</p>
-          </div>
-        </header>
+            <Link href="/model-artifacts/ontology">
+              <Button variant="ghost">View dependencies</Button>
+            </Link>
+          </>
+        }
+      />
 
-        <section className="rounded-3xl border border-cyan-400/30 bg-cyan-400/10 p-6">
-          <h2 className="text-2xl font-semibold">Active Published Package</h2>
-          {lists.activeModelPackage.error ? (
-            <div className="mt-4">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Active package</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {lists.activeModelPackage.error ? (
               <ErrorState error={lists.activeModelPackage.error} />
-            </div>
-          ) : activePackage ? (
-            <div className="mt-4">
-              {ModelPackageCard(activePackage)}
-            </div>
-          ) : (
-            <div className="mt-4">
-              <EmptyState message="No published model package is active yet." />
-            </div>
-          )}
-        </section>
+            ) : activePackage ? (
+              <>
+                <Callout title={activePackage.key} variant="info">
+                  contains ontology, semantic layer, import/query profiles, capability
+                  seeds, business policies, optimization objectives, agent templates, and
+                  demo fixtures.
+                </Callout>
+                <div className="my-4 h-px bg-etos-border" />
+                <DataTable<PackageRow>
+                  rows={packageRows}
+                  rowKey={(row) => row.id}
+                  columns={[
+                    {
+                      key: "artifact",
+                      header: "Artifact",
+                      render: (row) => row.artifact,
+                    },
+                    {
+                      key: "version",
+                      header: "Version",
+                      render: (row) => (
+                        <span className="text-etos-ink-muted">{row.version}</span>
+                      ),
+                    },
+                    {
+                      key: "readiness",
+                      header: "Readiness",
+                      render: (row) => <StatusBadge status={row.readiness} />,
+                    },
+                    {
+                      key: "health",
+                      header: "Dependency health",
+                      render: (row) => (
+                        <span className="text-xs text-etos-ink-subtle">{row.health}</span>
+                      ),
+                    },
+                  ]}
+                />
+              </>
+            ) : (
+              <EmptyState message="No published model package is active yet. Create a seed package." />
+            )}
+          </CardContent>
+        </Card>
 
-        <div className="grid gap-6 xl:grid-cols-2">
+        <SidePanel title="Package boundaries">
+          <PillStack
+            items={[
+              { label: "Platform core", value: "Generic", variant: "neutral" },
+              { label: "Ontology brain", value: "Domain meaning", variant: "info" },
+              { label: "Capabilities", value: "Outcomes", variant: "purple" },
+              { label: "Policies", value: "Constraints", variant: "warning" },
+              { label: "Agent templates", value: "Patterns", variant: "teal" },
+            ]}
+          />
+          <div className="mt-4 rounded-xl border-l-4 border-etos-info-border bg-etos-info-bg/30 p-3 text-xs text-etos-ink">
+            New imports bind to the active published package at batch creation time.
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/capabilities">
+              <Button variant="ghost">Capabilities</Button>
+            </Link>
+            <Link href="/business-policies">
+              <Button variant="ghost">Policies</Button>
+            </Link>
+          </div>
+        </SidePanel>
+      </div>
+
+      <details className="mt-6 rounded-etos-card border border-etos-border bg-etos-panel-muted p-4">
+        <summary className="cursor-pointer text-sm font-extrabold text-etos-ink">
+          Advanced / Debug — version lists
+        </summary>
+        <div className="mt-4 grid gap-6 xl:grid-cols-2">
           <ListSection
-            title="Ontology Versions"
+            title="Ontology versions"
             description="Canonical object types, semantic relationships, and BOM relationship metadata."
             result={lists.ontologyVersions}
             emptyMessage="No ontology versions have been created."
-            renderItem={OntologyCard}
+            renderItem={(version) => (
+              <VersionCard
+                key={version.id}
+                id={version.id}
+                title={`${version.key} ${version.versionLabel}`}
+                subtitle={`${version.objectTypeCount} object types, ${version.relationshipTypeCount} relationships`}
+                status={version.state}
+                summary={version.summary}
+                createdAt={version.createdAt}
+              />
+            )}
           />
-
           <ListSection
-            title="Semantic Layers"
+            title="Semantic layers"
             description="Graph memory mapping metadata for canonical object and relationship names."
             result={lists.semanticLayers}
             emptyMessage="No semantic layer versions have been created."
-            renderItem={SemanticLayerCard}
+            renderItem={(version) => (
+              <VersionCard
+                key={version.id}
+                id={version.id}
+                title={`${version.key} ${version.versionLabel}`}
+                subtitle={`Ontology ${version.ontologyVersionLabel ?? version.ontologyVersionId}`}
+                status={version.state}
+                summary={version.summary}
+                createdAt={version.createdAt}
+              />
+            )}
           />
-
           <ListSection
-            title="Lifecycle Vocabularies"
+            title="Lifecycle vocabularies"
             description="Normalized lifecycle states and approval-aware transitions."
             result={lists.lifecycleVocabularies}
             emptyMessage="No lifecycle vocabulary versions have been created."
-            renderItem={LifecycleCard}
+            renderItem={(version) => (
+              <VersionCard
+                key={version.id}
+                id={version.id}
+                title={`${version.key} ${version.versionLabel}`}
+                subtitle={`${version.stateCount} states, ${version.transitionCount} transitions`}
+                status={version.state}
+                summary={version.summary}
+                createdAt={version.createdAt}
+              />
+            )}
           />
-
           <ListSection
-            title="Attribute Schemas"
+            title="Attribute schemas"
             description="Tenant-safe attribute definitions with validation, permissions, search, and AI metadata."
             result={lists.attributeSchemas}
             emptyMessage="No attribute schema versions have been created."
-            renderItem={AttributeSchemaCard}
+            renderItem={(version) => (
+              <VersionCard
+                key={version.id}
+                id={version.id}
+                title={`${version.key} ${version.versionLabel}`}
+                subtitle={`${version.attributeCount} attributes`}
+                status={version.state}
+                summary={version.summary}
+                createdAt={version.createdAt}
+              />
+            )}
           />
         </div>
-
-        <ListSection
-          title="Model Packages"
-          description="Published packages bind ontology, semantic layer, lifecycle, and attributes for later imports and graph records."
-          result={lists.modelPackages}
-          emptyMessage="No model package versions have been created."
-          renderItem={ModelPackageCard}
-        />
-      </div>
+        <div className="mt-6">
+          <ListSection
+            title="Model packages"
+            description="Published packages bind ontology, semantic layer, lifecycle, and attributes."
+            result={lists.modelPackages}
+            emptyMessage="No model package versions have been created."
+            renderItem={(version: ModelPackageVersion) => (
+              <VersionCard
+                key={version.id}
+                id={version.id}
+                title={`${version.name} ${version.versionLabel}`}
+                subtitle={version.key}
+                status={version.state}
+                summary={version.summary}
+                createdAt={version.createdAt}
+                footer={
+                  <>
+                    <p>Ontology: {version.ontologyVersionLabel ?? version.ontologyVersionId}</p>
+                    <p>
+                      Semantic:{" "}
+                      {version.semanticLayerVersionLabel ?? version.semanticLayerVersionId}
+                    </p>
+                  </>
+                }
+              />
+            )}
+          />
+        </div>
+      </details>
     </main>
   );
 }
