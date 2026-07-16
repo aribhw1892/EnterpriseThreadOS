@@ -220,7 +220,7 @@ public sealed class AiTraceTests
         IGraphMemoryService graphMemoryService,
         IClassificationPolicyService? policyService = null)
     {
-        return new GovernedQueryService(
+        return DocumentMemoryTestSupport.CreateGovernedQueryService(
             dbContext,
             new StaticTenantContextResolver(context),
             new AllowAllPermissionService(),

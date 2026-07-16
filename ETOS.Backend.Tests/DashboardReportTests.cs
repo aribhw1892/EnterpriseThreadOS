@@ -380,7 +380,7 @@ public sealed class DashboardReportTests
     {
         var permissions = permissionService ?? new AllowAllPermissionService();
         var audit = auditRecorder ?? new RecordingAuditRecorder();
-        var governedQueryService = new GovernedQueryService(
+        var governedQueryService = DocumentMemoryTestSupport.CreateGovernedQueryService(
             dbContext,
             new StaticTenantContextResolver(context),
             permissions,
@@ -419,7 +419,7 @@ public sealed class DashboardReportTests
             new AllowAllPermissionService(),
             new RecordingDenialRecorder(),
             new RecordingAuditRecorder(),
-            new GovernedQueryService(
+            DocumentMemoryTestSupport.CreateGovernedQueryService(
                 dbContext,
                 new StaticTenantContextResolver(context),
                 new AllowAllPermissionService(),

@@ -165,10 +165,7 @@ public static class EnterpriseThreadPlatform
         services.AddScoped<IImportService, ImportService>();
         services.AddScoped<IIdentityResolutionService, IdentityResolutionService>();
         services.AddScoped<IDataQualityIssueService, DataQualityIssueService>();
-        services.AddScoped<IDocumentFileStorage, LocalDocumentFileStorage>();
-        services.AddScoped<IDocumentVectorIndexingService, DisabledDocumentVectorIndexingService>();
-        services.AddScoped<ICadParsingPlaceholder, DisabledCadParsingPlaceholder>();
-        services.AddScoped<IDocumentService, DocumentService>();
+        services.AddEnterpriseThreadDocumentMemory(configuration);
         services.AddScoped<IGovernedQueryService, GovernedQueryService>();
         services.AddScoped<IAiTraceRecorder, AiTraceRecorder>();
         services.AddScoped<IAiTraceService, AiTraceService>();

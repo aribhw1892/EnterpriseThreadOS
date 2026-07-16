@@ -338,7 +338,7 @@ public sealed class RecommendationTests
     private static GovernedChatService CreateChatService(EnterpriseThreadDbContext dbContext, TestContext context)
     {
         var graphMemory = new RecordingGraphMemoryService(context.GraphNodeId);
-        var governedQueryService = new GovernedQueryService(
+        var governedQueryService = DocumentMemoryTestSupport.CreateGovernedQueryService(
             dbContext,
             new StaticTenantContextResolver(context),
             new AllowAllPermissionService(),

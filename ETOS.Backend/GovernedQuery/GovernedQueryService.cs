@@ -2,12 +2,14 @@ using System.Text.Json;
 using ETOS.Backend.AiTrace;
 using ETOS.Backend.Classification;
 using ETOS.Backend.Documents;
+using ETOS.Backend.Documents.Vector;
 using ETOS.Backend.Governance;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Infrastructure.Persistence;
 using ETOS.Backend.Ontology;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ETOS.Backend.GovernedQuery;
 
@@ -31,7 +33,9 @@ public sealed class GovernedQueryService(
     IGraphMemoryService graphMemoryService,
     IClassificationPolicyService classificationPolicyService,
     IAiTraceRecorder aiTraceRecorder,
-    IModelPackageContextResolver modelPackageContextResolver) : IGovernedQueryService
+    IModelPackageContextResolver modelPackageContextResolver,
+    IDocumentVectorSearchService documentVectorSearchService,
+    IOptions<DocumentVectorIndexingOptions> documentVectorOptions) : IGovernedQueryService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -245,9 +249,16 @@ public sealed class GovernedQueryService(
             if (definition.RequiresPackageRelationshipTypes)
             {
                 strategy.RelationshipTypesJson = Serialize(relationshipTypes);
-                await dbContext.SaveChangesAsync(cancellationToken);
             }
 
+            strategy.AllowsVectorFallback = documentVectorOptions.Value.Enabled
+                && definition.Kind == QueryIntentKind.DocumentEvidenceContext;
+            if (documentVectorOptions.Value.Enabled)
+            {
+                strategy.Summary = "Trusted graph first, linked document metadata second, vector fallback when enabled.";
+            }
+
+            await dbContext.SaveChangesAsync(cancellationToken);
             await EnsureTenantPlaceholderAsync(context, cancellationToken);
             return (intent, strategy);
         }
@@ -277,12 +288,15 @@ public sealed class GovernedQueryService(
             VersionLabel = "v1",
             NormalizedVersionLabel = "V1",
             Name = $"{definition.Name} retrieval strategy",
-            Summary = "Trusted graph first, linked document metadata second. Semantic/vector fallback deferred.",
+            Summary = documentVectorOptions.Value.Enabled
+                ? "Trusted graph first, linked document metadata second, vector fallback when enabled."
+                : "Trusted graph first, linked document metadata second. Semantic/vector fallback deferred.",
             GraphSpace = GraphSpace.Trusted,
             RequiredTrustState = TrustState.Trusted,
             RelationshipTypesJson = Serialize(relationshipTypes),
             AllowsSemanticFallback = false,
-            AllowsVectorFallback = false,
+            AllowsVectorFallback = documentVectorOptions.Value.Enabled
+                && definition.Kind == QueryIntentKind.DocumentEvidenceContext,
             Source = QueryIntentSource.PlatformFixed,
             IsEnabled = true,
             CreatedByUserId = context.UserId,
@@ -393,6 +407,18 @@ public sealed class GovernedQueryService(
         {
             var documentCandidates = await LoadDocumentCandidatesAsync(tenantId, request.DocumentArtifactId.Value, candidates.Count, cancellationToken);
             candidates.AddRange(documentCandidates);
+        }
+
+        if (strategy.AllowsVectorFallback
+            && documentVectorSearchService.IsEnabled
+            && !string.IsNullOrWhiteSpace(request.QueryText))
+        {
+            var vectorHits = await documentVectorSearchService.SearchAsync(
+                tenantId,
+                request.QueryText!,
+                limit: 5,
+                cancellationToken);
+            candidates.AddRange(vectorHits.Select((hit, index) => FromVectorHit(hit, candidates.Count + index)));
         }
 
         return candidates
@@ -509,6 +535,21 @@ public sealed class GovernedQueryService(
             null,
             TrustState.Trusted,
             $"Document '{document.Title}' version '{version.VersionLabel}' metadata. Link evidence: {link?.EvidenceSummary ?? "direct document evidence"}");
+    }
+
+    private static RetrievedContextCandidate FromVectorHit(DocumentVectorSearchHit hit, int displayOrder)
+    {
+        return new RetrievedContextCandidate(
+            $"vector:{hit.DocumentArtifactId}:version:{hit.DocumentVersionId}",
+            hit.DocumentType,
+            hit.ClassificationKey,
+            null,
+            hit.DocumentArtifactId.ToString(),
+            "Vector",
+            displayOrder,
+            null,
+            TrustState.Trusted,
+            $"Vector retrieval match (score {hit.Score:F2}): {hit.SafeSummary}");
     }
 
     private static List<ContextAccessDecision> BuildAccessDecisions(

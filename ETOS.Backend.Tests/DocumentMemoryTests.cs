@@ -3,12 +3,14 @@ using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
 using ETOS.Backend.Documents;
+using ETOS.Backend.Documents.Extraction;
 using ETOS.Backend.Packages;
 using ETOS.Backend.Governance;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Imports;
 using ETOS.Backend.Infrastructure.Persistence;
+using ETOS.Backend.Tests.Fixtures;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -206,17 +208,15 @@ public sealed class DocumentMemoryTests
         TestContext context,
         IClassificationPolicyService? policyService = null)
     {
-        return new DocumentService(
+        return DocumentMemoryTestSupport.CreateDocumentService(
             dbContext,
             new StaticTenantContextResolver(context),
             new AllowAllPermissionService(),
             new RecordingDenialRecorder(),
             new RecordingAuditRecorder(),
             new RecordingDocumentFileStorage(),
-            new DisabledDocumentVectorIndexingService(),
-            new DisabledCadParsingPlaceholder(),
             new RecordingGraphMemoryService(),
-            policyService ?? new AllowAllPolicyService());
+            policyService);
     }
 
     private static IFormFile CreateTextFile(string fileName, string content)
@@ -301,12 +301,28 @@ public sealed class DocumentMemoryTests
 
     private sealed class RecordingDocumentFileStorage : IDocumentFileStorage
     {
+        private readonly Dictionary<string, byte[]> _files = new(StringComparer.OrdinalIgnoreCase);
+
         public async Task<StoredDocumentFile> StoreAsync(Guid tenantId, Guid documentId, string originalFileName, Stream content, CancellationToken cancellationToken)
         {
             using var memory = new MemoryStream();
             await content.CopyToAsync(memory, cancellationToken);
-            var checksum = Convert.ToHexString(SHA256.HashData(memory.ToArray())).ToLowerInvariant();
-            return new StoredDocumentFile($"{tenantId:N}/{documentId:N}/{Path.GetFileName(originalFileName)}", checksum, memory.Length);
+            var bytes = memory.ToArray();
+            var checksum = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+            var storageKey = $"{tenantId:N}/{documentId:N}/{Path.GetFileName(originalFileName)}";
+            _files[storageKey] = bytes;
+            return new StoredDocumentFile(storageKey, checksum, bytes.Length);
+        }
+
+        public Task<Stream> OpenReadAsync(string storageKey, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!_files.TryGetValue(storageKey, out var bytes))
+            {
+                throw new FileNotFoundException($"Recording storage key '{storageKey}' was not found.");
+            }
+
+            return Task.FromResult<Stream>(new MemoryStream(bytes, writable: false));
         }
     }
 

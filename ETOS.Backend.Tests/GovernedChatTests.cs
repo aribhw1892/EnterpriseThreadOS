@@ -276,7 +276,7 @@ public sealed class GovernedChatTests
         IAccessPermissionService? permissionService = null)
     {
         var permissions = permissionService ?? new AllowAllPermissionService();
-        var governedQueryService = new GovernedQueryService(
+        var governedQueryService = DocumentMemoryTestSupport.CreateGovernedQueryService(
             dbContext,
             new StaticTenantContextResolver(context),
             permissions,

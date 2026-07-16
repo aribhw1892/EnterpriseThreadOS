@@ -236,7 +236,8 @@ public sealed class AgentTemplateDefinitionTests
         var context = new ActiveTenantContext(tenantId, tenantId.ToString(), "Test tenant", userId);
         var artifacts = await seeder.EnsurePlatformArtifactsAsync(context, CancellationToken.None);
 
-        var intent = await dbContext.QueryIntentVersions.SingleOrDefaultAsync(item => item.TenantId == tenantId);
+        var intent = await dbContext.QueryIntentVersions.SingleOrDefaultAsync(
+            item => item.TenantId == tenantId && item.IntentKey == "object-360-context");
         if (intent is null)
         {
             intent = new QueryIntentVersion
@@ -258,7 +259,8 @@ public sealed class AgentTemplateDefinitionTests
             dbContext.QueryIntentVersions.Add(intent);
         }
 
-        var strategy = await dbContext.RetrievalStrategyVersions.SingleOrDefaultAsync(item => item.TenantId == tenantId);
+        var strategy = await dbContext.RetrievalStrategyVersions.SingleOrDefaultAsync(
+            item => item.TenantId == tenantId && item.StrategyKey == "object-360-trusted-graph-documents");
         if (strategy is null)
         {
             strategy = new RetrievalStrategyVersion

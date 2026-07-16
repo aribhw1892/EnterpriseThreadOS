@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>EnterpriseThreadOS — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 11364 nodes, 23179 edges, 626 communities. Commit: cae032d</p>
+<p class="subtitle">Generated from graphify knowledge graph: 11611 nodes, 23594 edges, 644 communities. Commit: e4a957b</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -69,6 +69,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
     <a href="#analysis-clustering">Analysis &amp; Clustering</a>
     <a href="#outputs-docs">Outputs &amp; Docs</a>
     <a href="#cli-skills">CLI &amp; Skill Installers</a>
+    <a href="#ingest-cache-update">Ingestion &amp; Updates</a>
     <a href="#serve-api">Serving API</a>
     <a href="#security-global">Security &amp; Global Graph</a>
     <a href="#tests-fixtures">Tests &amp; Fixtures</a>
@@ -77,7 +78,6 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
     <a href="#graph-bootstrap-service">Graph Bootstrap Service</a>
     <a href="#community-142">Community 142</a>
     <a href="#community-178">Community 178</a>
-    <a href="#classification-policy-management">Classification Policy Management</a>
     <a href="#other">Other</a>
 </div>
 
@@ -88,21 +88,23 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>788 nodes</small>")
+    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>789 nodes</small>")
     class EXTRACT_PIPELINE_5F350230 module;
-    BUILD_GRAPH_321CBB04("Graph Build<br/><small>642 nodes</small>")
+    BUILD_GRAPH_321CBB04("Graph Build<br/><small>647 nodes</small>")
     class BUILD_GRAPH_321CBB04 module;
-    ANALYSIS_CLUSTERING_C79796DA("Analysis &amp; Clustering<br/><small>151 nodes</small>")
+    ANALYSIS_CLUSTERING_C79796DA("Analysis &amp; Clustering<br/><small>160 nodes</small>")
     class ANALYSIS_CLUSTERING_C79796DA module;
     OUTPUTS_DOCS_ED82387C("Outputs &amp; Docs<br/><small>120 nodes</small>")
     class OUTPUTS_DOCS_ED82387C module;
-    CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>371 nodes</small>")
+    CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>390 nodes</small>")
     class CLI_SKILLS_9964CBB8 module;
-    SERVE_API_35EC8E86("Serving API<br/><small>681 nodes</small>")
+    INGEST_CACHE_UPDATE_FF457338("Ingestion &amp; Updates<br/><small>41 nodes</small>")
+    class INGEST_CACHE_UPDATE_FF457338 module;
+    SERVE_API_35EC8E86("Serving API<br/><small>669 nodes</small>")
     class SERVE_API_35EC8E86 module;
-    SECURITY_GLOBAL_5B9C6A04("Security &amp; Global Graph<br/><small>65 nodes</small>")
+    SECURITY_GLOBAL_5B9C6A04("Security &amp; Global Graph<br/><small>77 nodes</small>")
     class SECURITY_GLOBAL_5B9C6A04 module;
-    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>2520 nodes</small>")
+    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>2576 nodes</small>")
     class TESTS_FIXTURES_B84B1DCC module;
     ACCESS_AND_PERMISSION_MANAGEMENT_5AD7F096("Access and Permission Management<br/><small>120 nodes</small>")
     class ACCESS_AND_PERMISSION_MANAGEMENT_5AD7F096 module;
@@ -114,22 +116,20 @@ flowchart LR
     class COMMUNITY_142_4F58A044 module;
     COMMUNITY_178_FEA41A9A("Community 178<br/><small>101 nodes</small>")
     class COMMUNITY_178_FEA41A9A module;
-    CLASSIFICATION_POLICY_MANAGEMENT_67DB5928("Classification Policy Management<br/><small>101 nodes</small>")
-    class CLASSIFICATION_POLICY_MANAGEMENT_67DB5928 module;
-    OTHER_D0941E68("Other<br/><small>5393 nodes</small>")
+    OTHER_D0941E68("Other<br/><small>5610 nodes</small>")
     class OTHER_D0941E68 module;
     SERVE_API_35EC8E86 -->|contains x68| EXTRACT_PIPELINE_5F350230
     EXTRACT_PIPELINE_5F350230 -->|calls x55| SERVE_API_35EC8E86
     OTHER_D0941E68 -->|contains x50| COMMUNITY_142_4F58A044
-    CLASSIFICATION_POLICY_MANAGEMENT_67DB5928 -->|contains x50| COMMUNITY_178_FEA41A9A
-    CLASSIFICATION_POLICY_MANAGEMENT_67DB5928 -->|contains x50| OTHER_D0941E68
-    TESTS_FIXTURES_B84B1DCC -->|implements x45| OTHER_D0941E68
+    OTHER_D0941E68 -->|contains x50| COMMUNITY_178_FEA41A9A
     OTHER_D0941E68 -->|contains x40| BUILD_GRAPH_321CBB04
+    TESTS_FIXTURES_B84B1DCC -->|implements x34| OTHER_D0941E68
     OTHER_D0941E68 -->|implements x28| EXTRACT_PIPELINE_5F350230
-    CLI_SKILLS_9964CBB8 -->|calls x25| SERVE_API_35EC8E86
-    OTHER_D0941E68 -->|imports x19| TESTS_FIXTURES_B84B1DCC
+    CLI_SKILLS_9964CBB8 -->|calls x23| SERVE_API_35EC8E86
+    OTHER_D0941E68 -->|imports x22| TESTS_FIXTURES_B84B1DCC
     SERVE_API_35EC8E86 -->|contains x13| CLI_SKILLS_9964CBB8
     ACCESS_AND_PERMISSION_MANAGEMENT_5AD7F096 -->|inherits x9| OTHER_D0941E68
+    ANALYSIS_CLUSTERING_C79796DA -->|references x9| OTHER_D0941E68
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -146,23 +146,23 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Extraction Pipeline</td><td>788</td><td><code>18, 3, 21, 47, 46, 90, 102, 131, 175, 179, 333, 180, 186, 195, 219, 206, 221, 592, 231, 242, 257, 292, 293, 324, 329, 351, 352, 473, 474, 492, 620, 623, 517</code></td></tr><tr><td>Graph Build</td><td>642</td><td><code>12, 111, 28, 118, 134, 122, 124, 157, 184, 192, 218, 246, 249, 265, 307, 310, 594, 596, 598, 600, 339, 601, 535, 538, 540</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>151</td><td><code>129, 136, 137, 161, 171, 264, 200, 341, 610</code></td></tr><tr><td>Outputs &amp; Docs</td><td>120</td><td><code>74, 139, 266, 267, 385, 386, 435, 483, 490, 491, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 525, 544, 555, 556, 557, 558, 559</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>371</td><td><code>117, 70, 77, 84, 85, 108, 140, 170, 173, 177, 172, 238, 245, 234, 342, 597, 602, 489, 513, 519, 523, 524, 528, 529, 552, 553, 554, 585</code></td></tr><tr><td>Serving API</td><td>681</td><td><code>0, 15, 17, 30, 60, 94, 104, 107, 125, 126, 130, 138, 152, 163</code></td></tr><tr><td>Security &amp; Global Graph</td><td>65</td><td><code>57, 248, 312, 527</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>2520</td><td><code>6, 7, 10, 14, 167, 20, 23, 32, 31, 13, 35, 37, 83, 120, 54, 68, 61, 67, 9, 69, 116, 71, 73, 72, 81, 45, 82, 87, 89, 96, 100, 141, 110, 114, 123, 105, 133, 237, 309, 146, 147, 169, 155, 156, 158, 236, 165, 166, 201, 590, 181, 182, 164, 187, 197, 198, 199, 216, 208, 209, 210, 211, 148, 212, 225, 232, 343, 455, 595, 282, 132, 334, 346, 422, 605, 378, 379, 380, 424, 425, 426, 427, 428, 449, 450, 451, 452, 480</code></td></tr><tr><td>Access and Permission Management</td><td>120</td><td><code>5</code></td></tr><tr><td>Identity and Data Quality Configuration</td><td>108</td><td><code>38</code></td></tr><tr><td>Graph Bootstrap Service</td><td>102</td><td><code>52</code></td></tr><tr><td>Community 142</td><td>101</td><td><code>142</code></td></tr><tr><td>Community 178</td><td>101</td><td><code>178</code></td></tr><tr><td>Classification Policy Management</td><td>101</td><td><code>2</code></td></tr><tr><td>Other</td><td>5393</td><td><code>224, 4, 50, 19, 11, 8, 228, 253, 1, 22, 24, 25, 16, 26, 34, 36, 41, 39, 42, 43, 44, 277, 48, 49, 51, 53, 55, 56, 58, 59, 33, 62, 63, 64, 65, 66, 40, 80, 322, 75, 76, 78, 106, 432, 86, 88, 91, 92, 93, 95, 27, 29, 97, 98, 101, 99, 103, 109, 121, 79, 113, 115, 119, 127, 128, 135, 151, 143, 144, 145, 149, 150, 153, 154, 159, 162, 168, 326, 174, 176, 183, 185, 188, 189, 190, 191, 262, 323, 193, 194, 196, 345, 202, 204, 207, 213, 214, 215, 217, 112, 203, 205, 220, 222, 223, 226, 227, 247, 160, 229, 230, 233, 235, 239, 240, 241, 243, 244, 430, 431, 433, 456, 250, 251, 252, 254, 255, 256, 258, 259, 260, 261, 263, 313, 457, 591, 268, 269, 270, 271, 272, 273, 274, 275, 276, 278, 279, 280, 281, 283, 284, 285, 286, 287, 288, 289, 290, 291, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 308, 311, 593, 314, 315, 317, 318, 319, 320, 321, 340, 316, 325, 327, 328, 331, 332, 335, 336, 337, 338, 353, 330, 344, 347, 348, 349, 350, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 381, 382, 383, 384, 479, 599, 612, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 423, 429, 434, 604, 613, 616, 617, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 453, 454, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 475, 476, 477, 478, 481, 482, 603, 606, 607, 608, 614, 615, 484, 485, 486, 487, 488, 493, 609, 611, 618, 621, 622, 508, 509, 510, 511, 512, 514, 515, 516, 518, 520, 521, 522, 526, 530, 531, 532, 533, 534, 536, 537, 539, 541, 542, 543, 545, 546, 547, 548, 549, 550, 551, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 586, 587, 588, 589, 626, 627, 628</code></td></tr>
+      <tr><td>Extraction Pipeline</td><td>789</td><td><code>18, 21, 47, 46, 3, 90, 240, 102, 231, 175, 131, 327, 344, 179, 333, 180, 186, 195, 219, 206, 221, 592, 257, 292, 324, 329, 635, 638, 352, 473, 474, 642, 492, 620, 623, 517</code></td></tr><tr><td>Graph Build</td><td>647</td><td><code>12, 111, 28, 118, 134, 122, 124, 157, 184, 192, 218, 246, 249, 265, 307, 310, 594, 596, 598, 600, 339, 601, 535, 538, 540</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>160</td><td><code>161, 129, 136, 137, 171, 264, 200, 341, 610</code></td></tr><tr><td>Outputs &amp; Docs</td><td>120</td><td><code>74, 139, 266, 267, 385, 386, 435, 483, 490, 491, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 525, 544, 555, 556, 557, 558, 559</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>390</td><td><code>117, 70, 77, 108, 84, 85, 140, 170, 173, 177, 172, 238, 245, 234, 342, 597, 639, 602, 489, 513, 519, 523, 524, 528, 529, 552, 553, 554, 585</code></td></tr><tr><td>Ingestion &amp; Updates</td><td>41</td><td><code>293, 599</code></td></tr><tr><td>Serving API</td><td>669</td><td><code>0, 15, 17, 30, 60, 94, 104, 107, 125, 126, 130, 138, 152</code></td></tr><tr><td>Security &amp; Global Graph</td><td>77</td><td><code>57, 248, 312, 527</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>2576</td><td><code>6, 7, 10, 14, 167, 20, 23, 31, 35, 37, 163, 120, 54, 68, 32, 13, 61, 67, 9, 69, 71, 73, 72, 45, 81, 82, 87, 89, 83, 100, 96, 105, 114, 308, 110, 116, 132, 236, 123, 133, 237, 309, 343, 146, 147, 164, 155, 156, 158, 169, 165, 166, 141, 201, 160, 182, 187, 346, 197, 198, 199, 216, 208, 209, 210, 211, 212, 148, 181, 225, 232, 455, 595, 282, 334, 422, 605, 636, 637, 378, 379, 380, 424, 425, 426, 427, 428, 641, 449, 450, 451, 452, 480, 643</code></td></tr><tr><td>Access and Permission Management</td><td>120</td><td><code>5</code></td></tr><tr><td>Identity and Data Quality Configuration</td><td>108</td><td><code>38</code></td></tr><tr><td>Graph Bootstrap Service</td><td>102</td><td><code>52</code></td></tr><tr><td>Community 142</td><td>101</td><td><code>142</code></td></tr><tr><td>Community 178</td><td>101</td><td><code>178</code></td></tr><tr><td>Other</td><td>5610</td><td><code>2, 224, 4, 50, 19, 53, 11, 8, 228, 253, 1, 22, 16, 24, 26, 34, 36, 40, 41, 39, 43, 44, 277, 48, 49, 51, 55, 56, 58, 59, 33, 62, 63, 64, 65, 66, 80, 322, 75, 76, 78, 106, 432, 86, 88, 242, 91, 92, 95, 27, 29, 93, 97, 98, 101, 42, 99, 103, 25, 109, 121, 79, 113, 115, 119, 127, 205, 326, 128, 135, 151, 143, 144, 145, 149, 150, 153, 154, 159, 162, 168, 112, 174, 176, 183, 185, 188, 189, 190, 191, 262, 323, 193, 194, 196, 345, 348, 202, 204, 207, 213, 214, 215, 217, 203, 220, 222, 223, 226, 227, 247, 251, 351, 619, 229, 230, 233, 430, 235, 239, 241, 243, 244, 431, 433, 456, 457, 250, 252, 254, 255, 256, 258, 259, 260, 261, 263, 313, 590, 591, 613, 268, 269, 270, 271, 272, 273, 274, 275, 276, 278, 279, 280, 281, 283, 284, 285, 286, 287, 288, 289, 290, 291, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 311, 593, 624, 314, 315, 317, 318, 319, 320, 321, 340, 625, 629, 630, 316, 325, 328, 331, 332, 335, 336, 337, 338, 353, 631, 632, 633, 634, 330, 347, 349, 350, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 381, 382, 383, 384, 479, 612, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 423, 429, 434, 604, 616, 617, 640, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 453, 454, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 475, 476, 477, 478, 481, 482, 603, 606, 607, 608, 614, 615, 484, 485, 486, 487, 488, 493, 609, 611, 618, 621, 622, 508, 509, 510, 511, 512, 514, 515, 516, 518, 520, 521, 522, 526, 530, 531, 532, 533, 534, 536, 537, 539, 541, 542, 543, 545, 546, 547, 548, 549, 550, 551, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 586, 587, 588, 589, 626, 627, 628</code></td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Core Flow</h4>
-    <div class="arrow-chain">Outputs &amp; Docs -&gt; Extraction Pipeline -&gt; Serving API -&gt; CLI &amp; Skill Installers -&gt; Other -&gt; Community 142 -&gt; Graph Build</div>
+    <div class="arrow-chain">Ingestion &amp; Updates -&gt; Extraction Pipeline -&gt; Serving API -&gt; CLI &amp; Skill Installers -&gt; Other -&gt; Community 178 -&gt; Graph Build</div>
   </div>
 </div>
 <div class="grid">
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>11364 nodes · 23179 edges · 626 communities (496 shown, 130 thin omitted)</li>
-      <li>Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 130 edges (avg confidence: 0.65)</li>
+      <li>11611 nodes · 23594 edges · 644 communities (512 shown, 132 thin omitted)</li>
+      <li>Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 174 edges (avg confidence: 0.69)</li>
       <li>Token cost: 0 input · 0 output</li>
       <li>1. `EnterpriseThreadOS Implementation Issues` - 205 edges</li>
-      <li>2. `EnterpriseThreadOS Implementation Issues` - 167 edges</li>
+      <li>2. `EnterpriseThreadOS Implementation Issues` - 171 edges</li>
       <li>3. `missingContext()` - 153 edges</li>
     </ul>
   </div>
@@ -170,12 +170,12 @@ flowchart LR
 <hr>
 <!-- ====== 2. Extraction Pipeline ====== -->
 <h2 id="extract-pipeline">2. Extraction Pipeline</h2>
-<p>Extraction Pipeline groups implementation around imports, etosbackend, etosfrontend, import, mostly in ETOS.Backend/Imports/ImportService.cs, src/lib/etos-api.ts, app/imports/page.tsx. This section covers 788 nodes and 1684 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Extraction Pipeline groups implementation around imports, etosbackend, etosfrontend, import, mostly in ETOS.Backend/Imports/ImportService.cs, src/lib/etos-api.ts, app/imports/page.tsx. This section covers 789 nodes and 1685 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Extraction Pipeline (788 nodes, 1684 edges)
+    %% Section: Extraction Pipeline (789 nodes, 1685 edges)
     subgraph extract_pipeline_ETOS_Backend_Imports_ImportFile_f251b09d["ETOS.Backend/Imports/ImportFileParser.cs"]
         imports_importfileparser_iimportfileparser_5c239621("IImportFileParser<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
         imports_importfileparser_iimportfileparser_parse_6027d6bf("ParseAsync()<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
@@ -215,7 +215,7 @@ flowchart LR
     imports_importfileparser_csvimportfileparser_par_fe4c2b7b -->|calls| imports_importfileparser_csvimportfileparser_tor_e3c76ffe
     imports_importfileparser_csvimportfileparser_par_46bc524b -->|calls| imports_importfileparser_csvimportfileparser_tor_e3c76ffe
     imports_importfileparser_csvimportfileparser_rea_9a7d3f16 -->|calls| imports_importfileparser_csvimportfileparser_par_a627dd5c
-    %% Omitted for readability: 770 nodes, 0 edges
+    %% Omitted for readability: 771 nodes, 0 edges
     class imports_importfileparser_iimportfileparser_5c239621 klass;
     class imports_importfileparser_iimportfileparser_parse_6027d6bf async;
     class imports_importfileparser_csvimportfileparser_9ebfabdc klass;
@@ -491,7 +491,7 @@ flowchart LR
   <td>30</td>
   <td><code>ImportWizardContent()</code><br><small style="color:var(--muted)">components/import-wizard/ImportWizardContent.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">imports/pdm/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">imports/odoo/page.tsx</small></td>
+  <td><code>page.tsx</code><br><small style="color:var(--muted)">imports/odoo/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">imports/pdm/page.tsx</small></td>
   <td><code>getImportProfiles()</code><br><small style="color:var(--muted)">lib/import-wizard/import-config.server.ts</small><br><code>getImportSourceConfig()</code><br><small style="color:var(--muted)">lib/import-wizard/import-source-config.ts</small><br><code>getImportWizardBasePath()</code><br><small style="color:var(--muted)">lib/import-wizard/import-source-config.ts</small><br>+1 more</td>
   <td>ImportWizardContent() node in components/import-wizard/ImportWizardContent.tsx.</td>
 </tr>
@@ -505,7 +505,7 @@ flowchart LR
       <tr><td><code>ETOS.Backend/Imports/ImportService.cs</code></td><td>125 nodes</td></tr>
 <tr><td><code>src/lib/etos-api.ts</code></td><td>59 nodes</td></tr>
 <tr><td><code>app/imports/page.tsx</code></td><td>43 nodes</td></tr>
-<tr><td><code>.docs/.prd/issue-29-pdm-extract-transform-import.md</code></td><td>34 nodes</td></tr>
+<tr><td><code>.docs/.prd/issue-29-pdm-extract-transform-import.md</code></td><td>35 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportStructuralImportHelper.cs</code></td><td>28 nodes</td></tr>
 <tr><td><code>Imports/MappingSuggestions/PydanticAiMappingProvider.cs</code></td><td>25 nodes</td></tr>
 <tr><td><code>ETOS.Backend/Imports/ImportMappingLearningSignalEmitter.cs</code></td><td>24 nodes</td></tr>
@@ -514,19 +514,19 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x496, calls x362, contains x328, method x154. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x496, calls x362, contains x329, method x154. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 3. Graph Build ====== -->
 <h2 id="build-graph">3. Graph Build</h2>
-<p>Graph Build groups implementation around docs, etos, execution, engineering, mostly in .docs/.prd/engineering-execution-issues.md, etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md, ETOS.Backend/DataQuality/DataQualityService.cs. This section covers 642 nodes and 850 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Graph Build groups implementation around docs, etos, execution, engineering, mostly in .docs/.prd/engineering-execution-issues.md, etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md, ETOS.Backend/DataQuality/DataQualityService.cs. This section covers 647 nodes and 855 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Graph Build (642 nodes, 850 edges)
+    %% Section: Graph Build (647 nodes, 855 edges)
     subgraph build_graph_ETOS_Backend_DataQuality_DataQuality_014857cc["ETOS.Backend/DataQuality/DataQualityService.cs"]
         dataquality_dataqualityservice_dataqualityissues_c3a4fac1("DataQualityIssueService<br/><small>ETOS.Backend/DataQuality/DataQualityService.cs</small>")
         dataquality_dataqualityservice_dataqualityissues_679944cd("CreateIssueAsync()<br/><small>ETOS.Backend/DataQuality/DataQualityService.cs</small>")
@@ -571,7 +571,7 @@ flowchart LR
     dataquality_dataqualityservice_dataqualityissues_b8ca4c97 -->|calls| dataquality_dataqualityservice_dataqualityissues_7887ca03
     dataquality_dataqualityservice_dataqualityissues_b8ca4c97 -->|calls| dataquality_dataqualityservice_dataqualityissues_e08ec138
     dataquality_dataqualityservice_dataqualityissues_b8ca4c97 -->|calls| dataquality_dataqualityservice_dataqualityissues_8bfa3cfb
-    %% Omitted for readability: 624 nodes, 3 edges
+    %% Omitted for readability: 629 nodes, 3 edges
     class dataquality_dataqualityservice_dataqualityissues_c3a4fac1 klass;
     class dataquality_dataqualityservice_dataqualityissues_679944cd async;
     class dataquality_dataqualityservice_dataqualityissues_80be0db0 async;
@@ -613,14 +613,22 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
-  <td><code>Issue 28: Future Enterprise Action Framework Contracts</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-issues.md</small></td>
+  <td><code>Issue 19: Review Tasks, Task Chains, and Escalation Placeholders</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-issues.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Documentation node describing Issue 28: Future Enterprise Action Framework Contracts.</td>
+  <td>Documentation node describing Issue 19: Review Tasks, Task Chains, and Escalation Placeholders.</td>
 </tr>
 <tr>
   <td>2</td>
+  <td><code>Issue 25: Multi-Agent Teams, Delegation, and Consensus</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-issues.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Issue 25: Multi-Agent Teams, Delegation, and Consensus.</td>
+</tr>
+<tr>
+  <td>3</td>
   <td><code>engineering-execution-issues.with-digital-thread-timeline.md</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -628,7 +636,7 @@ flowchart LR
   <td>Documentation node describing engineering-execution-issues.with-digital-thread-timeline.md.</td>
 </tr>
 <tr>
-  <td>3</td>
+  <td>4</td>
   <td><code>EnterpriseThreadOS Implementation Issues</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -636,7 +644,7 @@ flowchart LR
   <td>Documentation node describing EnterpriseThreadOS Implementation Issues.</td>
 </tr>
 <tr>
-  <td>4</td>
+  <td>5</td>
   <td><code>Open-Source Library Guidance by Issue Area</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -644,7 +652,7 @@ flowchart LR
   <td>Documentation node describing Open-Source Library Guidance by Issue Area.</td>
 </tr>
 <tr>
-  <td>5</td>
+  <td>6</td>
   <td><code>Issue 1: Bootstrap Local Platform Foundation</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -652,7 +660,7 @@ flowchart LR
   <td>Documentation node describing Issue 1: Bootstrap Local Platform Foundation.</td>
 </tr>
 <tr>
-  <td>6</td>
+  <td>7</td>
   <td><code>What to build</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -660,7 +668,7 @@ flowchart LR
   <td>Documentation node describing What to build.</td>
 </tr>
 <tr>
-  <td>7</td>
+  <td>8</td>
   <td><code>Acceptance criteria</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -668,7 +676,7 @@ flowchart LR
   <td>Documentation node describing Acceptance criteria.</td>
 </tr>
 <tr>
-  <td>8</td>
+  <td>9</td>
   <td><code>Blocked by</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -676,7 +684,7 @@ flowchart LR
   <td>Documentation node describing Blocked by.</td>
 </tr>
 <tr>
-  <td>9</td>
+  <td>10</td>
   <td><code>Issue 2: Tenant Identity and Access Baseline</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -684,7 +692,7 @@ flowchart LR
   <td>Documentation node describing Issue 2: Tenant Identity and Access Baseline.</td>
 </tr>
 <tr>
-  <td>10</td>
+  <td>11</td>
   <td><code>What to build</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -692,7 +700,7 @@ flowchart LR
   <td>Documentation node describing What to build.</td>
 </tr>
 <tr>
-  <td>11</td>
+  <td>12</td>
   <td><code>Acceptance criteria</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -700,7 +708,7 @@ flowchart LR
   <td>Documentation node describing Acceptance criteria.</td>
 </tr>
 <tr>
-  <td>12</td>
+  <td>13</td>
   <td><code>Blocked by</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -708,7 +716,7 @@ flowchart LR
   <td>Documentation node describing Blocked by.</td>
 </tr>
 <tr>
-  <td>13</td>
+  <td>14</td>
   <td><code>Issue 3: Audit, Security Events, and Runtime Retention Foundation</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -716,7 +724,7 @@ flowchart LR
   <td>Documentation node describing Issue 3: Audit, Security Events, and Runtime Retention Foundation.</td>
 </tr>
 <tr>
-  <td>14</td>
+  <td>15</td>
   <td><code>What to build</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -724,7 +732,7 @@ flowchart LR
   <td>Documentation node describing What to build.</td>
 </tr>
 <tr>
-  <td>15</td>
+  <td>16</td>
   <td><code>Acceptance criteria</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -732,7 +740,7 @@ flowchart LR
   <td>Documentation node describing Acceptance criteria.</td>
 </tr>
 <tr>
-  <td>16</td>
+  <td>17</td>
   <td><code>Blocked by</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -740,7 +748,7 @@ flowchart LR
   <td>Documentation node describing Blocked by.</td>
 </tr>
 <tr>
-  <td>17</td>
+  <td>18</td>
   <td><code>Issue 4: Base Artifact Registry and Dependency Graph</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -748,7 +756,7 @@ flowchart LR
   <td>Documentation node describing Issue 4: Base Artifact Registry and Dependency Graph.</td>
 </tr>
 <tr>
-  <td>18</td>
+  <td>19</td>
   <td><code>What to build</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -756,7 +764,7 @@ flowchart LR
   <td>Documentation node describing What to build.</td>
 </tr>
 <tr>
-  <td>19</td>
+  <td>20</td>
   <td><code>Acceptance criteria</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -764,7 +772,7 @@ flowchart LR
   <td>Documentation node describing Acceptance criteria.</td>
 </tr>
 <tr>
-  <td>20</td>
+  <td>21</td>
   <td><code>Blocked by</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -772,7 +780,7 @@ flowchart LR
   <td>Documentation node describing Blocked by.</td>
 </tr>
 <tr>
-  <td>21</td>
+  <td>22</td>
   <td><code>Issue 5: Classification and Policy Enforcement Foundation</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -780,7 +788,7 @@ flowchart LR
   <td>Documentation node describing Issue 5: Classification and Policy Enforcement Foundation.</td>
 </tr>
 <tr>
-  <td>22</td>
+  <td>23</td>
   <td><code>What to build</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -788,7 +796,7 @@ flowchart LR
   <td>Documentation node describing What to build.</td>
 </tr>
 <tr>
-  <td>23</td>
+  <td>24</td>
   <td><code>Acceptance criteria</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -796,7 +804,7 @@ flowchart LR
   <td>Documentation node describing Acceptance criteria.</td>
 </tr>
 <tr>
-  <td>24</td>
+  <td>25</td>
   <td><code>Blocked by</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -804,7 +812,7 @@ flowchart LR
   <td>Documentation node describing Blocked by.</td>
 </tr>
 <tr>
-  <td>25</td>
+  <td>26</td>
   <td><code>Issue 6: Graph Memory Abstraction and Neo4j Backend</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -812,7 +820,7 @@ flowchart LR
   <td>Documentation node describing Issue 6: Graph Memory Abstraction and Neo4j Backend.</td>
 </tr>
 <tr>
-  <td>26</td>
+  <td>27</td>
   <td><code>What to build</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -820,7 +828,7 @@ flowchart LR
   <td>Documentation node describing What to build.</td>
 </tr>
 <tr>
-  <td>27</td>
+  <td>28</td>
   <td><code>Acceptance criteria</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -828,7 +836,7 @@ flowchart LR
   <td>Documentation node describing Acceptance criteria.</td>
 </tr>
 <tr>
-  <td>28</td>
+  <td>29</td>
   <td><code>Blocked by</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -836,20 +844,12 @@ flowchart LR
   <td>Documentation node describing Blocked by.</td>
 </tr>
 <tr>
-  <td>29</td>
+  <td>30</td>
   <td><code>Issue 7: Canonical Ontology and Tenant Attribute Schemas</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
   <td>Documentation node describing Issue 7: Canonical Ontology and Tenant Attribute Schemas.</td>
-</tr>
-<tr>
-  <td>30</td>
-  <td><code>What to build</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing What to build.</td>
 </tr>
 </table>
 
@@ -858,7 +858,7 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>.docs/.prd/engineering-execution-issues.md</code></td><td>141 nodes</td></tr>
+      <tr><td><code>.docs/.prd/engineering-execution-issues.md</code></td><td>146 nodes</td></tr>
 <tr><td><code>etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</code></td><td>141 nodes</td></tr>
 <tr><td><code>ETOS.Backend/DataQuality/DataQualityService.cs</code></td><td>70 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-6-graph-memory_8a3f2c1b.plan.md</code></td><td>33 nodes</td></tr>
@@ -870,19 +870,19 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x597, references x139, calls x65, method x48. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x602, references x139, calls x65, method x48. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 4. Analysis & Clustering ====== -->
 <h2 id="analysis-clustering">4. Analysis &amp; Clustering</h2>
-<p>Analysis &amp; Clustering groups implementation around cursor, plans, issue, issues, mostly in .cursor/plans/issue_15_governed_chat.plan.md, .docs/.QA/issues-1-18-e2e-flow-to-recommendations.md, etos_ui_mockups/docs/issues-1-18-e2e-flow-to-recommendations.with-digital-thread-timeline.md. This section covers 151 nodes and 153 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Analysis &amp; Clustering groups implementation around cursor, plans, issue, issues, mostly in .cursor/plans/issue_15_governed_chat.plan.md, .docs/.QA/issues-1-18-e2e-flow-to-recommendations.md, etos_ui_mockups/docs/issues-1-18-e2e-flow-to-recommendations.with-digital-thread-timeline.md. This section covers 160 nodes and 162 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Analysis &amp; Clustering (151 nodes, 153 edges)
+    %% Section: Analysis &amp; Clustering (160 nodes, 162 edges)
     subgraph analysis_clustering_cursor_plans_issue_15_govern_99c92fdd[".cursor/plans/issue_15_governed_chat.plan.md"]
         plans_issue_15_governed_chat_plan_1ca96739("15 governed chat.plan.md<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
         plans_issue_15_governed_chat_plan_api_endpoints_b5b3b168("API endpoints<br/><small>.cursor/plans/issue_15_governed_chat.plan.md</small>")
@@ -907,7 +907,7 @@ flowchart LR
     cursorplansissue14aitrace_e87937fd("Issue 14 AI Trace Plan<br/><small>.cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md</small>")
     etos_helpers_odooerptransform_app_config_py_app_ce778ff8 -->|calls| etos_helpers_odooerptransform_app_config_py_app_90c30375
     etos_helpers_odooerptransform_app_config_py_app_40ee9cbd -->|method| app_config_transformconfig_output_file_names_a8144a69
-    %% Omitted for readability: 133 nodes, 0 edges
+    %% Omitted for readability: 142 nodes, 0 edges
     class plans_issue_15_governed_chat_plan_1ca96739 concept;
     class plans_issue_15_governed_chat_plan_api_endpoints_b5b3b168 concept;
     class plans_issue_15_governed_chat_plan_acceptance_cri_8374e4a9 concept;
@@ -949,6 +949,230 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
+  <td><code>slice-13-Governed-Query-Intents.md</code><br><small style="color:var(--muted)">.cursor/plans/slice-13-Governed-Query-Intents.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing slice-13-Governed-Query-Intents.md.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>ARCHITECTURE.md</code><br><small style="color:var(--muted)">ARCHITECTURE.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing ARCHITECTURE.md.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>EnterpriseThreadOS Architecture</code><br><small style="color:var(--muted)">ARCHITECTURE.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing EnterpriseThreadOS Architecture.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Current System</code><br><small style="color:var(--muted)">ARCHITECTURE.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Current System.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>Implemented Components</code><br><small style="color:var(--muted)">ARCHITECTURE.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Implemented Components.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>Implemented Vs Planned</code><br><small style="color:var(--muted)">ARCHITECTURE.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Implemented Vs Planned.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>Backend Request Flow</code><br><small style="color:var(--muted)">ARCHITECTURE.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Backend Request Flow.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>Data Ownership</code><br><small style="color:var(--muted)">ARCHITECTURE.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Data Ownership.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>Guardrails</code><br><small style="color:var(--muted)">ARCHITECTURE.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Guardrails.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>Related Docs</code><br><small style="color:var(--muted)">ARCHITECTURE.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Related Docs.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>architecture.md</code><br><small style="color:var(--muted)">docs/frontend/architecture.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing architecture.md.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>Frontend Architecture</code><br><small style="color:var(--muted)">docs/frontend/architecture.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Frontend Architecture.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>Stack</code><br><small style="color:var(--muted)">docs/frontend/architecture.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Stack.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>Project Shape</code><br><small style="color:var(--muted)">docs/frontend/architecture.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Project Shape.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>Runtime Configuration</code><br><small style="color:var(--muted)">docs/frontend/architecture.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Runtime Configuration.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>Current Data Flow</code><br><small style="color:var(--muted)">docs/frontend/architecture.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Current Data Flow.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>UI Guidance</code><br><small style="color:var(--muted)">docs/frontend/architecture.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing UI Guidance.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>Scripts</code><br><small style="color:var(--muted)">docs/frontend/architecture.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Scripts.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>Planned Frontend Areas</code><br><small style="color:var(--muted)">docs/frontend/architecture.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Planned Frontend Areas.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>Issue 14 AI Trace Plan</code><br><small style="color:var(--muted)">.cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Issue 14 AI Trace Plan.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>Issue 15 Governed Chat Plan</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Issue 15 Governed Chat Plan.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>Issue 16 Explorers Context Views Plan</code><br><small style="color:var(--muted)">.cursor/plans/issue_16_explorers_context_views.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Issue 16 Explorers Context Views Plan.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>Issue 17 Dashboard Reports Plan</code><br><small style="color:var(--muted)">.cursor/plans/issue_17_dashboard_reports_05df64dd.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Issue 17 Dashboard Reports Plan.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>Issue 18 Recommendations Plan</code><br><small style="color:var(--muted)">.cursor/plans/issue_18_recommendations_f30d3826.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Issue 18 Recommendations Plan.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>Slice 11 Implementation Plan</code><br><small style="color:var(--muted)">.cursor/plans/slice-11_e69df934.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Slice 11 Implementation Plan.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>Slice 12 Document Memory and Object Linking Plan</code><br><small style="color:var(--muted)">.cursor/plans/slice-12-document-memory-object-linking.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Slice 12 Document Memory and Object Linking Plan.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>Slice 10 Quality Plan</code><br><small style="color:var(--muted)">.cursor/plans/slice_10_quality_558f624b.plan.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Slice 10 Quality Plan.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>Gap Analysis: Issues 1-18 vs Current Codebase</code><br><small style="color:var(--muted)">.docs/.gapAnalysis/issues-1-18-gap-analysis.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Gap Analysis: Issues 1-18 vs Current Codebase.</td>
+</tr>
+<tr>
+  <td>29</td>
   <td><code>issue_15_governed_chat.plan.md</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -956,236 +1180,12 @@ flowchart LR
   <td>Documentation node describing issue_15_governed_chat.plan.md.</td>
 </tr>
 <tr>
-  <td>2</td>
+  <td>30</td>
   <td><code>Issue 15: Governed Chat and Chat-to-Artifact Drafting</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
   <td>Documentation node describing Issue 15: Governed Chat and Chat-to-Artifact Drafting.</td>
-</tr>
-<tr>
-  <td>3</td>
-  <td><code>Prerequisite</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Prerequisite.</td>
-</tr>
-<tr>
-  <td>4</td>
-  <td><code>Scope</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Scope.</td>
-</tr>
-<tr>
-  <td>5</td>
-  <td><code>Architecture</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Architecture.</td>
-</tr>
-<tr>
-  <td>6</td>
-  <td><code>End-to-end chat turn flow</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing End-to-end chat turn flow.</td>
-</tr>
-<tr>
-  <td>7</td>
-  <td><code>Backend design</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Backend design.</td>
-</tr>
-<tr>
-  <td>8</td>
-  <td><code>New module: `ETOS.Backend/GovernedChat/`</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing New module: `ETOS.Backend/GovernedChat/`.</td>
-</tr>
-<tr>
-  <td>9</td>
-  <td><code>Persisted runtime models</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Persisted runtime models.</td>
-</tr>
-<tr>
-  <td>10</td>
-  <td><code>Platform artifact seeding (not new tables)</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Platform artifact seeding (not new tables).</td>
-</tr>
-<tr>
-  <td>11</td>
-  <td><code>Permissions (`GovernedChatContracts.cs`)</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Permissions (`GovernedChatContracts.cs`).</td>
-</tr>
-<tr>
-  <td>12</td>
-  <td><code>Governed query integration</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Governed query integration.</td>
-</tr>
-<tr>
-  <td>13</td>
-  <td><code>AiTrace extension</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing AiTrace extension.</td>
-</tr>
-<tr>
-  <td>14</td>
-  <td><code>LLM provider strategy (architecture-honest)</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing LLM provider strategy (architecture-honest).</td>
-</tr>
-<tr>
-  <td>15</td>
-  <td><code>API endpoints</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing API endpoints.</td>
-</tr>
-<tr>
-  <td>16</td>
-  <td><code>Draft + publish governance</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Draft + publish governance.</td>
-</tr>
-<tr>
-  <td>17</td>
-  <td><code>Frontend</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Frontend.</td>
-</tr>
-<tr>
-  <td>18</td>
-  <td><code>Tests: `ETOS.Backend.Tests/GovernedChatTests.cs`</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Tests: `ETOS.Backend.Tests/GovernedChatTests.cs`.</td>
-</tr>
-<tr>
-  <td>19</td>
-  <td><code>Docs touch (minimal)</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Docs touch (minimal).</td>
-</tr>
-<tr>
-  <td>20</td>
-  <td><code>Verification</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Verification.</td>
-</tr>
-<tr>
-  <td>21</td>
-  <td><code>Implementation order</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Implementation order.</td>
-</tr>
-<tr>
-  <td>22</td>
-  <td><code>Key conventions to reuse</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Key conventions to reuse.</td>
-</tr>
-<tr>
-  <td>23</td>
-  <td><code>Risk notes</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Risk notes.</td>
-</tr>
-<tr>
-  <td>24</td>
-  <td><code>Acceptance criteria mapping</code><br><small style="color:var(--muted)">.cursor/plans/issue_15_governed_chat.plan.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Acceptance criteria mapping.</td>
-</tr>
-<tr>
-  <td>25</td>
-  <td><code>issues-1-18-e2e-flow-to-recommendations.md</code><br><small style="color:var(--muted)">.docs/.QA/issues-1-18-e2e-flow-to-recommendations.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing issues-1-18-e2e-flow-to-recommendations.md.</td>
-</tr>
-<tr>
-  <td>26</td>
-  <td><code>End-to-End QA Flow: Issues 1–18.5 Through Recommendations</code><br><small style="color:var(--muted)">.docs/.QA/issues-1-18-e2e-flow-to-recommendations.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing End-to-End QA Flow: Issues 1–18.5 Through Recommendations.</td>
-</tr>
-<tr>
-  <td>27</td>
-  <td><code>Prerequisites (One-Time Startup)</code><br><small style="color:var(--muted)">.docs/.QA/issues-1-18-e2e-flow-to-recommendations.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Prerequisites (One-Time Startup).</td>
-</tr>
-<tr>
-  <td>28</td>
-  <td><code>Flow Map</code><br><small style="color:var(--muted)">.docs/.QA/issues-1-18-e2e-flow-to-recommendations.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Flow Map.</td>
-</tr>
-<tr>
-  <td>29</td>
-  <td><code>1. Platform + Governance (Issues 1–3)</code><br><small style="color:var(--muted)">.docs/.QA/issues-1-18-e2e-flow-to-recommendations.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 1. Platform + Governance (Issues 1–3).</td>
-</tr>
-<tr>
-  <td>30</td>
-  <td><code>2. Ontology / Model Package (Issues 6–7, 18.5) — Required Before Imports</code><br><small style="color:var(--muted)">.docs/.QA/issues-1-18-e2e-flow-to-recommendations.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 2. Ontology / Model Package (Issues 6–7, 18.5) — Required Before Imports.</td>
 </tr>
 </table>
 
@@ -1201,12 +1201,12 @@ flowchart LR
 <tr><td><code>.cursor/plans/slice-2-identity_ffcbe231.plan.md</code></td><td>17 nodes</td></tr>
 <tr><td><code>.cursor/plans/issue_18.1_cleanup_e7dbd526.plan.md</code></td><td>15 nodes</td></tr>
 <tr><td><code>ARCHITECTURE.md</code></td><td>9 nodes</td></tr>
-<tr><td><code>.cursor/plans/slice-13-Governed-Query-Intents.md</code></td><td>8 nodes</td></tr>
+<tr><td><code>docs/frontend/architecture.md</code></td><td>9 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x129, references x22, calls x1, method x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x137, references x23, calls x1, method x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -1558,12 +1558,12 @@ flowchart LR
 
 <!-- ====== 6. CLI & Skill Installers ====== -->
 <h2 id="cli-skills">6. CLI &amp; Skill Installers</h2>
-<p>CLI &amp; Skill Installers groups implementation around docs, agent, cursor, plans, mostly in .prd/.ui/ui-agent-implementation-guide.md, .cursor/plans/issue_22_tool_registry_a7b0bb72.plan.md, .cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md. This section covers 371 nodes and 383 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>CLI &amp; Skill Installers groups implementation around docs, agent, cursor, plans, mostly in .prd/.ui/ui-agent-implementation-guide.md, .cursor/plans/issue_22_tool_registry_a7b0bb72.plan.md, .cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md. This section covers 390 nodes and 403 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: CLI &amp; Skill Installers (371 nodes, 383 edges)
+    %% Section: CLI &amp; Skill Installers (390 nodes, 403 edges)
     subgraph cli_skills_agentKey_test_run_page_tsx_eabf35d4["[agentKey]/test-run/page.tsx"]
         test_run_page_dbd08ee7("page.tsx")
         test_run_page_testrunaction_582e724f("testRunAction()<br/><small>[agentKey]/test-run/page.tsx</small>")
@@ -1610,7 +1610,7 @@ flowchart LR
     test_run_page_dbd08ee7 -->|imports| lib_etos_api_postagenttestrun_6f198545
     agents_agentmodelconfigform_5f6961f0 -->|imports| agents_agent_configure_actions_29a05f14
     agents_agent_configure_actions_29a05f14 -->|imports| lib_etos_api_loadagentversionbykey_b2100040
-    %% Omitted for readability: 353 nodes, 0 edges
+    %% Omitted for readability: 372 nodes, 0 edges
     class test_run_page_dbd08ee7 test;
     class test_run_page_testrunaction_582e724f test;
     class test_run_page_previewaction_45d08842 test;
@@ -1764,54 +1764,6 @@ flowchart LR
 </tr>
 <tr>
   <td>15</td>
-  <td><code>Architecture Patterns</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Architecture Patterns.</td>
-</tr>
-<tr>
-  <td>16</td>
-  <td><code>Route groups</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Route groups.</td>
-</tr>
-<tr>
-  <td>17</td>
-  <td><code>Server vs client</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Server vs client.</td>
-</tr>
-<tr>
-  <td>18</td>
-  <td><code>Data access</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Data access.</td>
-</tr>
-<tr>
-  <td>19</td>
-  <td><code>Styling</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Styling.</td>
-</tr>
-<tr>
-  <td>20</td>
-  <td><code>Components layout</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Components layout.</td>
-</tr>
-<tr>
-  <td>21</td>
   <td><code>Phase 0 Implementation Sequence</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -1819,7 +1771,7 @@ flowchart LR
   <td>Documentation node describing Phase 0 Implementation Sequence.</td>
 </tr>
 <tr>
-  <td>22</td>
+  <td>16</td>
   <td><code>Step 1 — UI-0.1 Tokens + theme</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -1827,7 +1779,7 @@ flowchart LR
   <td>Documentation node describing Step 1 — UI-0.1 Tokens + theme.</td>
 </tr>
 <tr>
-  <td>23</td>
+  <td>17</td>
   <td><code>Step 2 — UI-0.3 Component primitives</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -1835,7 +1787,7 @@ flowchart LR
   <td>Documentation node describing Step 2 — UI-0.3 Component primitives.</td>
 </tr>
 <tr>
-  <td>24</td>
+  <td>18</td>
   <td><code>Step 3 — UI-0.2 Shell</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -1843,7 +1795,7 @@ flowchart LR
   <td>Documentation node describing Step 3 — UI-0.2 Shell.</td>
 </tr>
 <tr>
-  <td>25</td>
+  <td>19</td>
   <td><code>Step 4 — UI-0.4 Placeholders</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -1851,7 +1803,7 @@ flowchart LR
   <td>Documentation node describing Step 4 — UI-0.4 Placeholders.</td>
 </tr>
 <tr>
-  <td>26</td>
+  <td>20</td>
   <td><code>Reskinning an Existing Page</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -1859,7 +1811,7 @@ flowchart LR
   <td>Documentation node describing Reskinning an Existing Page.</td>
 </tr>
 <tr>
-  <td>27</td>
+  <td>21</td>
   <td><code>Placeholder Pages (backend not ready)</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -1867,7 +1819,7 @@ flowchart LR
   <td>Documentation node describing Placeholder Pages (backend not ready).</td>
 </tr>
 <tr>
-  <td>28</td>
+  <td>22</td>
   <td><code>Navigation Config Contract</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -1875,7 +1827,7 @@ flowchart LR
   <td>Documentation node describing Navigation Config Contract.</td>
 </tr>
 <tr>
-  <td>29</td>
+  <td>23</td>
   <td><code>Env and Local Dev</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -1883,12 +1835,60 @@ flowchart LR
   <td>Documentation node describing Env and Local Dev.</td>
 </tr>
 <tr>
-  <td>30</td>
+  <td>24</td>
   <td><code>Verification Commands</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
   <td>Documentation node describing Verification Commands.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>Common Mistakes</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Common Mistakes.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>Related Cursor Rule</code><br><small style="color:var(--muted)">.prd/.ui/ui-agent-implementation-guide.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Related Cursor Rule.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>ui-delivery-checklist.md</code><br><small style="color:var(--muted)">.prd/.ui/ui-delivery-checklist.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing ui-delivery-checklist.md.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>UI Delivery Checklist</code><br><small style="color:var(--muted)">.prd/.ui/ui-delivery-checklist.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing UI Delivery Checklist.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>Scope guard</code><br><small style="color:var(--muted)">.prd/.ui/ui-delivery-checklist.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Scope guard.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>Mockup parity</code><br><small style="color:var(--muted)">.prd/.ui/ui-delivery-checklist.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Mockup parity.</td>
 </tr>
 </table>
 
@@ -1909,19 +1909,363 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x274, references x72, imports x17, calls x14. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x285, references x81, imports x17, calls x14. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
-<!-- ====== 7. Serving API ====== -->
-<h2 id="serve-api">7. Serving API</h2>
-<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, .cursor/plans/pdm_import_wizard_ui_2977ea3d.plan.md, .cursor/plans/issue_16_explorers_context_views.plan.md. This section covers 681 nodes and 1452 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<!-- ====== 7. Ingestion & Updates ====== -->
+<h2 id="ingest-cache-update">7. Ingestion &amp; Updates</h2>
+<p>Ingestion &amp; Updates groups implementation around document, docs, governed, issue, mostly in .docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md, docs/document-ingest.md. This section covers 41 nodes and 39 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Serving API (681 nodes, 1452 edges)
+    %% Section: Ingestion &amp; Updates (41 nodes, 39 edges)
+    subgraph ingest_cache_update_docs_prd_issue_12_1_governed_0ee1aced[".docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md"]
+        prd_issue_12_1_governed_document_ingest_vector_p_1f7a1dfb("Issue 12.1: Governed Document Ingest, E...<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_2e07a383("Acceptance criteria<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_e010d483("Sub-slices<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_9ee00455("PRD alignment<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_60a2e0e6("12.1.0 Manufacturing ontology extension...<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_dac01a36("12.1.1 Object storage — MinIO behind I...<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_9620880f("12.1.2 Document extraction provider reg...<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_fe1e3c35("12.1.3 Live Qdrant vector indexing<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_5cbb7f4f("12.1.4 Governed query vector fallback<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_c146ad43("12.1.5 Linking, ingest runbook, UI, and...<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_436b0b56("Architecture<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_d3c5fffa("CAD scope (story 31)<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_0aeac0f6("Dependency graph<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_814ddca7("End-to-end (12.1.5)<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_1e82b253("Extraction (12.1.2)<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+        prd_issue_12_1_governed_document_ingest_vector_p_cc83143a("Four document memory layers (must prese...<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
+    end
+    subgraph ingest_cache_update_docs_document_ingest_md_052b2abc["docs/document-ingest.md"]
+        docs_document_ingest_governed_document_ingest_is_6aaa358f("Governed document ingest (Issue 12.1)<br/><small>docs/document-ingest.md</small>")
+        docs_document_ingest_configuration_appsettings_j_2a3fb5ba("Configuration (appsettings.json)<br/><small>docs/document-ingest.md</small>")
+    end
+    prd_issue_12_1_governed_document_ingest_vector_p_1f7a1dfb -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_2e07a383
+    prd_issue_12_1_governed_document_ingest_vector_p_1f7a1dfb -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_436b0b56
+    prd_issue_12_1_governed_document_ingest_vector_p_1f7a1dfb -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_0aeac0f6
+    prd_issue_12_1_governed_document_ingest_vector_p_1f7a1dfb -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_9ee00455
+    prd_issue_12_1_governed_document_ingest_vector_p_1f7a1dfb -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_e010d483
+    prd_issue_12_1_governed_document_ingest_vector_p_9ee00455 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_d3c5fffa
+    prd_issue_12_1_governed_document_ingest_vector_p_9ee00455 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_cc83143a
+    prd_issue_12_1_governed_document_ingest_vector_p_e010d483 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_60a2e0e6
+    prd_issue_12_1_governed_document_ingest_vector_p_e010d483 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_dac01a36
+    prd_issue_12_1_governed_document_ingest_vector_p_e010d483 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_9620880f
+    prd_issue_12_1_governed_document_ingest_vector_p_e010d483 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_fe1e3c35
+    prd_issue_12_1_governed_document_ingest_vector_p_e010d483 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_5cbb7f4f
+    prd_issue_12_1_governed_document_ingest_vector_p_e010d483 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_c146ad43
+    prd_issue_12_1_governed_document_ingest_vector_p_2e07a383 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_814ddca7
+    prd_issue_12_1_governed_document_ingest_vector_p_2e07a383 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_1e82b253
+    docs_document_ingest_governed_document_ingest_is_6aaa358f -->|contains| docs_document_ingest_configuration_appsettings_j_2a3fb5ba
+    %% Omitted for readability: 23 nodes, 0 edges
+    class prd_issue_12_1_governed_document_ingest_vector_p_1f7a1dfb concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_2e07a383 concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_e010d483 concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_9ee00455 concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_60a2e0e6 concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_dac01a36 concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_9620880f concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_fe1e3c35 concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_5cbb7f4f concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_c146ad43 concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_436b0b56 concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_d3c5fffa concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_0aeac0f6 concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_814ddca7 concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_1e82b253 concept;
+    class prd_issue_12_1_governed_document_ingest_vector_p_cc83143a concept;
+    class docs_document_ingest_governed_document_ingest_is_6aaa358f concept;
+    class docs_document_ingest_configuration_appsettings_j_2a3fb5ba concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>issue-12.1-governed-document-ingest-vector-parsers.md</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing issue-12.1-governed-document-ingest-vector-parsers.md.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Issue 12.1: Governed Document Ingest, Extraction Parsers, and Qdrant Retrieval</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Issue 12.1: Governed Document Ingest, Extraction Parsers, and Qdrant Retrieval.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Summary</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Summary.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Problem statement</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Problem statement.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>PRD alignment</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing PRD alignment.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>Four document memory layers (must preserve)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Four document memory layers (must preserve).</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>Retrieval order (Issue 13)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Retrieval order (Issue 13).</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>CAD scope (story 31)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing CAD scope (story 31).</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>Linking vs identity resolution</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Linking vs identity resolution.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>Target metadata model (manufacturing package)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Target metadata model (manufacturing package).</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>Architecture</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Architecture.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>Sub-slices</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Sub-slices.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>12.1.0 Manufacturing ontology extension for file evidence</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 12.1.0 Manufacturing ontology extension for file evidence.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>12.1.1 Object storage — MinIO behind `IDocumentFileStorage`</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 12.1.1 Object storage — MinIO behind `IDocumentFileStorage`.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>12.1.2 Document extraction provider registry</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 12.1.2 Document extraction provider registry.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>12.1.3 Live Qdrant vector indexing</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 12.1.3 Live Qdrant vector indexing.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>12.1.4 Governed query vector fallback</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 12.1.4 Governed query vector fallback.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>12.1.5 Linking, ingest runbook, UI, and integration smoke</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 12.1.5 Linking, ingest runbook, UI, and integration smoke.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>Acceptance criteria</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Acceptance criteria.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>Ontology (12.1.0)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Ontology (12.1.0).</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>Storage (12.1.1)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Storage (12.1.1).</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>Extraction (12.1.2)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Extraction (12.1.2).</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>Vector index (12.1.3)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Vector index (12.1.3).</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>Retrieval (12.1.4)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Retrieval (12.1.4).</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>End-to-end (12.1.5)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing End-to-end (12.1.5).</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>Out of scope</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Out of scope.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>Dependency graph</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Dependency graph.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>Implementation order (recommended)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Implementation order (recommended).</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>Key files (implementation reference)</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Key files (implementation reference).</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>Review questions</code><br><small style="color:var(--muted)">.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Review questions.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</code></td><td>30 nodes</td></tr>
+<tr><td><code>docs/document-ingest.md</code></td><td>11 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x39. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 8. Serving API ====== -->
+<h2 id="serve-api">8. Serving API</h2>
+<p>Serving API groups implementation around etosfrontend, etos, apits, pagetsx, mostly in src/lib/etos-api.ts, .cursor/plans/pdm_import_wizard_ui_2977ea3d.plan.md, .cursor/plans/issue_16_explorers_context_views.plan.md. This section covers 669 nodes and 1441 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Serving API (669 nodes, 1441 edges)
     subgraph serve_api_src_lib_etos_api_ts_396531a3["src/lib/etos-api.ts"]
         lib_etos_api_gettoolrundetail_054dc263("getToolRunDetail()<br/><small>src/lib/etos-api.ts</small>")
         lib_etos_api_gettoolruns_11c8d737("getToolRuns()<br/><small>src/lib/etos-api.ts</small>")
@@ -1953,7 +2297,7 @@ flowchart LR
     new_page_createfromtemplateaction_8419a7ee -->|calls| lib_etos_api_getartifactversions_40f49f48
     new_page_createfromtemplateaction_8419a7ee -->|calls| lib_etos_api_postagentfromtemplate_e2cfb09a
     recommendations_recommendationdetailview_fc11d848 -->|imports| lib_etos_api_getartifactversions_40f49f48
-    %% Omitted for readability: 663 nodes, 0 edges
+    %% Omitted for readability: 651 nodes, 0 edges
     class lib_etos_api_gettoolrundetail_054dc263 function;
     class lib_etos_api_gettoolruns_11c8d737 function;
     class lib_etos_api_getagentrundetail_056dea13 function;
@@ -2252,22 +2596,21 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x627, calls x383, imports x319, imports x114. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x616, calls x383, imports x319, imports x114. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
-<!-- ====== 8. Security & Global Graph ====== -->
-<h2 id="security-global">8. Security &amp; Global Graph</h2>
-<p>Security &amp; Global Graph groups implementation around execution, engineering, etos, digital, mostly in etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md, .docs/.prd/engineering-execution-prd.md, .cursor/plans/issue_24_workflows_914b4b73.plan.md. This section covers 65 nodes and 98 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<!-- ====== 9. Security & Global Graph ====== -->
+<h2 id="security-global">9. Security &amp; Global Graph</h2>
+<p>Security &amp; Global Graph groups implementation around execution, engineering, etos, digital, mostly in etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md, .docs/.prd/engineering-execution-prd.md, .cursor/plans/issue_24_workflows_914b4b73.plan.md. This section covers 77 nodes and 111 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Security &amp; Global Graph (65 nodes, 98 edges)
+    %% Section: Security &amp; Global Graph (77 nodes, 111 edges)
     subgraph security_global_context_checkpoints_engineering_1606a36f[".context/.checkpoints/engineering-execution-checkpoints.md"]
         checkpoints_engineering_execution_checkpoints_en_3af8f573("EnterpriseThreadOS Engineering Executio...<br/><small>.context/.checkpoints/engineering-execution-checkpoints.md</small>")
-        checkpoints_engineering_execution_checkpoints_ea9c371f("engineering-execution-checkpoints.md")
         checkpoints_engineering_execution_checkpoints_20_ca70a50f("2026-06-07 - Issue 1 Bootstrap Foundation<br/><small>.context/.checkpoints/engineering-execution-checkpoints.md</small>")
         checkpoints_engineering_execution_checkpoints_20_73b7f15a("2026-06-10 - Slice 2 Tenant Identity Ac...<br/><small>.context/.checkpoints/engineering-execution-checkpoints.md</small>")
         checkpoints_engineering_execution_checkpoints_20_0b499568("2026-06-10 - Slice 3 Audit And Security...<br/><small>.context/.checkpoints/engineering-execution-checkpoints.md</small>")
@@ -2275,17 +2618,22 @@ flowchart LR
         checkpoints_engineering_execution_checkpoints_20_33765579("2026-06-10 - Slice 7 Canonical Ontology...<br/><small>.context/.checkpoints/engineering-execution-checkpoints.md</small>")
         checkpoints_engineering_execution_checkpoints_20_ef1f75af("2026-06-11 - Slice 10 Data Quality Ready<br/><small>.context/.checkpoints/engineering-execution-checkpoints.md</small>")
         checkpoints_engineering_execution_checkpoints_20_351cb0fc("2026-06-19 - Milestone 3 And Abstractio...<br/><small>.context/.checkpoints/engineering-execution-checkpoints.md</small>")
+        checkpoints_engineering_execution_checkpoints_ea9c371f("engineering-execution-checkpoints.md")
     end
     subgraph security_global_cursor_plans_slice_3_audit_cb5f4_eafcb9cc[".cursor/plans/slice-3-audit_cb5f4911.plan.md"]
         plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736("Slice 3 Audit And Security Events<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_c67ec5b0("slice-3-audit cb5f4911.plan.md<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
         slice3auditcb5f4911planmd_slice_3_audit_d1f329cb("Slice 3 Audit and Security Events<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
-        plans_slice_3_audit_cb5f4911_plan_assumptions_666151da("Assumptions<br/><small>.cursor/plans/slice-3-audit_cb5f4911.plan.md</small>")
+    end
+    subgraph security_global_docs_prd_engineering_execution_p_50a3ed67[".docs/.prd/engineering-execution-prd.md"]
+        prd_engineering_execution_prd_enterprisethreados_5e27b483("EnterpriseThreadOS Engineering Executio...<br/><small>.docs/.prd/engineering-execution-prd.md</small>")
+        prd_engineering_execution_prd_architecture_diagr_5b542b2f("Architecture Diagrams<br/><small>.docs/.prd/engineering-execution-prd.md</small>")
+    end
+    subgraph security_global_etos_ui_mockups_docs_engineering_0ca0420d["etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md"]
+        docs_engineering_execution_prd_with_digital_thre_e7f01762("Architecture Diagrams<br/><small>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small>")
+        docs_engineering_execution_prd_with_digital_thre_c8e8de96("EnterpriseThreadOS Engineering Executio...<br/><small>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small>")
     end
     plans_issue_24_workflows_914b4b73_plan_issue_24_c4b73dce("Issue 24 — Workflow Runtime and Safe Re...<br/><small>.cursor/plans/issue_24_workflows_914b4b73.plan.md</small>")
-    prd_engineering_execution_prd_enterprisethreados_5e27b483("EnterpriseThreadOS Engineering Executio...<br/><small>.docs/.prd/engineering-execution-prd.md</small>")
     references_ui_mockupcontactsheet_fa786bed("EnterpriseThreadOS UI Mockup Contact Sheet<br/><small>etos_ui_mockup_pack_with_digital_thread_timeline/etos_ui_mockups/etos_ui_mockups_contact_sheet.png</small>")
-    docs_engineering_execution_prd_with_digital_thre_c8e8de96("EnterpriseThreadOS Engineering Executio...<br/><small>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small>")
     etos_ui_mockups_34_workflow_run_safe_mode_7852dc38("Workflow run safe mode trace UI screenshot<br/><small>etos_ui_mockups/images/34-workflow-run-safe-mode.png</small>")
     prd_engineering_execution_prd_enterprisethreados_5e27b483 -->|references| docs_engineering_execution_prd_with_digital_thre_c8e8de96
     prd_engineering_execution_prd_enterprisethreados_5e27b483 -->|references| references_ui_mockupcontactsheet_fa786bed
@@ -2311,9 +2659,8 @@ flowchart LR
     checkpoints_engineering_execution_checkpoints_20_0b499568 -->|contains| docs_engineering_execution_prd_with_digital_thre_c8e8de96
     checkpoints_engineering_execution_checkpoints_20_0b499568 -->|contains| prd_engineering_execution_prd_enterprisethreados_5e27b483
     checkpoints_engineering_execution_checkpoints_20_73b7f15a -->|contains| docs_engineering_execution_prd_with_digital_thre_c8e8de96
-    %% Omitted for readability: 47 nodes, 7 edges
+    %% Omitted for readability: 59 nodes, 6 edges
     class checkpoints_engineering_execution_checkpoints_en_3af8f573 concept;
-    class checkpoints_engineering_execution_checkpoints_ea9c371f concept;
     class checkpoints_engineering_execution_checkpoints_20_ca70a50f concept;
     class checkpoints_engineering_execution_checkpoints_20_73b7f15a concept;
     class checkpoints_engineering_execution_checkpoints_20_0b499568 concept;
@@ -2321,14 +2668,15 @@ flowchart LR
     class checkpoints_engineering_execution_checkpoints_20_33765579 concept;
     class checkpoints_engineering_execution_checkpoints_20_ef1f75af concept;
     class checkpoints_engineering_execution_checkpoints_20_351cb0fc concept;
+    class checkpoints_engineering_execution_checkpoints_ea9c371f concept;
     class plans_slice_3_audit_cb5f4911_plan_slice_3_audit_56a23736 concept;
-    class plans_slice_3_audit_cb5f4911_plan_c67ec5b0 concept;
     class slice3auditcb5f4911planmd_slice_3_audit_d1f329cb concept;
-    class plans_slice_3_audit_cb5f4911_plan_assumptions_666151da concept;
-    class plans_issue_24_workflows_914b4b73_plan_issue_24_c4b73dce concept;
     class prd_engineering_execution_prd_enterprisethreados_5e27b483 concept;
-    class references_ui_mockupcontactsheet_fa786bed klass;
+    class prd_engineering_execution_prd_architecture_diagr_5b542b2f concept;
+    class docs_engineering_execution_prd_with_digital_thre_e7f01762 concept;
     class docs_engineering_execution_prd_with_digital_thre_c8e8de96 concept;
+    class plans_issue_24_workflows_914b4b73_plan_issue_24_c4b73dce concept;
+    class references_ui_mockupcontactsheet_fa786bed klass;
     class etos_ui_mockups_34_workflow_run_safe_mode_7852dc38 klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
@@ -2465,6 +2813,54 @@ flowchart LR
 </tr>
 <tr>
   <td>15</td>
+  <td><code>Architecture Diagrams</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Architecture Diagrams.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>Layered Platform Architecture</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Layered Platform Architecture.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>Tech Stack by Layer</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Tech Stack by Layer.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>Open-Source Development Accelerators</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Open-Source Development Accelerators.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>End-to-End MVP Customer Flow</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing End-to-End MVP Customer Flow.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>MVP Data Promotion Flow</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing MVP Data Promotion Flow.</td>
+</tr>
+<tr>
+  <td>21</td>
   <td><code>User Stories</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -2472,7 +2868,7 @@ flowchart LR
   <td>Documentation node describing User Stories.</td>
 </tr>
 <tr>
-  <td>16</td>
+  <td>22</td>
   <td><code>Data and Storage Decisions</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -2480,7 +2876,7 @@ flowchart LR
   <td>Documentation node describing Data and Storage Decisions.</td>
 </tr>
 <tr>
-  <td>17</td>
+  <td>23</td>
   <td><code>API and Integration Decisions</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -2488,7 +2884,7 @@ flowchart LR
   <td>Documentation node describing API and Integration Decisions.</td>
 </tr>
 <tr>
-  <td>18</td>
+  <td>24</td>
   <td><code>Security, Governance, and Compliance Requirements</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -2496,7 +2892,7 @@ flowchart LR
   <td>Documentation node describing Security, Governance, and Compliance Requirements.</td>
 </tr>
 <tr>
-  <td>19</td>
+  <td>25</td>
   <td><code>Nonfunctional Requirements</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -2504,7 +2900,7 @@ flowchart LR
   <td>Documentation node describing Nonfunctional Requirements.</td>
 </tr>
 <tr>
-  <td>20</td>
+  <td>26</td>
   <td><code>Testing Decisions</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -2512,7 +2908,7 @@ flowchart LR
   <td>Documentation node describing Testing Decisions.</td>
 </tr>
 <tr>
-  <td>21</td>
+  <td>27</td>
   <td><code>MVP Demonstration Flow</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -2520,7 +2916,7 @@ flowchart LR
   <td>Documentation node describing MVP Demonstration Flow.</td>
 </tr>
 <tr>
-  <td>22</td>
+  <td>28</td>
   <td><code>Out of Scope</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -2528,7 +2924,7 @@ flowchart LR
   <td>Documentation node describing Out of Scope.</td>
 </tr>
 <tr>
-  <td>23</td>
+  <td>29</td>
   <td><code>Execution Risks</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -2536,60 +2932,12 @@ flowchart LR
   <td>Documentation node describing Execution Risks.</td>
 </tr>
 <tr>
-  <td>24</td>
+  <td>30</td>
   <td><code>Further Notes</code><br><small style="color:var(--muted)">.docs/.prd/engineering-execution-prd.md</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
   <td>Documentation node describing Further Notes.</td>
-</tr>
-<tr>
-  <td>25</td>
-  <td><code>engineering-execution-prd.with-digital-thread-timeline.md</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing engineering-execution-prd.with-digital-thread-timeline.md.</td>
-</tr>
-<tr>
-  <td>26</td>
-  <td><code>EnterpriseThreadOS Engineering Execution PRD</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing EnterpriseThreadOS Engineering Execution PRD.</td>
-</tr>
-<tr>
-  <td>27</td>
-  <td><code>Problem Statement</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Problem Statement.</td>
-</tr>
-<tr>
-  <td>28</td>
-  <td><code>Solution</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Solution.</td>
-</tr>
-<tr>
-  <td>29</td>
-  <td><code>Product Principles</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing Product Principles.</td>
-</tr>
-<tr>
-  <td>30</td>
-  <td><code>User Stories</code><br><small style="color:var(--muted)">etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing User Stories.</td>
 </tr>
 </table>
 
@@ -2598,8 +2946,8 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</code></td><td>16 nodes</td></tr>
-<tr><td><code>.docs/.prd/engineering-execution-prd.md</code></td><td>15 nodes</td></tr>
+      <tr><td><code>etos_ui_mockups/docs/engineering-execution-prd.with-digital-thread-timeline.md</code></td><td>22 nodes</td></tr>
+<tr><td><code>.docs/.prd/engineering-execution-prd.md</code></td><td>21 nodes</td></tr>
 <tr><td><code>.cursor/plans/issue_24_workflows_914b4b73.plan.md</code></td><td>13 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-3-audit_cb5f4911.plan.md</code></td><td>10 nodes</td></tr>
 <tr><td><code>.context/.checkpoints/engineering-execution-checkpoints.md</code></td><td>9 nodes</td></tr>
@@ -2609,19 +2957,19 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x95, references x3. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x108, references x3. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
-<!-- ====== 9. Tests & Fixtures ====== -->
-<h2 id="tests-fixtures">9. Tests &amp; Fixtures</h2>
-<p>Tests &amp; Fixtures groups implementation around etosbackendtests, fixtures, etosbackend, explorerstestscs, mostly in ETOS.Backend.Tests/ExplorersTests.cs, ETOS.Backend.Tests/RecommendationTests.cs, ETOS.Backend.Tests/DashboardReportTests.cs. This section covers 2520 nodes and 6197 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<!-- ====== 10. Tests & Fixtures ====== -->
+<h2 id="tests-fixtures">10. Tests &amp; Fixtures</h2>
+<p>Tests &amp; Fixtures groups implementation around etosbackendtests, fixtures, explorerstestscs, etosbackend, mostly in ETOS.Backend.Tests/ExplorersTests.cs, ETOS.Backend.Tests/RecommendationTests.cs, ETOS.Backend.Tests/DashboardReportTests.cs. This section covers 2576 nodes and 6333 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Tests &amp; Fixtures (2520 nodes, 6197 edges)
+    %% Section: Tests &amp; Fixtures (2576 nodes, 6333 edges)
     subgraph tests_fixtures_ETOS_AgentRuntime_app_execute_ser_73082a54["ETOS.AgentRuntime/app/execute_service.py"]
         app_execute_service_parse_json_object_3cfdb647("_parse_json_object()<br/><small>ETOS.AgentRuntime/app/execute_service.py</small>")
         app_execute_service_execute_request_9d3ab1b0("execute_request()<br/><small>ETOS.AgentRuntime/app/execute_service.py</small>")
@@ -2656,7 +3004,7 @@ flowchart LR
     app_execute_service_extract_json_object_48c72b61 -->|calls| app_execute_service_run_with_model_5e92d03b
     app_execute_service_build_structured_user_prompt_3e3b504e -->|calls| app_execute_service_run_with_model_5e92d03b
     app_execute_service_run_with_model_5e92d03b -->|calls| app_execute_service_execute_request_9d3ab1b0
-    %% Omitted for readability: 2502 nodes, 0 edges
+    %% Omitted for readability: 2558 nodes, 0 edges
     class app_execute_service_parse_json_object_3cfdb647 function;
     class app_execute_service_execute_request_9d3ab1b0 function;
     class app_execute_service_parse_output_schema_1c84590d function;
@@ -2943,11 +3291,11 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>ETOS.Backend.Tests/ExplorersTests.cs</code></td><td>138 nodes</td></tr>
+      <tr><td><code>ETOS.Backend.Tests/ExplorersTests.cs</code></td><td>135 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/RecommendationTests.cs</code></td><td>109 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/DashboardReportTests.cs</code></td><td>104 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/AiTraceTests.cs</code></td><td>95 nodes</td></tr>
-<tr><td><code>ETOS.Backend.Tests/DocumentMemoryTests.cs</code></td><td>93 nodes</td></tr>
+<tr><td><code>ETOS.Backend.Tests/DocumentMemoryTests.cs</code></td><td>95 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/GovernedChatTests.cs</code></td><td>93 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/GovernedQueryTests.cs</code></td><td>90 nodes</td></tr>
 <tr><td><code>ETOS.Backend.Tests/Fixtures/ImportFlowTestSupport.cs</code></td><td>78 nodes</td></tr>
@@ -2955,13 +3303,13 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x3347, calls x1214, method x1000, contains x407. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x3431, calls x1217, method x1022, contains x404. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
-<!-- ====== 10. Access and Permission Management ====== -->
-<h2 id="access-and-permission-management">10. Access and Permission Management</h2>
+<!-- ====== 11. Access and Permission Management ====== -->
+<h2 id="access-and-permission-management">11. Access and Permission Management</h2>
 <p>Access and Permission Management groups implementation around ontologyservicecs, etosbackend, ontology, listontologyversionsasync, mostly in ETOS.Backend/Ontology/OntologyService.cs. This section covers 120 nodes and 477 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -3299,8 +3647,8 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 11. Identity and Data Quality Configuration ====== -->
-<h2 id="identity-and-data-quality-configuration">11. Identity and Data Quality Configuration</h2>
+<!-- ====== 12. Identity and Data Quality Configuration ====== -->
+<h2 id="identity-and-data-quality-configuration">12. Identity and Data Quality Configuration</h2>
 <p>Identity and Data Quality Configuration groups implementation around docs, prd, initialconversation, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-001-1-100.md. This section covers 108 nodes and 107 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -3639,8 +3987,8 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 12. Graph Bootstrap Service ====== -->
-<h2 id="graph-bootstrap-service">12. Graph Bootstrap Service</h2>
+<!-- ====== 13. Graph Bootstrap Service ====== -->
+<h2 id="graph-bootstrap-service">13. Graph Bootstrap Service</h2>
 <p>Graph Bootstrap Service groups implementation around chatgpt, conversation, part, 701, mostly in .prd/.initialConversation/chatgpt-conversation-part-008-701-800.md, .prd/.initialConversation/chatgpt-conversation-part-001-1-100.md. This section covers 102 nodes and 101 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -3982,8 +4330,8 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 13. Community 142 ====== -->
-<h2 id="community-142">13. Community 142</h2>
+<!-- ====== 14. Community 142 ====== -->
+<h2 id="community-142">14. Community 142</h2>
 <p>Community 142 groups implementation around 201, chatgpt, conversation, part, mostly in .prd/.initialConversation/chatgpt-conversation-part-003-201-300.md. This section covers 101 nodes and 100 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -4322,8 +4670,8 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 14. Community 178 ====== -->
-<h2 id="community-178">14. Community 178</h2>
+<!-- ====== 15. Community 178 ====== -->
+<h2 id="community-178">15. Community 178</h2>
 <p>Community 178 groups implementation around 501, chatgpt, conversation, part, mostly in .prd/.initialConversation/chatgpt-conversation-part-006-501-600.md. This section covers 101 nodes and 100 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -4662,68 +5010,68 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 15. Classification Policy Management ====== -->
-<h2 id="classification-policy-management">15. Classification Policy Management</h2>
-<p>Classification Policy Management groups implementation around 301, chatgpt, conversation, part, mostly in .prd/.initialConversation/chatgpt-conversation-part-004-301-400.md. This section covers 101 nodes and 100 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<!-- ====== 16. Other ====== -->
+<h2 id="other">16. Other</h2>
+<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-004-301-400.md, .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md, .prd/.initialConversation/chatgpt-conversation-part-002-101-200.md. This section covers 5610 nodes and 11098 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Classification Policy Management (101 nodes, 100 edges)
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a("chatgpt-conversation-part-004-301-400.md")
-    initialconversation_chatgpt_conversation_part_00_fc7d9abf("301. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_8ed270d9("302. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_75453c72("303. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_7c6bcd1f("304. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_3ba0ddbc("305. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_2c98769e("306. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_94327238("307. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_d7ed7f94("308. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_6be681c6("309. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_6a1f78de("310. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_4f0d3211("311. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_f7222778("312. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_c464830e("313. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_b807e47e("314. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_cd856e1c("315. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_30e4f5e0("316. user<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_4808b4c8("317. assistant<br/><small>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</small>")
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_fc7d9abf
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_8ed270d9
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_75453c72
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_7c6bcd1f
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_3ba0ddbc
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_2c98769e
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_94327238
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_d7ed7f94
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_6be681c6
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_6a1f78de
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_4f0d3211
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_f7222778
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_c464830e
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_b807e47e
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_cd856e1c
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_30e4f5e0
-    initialconversation_chatgpt_conversation_part_00_8e53bb2a -->|contains| initialconversation_chatgpt_conversation_part_00_4808b4c8
-    %% Omitted for readability: 83 nodes, 0 edges
-    class initialconversation_chatgpt_conversation_part_00_8e53bb2a concept;
-    class initialconversation_chatgpt_conversation_part_00_fc7d9abf concept;
-    class initialconversation_chatgpt_conversation_part_00_8ed270d9 concept;
-    class initialconversation_chatgpt_conversation_part_00_75453c72 concept;
-    class initialconversation_chatgpt_conversation_part_00_7c6bcd1f concept;
-    class initialconversation_chatgpt_conversation_part_00_3ba0ddbc concept;
-    class initialconversation_chatgpt_conversation_part_00_2c98769e concept;
-    class initialconversation_chatgpt_conversation_part_00_94327238 concept;
-    class initialconversation_chatgpt_conversation_part_00_d7ed7f94 concept;
-    class initialconversation_chatgpt_conversation_part_00_6be681c6 concept;
-    class initialconversation_chatgpt_conversation_part_00_6a1f78de concept;
-    class initialconversation_chatgpt_conversation_part_00_4f0d3211 concept;
-    class initialconversation_chatgpt_conversation_part_00_f7222778 concept;
-    class initialconversation_chatgpt_conversation_part_00_c464830e concept;
-    class initialconversation_chatgpt_conversation_part_00_b807e47e concept;
-    class initialconversation_chatgpt_conversation_part_00_cd856e1c concept;
-    class initialconversation_chatgpt_conversation_part_00_30e4f5e0 concept;
-    class initialconversation_chatgpt_conversation_part_00_4808b4c8 concept;
+    %% Section: Other (5610 nodes, 11098 edges)
+    subgraph other_ETOS_Backend_AgentRuns_AgentRunService_cs_a82ae235["ETOS.Backend/AgentRuns/AgentRunService.cs"]
+        agentruns_agentrunservice_iagentrunservice_a076c105("IAgentRunService<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
+        agentruns_agentrunservice_iagentrunservice_getas_cfb5db9b("GetAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
+        agentruns_agentrunservice_iagentrunservice_lista_513318c2("ListAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
+        agentruns_agentrunservice_agentrunservice_dec89402("AgentRunService<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
+        agentruns_agentrunservice_agentrunservice_getasy_e39310d8("GetAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
+        agentruns_agentrunservice_agentrunservice_listas_66c9e297("ListAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
+        agentruns_agentrunservice_agentrunservice_requir_a827e1af("RequireReadPermissionAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
+    end
+    subgraph other_ETOS_Backend_AgentRuns_AgentRunEndpointExt_8373f593["ETOS.Backend/AgentRuns/AgentRunEndpointExtensions.cs"]
+        agentruns_agentrunendpointextensions_agentrunend_9b0cc282("AgentRunEndpointExtensions<br/><small>ETOS.Backend/AgentRuns/AgentRunEndpointExtensions.cs</small>")
+        agentruns_agentrunendpointextensions_agentrunend_f98f816d("ExecuteAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunEndpointExtensions.cs</small>")
+        agentruns_agentrunendpointextensions_agentrunend_18142f9f("MapEnterpriseThreadAgentRunEndpoints()<br/><small>ETOS.Backend/AgentRuns/AgentRunEndpointExtensions.cs</small>")
+    end
+    subgraph other_ETOS_Backend_AgentRuntime_AgentExecutionEn_a127f125["ETOS.Backend/AgentRuntime/AgentExecutionEndpointExtensions.cs"]
+        agentruntime_agentexecutionendpointextensions_ag_9d8245b6("AgentExecutionEndpointExtensions<br/><small>ETOS.Backend/AgentRuntime/AgentExecutionEndpointExtensions.cs</small>")
+        agentruntime_agentexecutionendpointextensions_ag_f96cbf93("ExecuteAsync()<br/><small>ETOS.Backend/AgentRuntime/AgentExecutionEndpointExtensions.cs</small>")
+    end
+    agents_agentdefinitionservice_agentdefinitionser_b95acd20("AgentDefinitionService<br/><small>ETOS.Backend/Agents/AgentDefinitionService.cs</small>")
+    classification_classificationpolicyservice_class_737a2aa3("ClassificationPolicyService<br/><small>ETOS.Backend/Classification/ClassificationPolicyService.cs</small>")
+    governedquery_governedqueryservice_governedquery_9453975b("GovernedQueryService<br/><small>ETOS.Backend/GovernedQuery/GovernedQueryService.cs</small>")
+    identityresolution_identityresolutionservice_ide_fee45c54("IdentityResolutionService<br/><small>ETOS.Backend/IdentityResolution/IdentityResolutionService.cs</small>")
+    packages_manufacturingreferencepackageinstaller_2b538ddd("ManufacturingReferencePackageInstaller<br/><small>ETOS.Backend/Packages/ManufacturingReferencePackageInstaller.cs</small>")
+    toolregistry_tooldefinitionservice_tooldefinitio_57e30779("ToolDefinitionService<br/><small>ETOS.Backend/ToolRegistry/ToolDefinitionService.cs</small>")
+    agentruns_agentrunendpointextensions_agentrunend_9b0cc282 -->|method| agentruns_agentrunendpointextensions_agentrunend_f98f816d
+    agentruns_agentrunendpointextensions_agentrunend_9b0cc282 -->|method| agentruns_agentrunendpointextensions_agentrunend_18142f9f
+    agentruns_agentrunendpointextensions_agentrunend_18142f9f -->|calls| agentruns_agentrunendpointextensions_agentrunend_f98f816d
+    agentruns_agentrunservice_iagentrunservice_a076c105 -->|method| agentruns_agentrunservice_iagentrunservice_getas_cfb5db9b
+    agentruns_agentrunservice_iagentrunservice_a076c105 -->|method| agentruns_agentrunservice_iagentrunservice_lista_513318c2
+    agentruns_agentrunservice_agentrunservice_dec89402 -->|method| agentruns_agentrunservice_agentrunservice_getasy_e39310d8
+    agentruns_agentrunservice_agentrunservice_dec89402 -->|method| agentruns_agentrunservice_agentrunservice_listas_66c9e297
+    agentruns_agentrunservice_agentrunservice_dec89402 -->|method| agentruns_agentrunservice_agentrunservice_requir_a827e1af
+    agentruns_agentrunservice_agentrunservice_listas_66c9e297 -->|calls| agentruns_agentrunservice_agentrunservice_requir_a827e1af
+    agentruns_agentrunservice_agentrunservice_getasy_e39310d8 -->|calls| agentruns_agentrunservice_agentrunservice_requir_a827e1af
+    agentruntime_agentexecutionendpointextensions_ag_9d8245b6 -->|method| agentruntime_agentexecutionendpointextensions_ag_f96cbf93
+    %% Omitted for readability: 5592 nodes, 0 edges
+    class agentruns_agentrunservice_iagentrunservice_a076c105 klass;
+    class agentruns_agentrunservice_iagentrunservice_getas_cfb5db9b async;
+    class agentruns_agentrunservice_iagentrunservice_lista_513318c2 async;
+    class agentruns_agentrunservice_agentrunservice_dec89402 klass;
+    class agentruns_agentrunservice_agentrunservice_getasy_e39310d8 async;
+    class agentruns_agentrunservice_agentrunservice_listas_66c9e297 async;
+    class agentruns_agentrunservice_agentrunservice_requir_a827e1af async;
+    class agentruns_agentrunendpointextensions_agentrunend_9b0cc282 api;
+    class agentruns_agentrunendpointextensions_agentrunend_f98f816d async;
+    class agentruns_agentrunendpointextensions_agentrunend_18142f9f api;
+    class agentruntime_agentexecutionendpointextensions_ag_9d8245b6 api;
+    class agentruntime_agentexecutionendpointextensions_ag_f96cbf93 async;
+    class agents_agentdefinitionservice_agentdefinitionser_b95acd20 klass;
+    class classification_classificationpolicyservice_class_737a2aa3 klass;
+    class governedquery_governedqueryservice_governedquery_9453975b klass;
+    class identityresolution_identityresolutionservice_ide_fee45c54 klass;
+    class packages_manufacturingreferencepackageinstaller_2b538ddd klass;
+    class toolregistry_tooldefinitionservice_tooldefinitio_57e30779 klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -4992,359 +5340,19 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</code></td><td>101 nodes</td></tr>
-    </table>
-  </div>
-  <div class="card">
-    <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x100. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
-  </div>
-</div>
-<hr>
-
-<!-- ====== 16. Other ====== -->
-<h2 id="other">16. Other</h2>
-<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md, .prd/.initialConversation/chatgpt-conversation-part-002-101-200.md, .prd/.initialConversation/chatgpt-conversation-part-005-401-500.md. This section covers 5393 nodes and 10732 internal edges; the diagram shows only representative relationships to stay readable.</p>
-
-<div class="mermaid">
-%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
-flowchart LR
-    %% Section: Other (5393 nodes, 10732 edges)
-    subgraph other_ETOS_Backend_AgentRuns_AgentRunService_cs_a82ae235["ETOS.Backend/AgentRuns/AgentRunService.cs"]
-        agentruns_agentrunservice_iagentrunservice_a076c105("IAgentRunService<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
-        agentruns_agentrunservice_iagentrunservice_getas_cfb5db9b("GetAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
-        agentruns_agentrunservice_iagentrunservice_lista_513318c2("ListAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
-        agentruns_agentrunservice_agentrunservice_dec89402("AgentRunService<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
-        agentruns_agentrunservice_agentrunservice_getasy_e39310d8("GetAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
-        agentruns_agentrunservice_agentrunservice_listas_66c9e297("ListAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
-        agentruns_agentrunservice_agentrunservice_requir_a827e1af("RequireReadPermissionAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
-    end
-    subgraph other_ETOS_Backend_AgentRuns_AgentRunEndpointExt_8373f593["ETOS.Backend/AgentRuns/AgentRunEndpointExtensions.cs"]
-        agentruns_agentrunendpointextensions_agentrunend_9b0cc282("AgentRunEndpointExtensions<br/><small>ETOS.Backend/AgentRuns/AgentRunEndpointExtensions.cs</small>")
-        agentruns_agentrunendpointextensions_agentrunend_f98f816d("ExecuteAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunEndpointExtensions.cs</small>")
-        agentruns_agentrunendpointextensions_agentrunend_18142f9f("MapEnterpriseThreadAgentRunEndpoints()<br/><small>ETOS.Backend/AgentRuns/AgentRunEndpointExtensions.cs</small>")
-    end
-    subgraph other_ETOS_Backend_AgentRuntime_AgentExecutionEn_a127f125["ETOS.Backend/AgentRuntime/AgentExecutionEndpointExtensions.cs"]
-        agentruntime_agentexecutionendpointextensions_ag_9d8245b6("AgentExecutionEndpointExtensions<br/><small>ETOS.Backend/AgentRuntime/AgentExecutionEndpointExtensions.cs</small>")
-        agentruntime_agentexecutionendpointextensions_ag_f96cbf93("ExecuteAsync()<br/><small>ETOS.Backend/AgentRuntime/AgentExecutionEndpointExtensions.cs</small>")
-    end
-    agents_agentdefinitionservice_agentdefinitionser_b95acd20("AgentDefinitionService<br/><small>ETOS.Backend/Agents/AgentDefinitionService.cs</small>")
-    classification_classificationpolicyservice_class_737a2aa3("ClassificationPolicyService<br/><small>ETOS.Backend/Classification/ClassificationPolicyService.cs</small>")
-    governedquery_governedqueryservice_governedquery_9453975b("GovernedQueryService<br/><small>ETOS.Backend/GovernedQuery/GovernedQueryService.cs</small>")
-    identityresolution_identityresolutionservice_ide_fee45c54("IdentityResolutionService<br/><small>ETOS.Backend/IdentityResolution/IdentityResolutionService.cs</small>")
-    packages_manufacturingreferencepackageinstaller_2b538ddd("ManufacturingReferencePackageInstaller<br/><small>ETOS.Backend/Packages/ManufacturingReferencePackageInstaller.cs</small>")
-    toolregistry_tooldefinitionservice_tooldefinitio_57e30779("ToolDefinitionService<br/><small>ETOS.Backend/ToolRegistry/ToolDefinitionService.cs</small>")
-    agentruns_agentrunendpointextensions_agentrunend_9b0cc282 -->|method| agentruns_agentrunendpointextensions_agentrunend_f98f816d
-    agentruns_agentrunendpointextensions_agentrunend_9b0cc282 -->|method| agentruns_agentrunendpointextensions_agentrunend_18142f9f
-    agentruns_agentrunendpointextensions_agentrunend_18142f9f -->|calls| agentruns_agentrunendpointextensions_agentrunend_f98f816d
-    agentruns_agentrunservice_iagentrunservice_a076c105 -->|method| agentruns_agentrunservice_iagentrunservice_getas_cfb5db9b
-    agentruns_agentrunservice_iagentrunservice_a076c105 -->|method| agentruns_agentrunservice_iagentrunservice_lista_513318c2
-    agentruns_agentrunservice_agentrunservice_dec89402 -->|method| agentruns_agentrunservice_agentrunservice_getasy_e39310d8
-    agentruns_agentrunservice_agentrunservice_dec89402 -->|method| agentruns_agentrunservice_agentrunservice_listas_66c9e297
-    agentruns_agentrunservice_agentrunservice_dec89402 -->|method| agentruns_agentrunservice_agentrunservice_requir_a827e1af
-    agentruns_agentrunservice_agentrunservice_listas_66c9e297 -->|calls| agentruns_agentrunservice_agentrunservice_requir_a827e1af
-    agentruns_agentrunservice_agentrunservice_getasy_e39310d8 -->|calls| agentruns_agentrunservice_agentrunservice_requir_a827e1af
-    agentruntime_agentexecutionendpointextensions_ag_9d8245b6 -->|method| agentruntime_agentexecutionendpointextensions_ag_f96cbf93
-    %% Omitted for readability: 5375 nodes, 0 edges
-    class agentruns_agentrunservice_iagentrunservice_a076c105 klass;
-    class agentruns_agentrunservice_iagentrunservice_getas_cfb5db9b async;
-    class agentruns_agentrunservice_iagentrunservice_lista_513318c2 async;
-    class agentruns_agentrunservice_agentrunservice_dec89402 klass;
-    class agentruns_agentrunservice_agentrunservice_getasy_e39310d8 async;
-    class agentruns_agentrunservice_agentrunservice_listas_66c9e297 async;
-    class agentruns_agentrunservice_agentrunservice_requir_a827e1af async;
-    class agentruns_agentrunendpointextensions_agentrunend_9b0cc282 api;
-    class agentruns_agentrunendpointextensions_agentrunend_f98f816d async;
-    class agentruns_agentrunendpointextensions_agentrunend_18142f9f api;
-    class agentruntime_agentexecutionendpointextensions_ag_9d8245b6 api;
-    class agentruntime_agentexecutionendpointextensions_ag_f96cbf93 async;
-    class agents_agentdefinitionservice_agentdefinitionser_b95acd20 klass;
-    class classification_classificationpolicyservice_class_737a2aa3 klass;
-    class governedquery_governedqueryservice_governedquery_9453975b klass;
-    class identityresolution_identityresolutionservice_ide_fee45c54 klass;
-    class packages_manufacturingreferencepackageinstaller_2b538ddd klass;
-    class toolregistry_tooldefinitionservice_tooldefinitio_57e30779 klass;
-    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
-    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
-    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
-    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
-    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
-    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
-    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
-    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
-    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
-</div>
-
-<h3>Call Details</h3>
-<table class="call-table">
-<tr>
-  <th style="width:5%">#</th>
-  <th style="width:28%">Node</th>
-  <th style="width:10%">Type</th>
-  <th style="width:17%">Caller</th>
-  <th style="width:20%">Callees</th>
-  <th style="width:20%">Description</th>
-</tr>
-<tr>
-  <td>1</td>
-  <td><code>chatgpt-conversation-part-009-801-900.md</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing chatgpt-conversation-part-009-801-900.md.</td>
-</tr>
-<tr>
-  <td>2</td>
-  <td><code>801. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 801. assistant.</td>
-</tr>
-<tr>
-  <td>3</td>
-  <td><code>802. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 802. user.</td>
-</tr>
-<tr>
-  <td>4</td>
-  <td><code>803. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 803. assistant.</td>
-</tr>
-<tr>
-  <td>5</td>
-  <td><code>804. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 804. user.</td>
-</tr>
-<tr>
-  <td>6</td>
-  <td><code>805. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 805. assistant.</td>
-</tr>
-<tr>
-  <td>7</td>
-  <td><code>806. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 806. user.</td>
-</tr>
-<tr>
-  <td>8</td>
-  <td><code>807. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 807. assistant.</td>
-</tr>
-<tr>
-  <td>9</td>
-  <td><code>808. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 808. user.</td>
-</tr>
-<tr>
-  <td>10</td>
-  <td><code>809. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 809. assistant.</td>
-</tr>
-<tr>
-  <td>11</td>
-  <td><code>810. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 810. user.</td>
-</tr>
-<tr>
-  <td>12</td>
-  <td><code>811. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 811. assistant.</td>
-</tr>
-<tr>
-  <td>13</td>
-  <td><code>812. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 812. user.</td>
-</tr>
-<tr>
-  <td>14</td>
-  <td><code>813. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 813. assistant.</td>
-</tr>
-<tr>
-  <td>15</td>
-  <td><code>814. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 814. user.</td>
-</tr>
-<tr>
-  <td>16</td>
-  <td><code>815. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 815. assistant.</td>
-</tr>
-<tr>
-  <td>17</td>
-  <td><code>816. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 816. user.</td>
-</tr>
-<tr>
-  <td>18</td>
-  <td><code>817. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 817. assistant.</td>
-</tr>
-<tr>
-  <td>19</td>
-  <td><code>818. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 818. user.</td>
-</tr>
-<tr>
-  <td>20</td>
-  <td><code>819. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 819. assistant.</td>
-</tr>
-<tr>
-  <td>21</td>
-  <td><code>820. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 820. user.</td>
-</tr>
-<tr>
-  <td>22</td>
-  <td><code>821. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 821. assistant.</td>
-</tr>
-<tr>
-  <td>23</td>
-  <td><code>822. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 822. user.</td>
-</tr>
-<tr>
-  <td>24</td>
-  <td><code>823. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 823. assistant.</td>
-</tr>
-<tr>
-  <td>25</td>
-  <td><code>824. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 824. user.</td>
-</tr>
-<tr>
-  <td>26</td>
-  <td><code>825. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 825. assistant.</td>
-</tr>
-<tr>
-  <td>27</td>
-  <td><code>826. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 826. user.</td>
-</tr>
-<tr>
-  <td>28</td>
-  <td><code>827. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 827. assistant.</td>
-</tr>
-<tr>
-  <td>29</td>
-  <td><code>828. user</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 828. user.</td>
-</tr>
-<tr>
-  <td>30</td>
-  <td><code>829. assistant</code><br><small style="color:var(--muted)">.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Documentation node describing 829. assistant.</td>
-</tr>
-</table>
-
-<div class="grid">
-  <div class="card">
-    <h4>Key Files</h4>
-    <table style="width:100%;font-size:0.85rem;">
-      <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-002-101-200.md</code></td><td>101 nodes</td></tr>
+      <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-004-301-400.md</code></td><td>102 nodes</td></tr>
+<tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-002-101-200.md</code></td><td>101 nodes</td></tr>
 <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-005-401-500.md</code></td><td>101 nodes</td></tr>
 <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-007-601-700.md</code></td><td>101 nodes</td></tr>
 <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-009-801-900.md</code></td><td>101 nodes</td></tr>
 <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-010-901-1000.md</code></td><td>101 nodes</td></tr>
 <tr><td><code>.prd/.initialConversation/chatgpt-conversation-part-011-1001-1100.md</code></td><td>101 nodes</td></tr>
 <tr><td><code>ETOS.Backend/IdentityResolution/IdentityResolutionService.cs</code></td><td>95 nodes</td></tr>
-<tr><td><code>ETOS.Backend/Classification/ClassificationPolicyService.cs</code></td><td>92 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x5647, contains x1722, method x1677, calls x1530. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x5753, contains x1879, method x1711, calls x1546. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -5355,18 +5363,18 @@ flowchart LR
   <div class="card">
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>Nodes</td><td>11364</td></tr>
-      <tr><td>Edges</td><td>23179</td></tr>
+      <tr><td>Nodes</td><td>11611</td></tr>
+      <tr><td>Edges</td><td>23594</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
-      <tr><td>Communities</td><td>626</td></tr>
+      <tr><td>Communities</td><td>644</td></tr>
       <tr><td>Documented Sections</td><td>15</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>EXTRACTED</td><td>23049</td></tr>
-      <tr><td>INFERRED</td><td>130</td></tr>
+      <tr><td>EXTRACTED</td><td>23420</td></tr>
+      <tr><td>INFERRED</td><td>174</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
   </div>
@@ -5374,7 +5382,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>EnterpriseThreadOS — Architecture Documentation</p>
-  <p>Generated: 2026-07-11 17:49 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-07-13 17:34 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

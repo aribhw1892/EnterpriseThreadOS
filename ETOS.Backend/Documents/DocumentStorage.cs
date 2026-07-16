@@ -7,7 +7,24 @@ public sealed class DocumentFileStorageOptions
 {
     public const string SectionName = "DocumentFileStorage";
 
+    public string Provider { get; set; } = "Local";
+
     public string RootPath { get; set; } = Path.Combine(AppContext.BaseDirectory, "document-memory");
+
+    public MinioDocumentStorageOptions Minio { get; set; } = new();
+}
+
+public sealed class MinioDocumentStorageOptions
+{
+    public string Endpoint { get; set; } = "localhost:9000";
+
+    public string AccessKey { get; set; } = "etosminio";
+
+    public string SecretKey { get; set; } = "etos_minio_dev_password";
+
+    public string Bucket { get; set; } = "etos-documents";
+
+    public bool UseSsl { get; set; }
 }
 
 public sealed record StoredDocumentFile(
@@ -23,6 +40,8 @@ public interface IDocumentFileStorage
         string originalFileName,
         Stream content,
         CancellationToken cancellationToken);
+
+    Task<Stream> OpenReadAsync(string storageKey, CancellationToken cancellationToken);
 }
 
 public sealed class LocalDocumentFileStorage(IOptions<DocumentFileStorageOptions> options) : IDocumentFileStorage
@@ -55,6 +74,14 @@ public sealed class LocalDocumentFileStorage(IOptions<DocumentFileStorageOptions
         return new StoredDocumentFile(storageKey, Convert.ToHexString(sha256.Hash!).ToLowerInvariant(), totalBytes);
     }
 
+    public Task<Stream> OpenReadAsync(string storageKey, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var absolutePath = GetAbsolutePath(storageKey);
+        Stream stream = File.OpenRead(absolutePath);
+        return Task.FromResult(stream);
+    }
+
     private string GetAbsolutePath(string storageKey)
     {
         var root = Path.GetFullPath(options.Value.RootPath);
@@ -68,17 +95,39 @@ public sealed class LocalDocumentFileStorage(IOptions<DocumentFileStorageOptions
     }
 }
 
+public sealed record DocumentVectorIndexContext(
+    DocumentArtifact Document,
+    DocumentVersion Version,
+    string? ExtractedText,
+    IReadOnlyCollection<Guid> LinkedGraphNodeIds);
+
+public sealed record DocumentVectorIndexResult(
+    DocumentVectorIndexStatus Status,
+    string ProviderName,
+    string? FailureSummary);
+
 public interface IDocumentVectorIndexingService
 {
-    Task<DocumentVectorIndexStatus> RequestIndexAsync(DocumentVersion documentVersion, CancellationToken cancellationToken);
+    bool IsEnabled { get; }
+
+    Task<DocumentVectorIndexResult> RequestIndexAsync(
+        DocumentVectorIndexContext context,
+        CancellationToken cancellationToken);
 }
 
 public sealed class DisabledDocumentVectorIndexingService : IDocumentVectorIndexingService
 {
-    public Task<DocumentVectorIndexStatus> RequestIndexAsync(DocumentVersion documentVersion, CancellationToken cancellationToken)
+    public bool IsEnabled => false;
+
+    public Task<DocumentVectorIndexResult> RequestIndexAsync(
+        DocumentVectorIndexContext context,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(DocumentVectorIndexStatus.DisabledPlaceholder);
+        return Task.FromResult(new DocumentVectorIndexResult(
+            DocumentVectorIndexStatus.DisabledPlaceholder,
+            "disabled-qdrant-placeholder",
+            "Qdrant indexing provider is not enabled."));
     }
 }
 

@@ -578,7 +578,7 @@ public sealed class ExplorersTests
         TestContext context,
         IGraphMemoryService graphMemoryService)
     {
-        return new GovernedQueryService(
+        return DocumentMemoryTestSupport.CreateGovernedQueryService(
             dbContext,
             new StaticTenantContextResolver(context),
             new AllowAllPermissionService(),
@@ -608,17 +608,14 @@ public sealed class ExplorersTests
         TestContext context,
         IGraphMemoryService graphMemoryService)
     {
-        return new DocumentService(
+        return DocumentMemoryTestSupport.CreateDocumentService(
             dbContext,
             new StaticTenantContextResolver(context),
             new AllowAllPermissionService(),
             new RecordingDenialRecorder(),
             new RecordingAuditRecorder(),
             new NoOpDocumentFileStorage(),
-            new NoOpDocumentVectorIndexingService(),
-            new NoOpCadParsingPlaceholder(),
-            graphMemoryService,
-            new AllowAllPolicyService());
+            graphMemoryService);
     }
 
     private static AiTraceService CreateAiTraceService(EnterpriseThreadDbContext dbContext, TestContext context)
@@ -712,12 +709,9 @@ public sealed class ExplorersTests
     {
         public Task<StoredDocumentFile> StoreAsync(Guid tenantId, Guid documentId, string originalFileName, Stream content, CancellationToken cancellationToken)
             => throw new NotSupportedException();
-    }
 
-    private sealed class NoOpDocumentVectorIndexingService : IDocumentVectorIndexingService
-    {
-        public Task<DocumentVectorIndexStatus> RequestIndexAsync(DocumentVersion documentVersion, CancellationToken cancellationToken)
-            => Task.FromResult(DocumentVectorIndexStatus.DisabledPlaceholder);
+        public Task<Stream> OpenReadAsync(string storageKey, CancellationToken cancellationToken)
+            => throw new NotSupportedException();
     }
 
     private sealed class NoOpCadParsingPlaceholder : ICadParsingPlaceholder

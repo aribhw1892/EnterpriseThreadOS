@@ -1,12 +1,15 @@
 using ETOS.Backend.Artifacts;
 using ETOS.Backend.Classification;
 using ETOS.Backend.DataQuality;
+using ETOS.Backend.Documents.Extraction;
+using ETOS.Backend.Documents.Vector;
 using ETOS.Backend.Governance;
 using ETOS.Backend.GraphMemory;
 using ETOS.Backend.Identity;
 using ETOS.Backend.Imports;
 using ETOS.Backend.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ETOS.Backend.Documents;
 
@@ -30,10 +33,13 @@ public sealed class DocumentService(
     IAccessDenialRecorder denialRecorder,
     IAuditRecorder auditRecorder,
     IDocumentFileStorage fileStorage,
+    IDocumentExtractionRouter extractionRouter,
     IDocumentVectorIndexingService vectorIndexingService,
     ICadParsingPlaceholder cadParsingPlaceholder,
     IGraphMemoryService graphMemoryService,
-    IClassificationPolicyService classificationPolicyService) : IDocumentService
+    IClassificationPolicyService classificationPolicyService,
+    IOptions<DocumentIngestOptions> ingestOptions,
+    IOptions<DocumentVectorIndexingOptions> vectorOptions) : IDocumentService
 {
     private const decimal UncertainLinkThreshold = 0.75m;
 
@@ -143,6 +149,28 @@ public sealed class DocumentService(
 
         await using var stream = file.OpenReadStream();
         var stored = await fileStorage.StoreAsync(context.TenantId, document.Id, file.FileName, stream, cancellationToken);
+
+        var extractionStatus = request.ExtractionStatus;
+        var metadataJson = request.ExtractedMetadataSummaryJson;
+        var failureSummary = request.ExtractionFailureSummary;
+        string? extractedText = null;
+
+        if (request.ExtractionStatus == DocumentExtractionStatus.NotStarted && ingestOptions.Value.AutoExtractOnUpload)
+        {
+            await using var extractStream = await fileStorage.OpenReadAsync(stored.StorageKey, cancellationToken);
+            var extraction = await extractionRouter.ExtractAsync(
+                new DocumentExtractionRequest(
+                    TrimToMax(Path.GetFileName(file.FileName), 260),
+                    TrimToMax(string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType, 160),
+                    extractStream,
+                    request.ExtractedMetadataSummaryJson),
+                cancellationToken);
+            extractionStatus = extraction.ExtractionStatus;
+            extractedText = extraction.ExtractedText;
+            metadataJson = extraction.ExtractedMetadataSummaryJson ?? metadataJson;
+            failureSummary = extraction.FailureSummary ?? failureSummary;
+        }
+
         var version = new DocumentVersion
         {
             Id = Guid.NewGuid(),
@@ -155,9 +183,9 @@ public sealed class DocumentService(
             OriginalFileName = TrimToMax(Path.GetFileName(file.FileName), 260),
             ContentType = TrimToMax(string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType, 160),
             SizeBytes = stored.SizeBytes,
-            ExtractedMetadataSummaryJson = TrimOptional(request.ExtractedMetadataSummaryJson, 4000),
-            ExtractionStatus = request.ExtractionStatus,
-            ExtractionFailureSummary = TrimOptional(request.ExtractionFailureSummary, 1000),
+            ExtractedMetadataSummaryJson = TrimOptional(metadataJson, 4000),
+            ExtractionStatus = extractionStatus,
+            ExtractionFailureSummary = TrimOptional(failureSummary, 1000),
             UploadedByUserId = context.UserId,
             CreatedAt = DateTimeOffset.UtcNow
         };
@@ -172,6 +200,21 @@ public sealed class DocumentService(
         if (version.ExtractionStatus == DocumentExtractionStatus.Failed)
         {
             await CreateExtractionIssueInternalAsync(context, document, version, "Document extraction failed", "document_extraction_failed", version.ExtractionFailureSummary ?? "Document extraction failed.", null, cancellationToken);
+        }
+
+        if (vectorOptions.Value.AutoIndexOnUpload
+            && vectorIndexingService.IsEnabled
+            && version.ExtractionStatus is DocumentExtractionStatus.Completed or DocumentExtractionStatus.MetadataImported)
+        {
+            await RecordVectorIndexAsync(
+                context,
+                document,
+                version,
+                extractedText,
+                [],
+                safeSummary: $"Auto-indexed document '{document.Title}' version '{version.VersionLabel}'.",
+                policyKey: null,
+                cancellationToken);
         }
 
         return ToVersionResponse(version);
@@ -253,6 +296,24 @@ public sealed class DocumentService(
             await CreateLinkIssueInternalAsync(context, document, version, link, cancellationToken);
         }
 
+        if (vectorOptions.Value.AutoIndexOnUpload && vectorIndexingService.IsEnabled)
+        {
+            var linkedGraphNodeIds = await dbContext.DocumentObjectLinks
+                .AsNoTracking()
+                .Where(item => item.TenantId == context.TenantId && item.DocumentVersionId == version.Id && item.GraphNodeId != null)
+                .Select(item => item.GraphNodeId!.Value)
+                .ToListAsync(cancellationToken);
+            await RecordVectorIndexAsync(
+                context,
+                document,
+                version,
+                extractedText: null,
+                linkedGraphNodeIds,
+                safeSummary: $"Re-indexed document '{document.Title}' after object link creation.",
+                policyKey: null,
+                cancellationToken);
+        }
+
         return ToLinkResponse(link);
     }
 
@@ -294,19 +355,50 @@ public sealed class DocumentService(
             throw new TenantAccessDeniedException("Document is restricted by policy.");
         }
 
-        var status = await vectorIndexingService.RequestIndexAsync(version, cancellationToken);
+        var linkedGraphNodeIds = await dbContext.DocumentObjectLinks
+            .AsNoTracking()
+            .Where(item => item.TenantId == context.TenantId && item.DocumentVersionId == version.Id && item.GraphNodeId != null)
+            .Select(item => item.GraphNodeId!.Value)
+            .ToListAsync(cancellationToken);
+
+        var record = await RecordVectorIndexAsync(
+            context,
+            document,
+            version,
+            extractedText: null,
+            linkedGraphNodeIds,
+            TrimOptional(request.SafeSummary, 1000) ?? $"Document '{document.Title}' version '{version.VersionLabel}' vector indexing request.",
+            request.PolicyKey,
+            cancellationToken);
+
+        return ToVectorResponse(record);
+    }
+
+    private async Task<DocumentVectorIndexRecord> RecordVectorIndexAsync(
+        ActiveTenantContext context,
+        DocumentArtifact document,
+        DocumentVersion version,
+        string? extractedText,
+        IReadOnlyCollection<Guid> linkedGraphNodeIds,
+        string safeSummary,
+        string? policyKey,
+        CancellationToken cancellationToken)
+    {
+        var indexResult = await vectorIndexingService.RequestIndexAsync(
+            new DocumentVectorIndexContext(document, version, extractedText, linkedGraphNodeIds),
+            cancellationToken);
         var record = new DocumentVectorIndexRecord
         {
             Id = Guid.NewGuid(),
             TenantId = context.TenantId,
             DocumentArtifactId = document.Id,
             DocumentVersionId = version.Id,
-            ProviderName = "disabled-qdrant-placeholder",
-            Status = status,
+            ProviderName = indexResult.ProviderName,
+            Status = indexResult.Status,
             TenantFilter = context.TenantId.ToString(),
-            PolicyFilterSummary = $"classification={document.ClassificationKey};documentType={document.DocumentType};policy={request.PolicyKey ?? "active"}",
-            SafeSummary = TrimOptional(request.SafeSummary, 1000) ?? $"Document '{document.Title}' version '{version.VersionLabel}' is eligible for future vector indexing.",
-            FailureSummary = status == DocumentVectorIndexStatus.DisabledPlaceholder ? "Qdrant indexing provider is not enabled in this slice." : null,
+            PolicyFilterSummary = $"classification={document.ClassificationKey};documentType={document.DocumentType};policy={policyKey ?? "active"}",
+            SafeSummary = safeSummary,
+            FailureSummary = indexResult.FailureSummary,
             RequestedByUserId = context.UserId,
             CreatedAt = DateTimeOffset.UtcNow
         };
@@ -316,8 +408,7 @@ public sealed class DocumentService(
         var audit = await RecordAuditAsync(context, "documents.vector_index.create", "Document vector indexing request was recorded.", nameof(DocumentVectorIndexRecord), record.Id, cancellationToken);
         record.AuditRecordId = audit.Id;
         await dbContext.SaveChangesAsync(cancellationToken);
-
-        return ToVectorResponse(record);
+        return record;
     }
 
     public async Task<CadParsingPlaceholderResponse> GetCadParsingStatusAsync(CancellationToken cancellationToken)

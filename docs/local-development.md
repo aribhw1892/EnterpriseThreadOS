@@ -35,8 +35,8 @@ Local services:
 
 - PostgreSQL: operational SQL store for current backend persistence.
 - Neo4j: primary graph memory backend for Slice 6 and later graph-backed features.
-- Qdrant: vector store for future document/vector retrieval slices.
-- MinIO: object storage for import/document/trace package slices. Current import and document slices use local file-backed storage implementations for developer/test runs while keeping storage boundaries ready for MinIO-compatible object storage.
+- Qdrant: document chunk embeddings when `DocumentVectorIndexing:Enabled` is true (off by default in dev).
+- MinIO: optional object storage for document/import bytes. Default dev path uses local disk (`DocumentFileStorage:Provider` = `Local`); set `Minio` when exercising object storage.
 - Redis: cache/runtime support for later slices.
 - RabbitMQ: messaging/runtime support for later slices.
 - Agent runtime (`ETOS.AgentRuntime`): Python FastAPI + PydanticAI sidecar for governed single-step agent execution. The .NET host calls it through `PydanticAiRuntimeAdapter`; tools and context assembly stay in .NET.
@@ -492,4 +492,4 @@ If EF migrations fail:
 - `docs/architecture/domain-packages.md`: core vs domain package boundary.
 - `docs/backend/architecture.md`: backend module guidance.
 - `docs/frontend/architecture.md`: frontend guidance.
-- `docs/ai-agent-workflow.md`: AI agent workflow.
+- `docs/document-ingest.md`: governed document upload, extraction providers, Qdrant/MinIO configuration.
