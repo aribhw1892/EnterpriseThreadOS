@@ -35,7 +35,7 @@ Local services:
 
 - PostgreSQL: operational SQL store for current backend persistence.
 - Neo4j: primary graph memory backend for Slice 6 and later graph-backed features.
-- Qdrant: document chunk embeddings when `DocumentVectorIndexing:Enabled` is true (off by default in dev).
+- Qdrant: document chunk embeddings when `DocumentVectorIndexing:Enabled` is true (off by default in `appsettings.json`; Development may enable it). Embedding providers mirror agent LLM keys: `deterministic-v1`, `openai`/`openai-v1`, `openai-compatible` — see `docs/document-ingest.md`.
 - MinIO: optional object storage for document/import bytes. Default dev path uses local disk (`DocumentFileStorage:Provider` = `Local`); set `Minio` when exercising object storage.
 - Redis: cache/runtime support for later slices.
 - RabbitMQ: messaging/runtime support for later slices.
@@ -53,6 +53,8 @@ Stop services:
 ```powershell
 docker compose --env-file .env -f infra/local/docker-compose.yml down
 ```
+
+
 
 ## Agent Runtime (Python sidecar)
 
@@ -104,13 +106,17 @@ Restart only (no rebuild) when you change `.env` values such as `OPENAI_BASE_URL
 docker compose --env-file .env -f infra/local/docker-compose.yml up -d agent-runtime
 ```
 
-| Change | Action |
-| --- | --- |
-| `ETOS.AgentRuntime/` Python code | Rebuild `agent-runtime` image + recreate container |
-| `.env` (`OPENAI_BASE_URL`, `OPENAI_API_KEY`) | Restart `agent-runtime` container |
-| `ETOS.Backend/` C# code | Restart `dotnet run` |
-| Published agent model routing (configure page) | Mark ready → Publish (no Docker) |
-| LM Studio model loaded in the UI | No ETOS rebuild; align agent **Primary model id** with LM Studio |
+
+| Change                                         | Action                                                           |
+| ---------------------------------------------- | ---------------------------------------------------------------- |
+| `ETOS.AgentRuntime/` Python code               | Rebuild `agent-runtime` image + recreate container               |
+| `.env` (`OPENAI_BASE_URL`, `OPENAI_API_KEY`)   | Restart `agent-runtime` container                                |
+| `ETOS.Backend/` C# code                        | Restart `dotnet run`                                             |
+| Published agent model routing (configure page) | Mark ready → Publish (no Docker)                                 |
+| LM Studio model loaded in the UI               | No ETOS rebuild; align agent **Primary model id** with LM Studio |
+
+
+
 
 ## Workflow runtime (Issue 24 / 24.1)
 
@@ -118,6 +124,8 @@ Governed workflow orchestration uses `WorkflowRuntime:AdapterKey` in `ETOS.Backe
 
 - Default local/CI: `in-process-v1` with `EnableDaprHost=false` (sequential step execution in the .NET host; no Dapr sidecar required).
 - Dapr path (opt-in): set `AdapterKey` to `dapr-v1` and `EnableDaprHost=true`, then run the backend under `dapr run` with local workflow components.
+
+
 
 ### Dapr workflow local run
 
@@ -178,11 +186,13 @@ See [mvp-demonstration-flow.md](./mvp-demonstration-flow.md) for the full PRD st
 
 Install the manufacturing reference package to seed the `bom-impact-review` sample workflow.
 
-See also the summary table in [`README.md`](../README.md#llm-mapping-lm-studio-and-agent-runtime-docker).
+See also the summary table in `[README.md](../README.md#llm-mapping-lm-studio-and-agent-runtime-docker)`.
 
 ### LLM-assisted import mapping (local)
 
 Development defaults in `ETOS.Backend/appsettings.Development.json` enable `ImportMappingSuggestions` with provider `pydantic-ai-v1` and `FallbackToRuleBasedOnRuntimeFailure: true`. Production/base config in `appsettings.json` keeps `ImportMappingSuggestions:Enabled` false and default provider `rule-based-v1`.
+
+When fallback is enabled, ontology-invalid LLM keys (for example inventing `productCategory` when the schema only defines `category`) or unusable structured output soft-fail into `rule-based-v1`. Mapping Agent Debug shows `usedRuleBasedFallback` and the sanitizer/runtime error message when that happens. One-click Odoo/PDM demo import still applies **package preset** column mappings; create-mapping only uses live suggestions for learning comparison and will not block the draft if the LLM path fails (learning falls back to rule-based).
 
 **Model routing is configured on the tenant mapping assistant agent**, not in appsettings. After installing the manufacturing reference package, open `/agents/import-mapping-assistant/configure` (or the agent key from the model package import profile). Use **Model routing** on that page to set `primaryModelProviderKey`, `primaryModelId`, and optional fallback models. Saving on a published version creates a new draft (for example `1.0.1`); use **Mark ready** then **Publish** to activate the change. No backend or Docker restart is required for agent config changes once the new version is published. Rebuild the `agent-runtime` container when sidecar Python code changes (see [Rebuild vs restart](#rebuild-vs-restart-agent-runtime) above).
 
@@ -199,7 +209,7 @@ Set the agent's `primaryModelId` to the model id LM Studio exposes (for example 
 
 #### Default model id (`local-model`)
 
-A fresh reference-package install seeds the tenant `import-mapping-assistant` agent from [`packages/manufacturing-reference/artifacts/agent-templates.json`](../packages/manufacturing-reference/artifacts/agent-templates.json) with `primaryModelProviderKey: openai-compatible` and `primaryModelId: local-model`. The configure page displays whatever is stored on the published tenant `AgentVersion` payload—it does not read the model currently loaded in LM Studio. Loading `google/gemma-3-1b` in LM Studio only affects the local server reached through `OPENAI_BASE_URL`; ETOS still sends the agent's configured model id on each LLM call until you update **Primary model id** on the configure page and **Mark ready** → **Publish**. Mapping preview resolves the **latest published** agent version for a given `agentKey` (by `PublishedAt`, then `CreatedAt`). Use **Mapping Agent Debug** on `/imports` with diagnostics enabled to verify the resolved provider/model at runtime.
+A fresh reference-package install seeds the tenant `import-mapping-assistant` agent from `[packages/manufacturing-reference/artifacts/agent-templates.json](../packages/manufacturing-reference/artifacts/agent-templates.json)` with `primaryModelProviderKey: openai-compatible` and `primaryModelId: local-model`. The configure page displays whatever is stored on the published tenant `AgentVersion` payload—it does not read the model currently loaded in LM Studio. Loading `google/gemma-3-1b` in LM Studio only affects the local server reached through `OPENAI_BASE_URL`; ETOS still sends the agent's configured model id on each LLM call until you update **Primary model id** on the configure page and **Mark ready** → **Publish**. Mapping preview resolves the **latest published** agent version for a given `agentKey` (by `PublishedAt`, then `CreatedAt`). Use **Mapping Agent Debug** on `/imports` with diagnostics enabled to verify the resolved provider/model at runtime.
 
 #### Reference package reinstall and recovery
 
@@ -229,6 +239,8 @@ Request body fields:
 - `suggestionProviderKey` (optional; Development default is `pydantic-ai-v1`)
 - `includeDiagnostics` (optional; when `true`, returns governed context, prefetch tool output, runtime request metadata, trace notes, and raw structured LLM output for debugging)
 
+
+
 ### Mapping Agent Debug UI
 
 Open `http://localhost:3000/imports` and use the **Mapping Agent Debug** panel (purple section below the action buttons). It calls mapping preview with `includeDiagnostics: true` without saving a draft mapping version. Use it to verify:
@@ -242,13 +254,15 @@ Compare `pydantic-ai-v1` vs `rule-based-v1` on the same batch. After debug succe
 
 #### Troubleshooting mapping preview
 
-| Symptom | Likely cause | What to do |
-| --- | --- | --- |
-| `Config: .../local-model` after publishing a new model id | Older published agent version still in DB; or backend not restarted after resolver fix | Confirm latest version is **Published** on configure page; check debug **Config** pill; restart backend after pulling backend changes |
-| LM Studio shows traffic but debug shows **Runtime: Failed** + rule-based fallback | Sidecar rejected LLM JSON (common with small local models) | Expand **Runtime trace notes**; rebuild `agent-runtime` after pulling sidecar fixes; try a larger model or `openai` / `gpt-4o-mini` |
-| `Structured output missing required fields: columnSuggestions, lifecycleSuggestions` | Model returned a JSON Schema document or wrong shape instead of mapping data | Rebuild `agent-runtime` (sidecar now asks for data + example output, not schema echo); use a stronger model if it persists |
-| Sidecar changes not taking effect | Stale Docker image | `docker compose ... up -d --build agent-runtime` |
-| `.env` URL change ignored | Container not recreated with new env | `docker compose ... up -d agent-runtime` (restart) |
+
+| Symptom                                                                              | Likely cause                                                                           | What to do                                                                                                                            |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `Config: .../local-model` after publishing a new model id                            | Older published agent version still in DB; or backend not restarted after resolver fix | Confirm latest version is **Published** on configure page; check debug **Config** pill; restart backend after pulling backend changes |
+| LM Studio shows traffic but debug shows **Runtime: Failed** + rule-based fallback    | Sidecar rejected LLM JSON (common with small local models)                             | Expand **Runtime trace notes**; rebuild `agent-runtime` after pulling sidecar fixes; try a larger model or `openai` / `gpt-4o-mini`   |
+| `Structured output missing required fields: columnSuggestions, lifecycleSuggestions` | Model returned a JSON Schema document or wrong shape instead of mapping data           | Rebuild `agent-runtime` (sidecar now asks for data + example output, not schema echo); use a stronger model if it persists            |
+| Sidecar changes not taking effect                                                    | Stale Docker image                                                                     | `docker compose ... up -d --build agent-runtime`                                                                                      |
+| `.env` URL change ignored                                                            | Container not recreated with new env                                                   | `docker compose ... up -d agent-runtime` (restart)                                                                                    |
+
 
 The sidecar validates that the model returns a **data object** with required fields such as `columnSuggestions` and `lifecycleSuggestions`. Development config sets `FallbackToRuleBasedOnRuntimeFailure: true`, so preview still returns heuristic mappings when the LLM step fails.
 
@@ -260,6 +274,8 @@ python -m pip install -e ".[dev]"
 python -m pytest
 Pop-Location
 ```
+
+
 
 ## Backend
 
@@ -315,14 +331,18 @@ Useful endpoints:
 - `POST http://localhost:5000/api/admin/identity-resolution/candidates/{candidateId}/mark-conflicted`
 - `GET http://localhost:5000/api/admin/identity-resolution/batches/{batchId}/trust-scores`
 
+
+
 ### PDM ↔ Odoo identity linking
 
 Cross-attribute identity rules are seeded when you install the manufacturing reference package (`POST /api/admin/development/install-reference-package` or `/model-artifacts`). They match Odoo bridge attributes to PDM identifiers:
 
-| Odoo attribute | PDM attribute | Object type |
-| --- | --- | --- |
-| `sourceDocumentId` | `documentId` | `part` |
+
+| Odoo attribute        | PDM attribute   | Object type   |
+| --------------------- | --------------- | ------------- |
+| `sourceDocumentId`    | `documentId`    | `part`        |
 | `sourcePdmVersionKey` | `pdmVersionKey` | `partVersion` |
+
 
 Workflow:
 
@@ -332,6 +352,7 @@ Workflow:
 4. Review and approve candidates, then promote both sides to the trusted graph.
 
 Approved matches create non-destructive `IDENTITY_LINK` graph relationships between Odoo and PDM nodes.
+
 - `GET http://localhost:5000/api/admin/recommendations`
 - `POST http://localhost:5000/api/admin/recommendations`
 - `GET http://localhost:5000/api/admin/recommendations/{artifactId}/versions/{versionId}`
@@ -384,7 +405,7 @@ Pop-Location
 
 Open `http://localhost:3000`.
 
-Open `http://localhost:3000/model-artifacts` to inspect and seed the manufacturing reference model package. The `Create seed model package` action calls `POST /api/admin/development/install-reference-package` with package key `etos-manufacturing-reference`, publishing ontology layers, import/query profiles, and governed capability/policy/optimization/agent-template seeds from [`packages/manufacturing-reference/`](../packages/manufacturing-reference/). Re-running the action is safe for the same tenant: when the model package is already published, the installer ensures missing reference artifacts and the tenant mapping assistant agent without republishing the package.
+Open `http://localhost:3000/model-artifacts` to inspect and seed the manufacturing reference model package. The `Create seed model package` action calls `POST /api/admin/development/install-reference-package` with package key `etos-manufacturing-reference`, publishing ontology layers, import/query profiles, and governed capability/policy/optimization/agent-template seeds from `[packages/manufacturing-reference/](../packages/manufacturing-reference/)`. Re-running the action is safe for the same tenant: when the model package is already published, the installer ensures missing reference artifacts and the tenant mapping assistant agent without republishing the package.
 
 Open `http://localhost:3000/agents/import-mapping-assistant/configure` to edit mapping-assistant model routing (`openai` vs `openai-compatible`, primary model id, fallbacks). See [LLM-assisted import mapping (local)](#llm-assisted-import-mapping-local) above.
 
@@ -433,6 +454,8 @@ Expected `/imports` identity-demo result:
 2. Populated `Identity Candidates` cards showing confidence, trust state, recommendation exclusion status, and graph relationship id when approved.
 3. Populated `Trust Scores` cards showing score and component breakdowns.
 
+
+
 ## Import File Parsing
 
 The import module accepts CSV and Excel-style source exports:
@@ -465,6 +488,8 @@ Docker Compose syntax:
 docker compose -f infra/local/docker-compose.yml config
 ```
 
+
+
 ## Troubleshooting
 
 If the frontend reports backend health as unavailable:
@@ -485,6 +510,8 @@ If EF migrations fail:
 2. Confirm the backend connection string points at the local PostgreSQL service.
 3. Re-run `dotnet tool restore` before using `dotnet-ef`.
 
+
+
 ## Documentation Links
 
 - `README.md`: quick start.
@@ -493,3 +520,4 @@ If EF migrations fail:
 - `docs/backend/architecture.md`: backend module guidance.
 - `docs/frontend/architecture.md`: frontend guidance.
 - `docs/document-ingest.md`: governed document upload, extraction providers, Qdrant/MinIO configuration.
+

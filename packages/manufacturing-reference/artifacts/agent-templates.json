@@ -28,7 +28,7 @@
     "compositionMetadata": {
       "mode": "import-mapping",
       "primaryModelProviderKey": "openai-compatible",
-      "primaryModelId": "qwen/qwen3-1.7b"
+      "primaryModelId": "openai/gpt-oss-20b"
     },
     "futureExtensionPlaceholders": []
   },
@@ -46,7 +46,7 @@
     "compositionMetadata": {
       "mode": "normal",
       "primaryModelProviderKey": "openai-compatible",
-      "primaryModelId": "qwen/qwen3-1.7b"
+      "primaryModelId": "openai/gpt-oss-20b"
     },
     "futureExtensionPlaceholders": []
   }

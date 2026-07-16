@@ -46,10 +46,27 @@ public static class MappingSuggestionContextBuilder
 
     public static string BuildStructuredInputJson(ImportMappingSuggestionRequest request)
     {
+        var modelContext = request.ModelContext;
         var payload = new
         {
             headers = request.Headers,
-            sampleRows = request.SampleRows
+            sampleRows = request.SampleRows,
+            allowedObjectTypes = modelContext.Ontology.ObjectTypes
+                .OrderBy(item => item.Key, StringComparer.OrdinalIgnoreCase)
+                .Select(item => item.Key)
+                .ToArray(),
+            allowedAttributes = modelContext.AttributeSchema.Attributes
+                .OrderBy(item => item.AttributeKey, StringComparer.OrdinalIgnoreCase)
+                .Select(item => new
+                {
+                    attributeKey = item.AttributeKey,
+                    appliesToObjectType = item.AppliesToObjectType
+                })
+                .ToArray(),
+            allowedLifecycleKeys = modelContext.LifecycleVocabulary.States
+                .OrderBy(item => item.SortOrder)
+                .Select(item => item.Key)
+                .ToArray()
         };
 
         return JsonSerializer.Serialize(payload, JsonOptions);

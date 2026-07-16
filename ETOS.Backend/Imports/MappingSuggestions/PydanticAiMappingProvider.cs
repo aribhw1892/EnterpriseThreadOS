@@ -160,6 +160,8 @@ public sealed class PydanticAiMappingProvider(
 
         {
 
+            var outputSchemaJson = MappingSuggestionOutputSchemaFactory.Build(request.ModelContext);
+
             orchestratorResult = await previewOrchestrator.RunPreviewAsync(
 
                 profile,
@@ -182,7 +184,9 @@ public sealed class PydanticAiMappingProvider(
 
                     AgentRunId: null,
 
-                    _ => toolInputJson),
+                    _ => toolInputJson,
+
+                    outputSchemaJson),
 
                 cancellationToken);
 
@@ -272,52 +276,59 @@ public sealed class PydanticAiMappingProvider(
 
         var parsed = ParseRuntimeOutput(structuredOutputJson);
 
-        if (options.FallbackToRuleBasedOnRuntimeFailure
-            && !MappingSuggestionOutputQuality.HasUsableColumnSuggestions(parsed.ColumnSuggestions))
+        if (options.FallbackToRuleBasedOnRuntimeFailure)
         {
-            diagnosticsBuilder?.SetRuntimeFailure(
-                "Structured mapping output did not include usable column attribute keys.",
-                usedRuleBasedFallback: true);
-            var fallback = await ruleBasedMappingProvider.SuggestAsync(request, cancellationToken);
-            return fallback with
+            var sanitize = MappingSuggestionOntologyValidator.Sanitize(
+                parsed.ColumnSuggestions,
+                parsed.LifecycleSuggestions,
+                request.ModelContext);
+
+            if (sanitize.Issues.Count > 0
+                || !MappingSuggestionOutputQuality.HasUsableColumnSuggestions(sanitize.ColumnSuggestions))
             {
-                ProviderKey = ProviderKey,
-                Diagnostics = diagnosticsBuilder?.Build()
-            };
+                var detail = sanitize.Issues.Count > 0
+                    ? string.Join(" ", sanitize.Issues)
+                    : "Structured mapping output did not include usable column attribute keys.";
+                diagnosticsBuilder?.SetRuntimeFailure(detail, usedRuleBasedFallback: true);
+                var fallback = await ruleBasedMappingProvider.SuggestAsync(request, cancellationToken);
+                return fallback with
+                {
+                    ProviderKey = ProviderKey,
+                    Diagnostics = diagnosticsBuilder?.Build()
+                };
+            }
+
+            var sanitizedColumns = sanitize.ColumnSuggestions
+                .Select(MappingSuggestionOntologyValidator.ClampColumn)
+                .ToList();
+            var sanitizedLifecycle = sanitize.LifecycleSuggestions
+                .Select(MappingSuggestionOntologyValidator.ClampLifecycle)
+                .ToList();
+
+            return new ImportMappingSuggestionResult(
+                ProviderKey,
+                sanitizedColumns,
+                sanitizedLifecycle,
+                diagnosticsBuilder?.Build());
         }
 
         MappingSuggestionOntologyValidator.Validate(
-
             parsed.ColumnSuggestions,
-
             parsed.LifecycleSuggestions,
-
             request.ModelContext);
 
-
-
         var columnSuggestions = parsed.ColumnSuggestions
-
             .Select(MappingSuggestionOntologyValidator.ClampColumn)
-
             .ToList();
 
         var lifecycleSuggestions = parsed.LifecycleSuggestions
-
             .Select(MappingSuggestionOntologyValidator.ClampLifecycle)
-
             .ToList();
 
-
-
         return new ImportMappingSuggestionResult(
-
             ProviderKey,
-
             columnSuggestions,
-
             lifecycleSuggestions,
-
             diagnosticsBuilder?.Build());
 
     }

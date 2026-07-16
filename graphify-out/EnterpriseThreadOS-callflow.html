@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>EnterpriseThreadOS — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 11611 nodes, 23594 edges, 644 communities. Commit: e4a957b</p>
+<p class="subtitle">Generated from graphify knowledge graph: 11690 nodes, 23723 edges, 639 communities. Commit: e4a957b</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -88,25 +88,25 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>789 nodes</small>")
+    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>802 nodes</small>")
     class EXTRACT_PIPELINE_5F350230 module;
-    BUILD_GRAPH_321CBB04("Graph Build<br/><small>647 nodes</small>")
+    BUILD_GRAPH_321CBB04("Graph Build<br/><small>646 nodes</small>")
     class BUILD_GRAPH_321CBB04 module;
     ANALYSIS_CLUSTERING_C79796DA("Analysis &amp; Clustering<br/><small>160 nodes</small>")
     class ANALYSIS_CLUSTERING_C79796DA module;
     OUTPUTS_DOCS_ED82387C("Outputs &amp; Docs<br/><small>120 nodes</small>")
     class OUTPUTS_DOCS_ED82387C module;
-    CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>390 nodes</small>")
+    CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>383 nodes</small>")
     class CLI_SKILLS_9964CBB8 module;
-    INGEST_CACHE_UPDATE_FF457338("Ingestion &amp; Updates<br/><small>41 nodes</small>")
+    INGEST_CACHE_UPDATE_FF457338("Ingestion &amp; Updates<br/><small>42 nodes</small>")
     class INGEST_CACHE_UPDATE_FF457338 module;
     SERVE_API_35EC8E86("Serving API<br/><small>669 nodes</small>")
     class SERVE_API_35EC8E86 module;
     SECURITY_GLOBAL_5B9C6A04("Security &amp; Global Graph<br/><small>77 nodes</small>")
     class SECURITY_GLOBAL_5B9C6A04 module;
-    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>2576 nodes</small>")
+    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>2635 nodes</small>")
     class TESTS_FIXTURES_B84B1DCC module;
-    ACCESS_AND_PERMISSION_MANAGEMENT_5AD7F096("Access and Permission Management<br/><small>120 nodes</small>")
+    ACCESS_AND_PERMISSION_MANAGEMENT_5AD7F096("Access and Permission Management<br/><small>121 nodes</small>")
     class ACCESS_AND_PERMISSION_MANAGEMENT_5AD7F096 module;
     IDENTITY_AND_DATA_QUALITY_CONFIGURATION_2D61BCF4("Identity and Data Quality Configuration<br/><small>108 nodes</small>")
     class IDENTITY_AND_DATA_QUALITY_CONFIGURATION_2D61BCF4 module;
@@ -116,17 +116,17 @@ flowchart LR
     class COMMUNITY_142_4F58A044 module;
     COMMUNITY_178_FEA41A9A("Community 178<br/><small>101 nodes</small>")
     class COMMUNITY_178_FEA41A9A module;
-    OTHER_D0941E68("Other<br/><small>5610 nodes</small>")
+    OTHER_D0941E68("Other<br/><small>5623 nodes</small>")
     class OTHER_D0941E68 module;
     SERVE_API_35EC8E86 -->|contains x68| EXTRACT_PIPELINE_5F350230
     EXTRACT_PIPELINE_5F350230 -->|calls x55| SERVE_API_35EC8E86
     OTHER_D0941E68 -->|contains x50| COMMUNITY_142_4F58A044
     OTHER_D0941E68 -->|contains x50| COMMUNITY_178_FEA41A9A
     OTHER_D0941E68 -->|contains x40| BUILD_GRAPH_321CBB04
-    TESTS_FIXTURES_B84B1DCC -->|implements x34| OTHER_D0941E68
     OTHER_D0941E68 -->|implements x28| EXTRACT_PIPELINE_5F350230
+    TESTS_FIXTURES_B84B1DCC -->|implements x24| OTHER_D0941E68
     CLI_SKILLS_9964CBB8 -->|calls x23| SERVE_API_35EC8E86
-    OTHER_D0941E68 -->|imports x22| TESTS_FIXTURES_B84B1DCC
+    OTHER_D0941E68 -->|imports x16| TESTS_FIXTURES_B84B1DCC
     SERVE_API_35EC8E86 -->|contains x13| CLI_SKILLS_9964CBB8
     ACCESS_AND_PERMISSION_MANAGEMENT_5AD7F096 -->|inherits x9| OTHER_D0941E68
     ANALYSIS_CLUSTERING_C79796DA -->|references x9| OTHER_D0941E68
@@ -146,7 +146,7 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Extraction Pipeline</td><td>789</td><td><code>18, 21, 47, 46, 3, 90, 240, 102, 231, 175, 131, 327, 344, 179, 333, 180, 186, 195, 219, 206, 221, 592, 257, 292, 324, 329, 635, 638, 352, 473, 474, 642, 492, 620, 623, 517</code></td></tr><tr><td>Graph Build</td><td>647</td><td><code>12, 111, 28, 118, 134, 122, 124, 157, 184, 192, 218, 246, 249, 265, 307, 310, 594, 596, 598, 600, 339, 601, 535, 538, 540</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>160</td><td><code>161, 129, 136, 137, 171, 264, 200, 341, 610</code></td></tr><tr><td>Outputs &amp; Docs</td><td>120</td><td><code>74, 139, 266, 267, 385, 386, 435, 483, 490, 491, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 525, 544, 555, 556, 557, 558, 559</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>390</td><td><code>117, 70, 77, 108, 84, 85, 140, 170, 173, 177, 172, 238, 245, 234, 342, 597, 639, 602, 489, 513, 519, 523, 524, 528, 529, 552, 553, 554, 585</code></td></tr><tr><td>Ingestion &amp; Updates</td><td>41</td><td><code>293, 599</code></td></tr><tr><td>Serving API</td><td>669</td><td><code>0, 15, 17, 30, 60, 94, 104, 107, 125, 126, 130, 138, 152</code></td></tr><tr><td>Security &amp; Global Graph</td><td>77</td><td><code>57, 248, 312, 527</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>2576</td><td><code>6, 7, 10, 14, 167, 20, 23, 31, 35, 37, 163, 120, 54, 68, 32, 13, 61, 67, 9, 69, 71, 73, 72, 45, 81, 82, 87, 89, 83, 100, 96, 105, 114, 308, 110, 116, 132, 236, 123, 133, 237, 309, 343, 146, 147, 164, 155, 156, 158, 169, 165, 166, 141, 201, 160, 182, 187, 346, 197, 198, 199, 216, 208, 209, 210, 211, 212, 148, 181, 225, 232, 455, 595, 282, 334, 422, 605, 636, 637, 378, 379, 380, 424, 425, 426, 427, 428, 641, 449, 450, 451, 452, 480, 643</code></td></tr><tr><td>Access and Permission Management</td><td>120</td><td><code>5</code></td></tr><tr><td>Identity and Data Quality Configuration</td><td>108</td><td><code>38</code></td></tr><tr><td>Graph Bootstrap Service</td><td>102</td><td><code>52</code></td></tr><tr><td>Community 142</td><td>101</td><td><code>142</code></td></tr><tr><td>Community 178</td><td>101</td><td><code>178</code></td></tr><tr><td>Other</td><td>5610</td><td><code>2, 224, 4, 50, 19, 53, 11, 8, 228, 253, 1, 22, 16, 24, 26, 34, 36, 40, 41, 39, 43, 44, 277, 48, 49, 51, 55, 56, 58, 59, 33, 62, 63, 64, 65, 66, 80, 322, 75, 76, 78, 106, 432, 86, 88, 242, 91, 92, 95, 27, 29, 93, 97, 98, 101, 42, 99, 103, 25, 109, 121, 79, 113, 115, 119, 127, 205, 326, 128, 135, 151, 143, 144, 145, 149, 150, 153, 154, 159, 162, 168, 112, 174, 176, 183, 185, 188, 189, 190, 191, 262, 323, 193, 194, 196, 345, 348, 202, 204, 207, 213, 214, 215, 217, 203, 220, 222, 223, 226, 227, 247, 251, 351, 619, 229, 230, 233, 430, 235, 239, 241, 243, 244, 431, 433, 456, 457, 250, 252, 254, 255, 256, 258, 259, 260, 261, 263, 313, 590, 591, 613, 268, 269, 270, 271, 272, 273, 274, 275, 276, 278, 279, 280, 281, 283, 284, 285, 286, 287, 288, 289, 290, 291, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 311, 593, 624, 314, 315, 317, 318, 319, 320, 321, 340, 625, 629, 630, 316, 325, 328, 331, 332, 335, 336, 337, 338, 353, 631, 632, 633, 634, 330, 347, 349, 350, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 381, 382, 383, 384, 479, 612, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 423, 429, 434, 604, 616, 617, 640, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 453, 454, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 475, 476, 477, 478, 481, 482, 603, 606, 607, 608, 614, 615, 484, 485, 486, 487, 488, 493, 609, 611, 618, 621, 622, 508, 509, 510, 511, 512, 514, 515, 516, 518, 520, 521, 522, 526, 530, 531, 532, 533, 534, 536, 537, 539, 541, 542, 543, 545, 546, 547, 548, 549, 550, 551, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 586, 587, 588, 589, 626, 627, 628</code></td></tr>
+      <tr><td>Extraction Pipeline</td><td>802</td><td><code>18, 344, 21, 47, 46, 90, 102, 131, 175, 179, 333, 180, 186, 195, 219, 206, 221, 257, 592, 231, 327, 292, 324, 433, 329, 595, 634, 352, 473, 474, 492, 620, 623, 517</code></td></tr><tr><td>Graph Build</td><td>646</td><td><code>12, 111, 28, 118, 134, 122, 124, 157, 184, 192, 218, 246, 249, 265, 307, 310, 594, 596, 598, 600, 339, 601, 535, 538, 540</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>160</td><td><code>161, 129, 136, 137, 171, 264, 200, 341, 610</code></td></tr><tr><td>Outputs &amp; Docs</td><td>120</td><td><code>74, 139, 266, 267, 385, 386, 435, 483, 490, 491, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 525, 544, 555, 556, 557, 558, 559</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>383</td><td><code>117, 70, 77, 84, 85, 108, 140, 170, 173, 177, 172, 238, 245, 234, 342, 597, 639, 602, 489, 513, 519, 523, 524, 528, 529, 552, 553, 554, 585</code></td></tr><tr><td>Ingestion &amp; Updates</td><td>42</td><td><code>293, 599</code></td></tr><tr><td>Serving API</td><td>669</td><td><code>0, 15, 17, 30, 60, 94, 104, 107, 125, 126, 130, 138, 152</code></td></tr><tr><td>Security &amp; Global Graph</td><td>77</td><td><code>57, 248, 312, 527</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>2635</td><td><code>6, 7, 10, 14, 167, 20, 23, 93, 32, 31, 37, 35, 163, 120, 68, 54, 61, 13, 67, 9, 69, 71, 73, 141, 45, 82, 87, 89, 83, 105, 100, 96, 114, 81, 110, 123, 116, 133, 237, 309, 132, 146, 147, 148, 155, 156, 158, 169, 236, 165, 166, 182, 212, 150, 181, 201, 160, 164, 187, 346, 197, 198, 199, 216, 208, 209, 210, 3, 211, 225, 232, 240, 455, 345, 282, 334, 422, 603, 605, 636, 637, 378, 379, 380, 424, 425, 426, 427, 428, 449, 450, 451, 452, 480, 643</code></td></tr><tr><td>Access and Permission Management</td><td>121</td><td><code>5</code></td></tr><tr><td>Identity and Data Quality Configuration</td><td>108</td><td><code>38</code></td></tr><tr><td>Graph Bootstrap Service</td><td>102</td><td><code>52</code></td></tr><tr><td>Community 142</td><td>101</td><td><code>142</code></td></tr><tr><td>Community 178</td><td>101</td><td><code>178</code></td></tr><tr><td>Other</td><td>5623</td><td><code>2, 224, 4, 50, 19, 11, 8, 228, 253, 1, 22, 16, 24, 25, 26, 29, 34, 33, 40, 41, 39, 42, 43, 44, 277, 48, 49, 51, 53, 55, 56, 58, 59, 62, 63, 64, 66, 65, 80, 322, 75, 76, 78, 79, 106, 432, 86, 88, 242, 91, 92, 95, 27, 36, 97, 98, 101, 99, 103, 109, 121, 261, 113, 115, 119, 127, 326, 72, 128, 135, 151, 430, 143, 144, 145, 149, 153, 154, 308, 112, 159, 162, 168, 174, 176, 183, 190, 185, 188, 189, 191, 323, 193, 194, 196, 348, 202, 204, 207, 213, 214, 215, 217, 431, 203, 205, 220, 222, 223, 226, 227, 247, 251, 229, 230, 233, 235, 239, 241, 243, 244, 262, 456, 590, 250, 252, 254, 255, 256, 258, 259, 260, 263, 313, 343, 457, 613, 268, 269, 270, 271, 272, 273, 274, 275, 276, 278, 279, 280, 281, 283, 284, 285, 286, 287, 288, 289, 290, 291, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 311, 351, 624, 314, 315, 317, 318, 319, 320, 321, 340, 625, 629, 630, 316, 325, 328, 331, 332, 335, 336, 337, 338, 353, 591, 593, 632, 330, 347, 349, 350, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 381, 382, 383, 384, 479, 612, 617, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 423, 429, 434, 604, 616, 640, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 453, 454, 619, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 475, 476, 477, 478, 481, 482, 606, 607, 608, 614, 615, 631, 484, 485, 486, 487, 488, 493, 609, 611, 618, 621, 622, 508, 509, 510, 511, 512, 514, 515, 516, 518, 520, 521, 522, 526, 530, 531, 532, 533, 534, 536, 537, 539, 541, 542, 543, 545, 546, 547, 548, 549, 550, 551, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 586, 587, 588, 589, 626, 627, 628</code></td></tr>
     </table>
   </div>
   <div class="card">
@@ -158,7 +158,7 @@ flowchart LR
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>11611 nodes · 23594 edges · 644 communities (512 shown, 132 thin omitted)</li>
+      <li>11690 nodes · 23723 edges · 639 communities (507 shown, 132 thin omitted)</li>
       <li>Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 174 edges (avg confidence: 0.69)</li>
       <li>Token cost: 0 input · 0 output</li>
       <li>1. `EnterpriseThreadOS Implementation Issues` - 205 edges</li>
@@ -170,12 +170,12 @@ flowchart LR
 <hr>
 <!-- ====== 2. Extraction Pipeline ====== -->
 <h2 id="extract-pipeline">2. Extraction Pipeline</h2>
-<p>Extraction Pipeline groups implementation around imports, etosbackend, etosfrontend, import, mostly in ETOS.Backend/Imports/ImportService.cs, src/lib/etos-api.ts, app/imports/page.tsx. This section covers 789 nodes and 1685 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Extraction Pipeline groups implementation around imports, etosbackend, etosfrontend, import, mostly in ETOS.Backend/Imports/ImportService.cs, src/lib/etos-api.ts, app/imports/page.tsx. This section covers 802 nodes and 1709 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Extraction Pipeline (789 nodes, 1685 edges)
+    %% Section: Extraction Pipeline (802 nodes, 1709 edges)
     subgraph extract_pipeline_ETOS_Backend_Imports_ImportFile_f251b09d["ETOS.Backend/Imports/ImportFileParser.cs"]
         imports_importfileparser_iimportfileparser_5c239621("IImportFileParser<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
         imports_importfileparser_iimportfileparser_parse_6027d6bf("ParseAsync()<br/><small>ETOS.Backend/Imports/ImportFileParser.cs</small>")
@@ -215,7 +215,7 @@ flowchart LR
     imports_importfileparser_csvimportfileparser_par_fe4c2b7b -->|calls| imports_importfileparser_csvimportfileparser_tor_e3c76ffe
     imports_importfileparser_csvimportfileparser_par_46bc524b -->|calls| imports_importfileparser_csvimportfileparser_tor_e3c76ffe
     imports_importfileparser_csvimportfileparser_rea_9a7d3f16 -->|calls| imports_importfileparser_csvimportfileparser_par_a627dd5c
-    %% Omitted for readability: 771 nodes, 0 edges
+    %% Omitted for readability: 784 nodes, 0 edges
     class imports_importfileparser_iimportfileparser_5c239621 klass;
     class imports_importfileparser_iimportfileparser_parse_6027d6bf async;
     class imports_importfileparser_csvimportfileparser_9ebfabdc klass;
@@ -491,7 +491,7 @@ flowchart LR
   <td>30</td>
   <td><code>ImportWizardContent()</code><br><small style="color:var(--muted)">components/import-wizard/ImportWizardContent.tsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td><code>page.tsx</code><br><small style="color:var(--muted)">imports/odoo/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">imports/pdm/page.tsx</small></td>
+  <td><code>page.tsx</code><br><small style="color:var(--muted)">imports/pdm/page.tsx</small><br><code>page.tsx</code><br><small style="color:var(--muted)">imports/odoo/page.tsx</small></td>
   <td><code>getImportProfiles()</code><br><small style="color:var(--muted)">lib/import-wizard/import-config.server.ts</small><br><code>getImportSourceConfig()</code><br><small style="color:var(--muted)">lib/import-wizard/import-source-config.ts</small><br><code>getImportWizardBasePath()</code><br><small style="color:var(--muted)">lib/import-wizard/import-source-config.ts</small><br>+1 more</td>
   <td>ImportWizardContent() node in components/import-wizard/ImportWizardContent.tsx.</td>
 </tr>
@@ -502,7 +502,7 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>ETOS.Backend/Imports/ImportService.cs</code></td><td>125 nodes</td></tr>
+      <tr><td><code>ETOS.Backend/Imports/ImportService.cs</code></td><td>128 nodes</td></tr>
 <tr><td><code>src/lib/etos-api.ts</code></td><td>59 nodes</td></tr>
 <tr><td><code>app/imports/page.tsx</code></td><td>43 nodes</td></tr>
 <tr><td><code>.docs/.prd/issue-29-pdm-extract-transform-import.md</code></td><td>35 nodes</td></tr>
@@ -514,19 +514,19 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x496, calls x362, contains x329, method x154. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x510, calls x366, contains x330, method x159. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 3. Graph Build ====== -->
 <h2 id="build-graph">3. Graph Build</h2>
-<p>Graph Build groups implementation around docs, etos, execution, engineering, mostly in .docs/.prd/engineering-execution-issues.md, etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md, ETOS.Backend/DataQuality/DataQualityService.cs. This section covers 647 nodes and 855 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Graph Build groups implementation around docs, etos, execution, engineering, mostly in .docs/.prd/engineering-execution-issues.md, etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md, ETOS.Backend/DataQuality/DataQualityService.cs. This section covers 646 nodes and 853 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Graph Build (647 nodes, 855 edges)
+    %% Section: Graph Build (646 nodes, 853 edges)
     subgraph build_graph_ETOS_Backend_DataQuality_DataQuality_014857cc["ETOS.Backend/DataQuality/DataQualityService.cs"]
         dataquality_dataqualityservice_dataqualityissues_c3a4fac1("DataQualityIssueService<br/><small>ETOS.Backend/DataQuality/DataQualityService.cs</small>")
         dataquality_dataqualityservice_dataqualityissues_679944cd("CreateIssueAsync()<br/><small>ETOS.Backend/DataQuality/DataQualityService.cs</small>")
@@ -571,7 +571,7 @@ flowchart LR
     dataquality_dataqualityservice_dataqualityissues_b8ca4c97 -->|calls| dataquality_dataqualityservice_dataqualityissues_7887ca03
     dataquality_dataqualityservice_dataqualityissues_b8ca4c97 -->|calls| dataquality_dataqualityservice_dataqualityissues_e08ec138
     dataquality_dataqualityservice_dataqualityissues_b8ca4c97 -->|calls| dataquality_dataqualityservice_dataqualityissues_8bfa3cfb
-    %% Omitted for readability: 629 nodes, 3 edges
+    %% Omitted for readability: 628 nodes, 3 edges
     class dataquality_dataqualityservice_dataqualityissues_c3a4fac1 klass;
     class dataquality_dataqualityservice_dataqualityissues_679944cd async;
     class dataquality_dataqualityservice_dataqualityissues_80be0db0 async;
@@ -860,7 +860,7 @@ flowchart LR
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>.docs/.prd/engineering-execution-issues.md</code></td><td>146 nodes</td></tr>
 <tr><td><code>etos_ui_mockups/docs/engineering-execution-issues.with-digital-thread-timeline.md</code></td><td>141 nodes</td></tr>
-<tr><td><code>ETOS.Backend/DataQuality/DataQualityService.cs</code></td><td>70 nodes</td></tr>
+<tr><td><code>ETOS.Backend/DataQuality/DataQualityService.cs</code></td><td>69 nodes</td></tr>
 <tr><td><code>.cursor/plans/slice-6-graph-memory_8a3f2c1b.plan.md</code></td><td>33 nodes</td></tr>
 <tr><td><code>.docs/.gapAnalysis/issues-1-18.5-22-23-gap-analysis.md</code></td><td>27 nodes</td></tr>
 <tr><td><code>ETOS.Backend/ReviewTasks/ReviewTaskTemplatePayloadParser.cs</code></td><td>25 nodes</td></tr>
@@ -870,7 +870,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x602, references x139, calls x65, method x48. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x601, references x138, calls x65, method x48. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -1558,12 +1558,12 @@ flowchart LR
 
 <!-- ====== 6. CLI & Skill Installers ====== -->
 <h2 id="cli-skills">6. CLI &amp; Skill Installers</h2>
-<p>CLI &amp; Skill Installers groups implementation around docs, agent, cursor, plans, mostly in .prd/.ui/ui-agent-implementation-guide.md, .cursor/plans/issue_22_tool_registry_a7b0bb72.plan.md, .cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md. This section covers 390 nodes and 403 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>CLI &amp; Skill Installers groups implementation around docs, agent, cursor, plans, mostly in .prd/.ui/ui-agent-implementation-guide.md, .cursor/plans/issue_22_tool_registry_a7b0bb72.plan.md, .cursor/plans/issue_14_ai_trace_b0b9d2cf.plan.md. This section covers 383 nodes and 396 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: CLI &amp; Skill Installers (390 nodes, 403 edges)
+    %% Section: CLI &amp; Skill Installers (383 nodes, 396 edges)
     subgraph cli_skills_agentKey_test_run_page_tsx_eabf35d4["[agentKey]/test-run/page.tsx"]
         test_run_page_dbd08ee7("page.tsx")
         test_run_page_testrunaction_582e724f("testRunAction()<br/><small>[agentKey]/test-run/page.tsx</small>")
@@ -1610,7 +1610,7 @@ flowchart LR
     test_run_page_dbd08ee7 -->|imports| lib_etos_api_postagenttestrun_6f198545
     agents_agentmodelconfigform_5f6961f0 -->|imports| agents_agent_configure_actions_29a05f14
     agents_agent_configure_actions_29a05f14 -->|imports| lib_etos_api_loadagentversionbykey_b2100040
-    %% Omitted for readability: 372 nodes, 0 edges
+    %% Omitted for readability: 365 nodes, 0 edges
     class test_run_page_dbd08ee7 test;
     class test_run_page_testrunaction_582e724f test;
     class test_run_page_previewaction_45d08842 test;
@@ -1909,19 +1909,19 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x285, references x81, imports x17, calls x14. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x285, references x74, imports x17, calls x14. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 7. Ingestion & Updates ====== -->
 <h2 id="ingest-cache-update">7. Ingestion &amp; Updates</h2>
-<p>Ingestion &amp; Updates groups implementation around document, docs, governed, issue, mostly in .docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md, docs/document-ingest.md. This section covers 41 nodes and 39 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Ingestion &amp; Updates groups implementation around document, docs, governed, issue, mostly in .docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md, docs/document-ingest.md. This section covers 42 nodes and 40 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Ingestion &amp; Updates (41 nodes, 39 edges)
+    %% Section: Ingestion &amp; Updates (42 nodes, 40 edges)
     subgraph ingest_cache_update_docs_prd_issue_12_1_governed_0ee1aced[".docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md"]
         prd_issue_12_1_governed_document_ingest_vector_p_1f7a1dfb("Issue 12.1: Governed Document Ingest, E...<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
         prd_issue_12_1_governed_document_ingest_vector_p_2e07a383("Acceptance criteria<br/><small>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</small>")
@@ -1960,7 +1960,7 @@ flowchart LR
     prd_issue_12_1_governed_document_ingest_vector_p_2e07a383 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_814ddca7
     prd_issue_12_1_governed_document_ingest_vector_p_2e07a383 -->|contains| prd_issue_12_1_governed_document_ingest_vector_p_1e82b253
     docs_document_ingest_governed_document_ingest_is_6aaa358f -->|contains| docs_document_ingest_configuration_appsettings_j_2a3fb5ba
-    %% Omitted for readability: 23 nodes, 0 edges
+    %% Omitted for readability: 24 nodes, 0 edges
     class prd_issue_12_1_governed_document_ingest_vector_p_1f7a1dfb concept;
     class prd_issue_12_1_governed_document_ingest_vector_p_2e07a383 concept;
     class prd_issue_12_1_governed_document_ingest_vector_p_e010d483 concept;
@@ -2248,12 +2248,12 @@ flowchart LR
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>.docs/.prd/issue-12.1-governed-document-ingest-vector-parsers.md</code></td><td>30 nodes</td></tr>
-<tr><td><code>docs/document-ingest.md</code></td><td>11 nodes</td></tr>
+<tr><td><code>docs/document-ingest.md</code></td><td>12 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x39. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x40. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -2964,12 +2964,12 @@ flowchart LR
 
 <!-- ====== 10. Tests & Fixtures ====== -->
 <h2 id="tests-fixtures">10. Tests &amp; Fixtures</h2>
-<p>Tests &amp; Fixtures groups implementation around etosbackendtests, fixtures, explorerstestscs, etosbackend, mostly in ETOS.Backend.Tests/ExplorersTests.cs, ETOS.Backend.Tests/RecommendationTests.cs, ETOS.Backend.Tests/DashboardReportTests.cs. This section covers 2576 nodes and 6333 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Tests &amp; Fixtures groups implementation around etosbackendtests, fixtures, etosbackend, explorerstestscs, mostly in ETOS.Backend.Tests/ExplorersTests.cs, ETOS.Backend.Tests/RecommendationTests.cs, ETOS.Backend.Tests/DashboardReportTests.cs. This section covers 2635 nodes and 6452 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Tests &amp; Fixtures (2576 nodes, 6333 edges)
+    %% Section: Tests &amp; Fixtures (2635 nodes, 6452 edges)
     subgraph tests_fixtures_ETOS_AgentRuntime_app_execute_ser_73082a54["ETOS.AgentRuntime/app/execute_service.py"]
         app_execute_service_parse_json_object_3cfdb647("_parse_json_object()<br/><small>ETOS.AgentRuntime/app/execute_service.py</small>")
         app_execute_service_execute_request_9d3ab1b0("execute_request()<br/><small>ETOS.AgentRuntime/app/execute_service.py</small>")
@@ -3004,7 +3004,7 @@ flowchart LR
     app_execute_service_extract_json_object_48c72b61 -->|calls| app_execute_service_run_with_model_5e92d03b
     app_execute_service_build_structured_user_prompt_3e3b504e -->|calls| app_execute_service_run_with_model_5e92d03b
     app_execute_service_run_with_model_5e92d03b -->|calls| app_execute_service_execute_request_9d3ab1b0
-    %% Omitted for readability: 2558 nodes, 0 edges
+    %% Omitted for readability: 2617 nodes, 0 edges
     class app_execute_service_parse_json_object_3cfdb647 function;
     class app_execute_service_execute_request_9d3ab1b0 function;
     class app_execute_service_parse_output_schema_1c84590d function;
@@ -3303,19 +3303,19 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x3431, calls x1217, method x1022, contains x404. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x3487, calls x1231, method x1044, contains x416. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
 <!-- ====== 11. Access and Permission Management ====== -->
 <h2 id="access-and-permission-management">11. Access and Permission Management</h2>
-<p>Access and Permission Management groups implementation around ontologyservicecs, etosbackend, ontology, listontologyversionsasync, mostly in ETOS.Backend/Ontology/OntologyService.cs. This section covers 120 nodes and 477 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Access and Permission Management groups implementation around etosbackend, ontologyservicecs, ontology, listontologyversionsasync, mostly in ETOS.Backend/Ontology/OntologyService.cs, ETOS.Backend/DataQuality/DataQualityService.cs. This section covers 121 nodes and 478 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Access and Permission Management (120 nodes, 477 edges)
+    %% Section: Access and Permission Management (121 nodes, 478 edges)
     ontology_ontologyservice_ontologyservice_a475482f("OntologyService<br/><small>ETOS.Backend/Ontology/OntologyService.cs</small>")
     ontology_ontologyservice_iontologyservice_2ca46ee0("IOntologyService<br/><small>ETOS.Backend/Ontology/OntologyService.cs</small>")
     ontology_ontologyservice_ontologyservice_createm_f2cdb91d("CreateModelPackageVersionAsync()<br/><small>ETOS.Backend/Ontology/OntologyService.cs</small>")
@@ -3350,7 +3350,7 @@ flowchart LR
     ontology_ontologyservice_ontologyservice_a475482f -->|method| ontology_ontologyservice_ontologyservice_createl_aaf7beb3
     ontology_ontologyservice_ontologyservice_a475482f -->|method| ontology_ontologyservice_ontologyservice_createm_f2cdb91d
     ontology_ontologyservice_ontologyservice_a475482f -->|method| ontology_ontologyservice_ontologyservice_creates_06c633f6
-    %% Omitted for readability: 102 nodes, 0 edges
+    %% Omitted for readability: 103 nodes, 0 edges
     class ontology_ontologyservice_ontologyservice_a475482f klass;
     class ontology_ontologyservice_iontologyservice_2ca46ee0 klass;
     class ontology_ontologyservice_ontologyservice_createm_f2cdb91d async;
@@ -3400,6 +3400,14 @@ flowchart LR
 </tr>
 <tr>
   <td>2</td>
+  <td><code>CreateDataQualityIssueRequestValidator</code><br><small style="color:var(--muted)">ETOS.Backend/DataQuality/DataQualityService.cs</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>CreateDataQualityIssueRequestValidator node in ETOS.Backend/DataQuality/DataQualityService.cs.</td>
+</tr>
+<tr>
+  <td>3</td>
   <td><code>OntologyService.cs</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3407,7 +3415,7 @@ flowchart LR
   <td>OntologyService.cs node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>3</td>
+  <td>4</td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3415,7 +3423,7 @@ flowchart LR
   <td>IOntologyService node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>4</td>
+  <td>5</td>
   <td><code>.ListOntologyVersionsAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3423,7 +3431,7 @@ flowchart LR
   <td>.ListOntologyVersionsAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>5</td>
+  <td>6</td>
   <td><code>CancellationToken</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3431,7 +3439,7 @@ flowchart LR
   <td>CancellationToken node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>6</td>
+  <td>7</td>
   <td><code>Task</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3439,7 +3447,7 @@ flowchart LR
   <td>Task node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>7</td>
+  <td>8</td>
   <td><code>IReadOnlyCollection</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3447,7 +3455,7 @@ flowchart LR
   <td>IReadOnlyCollection node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>8</td>
+  <td>9</td>
   <td><code>OntologyVersionResponse</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3455,7 +3463,7 @@ flowchart LR
   <td>OntologyVersionResponse node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>9</td>
+  <td>10</td>
   <td><code>.GetOntologyVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3463,7 +3471,7 @@ flowchart LR
   <td>.GetOntologyVersionAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>10</td>
+  <td>11</td>
   <td><code>Guid</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3471,7 +3479,7 @@ flowchart LR
   <td>Guid node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>11</td>
+  <td>12</td>
   <td><code>OntologyVersionDetailResponse</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3479,7 +3487,7 @@ flowchart LR
   <td>OntologyVersionDetailResponse node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>12</td>
+  <td>13</td>
   <td><code>.CreateOntologyVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3487,7 +3495,7 @@ flowchart LR
   <td>.CreateOntologyVersionAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>13</td>
+  <td>14</td>
   <td><code>CreateOntologyVersionRequest</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3495,7 +3503,7 @@ flowchart LR
   <td>CreateOntologyVersionRequest node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>14</td>
+  <td>15</td>
   <td><code>.PublishOntologyVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3503,7 +3511,7 @@ flowchart LR
   <td>.PublishOntologyVersionAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>15</td>
+  <td>16</td>
   <td><code>PublishOntologyVersionRequest</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3511,7 +3519,7 @@ flowchart LR
   <td>PublishOntologyVersionRequest node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>16</td>
+  <td>17</td>
   <td><code>.ListSemanticLayerVersionsAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3519,7 +3527,7 @@ flowchart LR
   <td>.ListSemanticLayerVersionsAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>17</td>
+  <td>18</td>
   <td><code>SemanticLayerVersionResponse</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3527,7 +3535,7 @@ flowchart LR
   <td>SemanticLayerVersionResponse node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>18</td>
+  <td>19</td>
   <td><code>.CreateSemanticLayerVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3535,7 +3543,7 @@ flowchart LR
   <td>.CreateSemanticLayerVersionAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>19</td>
+  <td>20</td>
   <td><code>CreateSemanticLayerVersionRequest</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3543,7 +3551,7 @@ flowchart LR
   <td>CreateSemanticLayerVersionRequest node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>20</td>
+  <td>21</td>
   <td><code>.PublishSemanticLayerVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3551,7 +3559,7 @@ flowchart LR
   <td>.PublishSemanticLayerVersionAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>21</td>
+  <td>22</td>
   <td><code>.ListLifecycleVocabularyVersionsAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3559,7 +3567,7 @@ flowchart LR
   <td>.ListLifecycleVocabularyVersionsAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>22</td>
+  <td>23</td>
   <td><code>LifecycleVocabularyVersionResponse</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3567,7 +3575,7 @@ flowchart LR
   <td>LifecycleVocabularyVersionResponse node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>23</td>
+  <td>24</td>
   <td><code>.GetLifecycleVocabularyVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3575,7 +3583,7 @@ flowchart LR
   <td>.GetLifecycleVocabularyVersionAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>24</td>
+  <td>25</td>
   <td><code>LifecycleVocabularyVersionDetailResponse</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3583,7 +3591,7 @@ flowchart LR
   <td>LifecycleVocabularyVersionDetailResponse node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>25</td>
+  <td>26</td>
   <td><code>.CreateLifecycleVocabularyVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3591,7 +3599,7 @@ flowchart LR
   <td>.CreateLifecycleVocabularyVersionAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>26</td>
+  <td>27</td>
   <td><code>CreateLifecycleVocabularyVersionRequest</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3599,7 +3607,7 @@ flowchart LR
   <td>CreateLifecycleVocabularyVersionRequest node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>27</td>
+  <td>28</td>
   <td><code>.PublishLifecycleVocabularyVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3607,7 +3615,7 @@ flowchart LR
   <td>.PublishLifecycleVocabularyVersionAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>28</td>
+  <td>29</td>
   <td><code>.ListAttributeSchemaVersionsAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-async">Async</span></td>
   <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
@@ -3615,20 +3623,12 @@ flowchart LR
   <td>.ListAttributeSchemaVersionsAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 <tr>
-  <td>29</td>
+  <td>30</td>
   <td><code>AttributeSchemaVersionResponse</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
   <td>AttributeSchemaVersionResponse node in ETOS.Backend/Ontology/OntologyService.cs.</td>
-</tr>
-<tr>
-  <td>30</td>
-  <td><code>.GetAttributeSchemaVersionAsync()</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
-  <td><span class="tag tag-async">Async</span></td>
-  <td><code>IOntologyService</code><br><small style="color:var(--muted)">ETOS.Backend/Ontology/OntologyService.cs</small></td>
-  <td>No direct outbound edge</td>
-  <td>.GetAttributeSchemaVersionAsync() node in ETOS.Backend/Ontology/OntologyService.cs.</td>
 </tr>
 </table>
 
@@ -3638,6 +3638,7 @@ flowchart LR
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>ETOS.Backend/Ontology/OntologyService.cs</code></td><td>119 nodes</td></tr>
+<tr><td><code>ETOS.Backend/DataQuality/DataQualityService.cs</code></td><td>1 nodes</td></tr>
     </table>
   </div>
   <div class="card">
@@ -5012,12 +5013,12 @@ flowchart LR
 
 <!-- ====== 16. Other ====== -->
 <h2 id="other">16. Other</h2>
-<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-004-301-400.md, .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md, .prd/.initialConversation/chatgpt-conversation-part-002-101-200.md. This section covers 5610 nodes and 11098 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Other groups implementation around etosbackend, docs, prd, chatgpt, mostly in .prd/.initialConversation/chatgpt-conversation-part-004-301-400.md, .prd/.initialConversation/chatgpt-conversation-part-009-801-900.md, .prd/.initialConversation/chatgpt-conversation-part-002-101-200.md. This section covers 5623 nodes and 11105 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Other (5610 nodes, 11098 edges)
+    %% Section: Other (5623 nodes, 11105 edges)
     subgraph other_ETOS_Backend_AgentRuns_AgentRunService_cs_a82ae235["ETOS.Backend/AgentRuns/AgentRunService.cs"]
         agentruns_agentrunservice_iagentrunservice_a076c105("IAgentRunService<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
         agentruns_agentrunservice_iagentrunservice_getas_cfb5db9b("GetAsync()<br/><small>ETOS.Backend/AgentRuns/AgentRunService.cs</small>")
@@ -5053,7 +5054,7 @@ flowchart LR
     agentruns_agentrunservice_agentrunservice_listas_66c9e297 -->|calls| agentruns_agentrunservice_agentrunservice_requir_a827e1af
     agentruns_agentrunservice_agentrunservice_getasy_e39310d8 -->|calls| agentruns_agentrunservice_agentrunservice_requir_a827e1af
     agentruntime_agentexecutionendpointextensions_ag_9d8245b6 -->|method| agentruntime_agentexecutionendpointextensions_ag_f96cbf93
-    %% Omitted for readability: 5592 nodes, 0 edges
+    %% Omitted for readability: 5605 nodes, 0 edges
     class agentruns_agentrunservice_iagentrunservice_a076c105 klass;
     class agentruns_agentrunservice_iagentrunservice_getas_cfb5db9b async;
     class agentruns_agentrunservice_iagentrunservice_lista_513318c2 async;
@@ -5352,7 +5353,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: references x5753, contains x1879, method x1711, calls x1546. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: references x5742, contains x1889, method x1714, calls x1552. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -5363,17 +5364,17 @@ flowchart LR
   <div class="card">
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>Nodes</td><td>11611</td></tr>
-      <tr><td>Edges</td><td>23594</td></tr>
+      <tr><td>Nodes</td><td>11690</td></tr>
+      <tr><td>Edges</td><td>23723</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
-      <tr><td>Communities</td><td>644</td></tr>
+      <tr><td>Communities</td><td>639</td></tr>
       <tr><td>Documented Sections</td><td>15</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>EXTRACTED</td><td>23420</td></tr>
+      <tr><td>EXTRACTED</td><td>23549</td></tr>
       <tr><td>INFERRED</td><td>174</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
@@ -5382,7 +5383,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>EnterpriseThreadOS — Architecture Documentation</p>
-  <p>Generated: 2026-07-13 17:34 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-07-15 18:12 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

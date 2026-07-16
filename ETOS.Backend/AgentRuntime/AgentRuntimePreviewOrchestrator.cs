@@ -22,7 +22,8 @@ public sealed record AgentRuntimePreviewInput(
     bool ToolDryRun,
     Guid? AgentVersionId,
     Guid? AgentRunId,
-    Func<Guid, string> BuildToolInputJson);
+    Func<Guid, string> BuildToolInputJson,
+    string? OutputSchemaJsonOverride = null);
 
 public sealed record AgentRuntimePreviewOrchestratorResult(
     AgentRuntimeExecutionResult RuntimeResult,
@@ -97,7 +98,9 @@ public sealed class AgentRuntimePreviewOrchestrator(
         }
 
         var promptTemplatePayloadJson = await LoadArtifactPayloadAsync(input.TenantId, profile.PromptTemplateVersionId, cancellationToken);
-        var outputSchemaJson = await LoadArtifactPayloadAsync(input.TenantId, profile.OutputSchemaVersionId, cancellationToken);
+        var outputSchemaJson = !string.IsNullOrWhiteSpace(input.OutputSchemaJsonOverride)
+            ? input.OutputSchemaJsonOverride
+            : await LoadArtifactPayloadAsync(input.TenantId, profile.OutputSchemaVersionId, cancellationToken);
         var fallbackModelsJson = JsonSerializer.Serialize(profile.FallbackModels, JsonOptions);
         var toolOutputSummariesJson = JsonSerializer.Serialize(toolOutputSummaries, JsonOptions);
 

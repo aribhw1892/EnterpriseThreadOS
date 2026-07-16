@@ -41,6 +41,7 @@ Start local infrastructure:
 
 ```powershell
 docker compose --env-file .env -f infra/local/docker-compose.yml up -d
+docker compose --env-file .env -f infra/local/docker-compose.yml --profile dapr-workflow up -d
 ```
 
 Restore .NET tools and apply migrations:

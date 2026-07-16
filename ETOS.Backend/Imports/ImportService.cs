@@ -195,8 +195,10 @@ public sealed class ImportService(
         StructuralRelationshipResolver.ValidateStructuralRelationshipType(modelContext.Resolved, request.StructuralRelationshipType);
         var evidence = ResolveEvidence(batch, null);
         var parsed = await ParseEvidenceAsync(evidence, 25, cancellationToken);
-        var previewSuggestions = await mappingSuggestionProviderSelector.SuggestAsync(
-            new ImportMappingSuggestionRequest(parsed.Headers, parsed.Rows.ToList(), modelContext.Resolved),
+        var previewSuggestions = await ResolveLearningSuggestionsAsync(
+            parsed.Headers,
+            parsed.Rows.ToList(),
+            modelContext.Resolved,
             cancellationToken);
 
         var mapping = new ImportMappingVersion
@@ -1318,6 +1320,25 @@ public sealed class ImportService(
         if (!result.IsValid)
         {
             throw new RequestValidationException(string.Join("; ", result.Errors.Select(error => error.ErrorMessage)));
+        }
+    }
+
+    private async Task<ImportMappingSuggestionResult> ResolveLearningSuggestionsAsync(
+        IReadOnlyCollection<string> headers,
+        IReadOnlyCollection<IReadOnlyDictionary<string, string?>> sampleRows,
+        ResolvedModelPackageContext modelContext,
+        CancellationToken cancellationToken)
+    {
+        var suggestionRequest = new ImportMappingSuggestionRequest(headers, sampleRows, modelContext);
+        try
+        {
+            return await mappingSuggestionProviderSelector.SuggestAsync(suggestionRequest, cancellationToken);
+        }
+        catch (RequestValidationException)
+        {
+            return await mappingSuggestionProviderSelector.SuggestAsync(
+                suggestionRequest with { RequestedProviderKey = MappingSuggestionProviderKeys.RuleBased },
+                cancellationToken);
         }
     }
 

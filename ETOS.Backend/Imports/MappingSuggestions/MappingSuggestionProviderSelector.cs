@@ -14,8 +14,9 @@ public sealed class MappingSuggestionOptions
     public string? MappingAssistantAgentKey { get; set; } = "import-mapping-assistant";
 
     /// <summary>
-    /// When enabled, falls back to rule-based suggestions when runtime execution fails
-    /// or when structured LLM output is missing usable column attribute mappings.
+    /// When enabled, falls back to rule-based suggestions when runtime execution fails,
+    /// when structured LLM output is missing usable column attribute mappings,
+    /// or when LLM output references ontology-invalid object types, attributes, or lifecycle keys.
     /// </summary>
     public bool FallbackToRuleBasedOnRuntimeFailure { get; set; }
 }

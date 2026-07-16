@@ -26,9 +26,29 @@ public sealed class QdrantDocumentVectorOptions
 
 public sealed class DocumentEmbeddingOptions
 {
-    public string Provider { get; set; } = "deterministic-v1";
+    /// <summary>
+    /// Supported keys: deterministic-v1, openai, openai-v1, openai-compatible
+    /// (same dual-mode principle as agent runtime model providers).
+    /// </summary>
+    public string Provider { get; set; } = EmbeddingProviderKeys.Deterministic;
+
+    /// <summary>
+    /// Embedding model id for openai / openai-compatible providers.
+    /// </summary>
+    public string Model { get; set; } = "text-embedding-3-small";
 
     public int Dimensions { get; set; } = 64;
 
     public int MaxChunkCharacters { get; set; } = 1200;
+
+    /// <summary>
+    /// Optional config override. Falls back to OPENAI_API_KEY.
+    /// </summary>
+    public string? ApiKey { get; set; }
+
+    /// <summary>
+    /// Optional config override. Falls back to OPENAI_BASE_URL.
+    /// Cloud openai defaults to https://api.openai.com/v1 when unset.
+    /// </summary>
+    public string? BaseUrl { get; set; }
 }

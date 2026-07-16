@@ -25,11 +25,11 @@ public static class DocumentServiceCollectionExtensions
         services.AddOptions<DocumentVectorIndexingOptions>()
             .Bind(configuration.GetSection(DocumentVectorIndexingOptions.SectionName));
 
+        services.AddHttpClient(nameof(OpenAiCompatibleEmbeddingProvider));
         services.AddSingleton<IEmbeddingProvider>(sp =>
-        {
-            var options = sp.GetRequiredService<IOptions<DocumentVectorIndexingOptions>>().Value;
-            return new DeterministicEmbeddingProvider(options.Embedding.Dimensions);
-        });
+            EmbeddingProviderFactory.Create(
+                sp.GetRequiredService<IHttpClientFactory>(),
+                sp.GetRequiredService<IOptions<DocumentVectorIndexingOptions>>()));
 
         services.AddScoped<IDocumentExtractionProvider, TextDocumentExtractionProvider>();
         services.AddScoped<IDocumentExtractionProvider, PdfTextDocumentExtractionProvider>();

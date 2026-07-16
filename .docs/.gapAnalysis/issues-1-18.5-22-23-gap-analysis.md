@@ -480,7 +480,7 @@
 
 - `ImportProfileJson` and `QueryIntentExtensionsJson` on `ModelPackageVersion` with EF migration
 - `IModelPackageContextResolver` and package-driven import staging/BOM comparison
-- `IMappingSuggestionProvider` with `rule-based-v1` default (base config) and live `pydantic-ai-v1` via `PydanticAiMappingProvider` + agent runtime (Development config); optional `mapping-predictor-tool` prefetch; `hermes-v1` deferred
+- `IMappingSuggestionProvider` with `rule-based-v1` default (base config) and live `pydantic-ai-v1` via `PydanticAiMappingProvider` + agent runtime (Development config); per-request closed-enum schema overlay and ontology sanitize; ontology-invalid/unusable LLM output falls back to rule-based when `FallbackToRuleBasedOnRuntimeFailure` is true; draft create isolates learning suggestions so LLM invent/reject does not block presets; optional `mapping-predictor-tool` prefetch; `hermes-v1` deferred
 - Mapping reject endpoint and `ImportMappingLearningSignalInput` emitter (approve/reject/correct)
 - Package-driven `bom-impact-context` relationship resolution in `GovernedQueryService`
 - Neutral recommendation copy via import profile templates
@@ -698,7 +698,7 @@ flowchart LR
 | **BOM compare** | Package-driven per import batch + package-driven `bom-impact-context` intent | On-demand trusted-graph BOM compare endpoint |
 | **Manufacturing semantics** | Extracted to `packages/manufacturing-reference/` + tool/skill/connector/agent-template seeds | Additional industry packages beyond reference demo |
 | **Review workflow** | Review tasks (Issue 19), recommendation conversion, governance-flow live task nodes; agent/tool `CreatesReviewTask` metadata flags | `DecisionArtifact`, outcomes, learning evidence (Issues 20–21) |
-| **AI mapping** | `rule-based-v1` default + live `pydantic-ai-v1` (config-gated), optional `mapping-predictor-tool` prefetch, mapping preview diagnostics, Mapping Agent Debug UI | Hermes mapping provider; production opt-in defaults |
+| **AI mapping** | `rule-based-v1` default + live `pydantic-ai-v1` (config-gated), ontology sanitize + closed-enum schema overlay, ontology-invalid → rule-based fallback when configured, create-mapping learning isolation, optional `mapping-predictor-tool` prefetch, mapping preview diagnostics, Mapping Agent Debug UI | Hermes mapping provider; production opt-in defaults |
 | **Domain modeling** | Schema + graph instances + reference package under `packages/` | First-class `ObjectVersion` / BOM instances |
 | **Domain artifacts** | Capability, business policy, optimization model, agent template, tool/skill/connector, agent type/version CRUD + publish | Runtime enforcement beyond governed query + agent execute; optimization solver (Issue 24) |
 | **Agent automation** | `AgentVersion`/`AgentRun`, PydanticAI HTTP adapter, recommendation-from-agent, child `ToolRun` links | Skill runtime, Hermes/LangGraph, workflows, multi-agent teams (Issues 24–25) |

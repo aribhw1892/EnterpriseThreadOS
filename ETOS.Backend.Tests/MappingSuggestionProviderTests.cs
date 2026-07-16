@@ -75,7 +75,7 @@ public sealed class MappingSuggestionProviderTests
     }
 
     [Fact]
-    public async Task PydanticAiProviderRejectsInvalidOntologyInRuntimeOutput()
+    public async Task PydanticAiProviderRejectsInvalidOntologyWhenFallbackDisabled()
     {
         var resolved = CreateResolvedContext();
         var invalidOutput = """
@@ -96,7 +96,8 @@ public sealed class MappingSuggestionProviderTests
             """;
         var provider = CreatePydanticAiProvider(
             new RecordingAgentRuntimeAdapter(invalidOutput),
-            enabled: true);
+            enabled: true,
+            fallbackToRuleBased: false);
 
         var exception = await Assert.ThrowsAsync<RequestValidationException>(() =>
             provider.SuggestAsync(
@@ -104,6 +105,162 @@ public sealed class MappingSuggestionProviderTests
                 CancellationToken.None));
 
         Assert.Contains("unknown object type", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task PydanticAiProviderFallsBackToRuleBasedOnInvalidOntologyWhenFallbackEnabled()
+    {
+        var resolved = CreateResolvedContext();
+        var invalidOutput = """
+            {
+              "columnSuggestions": [
+                {
+                  "sourceColumn": "partNumber",
+                  "canonicalObjectType": "unknown-type",
+                  "canonicalAttributeKey": "partNumber",
+                  "isIdentityField": true,
+                  "isRequired": true,
+                  "confidence": 0.9,
+                  "rationale": "Invalid object type."
+                }
+              ],
+              "lifecycleSuggestions": []
+            }
+            """;
+        var provider = CreatePydanticAiProvider(
+            new RecordingAgentRuntimeAdapter(invalidOutput),
+            enabled: true,
+            fallbackToRuleBased: true);
+
+        var result = await provider.SuggestAsync(
+            new ImportMappingSuggestionRequest(
+                ["partNumber", "lifecycle"],
+                [new Dictionary<string, string?> { ["partNumber"] = "P-1", ["lifecycle"] = "released" }],
+                resolved,
+                IncludeDiagnostics: true),
+            CancellationToken.None);
+
+        Assert.Equal(MappingSuggestionProviderKeys.PydanticAi, result.ProviderKey);
+        var column = Assert.Single(result.ColumnSuggestions, item => item.SourceColumn == "partNumber");
+        Assert.Equal("partNumber", column.CanonicalAttributeKey);
+        Assert.NotNull(result.Diagnostics);
+        Assert.True(result.Diagnostics!.UsedRuleBasedFallback);
+        Assert.Contains("unknown object type", result.Diagnostics.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task PydanticAiProviderFallsBackToRuleBasedOnUnknownAttributeKey()
+    {
+        var resolved = CreateResolvedContext();
+        var invalidOutput = """
+            {
+              "columnSuggestions": [
+                {
+                  "sourceColumn": "productCategory",
+                  "canonicalObjectType": "part",
+                  "canonicalAttributeKey": "productCategory",
+                  "isIdentityField": false,
+                  "isRequired": false,
+                  "confidence": 0.9,
+                  "rationale": "Copied source column name."
+                }
+              ],
+              "lifecycleSuggestions": []
+            }
+            """;
+        var provider = CreatePydanticAiProvider(
+            new RecordingAgentRuntimeAdapter(invalidOutput),
+            enabled: true,
+            fallbackToRuleBased: true);
+
+        var result = await provider.SuggestAsync(
+            new ImportMappingSuggestionRequest(
+                ["productCategory"],
+                [new Dictionary<string, string?> { ["productCategory"] = "All / Saleable" }],
+                resolved,
+                IncludeDiagnostics: true),
+            CancellationToken.None);
+
+        Assert.Equal(MappingSuggestionProviderKeys.PydanticAi, result.ProviderKey);
+        Assert.NotNull(result.Diagnostics);
+        Assert.True(result.Diagnostics!.UsedRuleBasedFallback);
+        Assert.Contains("unknown attribute", result.Diagnostics.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(
+            result.ColumnSuggestions,
+            item => string.Equals(item.CanonicalAttributeKey, "productCategory", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task PydanticAiProviderPassesClosedEnumSchemaAndAllowListInput()
+    {
+        var resolved = CreateResolvedContext();
+        var runtimeAdapter = new RecordingAgentRuntimeAdapter(CreateValidMappingOutputJson());
+        var provider = CreatePydanticAiProvider(runtimeAdapter, enabled: true);
+
+        await provider.SuggestAsync(
+            new ImportMappingSuggestionRequest(["partNumber"], [], resolved),
+            CancellationToken.None);
+
+        Assert.NotNull(runtimeAdapter.LastRequest);
+        Assert.Contains("\"enum\"", runtimeAdapter.LastRequest!.OutputSchemaJson, StringComparison.Ordinal);
+        Assert.Contains("partNumber", runtimeAdapter.LastRequest.OutputSchemaJson, StringComparison.Ordinal);
+        Assert.Contains("allowedObjectTypes", runtimeAdapter.LastRequest.StructuredInputJson, StringComparison.Ordinal);
+        Assert.Contains("allowedAttributes", runtimeAdapter.LastRequest.StructuredInputJson, StringComparison.Ordinal);
+        Assert.Contains("allowedLifecycleKeys", runtimeAdapter.LastRequest.StructuredInputJson, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SanitizeClearsUnknownAttributeAndDropsUnknownObjectType()
+    {
+        var resolved = CreateResolvedContext();
+        var result = MappingSuggestionOntologyValidator.Sanitize(
+            [
+                new ImportColumnMappingSuggestionResponse(
+                    "productCategory",
+                    "part",
+                    "productCategory",
+                    false,
+                    false,
+                    0.9m,
+                    "Invented key."),
+                new ImportColumnMappingSuggestionResponse(
+                    "partNumber",
+                    "unknown-type",
+                    "partNumber",
+                    true,
+                    true,
+                    0.9m,
+                    "Bad type.")
+            ],
+            [
+                new ImportLifecycleMappingSuggestionResponse("released", "released", 0.9m, "ok"),
+                new ImportLifecycleMappingSuggestionResponse("bogus", "not-a-state", 0.5m, "bad")
+            ],
+            resolved);
+
+        Assert.Equal(3, result.Issues.Count);
+        Assert.Single(result.ColumnSuggestions);
+        Assert.Null(result.ColumnSuggestions[0].CanonicalAttributeKey);
+        Assert.True(result.ColumnSuggestions[0].Confidence <= 0.3m);
+        Assert.Single(result.LifecycleSuggestions);
+        Assert.Equal("released", result.LifecycleSuggestions[0].CanonicalLifecycleKey);
+    }
+
+    [Fact]
+    public void OutputSchemaFactoryInjectsClosedEnums()
+    {
+        var resolved = CreateResolvedContext();
+        var schemaJson = MappingSuggestionOutputSchemaFactory.Build(resolved);
+        using var document = JsonDocument.Parse(schemaJson);
+        var columnProps = document.RootElement
+            .GetProperty("properties")
+            .GetProperty("columnSuggestions")
+            .GetProperty("items")
+            .GetProperty("properties");
+        var objectEnum = columnProps.GetProperty("canonicalObjectType").GetProperty("enum");
+        var attributeEnum = columnProps.GetProperty("canonicalAttributeKey").GetProperty("enum");
+        Assert.Contains(objectEnum.EnumerateArray(), item => item.GetString() == "part");
+        Assert.Contains(attributeEnum.EnumerateArray(), item => item.GetString() == "partNumber");
     }
 
     [Fact]
@@ -439,7 +596,7 @@ public sealed class MappingSuggestionProviderTests
                 profile.AgentVersionId,
                 input.AgentRunId,
                 "prompt-body",
-                MappingSuggestionOutputSchema.Json,
+                input.OutputSchemaJsonOverride ?? MappingSuggestionOutputSchema.Json,
                 profile.PrimaryModelProviderKey,
                 profile.PrimaryModelId,
                 "[]",
@@ -449,7 +606,7 @@ public sealed class MappingSuggestionProviderTests
             return new AgentRuntimePreviewOrchestratorResult(
                 runtimeResult,
                 "prompt-body",
-                MappingSuggestionOutputSchema.Json,
+                input.OutputSchemaJsonOverride ?? MappingSuggestionOutputSchema.Json,
                 JsonSerializer.Serialize(toolOutputSummaries),
                 toolPrefetchSummaries);
         }
